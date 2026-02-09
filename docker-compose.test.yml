@@ -1,0 +1,36 @@
+# Docker Compose configuration for testing the CRM backend application
+# Warning: This file is intended for testing purposes only and should not be used in production environments.
+services:
+  crm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - MICROSERVICE_NAME=crm-backend
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=3000
+      - NODE_ENV=development
+      - DB_HOST=crm-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=crm_db
+    depends_on:
+      - crm-db
+
+  crm-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=crm_db
+    volumes:
+      - ./database_script/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
