@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",           // Allows files outside 'src' (like 'tests/')
+    "outDir": null,           // Don't emit files to dist/
+    "noEmit": true,           // We only want to type-check, not build .js files
+    "types": ["jest", "node"], // Ensure Jest types are recognized
+    "isolatedModules": true    // <--- ADD THIS LINE
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "tests/units/**/*",
+    "tests/functionals/**/*"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "get_key": {
+    "key_not_found": "Schlüssel nicht gefunden"
+  },
+  "download_key": {
+    "download_key": "Ein Fehler ist beim Erstellen der Excel-Datei aufgetreten",
+    "add_credit": "Ein Fehler ist beim Erstellen der Gutschriften für die Excel-Datei aufgetreten"
+  },
+  "add_key": {
+    "add_key_database": "Ein Fehler ist beim Hinzufügen des Schlüssels zur Datenbank aufgetreten",
+    "add_children_database": "Ein Fehler ist beim Hinzufügen von Iterationen und Verbrauchern zur Datenbank aufgetreten"
+  },
+  "update_key": {
+    "key_not_found": "Schlüssel nicht gefunden",
+    "update_key_database": "Ein Fehler ist beim Aktualisieren des Schlüssels in der Datenbank aufgetreten",
+    "delete_children_database": "Ein Fehler ist beim Löschen vorheriger Iterationen und Verbraucher aus der Datenbank aufgetreten",
+    "add_children_database": "Ein Fehler ist beim Hinzufügen von Iterationen und Verbrauchern zur Datenbank aufgetreten"
+  },
+  "delete_key": {
+    "database_delete": "Ein Fehler ist beim Löschen des Schlüssels aus der Datenbank aufgetreten"
+  },
+  "validation": {
+    "key_partial_query": {
+      "description_wrong_type": "Das Feld 'description' muss ein String sein",
+      "name_wrong_type": "Das Feld 'name' muss ein String sein",
+      "sort_name_out_of_range": "Der Wert von 'sort_name' muss zwischen 'ASC' und 'DESC' liegen"
+    },
+    "create_consumer": {
+      "energy_allocated_percentage_min_minus_1": "Das Feld 'energy_allocated_percentage' ist falsch, der Mindestwert ist -1",
+      "energy_allocated_percentage_max_1": "Das Feld 'energy_allocated_percentage' ist falsch, der Höchstwert ist 1"
+    },
+    "create_iteration": {
+      "number_min_0": "Das Feld 'number' ist falsch, der Mindestwert ist 0",
+      "number_max_2": "Das Feld 'number' ist falsch, der Höchstwert ist 2",
+      "energy_allocated_percentage_min_0": "Das Feld 'energy_allocated_percentage' ist falsch, der Mindestwert ist 0",
+      "consumer_sum_1": "Die Summe von 'energy_allocated_percentage' der Verbraucher muss gleich 1 sein"
+    },
+    "create_key": {
+      "iteration_sum_1": "Die Summe von 'energy_allocated_percentage' der Iterationen muss gleich 1 sein"
+    },
+    "update_key": {
+      "iteration_sum_1": "Die Summe von 'energy_allocated_percentage' der Iterationen muss gleich 1 sein"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "add_meter": {
+    "already_exist": "Der Zähler existiert bereits",
+    "database_add": "Beim Hinzufügen des Zählers zur Datenbank ist ein Fehler aufgetreten"
+  },
+  "delete_meter": {
+    "database_delete": "Beim Löschen des Zählers aus der Datenbank ist ein Fehler aufgetreten"
+  },
+  "download_meter_consumptions": {
+    "no_consumptions": "Kein Verbrauch gefunden"
+  },
+  "patch_meter_data": {
+    "meter_not_found": "Zähler nicht gefunden",
+    "database_update": "Beim Aktualisieren der Zählerdaten in der Datenbank ist ein Fehler aufgetreten"
+  },
+  "add_meter_data": {
+    "conflict_config_already_existing": "Für diesen Zeitraum liegen bereits Zählerdaten vor"
+  },
+  "get_meter": {
+    "meter_not_found": "Zähler nicht gefunden"
+  },
+  "validation": {
+    "wrong_type": {
+      "meter_data_status": "Das Feld '{{field}}' muss vom Typ 'MeterDataStatus' sein",
+      "meter_rate": "Das Feld '{{field}}' muss vom Typ 'MeterRate' sein",
+      "client_type": "Das Feld '{{field}}' muss vom Typ 'ClientType' sein",
+      "injection_status": "Das Feld '{{field}}' muss vom Typ 'InjectionStatus' sein",
+      "production_chain": "Das Feld '{{field}}' muss vom Typ 'ProductionChain' sein",
+      "tarif_group": "Das Feld '{{field}}' muss vom Typ 'TarifGroup' sein",
+      "reading_frequency": "Das Feld '{{field}}' muss vom Typ 'ReadingFrequency' sein"
+    }
+  }
+}

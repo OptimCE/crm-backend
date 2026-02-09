@@ -1,0 +1,30 @@
+{
+  "add_community": {
+    "iam_creation": "Er is een fout opgetreden bij het toevoegen aan de IAM-service",
+    "database_save": "Er is een fout opgetreden bij het opslaan in de database"
+  },
+  "update_community": {
+    "community_not_found": "Gemeenschap niet gevonden",
+    "iam_update": "Er is een fout opgetreden bij het bijwerken van de gemeenschap bij de IAM-service",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de gemeenschap in de database"
+  },
+  "delete_user_community": {
+    "community_user_not_found": "De koppeling tussen de gebruiker en de gemeenschap is niet gevonden",
+    "database_delete_user": "Er is een fout opgetreden bij het verwijderen van de koppeling tussen de gebruiker en de gemeenschap uit de database",
+    "iam_delete_user": "Er is een fout opgetreden bij het verwijderen van de koppeling tussen de gebruiker en de gemeenschap bij de IAM-service"
+  },
+  "update_user_role": {
+    "database_update_user_role": "Er is een fout opgetreden bij het bijwerken van de rol van de gemeenschapsgebruiker in de database",
+    "iam_update_user_role": "Er is een fout opgetreden bij het bijwerken van de rol van de gemeenschapsgebruiker bij de IAM-service"
+  },
+  "patch_user_role": {
+    "community_user_not_found": "De koppeling tussen de gebruiker en de gemeenschap is niet gevonden",
+    "exception": "Er is een uitzondering opgetreden bij het bijwerken van de gebruikersrol"
+  },
+  "delete_community": {
+    "community_not_found": "Gemeenschap niet gevonden",
+    "mismatch_id": "De gemeenschap-ID komt niet overeen met de te verwijderen gemeenschap",
+    "database_delete_exception": "Er is een fout opgetreden bij het verwijderen van de gemeenschap uit de database",
+    "iam_delete_community": "Er is een fout opgetreden bij het verwijderen van de gemeenschap bij de IAM-service"
+  }
+}

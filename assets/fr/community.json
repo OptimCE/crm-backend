@@ -1,0 +1,30 @@
+{
+  "add_community": {
+    "iam_creation": "Une erreur est survenue lors de l'ajout auprès du service IAM",
+    "database_save": "Une erreur est survenue lors de la sauvegarde dans la base de données"
+  },
+  "update_community": {
+    "community_not_found": "La communauté est introuvable",
+    "iam_update": "Une erreur est survenue lors de la mise à jour de la communauté auprès du service IAM",
+    "database_update": "Une erreur est survenue lors de la mise à jour de la communauté dans la base de données"
+  },
+  "delete_user_community": {
+    "community_user_not_found": "Le lien entre l'utilisateur et la communauté est introuvable",
+    "database_delete_user": "Une erreur est survenue lors de la suppression du lien entre l'utilisateur et la communauté dans la base de données",
+    "iam_delete_user": "Une erreur est survenue lors de la suppression du lien entre l'utilisateur et la communauté auprès du service IAM"
+  },
+  "update_user_role": {
+    "database_update_user_role": "Une erreur est survenue lors de la mise à jour du rôle de l'utilisateur de la communauté dans la base de données",
+    "iam_update_user_role": "Une erreur est survenue lors de la mise à jour du rôle de l'utilisateur de la communauté auprès du service IAM"
+  },
+  "patch_user_role": {
+    "community_user_not_found": "Le lien entre l'utilisateur et la communauté est introuvable",
+    "exception": "Une exception est survenue lors de la mise à jour du rôle de l'utilisateur"
+  },
+  "delete_community": {
+    "community_not_found": "La communauté est introuvable",
+    "mismatch_id": "L'identifiant de la communauté est différent de la communauté à supprimer",
+    "database_delete_exception": "Une erreur est survenue lors de la suppression de la communauté dans la base de données",
+    "iam_delete_community": "Une erreur est survenue lors de la suppression de la communauté auprès du service IAM"
+  }
+}

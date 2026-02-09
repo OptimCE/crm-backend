@@ -1,0 +1,63 @@
+{
+  "add_consumption_data": {
+    "database_add": "Une erreur est survenue lors de l'ajout des données de consommation dans la base de données",
+    "no_meter_authorized": "Aucun compteurs valide n'a été trouvé"
+  },
+  "parse_excel_data": {
+    "invalid_date_format": "Une date dans le fichier a un format invalide"
+  },
+  "add_key_to_sharing": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "allocation_key_not_found": "La clé de répartition est introuvable",
+    "database_add": "Une erreur est survenue lors de l'ajout de la clé de répartition à l'opération de partage dans la base de données"
+  },
+  "add_meter_to_sharing": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "meters_invalid": "Un ou plusieurs compteurs n'appartiennent pas à la communauté",
+    "database_add": "Une erreur est survenue lors de l'ajout du compteur à l'opération de partage dans la base de données"
+  },
+  "create_sharing_operation": {
+    "database_add": "Une erreur est survenue lors de l'ajout de l'opération de partage dans la base de données"
+  },
+  "get_sharing_operation": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable"
+  },
+  "patch_key_status": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "database_update": "Une erreur est survenue lors de la mise à jour du statut associé à l'opération de partage dans la base de données"
+  },
+  "patch_meter_status": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "meter_not_in_community": "Un ou plusieurs compteurs n'appartiennent pas à la communauté",
+    "latest_meter_data_not_found": "Aucune information du compteur valide n'a été trouvé",
+    "meter_not_part_of_sharing": "Le compteur n'appartient actuellement pas à l'opération de partage",
+    "database_add": "Une erreur est survenue lors de la mise à jour des informations du compteur dans la base de données"
+  },
+  "delete_sharing_operation": {
+    "database_delete": "Une erreur est survenue lors de la suppression de l'opération de partage dans la base de données"
+  },
+  "delete_meter_from_sharing": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "meter_not_in_community": "Un ou plusieurs compteurs n'appartiennent pas à la communauté",
+    "latest_meter_data_not_found": "Aucune information du compteur valide n'a été trouvé",
+    "meter_not_part_of_sharing": "Le compteur n'appartient actuellement pas à l'opération de partage",
+    "database_add": "Une erreur est survenue lors de la mise à jour des informations du compteur dans la base de données"
+  },
+  "get_sharing_operation_consumption": {
+    "no_consumption_found": "Aucune consommation trouvée entre ces deux dates"
+  },
+  "validation": {
+    "wrong_type": {
+      "sharing_operation_type": "Le champ '{{field}}' doit être de type 'SharingOperationType'",
+      "sharing_key_status": "Le champ '{{field}}' doit être de type 'SharingKeyStatus'",
+      "meter_data_status": "Le champ '{{field}}' doit être de type 'MeterDataStatus'"
+    },
+    "add_consumption_data": {
+      "file_too_big": "Le fichier est trop volumineux (5Mb maximum)",
+      "has_mime_type": "Le fichier doit être un CSV ou un Excel"
+    },
+    "patch_meter_to_sharing_operation": {
+      "status_out_of_range": "La valeur du champ '{{field}}' doit être compris entre 1, 3 et 4"
+    }
+  }
+}

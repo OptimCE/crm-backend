@@ -1,0 +1,36 @@
+{
+  "add_meter": {
+    "already_exist": "Le compteur existe déjà",
+    "database_add": "Une erreur est survenue lors de l'ajout du compteur dans la base de données"
+  },
+  "delete_meter": {
+    "database_delete": "Une erreur est survenue lors de la suppression du compteur dans la base de données"
+  },
+  "download_meter_consumptions": {
+    "no_consumptions": "Aucune consommation n'a été trouvée"
+  },
+  "patch_meter_data": {
+    "meter_not_found": "Compteur introuvable",
+    "database_update": "Une erreur est survenue lors de la mise à jour des données compteurs dans la base de données"
+  },
+  "add_meter_data": {
+    "conflict_config_already_existing": "Des données compteurs existe déjà pour cette période"
+  },
+  "get_meter": {
+    "meter_not_found": "Compteur introuvable"
+  },
+  "update_meter": {
+    "database_update": "Une erreur est survenue lors de la mise à jour des données compteurs dans la base de données"
+  },
+  "validation": {
+    "wrong_type": {
+      "meter_data_status": "Le champ '{{field}}' doit être de type 'MeterDataStatus'",
+      "meter_rate": "Le champ '{{field}}' doit être de type 'MeterRate'",
+      "client_type": "Le champ '{{field}}' doit être de type 'ClientType'",
+      "injection_status": "Le champ '{{field}}' doit être de type 'InjectionStatus'",
+      "production_chain": "Le champ '{{field}}' doit être de type 'ProductionChain'",
+      "tarif_group": "Le champ '{{field}}' doit être de type 'TarifGroup'",
+      "reading_frequency": "Le champ '{{field}}' doit être de type 'ReadingFrequency'"
+    }
+  }
+}

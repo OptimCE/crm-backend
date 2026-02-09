@@ -1,0 +1,33 @@
+{
+  "add_meter": {
+    "already_exist": "De meter bestaat al",
+    "database_add": "Er is een fout opgetreden bij het toevoegen van de meter aan de database"
+  },
+  "delete_meter": {
+    "database_delete": "Er is een fout opgetreden bij het verwijderen van de meter uit de database"
+  },
+  "download_meter_consumptions": {
+    "no_consumptions": "Geen verbruik gevonden"
+  },
+  "patch_meter_data": {
+    "meter_not_found": "Meter niet gevonden",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de metergegevens in de database"
+  },
+  "add_meter_data": {
+    "conflict_config_already_existing": "Er bestaan al metergegevens voor deze periode"
+  },
+  "get_meter": {
+    "meter_not_found": "Meter niet gevonden"
+  },
+  "validation": {
+    "wrong_type": {
+      "meter_data_status": "Het veld '{{field}}' moet van het type 'MeterDataStatus' zijn",
+      "meter_rate": "Het veld '{{field}}' moet van het type 'MeterRate' zijn",
+      "client_type": "Het veld '{{field}}' moet van het type 'ClientType' zijn",
+      "injection_status": "Het veld '{{field}}' moet van het type 'InjectionStatus' zijn",
+      "production_chain": "Het veld '{{field}}' moet van het type 'ProductionChain' zijn",
+      "tarif_group": "Het veld '{{field}}' moet van het type 'TarifGroup' zijn",
+      "reading_frequency": "Het veld '{{field}}' moet van het type 'ReadingFrequency' zijn"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "delete_document": {
+    "storage_service_delete": "Une erreur est survenue lors de la suppression du document auprès du service de stockage",
+    "database_delete": "Une erreur est survenue lors de la suppression du document dans la base de données"
+  },
+  "download_document": {
+    "document_not_found": "Le document est introuvable"
+  },
+  "upload_document": {
+    "storage_service_upload": "Une erreur est survenue lors de l'upload du document auprès du service de stockage",
+    "database_upload": "Une erreur est survenue lors de l'ajout du nouveau document dans la base de données"
+  },
+  "validation": {
+    "upload_document": {
+      "file_too_big": "Le fichier est trop volumineux (5Mb maximum)"
+    }
+  }
+}

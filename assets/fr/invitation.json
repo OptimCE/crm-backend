@@ -1,0 +1,67 @@
+{
+  "accept_invitation_manager": {
+    "invitation_manager_not_found": "L'invitation est introuvable",
+    "mismatch_user_id": "L'invitation ne vous est pas adressée",
+    "admin_cant_accept_manager_invitation": "Un administrateur ne peut accepter une invitation pour devenir gestionnaire",
+    "already_manager": "Vous êtes déjà gestionnaire",
+    "database_save_update": "Une erreur est survenue lors de la mise à jour de la base de données",
+    "iam_service_save_update": "Une erreur est survenue lors de la mise à jour auprès du service IAM"
+  },
+  "accept_invitation_member": {
+    "invitation_manager_not_found": "L'invitation est introuvable",
+    "mismatch_user_id": "L'invitation ne vous est pas adressée",
+    "database_save_user_member_link": "Une erreur est survenue lors de l'ajout du lien avec le membre dans la base de données",
+    "database_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté dans la base de données",
+    "iam_service_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté auprès du service IAM"
+  },
+  "accept_invitation_member_encoded": {
+    "invitation_manager_not_found": "L'invitation est introuvable",
+    "mismatch_user_id": "L'invitation ne vous est pas adressée",
+    "database_save_user_member_link": "Une erreur est survenue lors de l'ajout du lien avec le membre dans la base de données",
+    "database_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté dans la base de données",
+    "iam_service_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté auprès du service IAM",
+    "database_member_save": "Une erreur est survenue lors de l'ajout du membre dans la base de données"
+  },
+  "cancel_manager_invitation": {
+    "database_cancel": "Une erreur est survenue lors de l'annulation de l'invitation à devenir gestionnaire"
+  },
+  "cancel_member_invitation": {
+    "database_cancel": "Une erreur est survenue lors de l'annulation de l'invitation à devenir membre"
+  },
+  "refuse_manager_invitation": {
+    "database_refuse": "Une erreur est survenue lors de la réfutation de l'invitation à devenir gestionnaire"
+  },
+  "refuse_member_invitation": {
+    "database_refuse": "Une erreur est survenue lors de la réfutation de l'invitation à devenir membre"
+  },
+  "invite_user_to_become_manager": {
+    "database_save": "Une erreur est survenue lors de l'ajout de l'invitation dans la base de données"
+  },
+  "invite_user_to_become_member": {
+    "database_save": "Une erreur est survenue lors de l'ajout de l'invitation dans la base de données"
+  },
+  "validation": {
+    "user_member_invitation_query": {
+      "name_wrong_type": "Le champ 'name' doit être un string",
+      "to_be_encoded_wrong_type": "Le champ 'to_be_encoded' doit être un boolean",
+      "sort_name_out_of_range": "La valeur de 'sort_name' doit être comprise entre 'ASC' et 'DESC'",
+      "sort_date_out_of_range": "La valeur de 'sort_date' doit être comprise entre 'ASC' et 'DESC'"
+    },
+    "user_manager_invitation_query": {
+      "name_wrong_type": "Le champ 'name' doit être un string",
+      "sort_name_out_of_range": "La valeur de 'sort_name' doit être comprise entre 'ASC' et 'DESC'",
+      "sort_date_out_of_range": "La valeur de 'sort_date' doit être comprise entre 'ASC' et 'DESC'"
+    },
+    "invite_user": {
+      "user_email_empty": "Le champ 'user_email' est vide",
+      "user_email_wrong_type": "Le champ 'user_email' doit être un string"
+    },
+    "accept_invitation": {
+      "invitation_id_empty": "Le champ 'invitation_id' est vide",
+      "invitation_id_wrong_type": "Le champ 'invitation_id' doit être un string"
+    },
+    "accept_invtation_encoded": {
+      "member_empty": "Le champ 'member' est vide"
+    }
+  }
+}

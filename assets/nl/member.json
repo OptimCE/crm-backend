@@ -1,0 +1,34 @@
+{
+  "add_member": {
+    "database_add": "Er is een fout opgetreden bij het toevoegen van het nieuwe lid aan de database"
+  },
+  "delete_member": {
+    "database_delete": "Er is een fout opgetreden bij het verwijderen van het lid uit de database"
+  },
+  "delete_member_link": {
+    "database_delete": "Er is een fout opgetreden bij het verwijderen van de koppeling tussen de gebruiker en het lid uit de database"
+  },
+  "get_member": {
+    "member_not_found": "Lid niet gevonden"
+  },
+  "patch_member_status": {
+    "member_not_found": "Lid niet gevonden",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de database"
+  },
+  "patch_member_link": {
+    "member_not_found": "Lid niet gevonden",
+    "database_add": "Er is een fout opgetreden bij het toevoegen van de uitnodiging aan de database"
+  },
+  "update_member": {
+    "member_not_found": "Lid niet gevonden",
+    "database_save_address": "Er is een fout opgetreden bij het toevoegen/ophalen van het adres in de database",
+    "database_save_member": "Er is een fout opgetreden bij het bijwerken van het lid in de database",
+    "database_save_individual": "Er is een fout opgetreden bij het bijwerken van het individu in de database",
+    "database_save_company": "Er is een fout opgetreden bij het bijwerken van het bedrijf in de database"
+  },
+  "validation": {
+    "wrong_type": {
+      "member_type": "Het veld '{{field}}' moet van het type 'MemberType' zijn"
+    }
+  }
+}

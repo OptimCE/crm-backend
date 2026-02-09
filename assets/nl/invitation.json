@@ -1,0 +1,67 @@
+{
+  "accept_invitation_manager": {
+    "invitation_manager_not_found": "Uitnodiging niet gevonden",
+    "mismatch_user_id": "De uitnodiging is niet aan u gericht",
+    "admin_cant_accept_manager_invitation": "Een beheerder kan geen uitnodiging accepteren om manager te worden",
+    "already_manager": "U bent al manager",
+    "database_save_update": "Er is een fout opgetreden bij het bijwerken van de database",
+    "iam_service_save_update": "Er is een fout opgetreden bij het bijwerken bij de IAM-service"
+  },
+  "accept_invitation_member": {
+    "invitation_manager_not_found": "Uitnodiging niet gevonden",
+    "mismatch_user_id": "De uitnodiging is niet aan u gericht",
+    "database_save_user_member_link": "Er is een fout opgetreden bij het toevoegen van de koppeling met het lid aan de database",
+    "database_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap in de database",
+    "iam_service_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap bij de IAM-service"
+  },
+  "accept_invitation_member_encoded": {
+    "invitation_manager_not_found": "Uitnodiging niet gevonden",
+    "mismatch_user_id": "De uitnodiging is niet aan u gericht",
+    "database_save_user_member_link": "Er is een fout opgetreden bij het toevoegen van de koppeling met het lid aan de database",
+    "database_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap in de database",
+    "iam_service_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap bij de IAM-service",
+    "database_member_save": "Er is een fout opgetreden bij het toevoegen van het lid aan de database"
+  },
+  "cancel_manager_invitation": {
+    "database_cancel": "Er is een fout opgetreden bij het annuleren van de uitnodiging om manager te worden"
+  },
+  "cancel_member_invitation": {
+    "database_cancel": "Er is een fout opgetreden bij het annuleren van de uitnodiging om lid te worden"
+  },
+  "refuse_manager_invitation": {
+    "database_refuse": "Er is een fout opgetreden bij het weigeren van de uitnodiging om manager te worden"
+  },
+  "refuse_member_invitation": {
+    "database_refuse": "Er is een fout opgetreden bij het weigeren van de uitnodiging om lid te worden"
+  },
+  "invite_user_to_become_manager": {
+    "database_save": "Er is een fout opgetreden bij het toevoegen van de uitnodiging aan de database"
+  },
+  "invite_user_to_become_member": {
+    "database_save": "Er is een fout opgetreden bij het toevoegen van de uitnodiging aan de database"
+  },
+  "validation": {
+    "user_member_invitation_query": {
+      "name_wrong_type": "Het veld 'name' moet een string zijn",
+      "to_be_encoded_wrong_type": "Het veld 'to_be_encoded' moet een boolean zijn",
+      "sort_name_out_of_range": "De waarde van 'sort_name' moet tussen 'ASC' en 'DESC' liggen",
+      "sort_date_out_of_range": "De waarde van 'sort_date' moet tussen 'ASC' en 'DESC' liggen"
+    },
+    "user_manager_invitation_query": {
+      "name_wrong_type": "Het veld 'name' moet een string zijn",
+      "sort_name_out_of_range": "De waarde van 'sort_name' moet tussen 'ASC' en 'DESC' liggen",
+      "sort_date_out_of_range": "De waarde van 'sort_date' moet tussen 'ASC' en 'DESC' liggen"
+    },
+    "invite_user": {
+      "user_email_empty": "Het veld 'user_email' is leeg",
+      "user_email_wrong_type": "Het veld 'user_email' moet een string zijn"
+    },
+    "accept_invitation": {
+      "invitation_id_empty": "Het veld 'invitation_id' is leeg",
+      "invitation_id_wrong_type": "Het veld 'invitation_id' moet een string zijn"
+    },
+    "accept_invtation_encoded": {
+      "member_empty": "Het veld 'member' is leeg"
+    }
+  }
+}

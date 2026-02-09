@@ -1,0 +1,67 @@
+{
+  "accept_invitation_manager": {
+    "invitation_manager_not_found": "Einladung nicht gefunden",
+    "mismatch_user_id": "Die Einladung ist nicht an Sie gerichtet",
+    "admin_cant_accept_manager_invitation": "Ein Administrator kann keine Einladung annehmen, Manager zu werden",
+    "already_manager": "Sie sind bereits Manager",
+    "database_save_update": "Beim Aktualisieren der Datenbank ist ein Fehler aufgetreten",
+    "iam_service_save_update": "Beim Aktualisieren im IAM-Dienst ist ein Fehler aufgetreten"
+  },
+  "accept_invitation_member": {
+    "invitation_manager_not_found": "Einladung nicht gefunden",
+    "mismatch_user_id": "Die Einladung ist nicht an Sie gerichtet",
+    "database_save_user_member_link": "Beim Hinzufügen der Verknüpfung mit dem Mitglied zur Datenbank ist ein Fehler aufgetreten",
+    "database_save_user_community": "Beim Hinzufügen zur Community in der Datenbank ist ein Fehler aufgetreten",
+    "iam_service_save_user_community": "Beim Hinzufügen zur Community im IAM-Dienst ist ein Fehler aufgetreten"
+  },
+  "accept_invitation_member_encoded": {
+    "invitation_manager_not_found": "Einladung nicht gefunden",
+    "mismatch_user_id": "Die Einladung ist nicht an Sie gerichtet",
+    "database_save_user_member_link": "Beim Hinzufügen der Verknüpfung mit dem Mitglied zur Datenbank ist ein Fehler aufgetreten",
+    "database_save_user_community": "Beim Hinzufügen zur Community in der Datenbank ist ein Fehler aufgetreten",
+    "iam_service_save_user_community": "Beim Hinzufügen zur Community im IAM-Dienst ist ein Fehler aufgetreten",
+    "database_member_save": "Beim Hinzufügen des Mitglieds zur Datenbank ist ein Fehler aufgetreten"
+  },
+  "cancel_manager_invitation": {
+    "database_cancel": "Beim Abbrechen der Einladung zum Manager ist ein Fehler aufgetreten"
+  },
+  "cancel_member_invitation": {
+    "database_cancel": "Beim Abbrechen der Einladung zum Mitglied ist ein Fehler aufgetreten"
+  },
+  "refuse_manager_invitation": {
+    "database_refuse": "Beim Ablehnen der Einladung zum Manager ist ein Fehler aufgetreten"
+  },
+  "refuse_member_invitation": {
+    "database_refuse": "Beim Ablehnen der Einladung zum Mitglied ist ein Fehler aufgetreten"
+  },
+  "invite_user_to_become_manager": {
+    "database_save": "Beim Hinzufügen der Einladung zur Datenbank ist ein Fehler aufgetreten"
+  },
+  "invite_user_to_become_member": {
+    "database_save": "Beim Hinzufügen der Einladung zur Datenbank ist ein Fehler aufgetreten"
+  },
+  "validation": {
+    "user_member_invitation_query": {
+      "name_wrong_type": "Das Feld 'name' muss ein String sein",
+      "to_be_encoded_wrong_type": "Das Feld 'to_be_encoded' muss ein Boolean sein",
+      "sort_name_out_of_range": "Der Wert von 'sort_name' muss zwischen 'ASC' und 'DESC' liegen",
+      "sort_date_out_of_range": "Der Wert von 'sort_date' muss zwischen 'ASC' und 'DESC' liegen"
+    },
+    "user_manager_invitation_query": {
+      "name_wrong_type": "Das Feld 'name' muss ein String sein",
+      "sort_name_out_of_range": "Der Wert von 'sort_name' muss zwischen 'ASC' und 'DESC' liegen",
+      "sort_date_out_of_range": "Der Wert von 'sort_date' muss zwischen 'ASC' und 'DESC' liegen"
+    },
+    "invite_user": {
+      "user_email_empty": "Das Feld 'user_email' ist leer",
+      "user_email_wrong_type": "Das Feld 'user_email' muss ein String sein"
+    },
+    "accept_invitation": {
+      "invitation_id_empty": "Das Feld 'invitation_id' ist leer",
+      "invitation_id_wrong_type": "Das Feld 'invitation_id' muss ein String sein"
+    },
+    "accept_invtation_encoded": {
+      "member_empty": "Das Feld 'member' ist leer"
+    }
+  }
+}

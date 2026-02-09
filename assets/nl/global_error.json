@@ -1,0 +1,32 @@
+{
+  "success": "Succes",
+  "exception": "Er is een onverwachte fout opgetreden",
+  "timeout": "Time-out verstreken",
+  "decorator": "Uitvoering van de decorator is mislukt",
+  "unauthorized": "Niet geautoriseerd",
+  "authorization_missing": "Autorisatie ontbreekt",
+  "unauthenticated": "Niet geauthenticeerd",
+  "database": {
+    "query_runner_mandatory": "Er is een fout opgetreden met betrekking tot de unieke transactie"
+  },
+  "validation": {
+    "generic": {
+      "wrong_type": {
+        "string": "Het veld '{{field}}' moet een string zijn",
+        "integer": "Het veld '{{field}}' moet een integer zijn",
+        "email": "Het veld '{{field}}' moet een geldig e-mailadres zijn",
+        "file": "Het veld '{{field}}' moet een geldig bestand zijn",
+        "boolean": "Het veld '{{field}}' moet een boolean zijn",
+        "date": "Het veld '{{field}}' moet een geldige datum zijn",
+        "number": "Het veld '{{field}}' moet een getal zijn",
+        "array": "Het veld '{{field}}' moet een geldige array zijn"
+      },
+      "sort": "Het veld '{{field}}' moet 'ASC' of 'DESC' zijn",
+      "empty": "Het veld '{{field}}' is leeg",
+      "wrong_role": {
+        "member_manager_admin": "Het veld '{{field}}' moet 'MEMBER', 'MANAGER' of 'ADMIN' zijn"
+      },
+      "min_1": "Het veld '{{field}}' moet groter of gelijk aan 1 zijn"
+    }
+  }
+}

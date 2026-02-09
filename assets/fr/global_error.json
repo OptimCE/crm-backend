@@ -1,0 +1,33 @@
+{
+  "success": "Succès",
+  "exception": "Une erreur inattendue est survenue",
+  "timeout": "Délai d'attente dépassé",
+  "decorator": "L'exécution du décorateur a échoué",
+  "unauthorized": "Non autorisé",
+  "authorization_missing": "Autorisation manquante",
+  "unauthenticated": "Non authentifié",
+  "database": {
+    "query_runner_mandatory": "Une erreur lié à la transaction unique est survenue"
+  },
+  "validation": {
+    "generic": {
+      "wrong_type":{
+        "string": "Le champ '{{field}}' doit être un string",
+        "integer": "Le champ '{{field}}' doit être un integer",
+        "email": "Le champ '{{field}}' doit être une adresse e-mail valide",
+        "file": "Le champ '{{field}}' doit être un fichier valide",
+        "boolean": "Le champ '{{field}}' doit être un boolean",
+        "date": "Le champ '{{field}}' doit être une date valide",
+        "number": "Le champ '{{field}}' doit être un nombre",
+        "array": "Le champ '{{field}}' doit être un vecteur valide"
+      },
+      "sort": "Le champ '{{field}} doit être compris entre 'ASC' et 'DESC'",
+      "empty": "Le champ '{{field}}' est vide",
+      "wrong_role": {
+        "member_manager_admin": "Le champ '{{field}}' doit être compris entre 'MEMBER', 'MANAGER' et 'ADMIN'"
+
+      },
+      "min_1": "Le champ '{{field}}' doit être supérieur ou égale à 1"
+    }
+  }
+}

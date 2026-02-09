@@ -1,0 +1,18 @@
+{
+  "delete_document": {
+    "storage_service_delete": "Er is een fout opgetreden bij het verwijderen van het document uit de opslagservice",
+    "database_delete": "Er is een fout opgetreden bij het verwijderen van het document uit de database"
+  },
+  "download_document": {
+    "document_not_found": "Document niet gevonden"
+  },
+  "upload_document": {
+    "storage_service_upload": "Er is een fout opgetreden bij het uploaden van het document naar de opslagservice",
+    "database_upload": "Er is een fout opgetreden bij het toevoegen van het nieuwe document aan de database"
+  },
+  "validation": {
+    "upload_document": {
+      "file_too_big": "Het bestand is te groot (maximaal 5Mb)"
+    }
+  }
+}

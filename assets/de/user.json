@@ -1,0 +1,13 @@
+{
+  "get_profile": {
+    "database_add": "Beim Erstellen des Benutzerprofils in der Datenbank ist ein Fehler aufgetreten",
+    "user_not_found": "Benutzerprofil nicht gefunden"
+  },
+  "update_profile": {
+    "user_not_found": "Benutzerprofil nicht gefunden",
+    "database_update": "Beim Aktualisieren des Benutzerprofils in der Datenbank ist ein Fehler aufgetreten"
+  },
+  "update_invitation": {
+    "invitation_not_updated": "Die Einladungen konnten nicht aktualisiert werden"
+  }
+}

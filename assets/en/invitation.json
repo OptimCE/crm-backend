@@ -1,0 +1,67 @@
+{
+  "accept_invitation_manager": {
+    "invitation_manager_not_found": "Invitation not found",
+    "mismatch_user_id": "The invitation is not addressed to you",
+    "admin_cant_accept_manager_invitation": "An administrator cannot accept an invitation to become a manager",
+    "already_manager": "You are already a manager",
+    "database_save_update": "An error occurred while updating the database",
+    "iam_service_save_update": "An error occurred while updating with the IAM service"
+  },
+  "accept_invitation_member": {
+    "invitation_manager_not_found": "Invitation not found",
+    "mismatch_user_id": "The invitation is not addressed to you",
+    "database_save_user_member_link": "An error occurred while adding the link with the member to the database",
+    "database_save_user_community": "An error occurred while adding to the community in the database",
+    "iam_service_save_user_community": "An error occurred while adding to the community with the IAM service"
+  },
+  "accept_invitation_member_encoded": {
+    "invitation_manager_not_found": "Invitation not found",
+    "mismatch_user_id": "The invitation is not addressed to you",
+    "database_save_user_member_link": "An error occurred while adding the link with the member to the database",
+    "database_save_user_community": "An error occurred while adding to the community in the database",
+    "iam_service_save_user_community": "An error occurred while adding to the community with the IAM service",
+    "database_member_save": "An error occurred while adding the member to the database"
+  },
+  "cancel_manager_invitation": {
+    "database_cancel": "An error occurred while cancelling the invitation to become a manager"
+  },
+  "cancel_member_invitation": {
+    "database_cancel": "An error occurred while cancelling the invitation to become a member"
+  },
+  "refuse_manager_invitation": {
+    "database_refuse": "An error occurred while refusing the invitation to become a manager"
+  },
+  "refuse_member_invitation": {
+    "database_refuse": "An error occurred while refusing the invitation to become a member"
+  },
+  "invite_user_to_become_manager": {
+    "database_save": "An error occurred while adding the invitation to the database"
+  },
+  "invite_user_to_become_member": {
+    "database_save": "An error occurred while adding the invitation to the database"
+  },
+  "validation": {
+    "user_member_invitation_query": {
+      "name_wrong_type": "The 'name' field must be a string",
+      "to_be_encoded_wrong_type": "The 'to_be_encoded' field must be a boolean",
+      "sort_name_out_of_range": "The value of 'sort_name' must be between 'ASC' and 'DESC'",
+      "sort_date_out_of_range": "The value of 'sort_date' must be between 'ASC' and 'DESC'"
+    },
+    "user_manager_invitation_query": {
+      "name_wrong_type": "The 'name' field must be a string",
+      "sort_name_out_of_range": "The value of 'sort_name' must be between 'ASC' and 'DESC'",
+      "sort_date_out_of_range": "The value of 'sort_date' must be between 'ASC' and 'DESC'"
+    },
+    "invite_user": {
+      "user_email_empty": "The 'user_email' field is empty",
+      "user_email_wrong_type": "The 'user_email' field must be a string"
+    },
+    "accept_invitation": {
+      "invitation_id_empty": "The 'invitation_id' field is empty",
+      "invitation_id_wrong_type": "The 'invitation_id' field must be a string"
+    },
+    "accept_invtation_encoded": {
+      "member_empty": "The 'member' field is empty"
+    }
+  }
+}

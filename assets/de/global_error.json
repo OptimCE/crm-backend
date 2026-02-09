@@ -1,0 +1,32 @@
+{
+  "success": "Erfolg",
+  "exception": "Ein unerwarteter Fehler ist aufgetreten",
+  "timeout": "Zeitüberschreitung",
+  "decorator": "Die Ausführung des Decorators ist fehlgeschlagen",
+  "unauthorized": "Nicht autorisiert",
+  "authorization_missing": "Autorisierung fehlt",
+  "unauthenticated": "Nicht authentifiziert",
+  "database": {
+    "query_runner_mandatory": "Ein Fehler bezüglich der eindeutigen Transaktion ist aufgetreten"
+  },
+  "validation": {
+    "generic": {
+      "wrong_type": {
+        "string": "Das Feld '{{field}}' muss ein String sein",
+        "integer": "Das Feld '{{field}}' muss ein Integer sein",
+        "email": "Das Feld '{{field}}' muss eine gültige E-Mail-Adresse sein",
+        "file": "Das Feld '{{field}}' muss eine gültige Datei sein",
+        "boolean": "Das Feld '{{field}}' muss ein Boolean sein",
+        "date": "Das Feld '{{field}}' muss ein gültiges Datum sein",
+        "number": "Das Feld '{{field}}' muss eine Zahl sein",
+        "array": "Das Feld '{{field}}' muss ein gültiges Array sein"
+      },
+      "sort": "Das Feld '{{field}}' muss entweder 'ASC' oder 'DESC' sein",
+      "empty": "Das Feld '{{field}}' ist leer",
+      "wrong_role": {
+        "member_manager_admin": "Das Feld '{{field}}' muss 'MEMBER', 'MANAGER' oder 'ADMIN' sein"
+      },
+      "min_1": "Das Feld '{{field}}' muss größer oder gleich 1 sein"
+    }
+  }
+}

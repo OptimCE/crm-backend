@@ -1,0 +1,34 @@
+{
+  "add_member": {
+    "database_add": "Une erreur est survenue lors de l'ajout du nouveau membre dans la base de données"
+  },
+  "delete_member": {
+    "database_delete": "Une erreur est survenue lors de la suppression du membre dans la base de données"
+  },
+  "delete_member_link": {
+    "database_delete": "Une erreur est survenue lors de la suppression du lien entre l'utilisateur et le membre dans la base de données"
+  },
+  "get_member": {
+    "member_not_found": "Le membre est introuvable"
+  },
+  "patch_member_status": {
+    "member_not_found": "Le membre est introuvable",
+    "database_update": "Une erreur est survenue lors de la mise à jour dans la base de données"
+  },
+  "patch_member_link": {
+    "member_not_found": "Le membre est introuvable",
+    "database_add": "Une erreur est survenue lors de l'ajout de l'invitation dans la base de données"
+  },
+  "update_member": {
+    "member_not_found": "Le membre est introuvable",
+    "database_save_address": "Une erreur est survenue lors de l'ajout/récupération de l'adresse dans la base de données",
+    "database_save_member": "Une erreur est survenue lors de la mise à jour du membre dans la base de données",
+    "database_save_individual": "Une erreur est survenue lors de la mise à jour de l'individu dans la base de données",
+    "database_save_company": "Une erreur est survenue lors de la mise à jour de la société dans la base de données"
+  },
+  "validation": {
+    "wrong_type": {
+      "member_type": "Le champ '{{field}}' doit être du type 'MemberType'"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "get_profile": {
+    "database_add": "Une erreur est survenue lors de la création du profil de l'utilisateur dans la base de données",
+    "user_not_found": "Le profil de l'utilisateur est introuvable"
+  },
+  "update_profile": {
+    "user_not_found": "Le profil de l'utilisateur est introuvable",
+    "database_update": "Une erreur est survenue lors de la mise à jour du profil de l'utilisateur dans la base de données"
+  },
+  "update_invitation": {
+    "invitation_not_updated": "Les invitations n'ont pas pu être mises à jour"
+  }
+}
