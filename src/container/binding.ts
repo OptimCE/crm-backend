@@ -55,10 +55,10 @@ import { AuthContextRepository } from "../shared/context/authcontext.repository.
 if (process.env.NODE_ENV !== "test") {
   container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
   // IAM service
-  intializeIAMService()
+  intializeIAMService();
 
   // Storage service
-  initializeStorageService()
+  initializeStorageService();
 }
 if (!container.isBound("AuthContext")) {
   container.bind<IAuthContextRepository>("AuthContext").to(AuthContextRepository);
@@ -90,8 +90,6 @@ if (!container.isBound("SharingOperationRepository")) {
 if (!container.isBound("UserRepository")) {
   container.bind<IUserRepository>("UserRepository").to(UserRepository);
 }
-
-
 
 // Register services
 container.bind<ICommunityService>("CommunityService").to(CommunityService);

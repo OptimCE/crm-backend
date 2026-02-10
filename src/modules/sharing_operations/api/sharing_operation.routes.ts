@@ -13,8 +13,9 @@ export const sharing_operation_routes = express.Router();
 const sharing_operation_controller = container.get<SharingOperationController>(SharingOperationController);
 
 // Get (/) : Get partial list of sharing operations
-sharing_operation_routes.get("/",
-    /* #swagger.summary = 'Get partial list of sharing operations'
+sharing_operation_routes.get(
+  "/",
+  /* #swagger.summary = 'Get partial list of sharing operations'
        #swagger.tags = ['SharingOperations']
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationPartialQuery' }
        #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationListSuccess' }
@@ -27,10 +28,15 @@ sharing_operation_routes.get("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.getSharingOperationList.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.getSharingOperationList.bind(sharing_operation_controller),
+);
 // Get (/:id): Get a detailed sharing operations
-sharing_operation_routes.get("/:id",
-    /* #swagger.summary = 'Get a detailed sharing operations'
+sharing_operation_routes.get(
+  "/:id",
+  /* #swagger.summary = 'Get a detailed sharing operations'
        #swagger.tags = ['SharingOperations']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/SharingOperationId' }
        #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationGetSuccess' }
@@ -43,10 +49,15 @@ sharing_operation_routes.get("/:id",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.getSharingOperation.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.getSharingOperation.bind(sharing_operation_controller),
+);
 // Get (/:id/consumptions): Get consumptions information about a sharing operation
-sharing_operation_routes.get("/:id/consumptions",
-    /* #swagger.summary = 'Get consumptions information about a sharing operation'
+sharing_operation_routes.get(
+  "/:id/consumptions",
+  /* #swagger.summary = 'Get consumptions information about a sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/SharingOperationId' }
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationConsumptionQuery' }
@@ -60,10 +71,15 @@ sharing_operation_routes.get("/:id/consumptions",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.getSharingOperationConsumptions.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.getSharingOperationConsumptions.bind(sharing_operation_controller),
+);
 // Get (/:id/consumptions/download): Download consumptions information about a sharing operation
-sharing_operation_routes.get("/:id/consumptions/download",
-    /* #swagger.summary = 'Download consumptions information about a sharing operation'
+sharing_operation_routes.get(
+  "/:id/consumptions/download",
+  /* #swagger.summary = 'Download consumptions information about a sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/SharingOperationId' }
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationConsumptionQuery' }
@@ -77,10 +93,15 @@ sharing_operation_routes.get("/:id/consumptions/download",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.downloadSharingOperationConsumptions.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.downloadSharingOperationConsumptions.bind(sharing_operation_controller),
+);
 // Post (/) : Create a new sharing operation
-sharing_operation_routes.post("/",
-    /* #swagger.summary = 'Create a new sharing operation'
+sharing_operation_routes.post(
+  "/",
+  /* #swagger.summary = 'Create a new sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -100,10 +121,15 @@ sharing_operation_routes.post("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.createSharingOperation.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.createSharingOperation.bind(sharing_operation_controller),
+);
 // Post (/key): Add a new key to the sharing operation
-sharing_operation_routes.post("/key",
-    /* #swagger.summary = 'Add a new key to the sharing operation'
+sharing_operation_routes.post(
+  "/key",
+  /* #swagger.summary = 'Add a new key to the sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -123,10 +149,15 @@ sharing_operation_routes.post("/key",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.addKeyToSharing.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.addKeyToSharing.bind(sharing_operation_controller),
+);
 // Post (/meter): Add a new meter to the sharing operation
-sharing_operation_routes.post("/meter",
-    /* #swagger.summary = 'Add a new meter to the sharing operation'
+sharing_operation_routes.post(
+  "/meter",
+  /* #swagger.summary = 'Add a new meter to the sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -146,10 +177,15 @@ sharing_operation_routes.post("/meter",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.addMeterToSharing.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.addMeterToSharing.bind(sharing_operation_controller),
+);
 // Post (/consumptions): Upload external consumptions data
-sharing_operation_routes.post("/consumptions",
-    /* #swagger.summary = 'Upload external consumptions data'
+sharing_operation_routes.post(
+  "/consumptions",
+  /* #swagger.summary = 'Upload external consumptions data'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -183,10 +219,16 @@ sharing_operation_routes.post("/consumptions",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), upload.single("file"), sharing_operation_controller.addConsumptionDataToSharing.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  upload.single("file"),
+  sharing_operation_controller.addConsumptionDataToSharing.bind(sharing_operation_controller),
+);
 // Patch (/key): Change the status of a key in the sharing operation
-sharing_operation_routes.patch("/key",
-    /* #swagger.summary = 'Change the status of a key in the sharing operation'
+sharing_operation_routes.patch(
+  "/key",
+  /* #swagger.summary = 'Change the status of a key in the sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -206,10 +248,15 @@ sharing_operation_routes.patch("/key",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.patchKeyStatus.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.patchKeyStatus.bind(sharing_operation_controller),
+);
 // Patch (/meter): Change the status of a meter in the sharing operation
-sharing_operation_routes.patch("/meter",
-    /* #swagger.summary = 'Change the status of a meter in the sharing operation'
+sharing_operation_routes.patch(
+  "/meter",
+  /* #swagger.summary = 'Change the status of a meter in the sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -229,10 +276,15 @@ sharing_operation_routes.patch("/meter",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.patchMeterStatus.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.patchMeterStatus.bind(sharing_operation_controller),
+);
 // DELETE (/:id) : Delete a sharing operation
-sharing_operation_routes.delete("/:id",
-    /* #swagger.summary = 'Delete a sharing operation'
+sharing_operation_routes.delete(
+  "/:id",
+  /* #swagger.summary = 'Delete a sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/SharingOperationId' }
        #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationDeleteSuccess' }
@@ -245,10 +297,15 @@ sharing_operation_routes.delete("/:id",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.ADMIN), sharing_operation_controller.deleteSharingOperation.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.ADMIN),
+  sharing_operation_controller.deleteSharingOperation.bind(sharing_operation_controller),
+);
 // Delete (/:id/meter): Delete a meter from a sharing operation
-sharing_operation_routes.delete("/:id/meter",
-    /* #swagger.summary = 'Delete a meter from a sharing operation'
+sharing_operation_routes.delete(
+  "/:id/meter",
+  /* #swagger.summary = 'Delete a meter from a sharing operation'
        #swagger.tags = ['SharingOperations']
        #swagger.requestBody = {
            required: true,
@@ -268,4 +325,8 @@ sharing_operation_routes.delete("/:id/meter",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), sharing_operation_controller.deleteMeterFromSharingOperation.bind(sharing_operation_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.deleteMeterFromSharingOperation.bind(sharing_operation_controller),
+);

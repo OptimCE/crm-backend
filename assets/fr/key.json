@@ -4,7 +4,8 @@
   },
   "download_key": {
     "download_key": "Une erreur est survenue lors de la génération de l'Excel",
-    "add_credit": "Une erreur est survenue lors de la génération des crédits de l'Excel"
+    "add_credit": "Une erreur est survenue lors de la génération des crédits de l'Excel",
+    "download_name": "cle_repartition"
   },
   "add_key": {
     "add_key_database": "Une erreur est survenue lors de l'ajout de la clé dans la base de données",

@@ -15,9 +15,7 @@ import type { IMemberRepository } from "../../src/modules/members/domain/i-membe
 import { createMockMeterRepository } from "../repository_mocked/meter.repository.mock.js";
 import type { IMeterRepository } from "../../src/modules/meters/domain/i-meter.repository.js";
 import { createMockSharingOperationRepository } from "../repository_mocked/sharing_operation.repository.mock.js";
-import type {
-    ISharingOperationRepository
-} from "../../src/modules/sharing_operations/domain/i-sharing_operation.repository.js";
+import type { ISharingOperationRepository } from "../../src/modules/sharing_operations/domain/i-sharing_operation.repository.js";
 import { createMockUserRepository } from "../repository_mocked/user.repository.mock.js";
 import type { IUserRepository } from "../../src/modules/users/domain/i-user.repository.js";
 import { createMockIamService } from "../external_mocking/iam_service.mock.js";
@@ -28,175 +26,171 @@ import { createMockAuthContextRepository } from "../repository_mocked/authcontex
 import { IAuthContextRepository } from "../../src/shared/context/i-authcontext.repository.js";
 
 export const expectWithLog = async (response: any, assertionCallback: any) => {
-    try {
-        await assertionCallback();
-    } catch (error) {
-        console.error("\nTEST FAILED. API RESPONSE BODY:");
-        console.dir(response.body, { depth: null, colors: true });
-        console.error("\n----------------------------------\n");
-        throw error;
-    }
+  try {
+    await assertionCallback();
+  } catch (error) {
+    console.error("\nTEST FAILED. API RESPONSE BODY:");
+    console.dir(response.body, { depth: null, colors: true });
+    console.error("\n----------------------------------\n");
+    throw error;
+  }
 };
 
 export async function getWorkingFakeRepository() {
-    const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
-    const realQueryRunner = AppDataSource.createQueryRunner();
+  const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
+  const realQueryRunner = AppDataSource.createQueryRunner();
 
-    realQueryRunner.commitTransaction = jest.fn(() => Promise.resolve());
-    realQueryRunner.rollbackTransaction = jest.fn(() => Promise.resolve());
+  realQueryRunner.commitTransaction = jest.fn(() => Promise.resolve());
+  realQueryRunner.rollbackTransaction = jest.fn(() => Promise.resolve());
 
-    return realQueryRunner;
+  return realQueryRunner;
 }
-
 
 export async function initalizeDb() {
-    const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
-    if (!AppDataSource.isInitialized) {
-        await AppDataSource.initialize();
-        (await import("../../src/container/di-container.js")).container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
-    }
+  const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
+  if (!AppDataSource.isInitialized) {
+    await AppDataSource.initialize();
+    (await import("../../src/container/di-container.js")).container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
+  }
 }
 
-
-
 export async function resetDb() {
-    const sql = await readFile("tests/sql/init.sql", "utf8");
-    const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
-    const qr = AppDataSource.createQueryRunner(); // single connection
-    await qr.connect();
-    await qr.startTransaction();
-    try {
-        await qr.query(sql);
-        await qr.commitTransaction();
-    } catch (e) {
-        await qr.rollbackTransaction();
-        throw e;
-    } finally {
-        await qr.release();
-    }
+  const sql = await readFile("tests/sql/init.sql", "utf8");
+  const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
+  const qr = AppDataSource.createQueryRunner(); // single connection
+  await qr.connect();
+  await qr.startTransaction();
+  try {
+    await qr.query(sql);
+    await qr.commitTransaction();
+  } catch (e) {
+    await qr.rollbackTransaction();
+    throw e;
+  } finally {
+    await qr.release();
+  }
 }
 
 export async function tearDownDB() {
-    const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
-    if (AppDataSource.isInitialized) {
-        await AppDataSource.destroy();
-    }
-    jest.clearAllMocks();
+  const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
+  if (AppDataSource.isInitialized) {
+    await AppDataSource.destroy();
+  }
+  jest.clearAllMocks();
 }
 
 export function mockApiCall(overrides: Partial<Record<string, jest.Mock>> = {}) {
-    const defaultMocks = {
-        call: jest.fn(),
-        callWithTracingHeaders: jest.fn(),
-        callWithTracingHeadersCertificate: jest.fn(),
-    };
+  const defaultMocks = {
+    call: jest.fn(),
+    callWithTracingHeaders: jest.fn(),
+    callWithTracingHeadersCertificate: jest.fn(),
+  };
 
-    const mocks = { ...defaultMocks, ...overrides };
-    jest.unstable_mockModule("../src/shared/services/api_call.js", () => mocks);
+  const mocks = { ...defaultMocks, ...overrides };
+  jest.unstable_mockModule("../src/shared/services/api_call.js", () => mocks);
 
-    return mocks;
+  return mocks;
 }
 
-
 export async function setupCommonTestEnvironment() {
-    await initalizeDb();
-    const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
-    const fakeQueryRunner = await getWorkingFakeRepository();
+  await initalizeDb();
+  const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
+  const fakeQueryRunner = await getWorkingFakeRepository();
 
-    jest.spyOn(AppDataSource, "createQueryRunner").mockImplementation(() => fakeQueryRunner);
+  jest.spyOn(AppDataSource, "createQueryRunner").mockImplementation(() => fakeQueryRunner);
 }
 
 async function mockModule<T extends object>(mock: jest.Mocked<T>, container_name: string) {
-    const container = (await import("../../src/container/di-container.js")).container;
+  const container = (await import("../../src/container/di-container.js")).container;
 
-    if (container.isBound(container_name)) {
-        (await container.rebind<T>(container_name)).toConstantValue(mock);
-    } else {
-        container.bind<T>(container_name).toConstantValue(mock);
-    }
-    return mock;
-}
-
-export async function mockAddressRepositoryModule(overrides: {}) {
-    const mock = createMockAddressRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IAddressRepository>(mock, "AddressRepository");
+  if (container.isBound(container_name)) {
+    (await container.rebind<T>(container_name)).toConstantValue(mock);
+  } else {
+    container.bind<T>(container_name).toConstantValue(mock);
+  }
+  return mock;
 }
 
-export async function mockCommunityRepositoryModule(overrides: {}) {
-    const mock = createMockCommunityRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<ICommunityRepository>(mock, "CommunityRepository");
+export async function mockAddressRepositoryModule(overrides: any) {
+  const mock = createMockAddressRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IAddressRepository>(mock, "AddressRepository");
 }
 
-export async function mockDocumentRepositoryModule(overrides: {}) {
-    const mock = createMockDocumentRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IDocumentRepository>(mock, "DocumentRepository");
+export async function mockCommunityRepositoryModule(overrides: any) {
+  const mock = createMockCommunityRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<ICommunityRepository>(mock, "CommunityRepository");
 }
 
-export async function mockInvitationRepositoryModule(overrides: {}) {
-    const mock = createMockInvitationRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IInvitationRepository>(mock, "InvitationRepository");
+export async function mockDocumentRepositoryModule(overrides: any) {
+  const mock = createMockDocumentRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IDocumentRepository>(mock, "DocumentRepository");
 }
 
-export async function mockKeyRepositoryModule(overrides: {}) {
-    const mock = createMockKeyRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IKeyRepository>(mock, "KeyRepository");
+export async function mockInvitationRepositoryModule(overrides: any) {
+  const mock = createMockInvitationRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IInvitationRepository>(mock, "InvitationRepository");
 }
 
-export async function mockMemberRepositoryModule(overrides: {}) {
-    const mock = createMockMemberRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IMemberRepository>(mock, "MemberRepository");
+export async function mockKeyRepositoryModule(overrides: any) {
+  const mock = createMockKeyRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IKeyRepository>(mock, "KeyRepository");
 }
 
-export async function mockMeterRepositoryModule(overrides: {}) {
-    const mock = createMockMeterRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IMeterRepository>(mock, "MeterRepository");
+export async function mockMemberRepositoryModule(overrides: any) {
+  const mock = createMockMemberRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IMemberRepository>(mock, "MemberRepository");
 }
 
-export async function mockSharingOperationRepositoryModule(overrides: {}) {
-    const mock = createMockSharingOperationRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<ISharingOperationRepository>(mock, "SharingOperationRepository");
+export async function mockMeterRepositoryModule(overrides: any) {
+  const mock = createMockMeterRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IMeterRepository>(mock, "MeterRepository");
 }
 
-export async function mockUserRepositoryModule(overrides: {}) {
-    const mock = createMockUserRepository();
-    Object.assign(mock, overrides);
-    return await mockModule<IUserRepository>(mock, "UserRepository");
+export async function mockSharingOperationRepositoryModule(overrides: any) {
+  const mock = createMockSharingOperationRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<ISharingOperationRepository>(mock, "SharingOperationRepository");
 }
 
-export async function mockIAMServiceModule(overrides: {}) {
-    const mock = createMockIamService()
-    Object.assign(mock, overrides);
-    return await mockModule<IIamService>(mock, "IAMService");
+export async function mockUserRepositoryModule(overrides: any) {
+  const mock = createMockUserRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IUserRepository>(mock, "UserRepository");
 }
-export async function mockStorageServiceModule(overrides: {}) {
-    const mock = createMockStorageService()
-    Object.assign(mock, overrides);
-    return await mockModule<IStorageService>(mock, "StorageService");
+
+export async function mockIAMServiceModule(overrides: any) {
+  const mock = createMockIamService();
+  Object.assign(mock, overrides);
+  return await mockModule<IIamService>(mock, "IAMService");
 }
-export async function mockAuthContextRepositoryModule(overrides: {}) {
-    const mock = createMockAuthContextRepository()
-    Object.assign(mock, overrides);
-    return await mockModule<IAuthContextRepository>(mock, "AuthContext");
+export async function mockStorageServiceModule(overrides: any) {
+  const mock = createMockStorageService();
+  Object.assign(mock, overrides);
+  return await mockModule<IStorageService>(mock, "StorageService");
+}
+export async function mockAuthContextRepositoryModule(overrides: any) {
+  const mock = createMockAuthContextRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IAuthContextRepository>(mock, "AuthContext");
 }
 
 export async function initializeExternalServices() {
-    await mockIAMServiceModule({});
-    await mockStorageServiceModule({});
+  await mockIAMServiceModule({});
+  await mockStorageServiceModule({});
 }
 
-export async function mockTranslation(){
-    jest.mock("i18next-http-middleware", () => ({
-        handle: (i18next: any) => (req: any, res: any, next: any) => {
-            req.t = (k: string) => k; // The fix
-            next();
-        }
-    }));
+export async function mockTranslation() {
+  jest.mock("i18next-http-middleware", () => ({
+    handle: (_i18next: any) => (req: any, _res: any, next: any) => {
+      req.t = (k: string) => k; // The fix
+      next();
+    },
+  }));
 }
