@@ -31,5 +31,12 @@ module.exports = {
             db_name: process.env.STORAGE_DB_NAME,
             token: process.env.STORAGE_TOKEN
         }
+    },
+    remote_logging: {
+        status: process.env.REMOTE_LOGGING || "false",
+        opentelemetry: {
+            exporterEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+            exporterProtocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL
+        }
     }
 };
