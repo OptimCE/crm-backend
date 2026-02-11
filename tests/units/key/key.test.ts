@@ -71,16 +71,55 @@ describe("(Unit) Key Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/keys/${id}/download`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const smartParser = (res: any, callback: any) => {
+          const contentType = (res.headers["content-type"] ?? "").toLowerCase();
+
+          // Collect raw bytes first
+          res.setEncoding("binary");
+          let data = "";
+          res.on("data", (chunk: string) => (data += chunk));
+          res.on("end", () => {
+            const buf = Buffer.from(data, "binary");
+
+            // If JSON, decode to object
+            if (contentType.includes("application/json") || contentType.includes("+json")) {
+              try {
+                callback(null, JSON.parse(buf.toString("utf8")));
+              } catch (e) {
+                callback(e);
+              }
+              return;
+            }
+
+            // Otherwise keep as Buffer (xlsx, etc.)
+            callback(null, buf);
+          });
+        };
+        const response = await request(app).get(`/keys/${id}/download`)
+            .set("x-user-id", "1")
+            .set("x-community-id", "1")
+            .set("x-user-orgs", orgs)
+            .buffer(true)
+            .parse(smartParser);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
-          expect(response.body.error_code).toBe(expected_error_code);
-          let result = expected_data;
-          if (response.status !== 200) {
-            result = i18next.t(expected_data);
+          if(response.status === 200){
+            expect(response.headers["content-type"]).toContain(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            );
+
+            expect(response.headers["content-disposition"]).toMatch(
+                /^attachment;\s*filename=".+\.xlsx"$/i,);
+            expect(Buffer.isBuffer(response.body)).toBe(true);
+            expect(response.body.length).toBeGreaterThan(0);
           }
-          expect(response.body.data).toEqual(result);
+          else{
+            expect(response.body.error_code).toBe(expected_error_code);
+            const result = i18next.t(expected_data);
+            expect(response.body.data).toEqual(result);
+          }
+
         });
       },
     );

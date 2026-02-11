@@ -20,7 +20,6 @@ const requestContext = new AsyncLocalStorage<Context>();
 function parseUserOrgs(user_orgs: string) {
   // Example:[orgId:2c8a0ea5-d597-49d6-ae12-4dceb9e9a018 orgPath:/aaaa roles:[ADMIN]],map[orgId:a221664e-866e-46f6-9f7b-1087447c579e orgPath:/bbbb roles:[ADMIN]],map[orgId:585cded0-219e-43ff-8bee-774ddca28d7a orgPath:/cccc roles:[ADMIN]]
   const matches = user_orgs.match(/(?<=\[)[^\]]+]/gm);
-  console.log(matches);
   const orgToken: OrgToken[] = [];
   if (matches && matches.length > 0) {
     for (const match of matches) {

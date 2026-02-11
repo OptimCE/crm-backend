@@ -73,20 +73,29 @@ describe("(Unit) Member Module", () => {
 
     it.each(testCasesGetMemberLink)(
       "GET /members/:id/link : $description",
-      async ({ id, status_code, expected_error_code, expected_data, mocks, orgs }) => {
+      async ({ id, status_code, expected_error_code, expected_data, mocks, orgs, query, translation_field }) => {
         if (mocks?.memberRepo) await mockMemberRepositoryModule(mocks.memberRepo);
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/members/${id}/link`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get(`/members/${id}/link`)
+            .set("x-user-id", "1")
+            .set("x-community-id", "1").set("x-user-orgs", orgs)
+            .query(query);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
           expect(response.body.error_code).toBe(expected_error_code);
           let result = expected_data;
           if (response.status !== 200) {
-            result = i18next.t(expected_data as string);
+              if(expected_data){
+                  if (translation_field) {
+                      result = i18next.t(expected_data, translation_field);
+                  } else {
+                      result = i18next.t(expected_data as string);
+                  }
+              }
           }
           expect(response.body.data).toEqual(result);
         });

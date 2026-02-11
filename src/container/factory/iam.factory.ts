@@ -10,7 +10,6 @@ import type { IIamService } from "../../shared/iam/i-iam.service.js";
  * @throws Error if configuration or settings are missing/invalid.
  */
 export function intializeIAMService() {
-  console.log("Intialize IAM Service");
   const iam_service: string = config.get("iam_service.name");
   if (iam_service == null) {
     throw new Error("Missing iam_service.name");
@@ -29,8 +28,6 @@ export function intializeIAMService() {
         throw new Error("Missing settings.");
       }
       if (!settings.realm || !settings.realmName || !settings.baseUrl || !settings.clientId || !settings.grantType || !settings.clientSecret) {
-        console.log(`SETTINGS :`);
-        console.log(settings);
         throw new Error("Incorrect iam_service.settings");
       }
 

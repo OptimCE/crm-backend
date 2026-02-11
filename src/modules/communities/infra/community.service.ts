@@ -52,7 +52,6 @@ export class CommunityService implements ICommunityService {
     let org_id: string;
     try {
       org_id = await this.iam_service.createCommunity(new_community);
-      console.log("ORG ID : ", org_id);
     } catch (err) {
       logger.error({ operation: "addCommunity", error: err }, "An exception occurred while creating a new community in the IAM providers");
       throw new AppError(COMMUNITY_ERRORS.ADD_COMMUNITY.IAM_ERROR_CREATE, 400);
@@ -131,7 +130,6 @@ export class CommunityService implements ICommunityService {
    */
   async getMyCommunities(query: CommunityQueryDTO): Promise<[MyCommunityDTO[], Pagination]> {
     const [values, total] = await this.community_repository.getMyCommunities(query);
-    console.log("VALUES : ", values);
     const return_values = values.map((value) => toMyCommunityDTO(value));
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];

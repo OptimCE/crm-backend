@@ -63,7 +63,8 @@ export class KeyController {
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     const filenameBase = req.t("download_key.download_name", { ns: "key" }) + ".xlsx";
     res.setHeader("Content-Disposition", `attachment; filename="${filenameBase}.xlsx"`);
-    (workbook as ExcelJS.Workbook).xlsx.write(res).then(() => res.end());
+    await (workbook as ExcelJS.Workbook).xlsx.write(res);
+    res.end();
   }
 
   /**

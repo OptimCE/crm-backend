@@ -157,6 +157,9 @@ export const testCasesGetMemberLink = [
     orgs: ORGS_ADMIN,
     expected_error_code: SUCCESS,
     expected_data: { user_email: "test@test.com", status: 1, user_id: 5, id: 1 }, // 1=ACTIVE
+    query: {
+      email: "test@test.com"
+    },
     mocks: {
       memberRepo: {
         getMemberLink: jest.fn(() => Promise.resolve({ user: { email: "test@test.com", id: 5 }, id: 1 })),
@@ -170,6 +173,9 @@ export const testCasesGetMemberLink = [
     orgs: ORGS_ADMIN,
     expected_error_code: SUCCESS,
     expected_data: { user_email: "invite@test.com", status: 3, user_id: undefined, id: 1 }, // 3=PENDING
+    query: {
+      email: "invite@test.com"
+    },
     mocks: {
       memberRepo: {
         getMemberLink: jest.fn(() => Promise.resolve(null)),
@@ -184,6 +190,9 @@ export const testCasesGetMemberLink = [
     orgs: ORGS_ADMIN,
     expected_error_code: SUCCESS,
     expected_data: { status: 2 }, // 2=INACTIVE
+    query: {
+      email: "empty@test.com"
+    },
     mocks: {
       memberRepo: {
         getMemberLink: jest.fn(() => Promise.resolve(null)),
@@ -198,12 +207,42 @@ export const testCasesGetMemberLink = [
     orgs: ORGS_ADMIN,
     expected_error_code: MEMBER_ERRORS.EXCEPTION.errorCode,
     expected_data: MEMBER_ERRORS.EXCEPTION.message,
+    query: {
+      email: "invite@test.com"
+    },
     mocks: {
       memberRepo: {
         getMemberLink: jest.fn(() => Promise.reject(new Error("DB Error"))),
       },
     },
   },
+  {
+    description: "Fail (email missing)",
+    id: 1,
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY.errorCode,
+    expected_data: MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY.message, // 2=INACTIVE
+    translation_field: { field: "email" },
+    query: {
+    },
+    mocks: {
+    },
+  },
+  {
+    description: "Fail (email wrong format)",
+    id: 1,
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: MEMBER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL.errorCode,
+    expected_data: MEMBER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL.message, // 2=INACTIVE
+    translation_field: { field: "email" },
+    query: {
+      email: "not-an-email"
+    },
+    mocks: {
+    },
+  }
 ];
 
 // 4. Add Member

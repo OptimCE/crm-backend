@@ -30,14 +30,12 @@ export class KeycloakIamService implements IIamService {
 
   async createCommunity(new_community: CreateCommunityDTO): Promise<string> {
     // 1. Create the Root Group (Community)
-    console.log("CREATE COMM");
     const groupRep = await this.kcAdminClient.groups.create({
       realm: this.realm,
       name: new_community.name,
     });
 
     if (!groupRep.id) {
-      console.log("ERROR WHILE CREATING GROUP");
       throw new Error(`Failed to create community: ${new_community.name}`);
     }
 
@@ -55,7 +53,6 @@ export class KeycloakIamService implements IIamService {
         );
       } catch (error) {
         // Ignore 409 Conflict (group already exists), rethrow others
-        console.error("SUBGROUP CREATIONG FAIL");
         if ((error as any).response?.status !== 409) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           throw error;
@@ -145,7 +142,6 @@ export class KeycloakIamService implements IIamService {
       );
     } catch (error) {
       // Handle cases like "Name already taken" (409) or "Group not found" (404)
-      console.error("Failed to update community name", error);
       throw error;
     }
   }
@@ -168,14 +164,11 @@ export class KeycloakIamService implements IIamService {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return;
       }
-      console.error(`Failed to delete community ${community_id}`, error);
       throw error;
     }
   }
 
   async getUserEmail(user_id: string): Promise<string> {
-    console.log("REALM : ", this.realm);
-    console.log("user_id : ", user_id);
     const user = await this.kcAdminClient.users.findOne({
       id: user_id,
       realm: this.realm,

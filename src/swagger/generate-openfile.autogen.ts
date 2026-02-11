@@ -39,7 +39,7 @@ try {
 
   tsSchemas = JSON.parse(fixedSchemaString);
 } catch (e) {
-  console.warn("⚠️ Warning: Type generation failed.");
+  console.warn("Warning: Type generation failed.");
   console.error(e);
 }
 const outputDir = path.join(process.cwd(), "docs/openapi");

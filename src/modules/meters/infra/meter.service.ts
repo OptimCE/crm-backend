@@ -97,8 +97,6 @@ export class MeterService implements IMeterService {
   @Transactional()
   async deleteMeter(id: string, query_runner?: QueryRunner): Promise<void> {
     const deleted = await this.meterRepository.deleteMeter(id, query_runner);
-    console.log(`DELETED : ${deleted}`);
-    console.log(deleted);
     if (deleted.affected !== 1) {
       logger.error({ operation: "deleteMeter" }, "Failed to delete meter");
       throw new AppError(METER_ERRORS.DELETE_METER.DATABASE_DELETE, 400);

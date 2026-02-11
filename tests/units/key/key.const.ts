@@ -182,10 +182,10 @@ export const testCasesDownloadKey = [
   {
     description: "Fail (DB Error)",
     id: 1,
-    status_code: 500,
+    status_code: 400,
     orgs: ORGS_ADMIN,
-    expected_error_code: KEY_ERRORS.EXCEPTION.errorCode,
-    expected_data: KEY_ERRORS.EXCEPTION.message,
+    expected_error_code: KEY_ERRORS.DOWNLOAD_KEY.DOWNLOAD_KEY.errorCode,
+    expected_data: KEY_ERRORS.DOWNLOAD_KEY.DOWNLOAD_KEY.message,
     mocks: {
       keyRepo: {
         getKeyById: jest.fn(() => Promise.reject(new Error("DB Error"))),

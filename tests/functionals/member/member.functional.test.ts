@@ -75,7 +75,7 @@ describe("(Functional) Member Module", () => {
   describe("(Functional) Get Member Link", () => {
     it.each(testCasesGetMemberLink)(
       "GET /members/:id/link : $description",
-      async ({ member_id, orgs, status_code, expected_error_code, check_data }) => {
+      async ({ member_id, orgs, status_code, expected_error_code, check_data, query }) => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
 
@@ -83,7 +83,8 @@ describe("(Functional) Member Module", () => {
           .get(`/members/${member_id}/link`)
           .set("x-user-id", "auth0|admin")
           .set("x-community-id", AUTH_COMMUNITY_1)
-          .set("x-user-orgs", orgs);
+          .set("x-user-orgs", orgs)
+            .query(query)
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
