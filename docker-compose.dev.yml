@@ -15,8 +15,7 @@ services:
   crm-backend:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: development
+      dockerfile: Dockerfile.dev
     volumes:
       - .:/app
       - /app/node_modules
