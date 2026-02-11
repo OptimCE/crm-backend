@@ -3,7 +3,7 @@ FROM node:22-alpine AS development
 WORKDIR /app
 ENV NODE_ENV=development
 COPY package*.json ./
-RUN apk add --no-cache git
+RUN apk add --no-cache git openssh-client 
 # Rebuild a clean node_modules based on the package-lock.json to ensure consistency
 RUN npm install --package-lock-only
 RUN npm ci
