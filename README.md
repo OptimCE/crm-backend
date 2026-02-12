@@ -1,6 +1,8 @@
 # OptimCE CRM - Backend
 
-> Backend du module CRM d'OptimCE (TypeScript / Node.js).
+> Backend du module CRM d'OptimCE (TypeScript / Node.js). Découlant du projet Locomotrice.
+
+
 
 ## Vue d'ensemble
 
@@ -121,6 +123,12 @@ Si un de ces IDE vous pouvez utiliser un devcontainer pour avoir une architectur
 - WebStorm -> https://www.jetbrains.com/help/webstorm/connect-to-devcontainer.html
 
 Le fichier [.devcontainer/.devcontainer.json](.devcontainer.json) contient une configuration permettant à votre IDE de développer directement depuis le container.
+
+### Environnement "production" 
+Ce fichier permet de simuler un environnement de production pour valider les tests d’intégration, mais il ne couvre pas les aspects de scalabilité ou de haute disponibilité.
+
+Pour un déploiement complet, veuillez vous référer au dépôt dédié au déploiement.
+
 ## Base de données
 
 Le script d'initialisation SQL se trouve dans `sql/init.sql` et `database_script/init.sql`.
