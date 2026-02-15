@@ -76,7 +76,7 @@ export const testCasesGetMemberLink = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    query: {email: 'john@test.com'},
+    query: { email: "john@test.com" },
     check_data: (data: any) => {
       return typeof data.status === "number";
     },

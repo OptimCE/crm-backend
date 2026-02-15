@@ -17,7 +17,7 @@ import { DeleteResult, type QueryRunner } from "typeorm";
 import { GestionnaireInvitation, UserMemberInvitation } from "../domain/invitation.models.js";
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
-import {Company, Individual, Member} from "../../members/domain/member.models.js";
+import { Company, Individual, Member } from "../../members/domain/member.models.js";
 import type { IMemberService } from "../../members/domain/i-member.service.js";
 import type { IUserRepository } from "../../users/domain/i-user.repository.js";
 import type { IIamService } from "../../../shared/iam/i-iam.service.js";
@@ -28,9 +28,9 @@ import type { IAuthContextRepository } from "../../../shared/context/i-authconte
 import type { ICommunityRepository } from "../../communities/domain/i-community.repository.js";
 import { INVITATION_ERRORS } from "../shared/invitation.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
-import {CompanyDTO, IndividualDTO} from "../../members/api/member.dtos.js";
-import {query} from "express-validator";
-import {toMemberDTO} from "../../members/shared/to_dto.js";
+import { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
+import { query } from "express-validator";
+import { toMemberDTO } from "../../members/shared/to_dto.js";
 
 /**
  * Service implementation for managing invitations.
@@ -386,16 +386,13 @@ export class InvitationService implements IInvitationService {
    * @returns Tuple of [UserMemberInvitationDTO[], Pagination].
    */
   async getOwnMemberPendingInvitationById(id: number): Promise<IndividualDTO | CompanyDTO> {
-    const value: Member|null = await this.invitationRepository.getOwnMembersPendingInvitationById(id);
-    if(!value){
-      logger.error({operation: 'getOwnMemberPendingInvitationById'}, `Invitation not found / Member null in this invitation (${id})`)
+    const value: Member | null = await this.invitationRepository.getOwnMembersPendingInvitationById(id);
+    if (!value) {
+      logger.error({ operation: "getOwnMemberPendingInvitationById" }, `Invitation not found / Member null in this invitation (${id})`);
       throw new AppError(INVITATION_ERRORS.GET_OWN_MEMBER_INVITATION_BY_ID.NOT_FOUND, 400);
     }
     return toMemberDTO(value);
-
   }
-
-
 
   /**
    * Invites a user to become a manager.

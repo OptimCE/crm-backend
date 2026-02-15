@@ -16,6 +16,6 @@ export function createMockInvitationRepository(): jest.Mocked<IInvitationReposit
     refuseManagerInvitation: jest.fn(),
     refuseMemberInvitation: jest.fn(),
     saveUserMemberLink: jest.fn(),
-    getOwnMembersPendingInvitationById: jest.fn()
+    getOwnMembersPendingInvitationById: jest.fn(),
   };
 }

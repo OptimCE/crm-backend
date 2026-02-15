@@ -44,7 +44,7 @@ export const INVITATION_ERRORS = {
   INVITE_USER_TO_BECOME_MEMBER: {
     DATABASE_SAVE: new LocalError(30022, "invitation:invite_user_to_become_member.database_save"),
   },
-  GET_OWN_MEMBER_INVITATION_BY_ID:{
-    NOT_FOUND: new LocalError(30023, "invitation:get_own_member_invitation_by_id.not_found")
-  }
+  GET_OWN_MEMBER_INVITATION_BY_ID: {
+    NOT_FOUND: new LocalError(30023, "invitation:get_own_member_invitation_by_id.not_found"),
+  },
 };

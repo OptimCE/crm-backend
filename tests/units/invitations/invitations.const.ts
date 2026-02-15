@@ -6,7 +6,7 @@ import { UserMemberInvitationDTO, UserManagerInvitationDTO } from "../../../src/
 import { INVITATION_ERRORS } from "../../../src/modules/invitations/shared/invitation.errors.js";
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 import { HttpMethod, ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
-import {mockIndividualEntity, mockMemberDTOJSON} from "../member/member.const.js";
+import { mockIndividualEntity, mockMemberDTOJSON } from "../member/member.const.js";
 
 // --- Mock Data ---
 
@@ -120,7 +120,7 @@ export const testCasesGetPendingMembers = [
 
 export const testCaseGetInvitationById = [
   {
-    description: 'GET /invitations/own/member/:id Success',
+    description: "GET /invitations/own/member/:id Success",
     endpoint: "/invitations/own/member/",
     id_user: 1,
     id_invitation: 1,
@@ -128,14 +128,14 @@ export const testCaseGetInvitationById = [
     expected_error_code: SUCCESS,
     expected_data: mockMemberDTOJSON,
     translation_field: undefined,
-    mocks:{
-      invitationRepo:{
-        getOwnMembersPendingInvitationById: jest.fn(() => Promise.resolve(mockIndividualEntity))
-      }
-    }
+    mocks: {
+      invitationRepo: {
+        getOwnMembersPendingInvitationById: jest.fn(() => Promise.resolve(mockIndividualEntity)),
+      },
+    },
   },
   {
-    description: 'GET /invitations/own/member/:id Fail (Invitation not member)',
+    description: "GET /invitations/own/member/:id Fail (Invitation not member)",
     endpoint: "/invitations/own/member/",
     id_user: 1,
     id_invitation: 1,
@@ -143,13 +143,13 @@ export const testCaseGetInvitationById = [
     expected_error_code: INVITATION_ERRORS.GET_OWN_MEMBER_INVITATION_BY_ID.NOT_FOUND.errorCode,
     expected_data: INVITATION_ERRORS.GET_OWN_MEMBER_INVITATION_BY_ID.NOT_FOUND.message,
     translation_field: undefined,
-    mocks:{
-      invitationRepo:{
-        getOwnMembersPendingInvitationById: jest.fn(() => Promise.resolve(null))
-      }
-    }
-  }
-]
+    mocks: {
+      invitationRepo: {
+        getOwnMembersPendingInvitationById: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+];
 
 export const testCasesGetPendingManagers = [
   {

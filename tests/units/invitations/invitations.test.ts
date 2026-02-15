@@ -12,18 +12,19 @@ import {
   mockCommunityRepositoryModule,
 } from "../../utils/helper.js";
 import {
-    testCasesGetPendingMembers,
-    testCasesGetPendingManagers,
-    testCasesGetPendingOwnMembers,
-    testCasesGetPendingOwnManagers,
-    testCasesInvite,
-    testCasesAcceptMember,
-    testCasesAcceptManager,
-    testCasesAcceptEncoded,
-    testCasesCancelMember,
-    testCasesCancelManager,
-    testCasesRefuseMember,
-    testCasesRefuseManager, testCaseGetInvitationById,
+  testCasesGetPendingMembers,
+  testCasesGetPendingManagers,
+  testCasesGetPendingOwnMembers,
+  testCasesGetPendingOwnManagers,
+  testCasesInvite,
+  testCasesAcceptMember,
+  testCasesAcceptManager,
+  testCasesAcceptEncoded,
+  testCasesCancelMember,
+  testCasesCancelManager,
+  testCasesRefuseMember,
+  testCasesRefuseManager,
+  testCaseGetInvitationById,
 } from "./invitations.const.js";
 
 describe("(Unit) Invitation Module", () => {
@@ -81,48 +82,39 @@ describe("(Unit) Invitation Module", () => {
     );
   });
 
-  describe("(Unit) Get own Invitation Member by Id", () =>{
-      useUnitTestDb();
-      it.each(testCaseGetInvitationById)(
-          "$description",
-          async ({
-              endpoint,
-              id_user,
-              id_invitation,
-              status_code,
-              expected_error_code,
-              expected_data,
-              mocks,
-              translation_field
-          }) =>{
-              if (mocks?.invitationRepo) await mockInvitationRepositoryModule(mocks.invitationRepo);
+  describe("(Unit) Get own Invitation Member by Id", () => {
+    useUnitTestDb();
+    it.each(testCaseGetInvitationById)(
+      "$description",
+      async ({ endpoint, id_user, id_invitation, status_code, expected_error_code, expected_data, mocks, translation_field }) => {
+        if (mocks?.invitationRepo) await mockInvitationRepositoryModule(mocks.invitationRepo);
 
-              const appModule = await import("../../../src/app.js");
-              const app = appModule.default;
-              const i18next = appModule.i18next;
-              console.log(`ENDPOINT : ${endpoint + id_invitation.toString()}`)
-              const response = await request(app)
-                  .get(endpoint+ id_invitation.toString())
-                  .set("x-user-id", id_user.toString())
-              await expectWithLog(response, () => {
-                  expect(response.status).toBe(status_code);
-                  if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
-                  if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
-                  else if (expected_data) {
-                      let result: any = expected_data;
-                      if (response.status !== 200) {
-                          if (translation_field) {
-                              result = i18next.t(expected_data, translation_field);
-                          } else {
-                              result = i18next.t(expected_data);
-                          }
-                      }
-                      expect(response.body.data).toEqual(result);
-                  }
-              });
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+        const i18next = appModule.i18next;
+        console.log(`ENDPOINT : ${endpoint + id_invitation.toString()}`);
+        const response = await request(app)
+          .get(endpoint + id_invitation.toString())
+          .set("x-user-id", id_user.toString());
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
+          if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
+          else if (expected_data) {
+            let result: any = expected_data;
+            if (response.status !== 200) {
+              if (translation_field) {
+                result = i18next.t(expected_data, translation_field);
+              } else {
+                result = i18next.t(expected_data);
+              }
+            }
+            expect(response.body.data).toEqual(result);
           }
-      )
-  })
+        });
+      },
+    );
+  });
   // --- GET PENDING INVITATIONS MANAGERS ---
   describe("(Unit) Get Pending Invitations Managers", () => {
     useUnitTestDb();

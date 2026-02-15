@@ -84,7 +84,7 @@ describe("(Functional) Member Module", () => {
           .set("x-user-id", "auth0|admin")
           .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs)
-            .query(query)
+          .query(query);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);

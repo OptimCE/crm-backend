@@ -141,6 +141,7 @@ export class KeycloakIamService implements IIamService {
         },
       );
     } catch (error) {
+      logger.error({ operation: "updateCommunity" }, "Update community Keycloak IAM service fail");
       // Handle cases like "Name already taken" (409) or "Group not found" (404)
       throw error;
     }

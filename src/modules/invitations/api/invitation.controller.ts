@@ -16,7 +16,7 @@ import {
   UserMemberInvitationDTO,
   UserMemberInvitationQuery,
 } from "./invitation.dtos.js";
-import {CompanyDTO, IndividualDTO} from "../../members/api/member.dtos.js";
+import { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
 const invitationControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
 /**
@@ -79,7 +79,7 @@ export class InvitationController {
   async getOwnMemberPendingInvitationById(req: Request, res: Response, _next: NextFunction) {
     const result = await this.invitationService.getOwnMemberPendingInvitationById(+req.params.id);
     logger.info("Members pending invitations successfully retrieved");
-    res.status(200).json(new ApiResponse<IndividualDTO|CompanyDTO>(result, SUCCESS));
+    res.status(200).json(new ApiResponse<IndividualDTO | CompanyDTO>(result, SUCCESS));
   }
 
   /**

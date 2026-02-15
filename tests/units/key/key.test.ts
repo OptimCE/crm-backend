@@ -95,31 +95,27 @@ describe("(Unit) Key Module", () => {
             callback(null, buf);
           });
         };
-        const response = await request(app).get(`/keys/${id}/download`)
-            .set("x-user-id", "1")
-            .set("x-community-id", "1")
-            .set("x-user-orgs", orgs)
-            .buffer(true)
-            .parse(smartParser);
+        const response = await request(app)
+          .get(`/keys/${id}/download`)
+          .set("x-user-id", "1")
+          .set("x-community-id", "1")
+          .set("x-user-orgs", orgs)
+          .buffer(true)
+          .parse(smartParser);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
-          if(response.status === 200){
-            expect(response.headers["content-type"]).toContain(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            );
+          if (response.status === 200) {
+            expect(response.headers["content-type"]).toContain("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-            expect(response.headers["content-disposition"]).toMatch(
-                /^attachment;\s*filename=".+\.xlsx"$/i,);
+            expect(response.headers["content-disposition"]).toMatch(/^attachment;\s*filename=".+\.xlsx"$/i);
             expect(Buffer.isBuffer(response.body)).toBe(true);
             expect(response.body.length).toBeGreaterThan(0);
-          }
-          else{
+          } else {
             expect(response.body.error_code).toBe(expected_error_code);
             const result = i18next.t(expected_data);
             expect(response.body.data).toEqual(result);
           }
-
         });
       },
     );
