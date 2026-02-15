@@ -16,6 +16,7 @@ import {
   UserMemberInvitationDTO,
   UserMemberInvitationQuery,
 } from "./invitation.dtos.js";
+import {CompanyDTO, IndividualDTO} from "../../members/api/member.dtos.js";
 const invitationControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
 /**
@@ -66,6 +67,19 @@ export class InvitationController {
     const [result, pagination]: [UserMemberInvitationDTO[], Pagination] = await this.invitationService.getOwnMemberPendingInvitation(queryObject);
     logger.info("Members pending invitations successfully retrieved");
     res.status(200).json(new ApiResponsePaginated<UserMemberInvitationDTO[]>(result, pagination, SUCCESS));
+  }
+
+  /**
+   * Retrieves the current user's own pending member invitations.
+   * @param req - Express request object. Query: UserMemberInvitationQuery.
+   * @param res - Express response object. Returns list of UserMemberInvitationDTO.
+   * @param _next - Express next middleware.
+   */
+  @invitationControllerTraceDecorator.traceSpan("getOwnMemberPendingInvitation", { url: "/invitations/own/member/:id", method: "get" })
+  async getOwnMemberPendingInvitationById(req: Request, res: Response, _next: NextFunction) {
+    const result = await this.invitationService.getOwnMemberPendingInvitationById(+req.params.id);
+    logger.info("Members pending invitations successfully retrieved");
+    res.status(200).json(new ApiResponse<IndividualDTO|CompanyDTO>(result, SUCCESS));
   }
 
   /**

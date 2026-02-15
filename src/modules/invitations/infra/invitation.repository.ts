@@ -9,6 +9,7 @@ import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/da
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { withUserScope } from "../../../shared/database/withUser.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
+import {Member} from "../../members/domain/member.models.js";
 
 @injectable()
 export class InvitationRepository implements IInvitationRepository {
@@ -228,6 +229,39 @@ export class InvitationRepository implements IInvitationRepository {
 
     return qb.skip(skip).take(take).getManyAndCount();
   }
+
+  async getOwnMembersPendingInvitationById(id: number, query_runner?: QueryRunner): Promise<Member|null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    let qb = manager.createQueryBuilder(UserMemberInvitation, "invitation");
+
+    // Security Scope
+    withUserScope(qb, "invitation");
+
+    // 1. Join Invitation Relations
+    qb.leftJoinAndSelect("invitation.community", "inv_community") // Renamed alias to avoid collision
+        .leftJoinAndSelect("invitation.user", "user")
+        .leftJoinAndSelect("invitation.member", "member");
+
+    // 2. Join Member Deep Relations (anchored to the 'member' alias)
+    qb.leftJoinAndSelect("member.home_address", "home_address")
+        .leftJoinAndSelect("member.billing_address", "billing_address")
+        .leftJoinAndSelect("member.community", "member_community") // Distinct alias for member's community
+        .leftJoinAndSelect("member.individual_details", "individual")
+        .leftJoinAndSelect("individual.manager", "ind_manager")
+        .leftJoinAndSelect("member.company_details", "company")
+        .leftJoinAndSelect("company.manager", "comp_manager");
+
+    qb.where("invitation.id = :id", { id });
+
+    // 3. Execute and Extract
+    const invitation = await qb.getOne();
+
+    // Return the nested member object, or null if invitation/member doesn't exist
+    return invitation?.member || null;
+  }
+
+
 
   async inviteUserToBecomeManager(user_email: string, user?: User | null, query_runner?: QueryRunner): Promise<GestionnaireInvitation> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;

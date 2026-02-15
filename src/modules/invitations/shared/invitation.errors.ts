@@ -2,6 +2,7 @@ import { GLOBAL_ERRORS, LocalError } from "../../../shared/errors/errors.js";
 // Errors range: 30000 - 39999
 export const INVITATION_ERRORS = {
   ...GLOBAL_ERRORS,
+
   ACCEPT_INVITATION_MANAGER: {
     INVITATION_MANAGER_NOT_FOUND: new LocalError(30000, "invitation:accept_invitation_manager.invitation_manager_not_found"),
     MISMATCH_USER_ID: new LocalError(30001, "invitation:accept_invitation_manager.mismatch_user_id"),
@@ -43,4 +44,7 @@ export const INVITATION_ERRORS = {
   INVITE_USER_TO_BECOME_MEMBER: {
     DATABASE_SAVE: new LocalError(30022, "invitation:invite_user_to_become_member.database_save"),
   },
+  GET_OWN_MEMBER_INVITATION_BY_ID:{
+    NOT_FOUND: new LocalError(30023, "invitation:get_own_member_invitation_by_id.not_found")
+  }
 };

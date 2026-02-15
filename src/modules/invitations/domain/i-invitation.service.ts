@@ -8,6 +8,7 @@ import {
   UserMemberInvitationQuery,
 } from "../api/invitation.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import {CompanyDTO, IndividualDTO} from "../../members/api/member.dtos.js";
 
 /**
  * Interface for Invitation Service.
@@ -32,6 +33,12 @@ export interface IInvitationService {
    * @returns Tuple of [UserMemberInvitationDTO[], Pagination].
    */
   getOwnMemberPendingInvitation(queryObject: UserMemberInvitationQuery): Promise<[UserMemberInvitationDTO[], Pagination]>;
+  /**
+   * Retrieves own pending member invitations.
+   * @param id - Invitation id.
+   * @returns Tuple of [UserMemberInvitationDTO[], Pagination].
+   */
+  getOwnMemberPendingInvitationById(id: number): Promise<IndividualDTO|CompanyDTO>;
   /**
    * Retrieves own pending manager invitations.
    * @param queryObject - Query filters.

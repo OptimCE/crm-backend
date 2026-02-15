@@ -67,6 +67,21 @@ invitation_routes.get(
   idChecker(),
   invitation_controller.getOwnMemberPendingInvitation.bind(invitation_controller),
 );
+
+// GET (/own/member/:id) : Get specific member linked to invitation
+invitation_routes.get("/own/member/:id",
+    /* #swagger.summary = 'Get all member linked to pending invitation by id'
+     #swagger.tags = ['Invitations']
+     #swagger.responses[200] = { $ref: '#/components/responses/MemberInvitationsListSuccess' }
+     #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+     #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+     #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+     #swagger.security = [{
+          "UserIdChecker": []
+     }]
+  */
+    idChecker(),
+    invitation_controller.getOwnMemberPendingInvitationById.bind(invitation_controller));
 // GET (/own/managers): Get all own managers pending invitations
 invitation_routes.get(
   "/own/managers",
