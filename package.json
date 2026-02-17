@@ -17,6 +17,7 @@
     "start:prod": "cross-env NODE_ENV=production npm run start",
     "build-start": "npm run build && npm run start",
     "trace": "cross-env REMOTE_LOGGING=true OTEL_LOGS_EXPORTER=otlp npm run start",
+    "swagger": "npx tsx src/swagger/generate-openfile.autogen.ts && npx swagger-jsdoc -d src/swagger/swagger-jsdoc.config.js -o docs/openapi/swagger.yaml",
     "swagger:doc:md": "npx tsx src/swagger/generate-openfile.autogen.ts && npx widdershins docs/openapi/swagger.yaml -o docs/openapi/api-docs.md --language_tabs NodeJS:Typescript --summary --search false",
     "swagger:doc:html": "npx tsx src/swagger/generate-openfile.autogen.ts && npx redoc-cli bundle docs/openapi/swagger.yaml -o docs/index.html --title \"OptimCE CRM API\"",
     "typedoc:md": "typedoc src --out docs/typedoc/markdown --entryPointStrategy expand --name \"OptimCE CRM Backend\" --plugin typedoc-plugin-markdown",
