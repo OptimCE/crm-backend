@@ -232,7 +232,7 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-
+.env.production
 # Editor-based Rest Client
 .idea/httpRequests
 
@@ -274,5 +274,8 @@ fabric.properties
 .idea/**/azureSettings.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/node,webstorm,visualstudiocode
+#
+Custom ignores by developers
 config/default.json
 config/test.cjs
+.env.production

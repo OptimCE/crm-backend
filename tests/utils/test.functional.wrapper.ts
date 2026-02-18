@@ -1,5 +1,5 @@
-import {beforeEach, afterEach, jest} from '@jest/globals';
-import {initalizeDb, initializeExternalServices, resetDb, tearDownDB} from "./helper.js";
+import { beforeEach, afterEach, jest } from "@jest/globals";
+import { initalizeDb, initializeExternalServices, resetDb, tearDownDB } from "./helper.js";
 
 /**
  * Registers standard DB setup/teardown hooks for the current describe block.
@@ -8,24 +8,24 @@ import {initalizeDb, initializeExternalServices, resetDb, tearDownDB} from "./he
  * @param {Object} [hookOverrides] - Optional: { beforeEach, afterEach } overrides
  */
 export const useFunctionalTestDb = (initializeExternal: boolean = true, hookOverrides: any = {}) => {
-    beforeEach(async () => {
-        jest.resetModules();
-        if (hookOverrides.beforeEach) {
-            await hookOverrides.beforeEach();
-        } else {
-            await initalizeDb();
-            await resetDb();
-            if(initializeExternal){
-                await initializeExternalServices()
-            }
-        }
-    });
+  beforeEach(async () => {
+    jest.resetModules();
+    if (hookOverrides.beforeEach) {
+      await hookOverrides.beforeEach();
+    } else {
+      await initalizeDb();
+      await resetDb();
+      if (initializeExternal) {
+        await initializeExternalServices();
+      }
+    }
+  });
 
-    afterEach(async () => {
-        if (hookOverrides.afterEach) {
-            await hookOverrides.afterEach();
-        } else {
-            await tearDownDB();
-        }
-    });
+  afterEach(async () => {
+    if (hookOverrides.afterEach) {
+      await hookOverrides.afterEach();
+    } else {
+      await tearDownDB();
+    }
+  });
 };

@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
     // 1. Global Ignores
     {
-      ignores: ["**/node_modules/**", "**/dist/**", "**/coverage/**", "**/*.js"]
+      ignores: ["**/node_modules/**", "**/dist/**", "**/coverage/**", "**/*.js", "config/**"]
     },
 
     // 2. Base Configurations
@@ -18,13 +18,13 @@ export default tseslint.config(
       languageOptions: {
         globals: globals.node,
         parserOptions: {
-          project: "./tsconfig.eslint.json",
+          project: ["./tsconfig.eslint.json"],
           tsconfigRootDir: import.meta.dirname,
         },
       },
       rules: {
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-empty-object-type": "off",
+        "@typescript-eslint/no-wrapper-object-types": "off",
+        "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-unused-vars": [
           "warn",
           {

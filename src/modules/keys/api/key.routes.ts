@@ -10,8 +10,9 @@ export const key_router = express.Router();
 const key_controller = container.get<KeyController>(KeyController);
 
 // Get partial list of keys (/)
-key_router.get("/",
-    /* #swagger.summary = 'Get partial list of keys'
+key_router.get(
+  "/",
+  /* #swagger.summary = 'Get partial list of keys'
        #swagger.tags = ['Keys']
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/KeyQuery' }
        #swagger.responses[200] = { $ref: '#/components/responses/KeyListSuccess' }
@@ -24,10 +25,15 @@ key_router.get("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), key_controller.getKeysList.bind(key_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  key_controller.getKeysList.bind(key_controller),
+);
 // Get a detailed key (/:id)
-key_router.get("/:id",
-    /* #swagger.summary = 'Get a detailed key'
+key_router.get(
+  "/:id",
+  /* #swagger.summary = 'Get a detailed key'
        #swagger.tags = ['Keys']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/KeyId' }
        #swagger.responses[200] = { $ref: '#/components/responses/KeyGetSuccess' }
@@ -40,10 +46,15 @@ key_router.get("/:id",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), key_controller.getKey.bind(key_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  key_controller.getKey.bind(key_controller),
+);
 // Get download a detailled key (/:id/download)
-key_router.get("/:id/download",
-    /* #swagger.summary = 'Get download a detailled key'
+key_router.get(
+  "/:id/download",
+  /* #swagger.summary = 'Get download a detailled key'
        #swagger.tags = ['Keys']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/KeyId' }
        #swagger.responses[200] = { $ref: '#/components/responses/KeyDownloadSuccess' }
@@ -56,10 +67,15 @@ key_router.get("/:id/download",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), key_controller.downloadKey.bind(key_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  key_controller.downloadKey.bind(key_controller),
+);
 // Post add a key (/)
-key_router.post("/",
-    /* #swagger.summary = 'Add a key'
+key_router.post(
+  "/",
+  /* #swagger.summary = 'Add a key'
        #swagger.tags = ['Keys']
        #swagger.requestBody = {
            required: true,
@@ -79,10 +95,15 @@ key_router.post("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), key_controller.addKey.bind(key_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  key_controller.addKey.bind(key_controller),
+);
 // Put update a key (/)
-key_router.put("/",
-    /* #swagger.summary = 'Update a key'
+key_router.put(
+  "/",
+  /* #swagger.summary = 'Update a key'
        #swagger.tags = ['Keys']
        #swagger.requestBody = {
            required: true,
@@ -102,10 +123,15 @@ key_router.put("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), key_controller.updateKey.bind(key_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  key_controller.updateKey.bind(key_controller),
+);
 // Delete a key (/:id)
-key_router.delete("/:id",
-    /* #swagger.summary = 'Delete a key'
+key_router.delete(
+  "/:id",
+  /* #swagger.summary = 'Delete a key'
        #swagger.tags = ['Keys']
        #swagger.parameters['id'] = { $ref: '#/components/parameters/KeyId' }
        #swagger.responses[200] = { $ref: '#/components/responses/KeyDeleteSuccess' }
@@ -118,6 +144,8 @@ key_router.delete("/:id",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), key_controller.deleteKey.bind(key_controller))
-
-
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  key_controller.deleteKey.bind(key_controller),
+);

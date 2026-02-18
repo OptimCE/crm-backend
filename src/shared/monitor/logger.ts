@@ -1,6 +1,6 @@
+import config from "config";
 import pino from "pino";
 import { context, trace } from "@opentelemetry/api";
-import config from "config";
 import {getContext} from "../middlewares/context.js";
 
 /**
@@ -8,6 +8,7 @@ import {getContext} from "../middlewares/context.js";
  * @param serviceName - The name of the service to be used in logs
  * @returns Configured Pino logger instance
  */
+
 function initLogger(serviceName: string): pino.Logger {
   const targets: any = [
     {
@@ -16,14 +17,14 @@ function initLogger(serviceName: string): pino.Logger {
       options: { colorize: true },
     },
   ];
-  if (process.env.REMOTE_LOGGING && process.env.REMOTE_LOGGING === "true") {
+  if (config.get("remote_logging.status") && config.get("remote_logging.status") === "true") {
     targets.push({
       target: "pino-opentelemetry-transport",
       options: {
         resourceAttributes: {
           "service.name": serviceName,
         },
-        endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://192.168.190.128:4318",
+        endpoint: config.get("remote_logging.opentelemetry.exporterEndpoint"),
         includeTraceContext: true,
       },
     });
@@ -38,7 +39,7 @@ function initLogger(serviceName: string): pino.Logger {
         user_id: ctx.user_id,
         community_id: ctx.community_id,
         role: ctx.role,
-        source_ip: ctx.source_ip
+        source_ip: ctx.source_ip,
       };
     },
     // You can remove the 'user' serializer now, as it's handled by the mixin

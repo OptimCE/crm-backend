@@ -1,10 +1,11 @@
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import {resourceFromAttributes} from '@opentelemetry/resources';
+import { resourceFromAttributes } from "@opentelemetry/resources";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
 import { ATTR_SERVICE_NAME } from'@opentelemetry/semantic-conventions'
+import config from "config";
 
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
 /**
@@ -15,14 +16,14 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
 const init = function (serviceName: string) {
   let sdk: NodeSDK | undefined;
 
-  if (process.env.REMOTE_LOGGING && process.env.REMOTE_LOGGING === "true") {
+  if (config.get("remote_logging.status") && config.get("remote_logging.status") === "true") {
     const traceExporter = new OTLPTraceExporter({});
 
     sdk = new NodeSDK({
       traceExporter,
       instrumentations: [new HttpInstrumentation(), ...getNodeAutoInstrumentations()],
       resource: resourceFromAttributes({
-        [ATTR_SERVICE_NAME ]: serviceName,
+        [ATTR_SERVICE_NAME]: serviceName,
       }),
     });
 
@@ -30,12 +31,12 @@ const init = function (serviceName: string) {
 
     process.on("SIGTERM", () => {
       sdk!
-          .shutdown()
-          .then(
-              () => console.log("SDK shut down successfully"),
-              (err) => console.log("Error shutting down SDK", err),
-          )
-          .finally(() => process.exit(0));
+        .shutdown()
+        .then(
+          () => console.log("SDK shut down successfully"),
+          (err) => console.log("Error shutting down SDK", err),
+        )
+        .finally(() => process.exit(0));
     });
   } else {
     console.log("No remote logging");

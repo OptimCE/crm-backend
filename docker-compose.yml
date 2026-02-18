@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  crm-db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_DB=${DB_NAME:-crm_db}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - crm_db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  crm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: crm-backend:prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - crm-db
+    networks:
+      - backend
+
+  keycloak-db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - POSTGRES_USER=${KEYCLOAK_DB_USERNAME:-postgres}
+      - POSTGRES_DB=${KEYCLOAK_DB_NAME:-keycloak}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    command: ["start-dev"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak-db
+    networks:
+      - backend
+
+  openfiles:
+    image: totalplatform/openfiles:latest
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    ports:
+      - "8001:8001"
+    networks:
+      - backend
+    volumes:
+      - openfiles_data:/var/lib/openfiles
+
+  opentelemetry:
+    image: otel/opentelemetry-collector:latest
+    restart: unless-stopped
+    networks:
+      - backend
+    ports:
+      - "4317:4317"
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./opentelemetry/config:/etc
+
+volumes:
+  crm_db_data:
+  keycloak_db_data:
+  openfiles_data:
+
+networks:
+  backend:
+    driver: bridge

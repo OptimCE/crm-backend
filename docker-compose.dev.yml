@@ -1,0 +1,102 @@
+# Docker Compose configuration for testing the CRM backend application
+# Warning: This file is intended for testing purposes only and should not be used in production environments.
+services:
+  crm-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=crm_db
+    volumes:
+      # - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./tests/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+  crm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - MICROSERVICE_NAME=crm-backend
+      - ALLOWED_ORIGIN=http://localhost:3000
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=3000
+      - NODE_ENV=development
+      - DB_HOST=crm-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=crm_db
+      # Logging Behavior
+      - logging=false
+      # IAM Configuration
+      - IAM_SERVICE_NAME=KEYCLOACK
+      - IAM_REALM=master
+      - IAM_REALM_NAME=master
+      - IAM_BASE_URL=http://keycloak:8080
+      - IAM_GRANT_TYPE=client_credentials
+      - IAM_CLIENT_ID=admin
+      - IAM_CLIENT_SECRET=admin
+      #OpenFiles Configuration
+      - STORAGE_SERVICE_NAME=openfiles
+      - STORAGE_TARGET=http://openfiles:8001
+      - STORAGE_DB_NAME=storage_db
+      - STORAGE_TOKEN=this-is-a-secret-not-for-production
+      # OpenTelemetry Configuration
+      - REMOTE_LOGGING=true
+      - OTEL_SERVICE_NAME=crm-backend
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+    depends_on:
+      - crm-db
+
+
+
+  keycloak-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=keycloak
+    ports:
+      - "5433:5432"
+
+  keycloak:
+    image: keycloak/keycloak:latest
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=postgres
+      - KC_HOSTNAME=localhost
+
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak-db
+    command:
+      - start-dev
+
+#Note: no persistance between test runs, so data will be lost when the containers are stopped. This is intentional for testing purposes.
+  openfiles:
+    image: totalplatform/openfiles:latest
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+      - SECRET=this-is-a-secret-not-for-production
+    depends_on:
+      - crm-db
+
+  opentelemetry:
+    image: otel/opentelemetry-collector:latest
+    ports:
+      - "4317:4317"
+      - "4318:4318"

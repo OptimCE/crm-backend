@@ -1,4 +1,4 @@
-import type {DataSource, QueryRunner} from "typeorm";
+import type { DataSource, QueryRunner } from "typeorm";
 import logger from "../monitor/logger.js";
 export interface HasDataSource {
   dataSource: DataSource;

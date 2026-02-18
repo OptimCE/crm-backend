@@ -10,24 +10,28 @@ import { OpenfileStorageService } from "../../shared/storage/implementations/ope
  * @throws Error if configuration or settings are missing/invalid.
  */
 export function initializeStorageService() {
-    const storage_service = config.get<string>("storage_service.name");
-    if (storage_service == null) {
-        throw new Error("Missing storage_service.name");
+  const storage_service = config.get<string>("storage_service.name");
+  if (storage_service == null) {
+    throw new Error("Missing storage_service.name");
+  }
+  switch (storage_service.toUpperCase()) {
+    case "OPENFILES": {
+      const settings: {
+        token: string;
+        db_name: string;
+        target: string;
+      } = config.get("storage_service.settings");
+      if (!settings) {
+        throw new Error("Missing settings.");
+      }
+      if (!settings.token || !settings.db_name || !settings.target) {
+        throw new Error("Incorrect iam_service.settings");
+      }
+      container.bind<IStorageService>("StorageService").to(OpenfileStorageService);
+      break;
     }
-    switch (storage_service.toUpperCase()) {
-        case "OPENFILES": {
-            const settings: any = config.get("storage_service.settings");
-            if (!settings) {
-                throw new Error("Missing settings.");
-            }
-            if (!settings.token || !settings.db_name || !settings.target) {
-                throw new Error("Incorrect iam_service.settings");
-            }
-            container.bind<IStorageService>("StorageService").to(OpenfileStorageService);
-            break;
-        }
-        default: {
-            throw new Error("Unknown storage service name")
-        }
+    default: {
+      throw new Error("Unknown storage service name");
     }
+  }
 }

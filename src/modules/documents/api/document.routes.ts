@@ -12,8 +12,9 @@ const document_controller = container.get<DocumentController>(DocumentController
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get (/:member_id) : Get all documents linked to a member
-document_router.get("/:member_id",
-    /* #swagger.summary = 'Get all documents linked to a member'
+document_router.get(
+  "/:member_id",
+  /* #swagger.summary = 'Get all documents linked to a member'
        #swagger.tags = ['Documents']
        #swagger.parameters['member_id'] = { $ref: '#/components/parameters/MemberId' }
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/DocumentQuery' }
@@ -27,10 +28,15 @@ document_router.get("/:member_id",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), document_controller.getDocuments.bind(document_controller));
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  document_controller.getDocuments.bind(document_controller),
+);
 // Get (/:member_id/:document_id): Download a specific document
-document_router.get("/:member_id/:document_id",
-    /* #swagger.summary = 'Download a specific document'
+document_router.get(
+  "/:member_id/:document_id",
+  /* #swagger.summary = 'Download a specific document'
        #swagger.tags = ['Documents']
        #swagger.parameters['member_id'] = { $ref: '#/components/parameters/MemberId' }
        #swagger.parameters['document_id'] = { $ref: '#/components/parameters/DocumentId' }
@@ -44,10 +50,15 @@ document_router.get("/:member_id/:document_id",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), document_controller.downloadDocument.bind(document_controller));
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  document_controller.downloadDocument.bind(document_controller),
+);
 // POST (/): Upload a document
-document_router.post("/",
-    /* #swagger.summary = 'Upload a document'
+document_router.post(
+  "/",
+  /* #swagger.summary = 'Upload a document'
        #swagger.tags = ['Documents']
        #swagger.consumes = ['multipart/form-data']
        #swagger.requestBody = {
@@ -75,10 +86,16 @@ document_router.post("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), upload.single("file"), document_controller.uploadDocument.bind(document_controller));
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  upload.single("file"),
+  document_controller.uploadDocument.bind(document_controller),
+);
 // DELETE (/:document_id) : Delete a specific document
-document_router.delete("/:document_id",
-    /* #swagger.summary = 'Delete a specific document'
+document_router.delete(
+  "/:document_id",
+  /* #swagger.summary = 'Delete a specific document'
        #swagger.tags = ['Documents']
       #swagger.parameters['document_id'] = { $ref: '#/components/parameters/DocumentId' }
       #swagger.responses[200] = { $ref: '#/components/responses/DocumentDeleteSuccess' }
@@ -91,4 +108,8 @@ document_router.delete("/:document_id",
            "MinRoleChecker": []
       }]
    */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), document_controller.deleteDocument.bind(document_controller));
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  document_controller.deleteDocument.bind(document_controller),
+);

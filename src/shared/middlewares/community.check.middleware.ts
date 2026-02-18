@@ -1,10 +1,10 @@
 import logger from "../monitor/logger.js";
-import {GLOBAL_ERRORS} from "../errors/errors.js";
-import {AppError} from "./error.middleware.js";
-import type { Request } from 'express';
-import type {Response} from 'express'
+import { GLOBAL_ERRORS } from "../errors/errors.js";
+import { AppError } from "./error.middleware.js";
+import type { Request } from "express";
+import type { Response } from "express";
 import type { NextFunction } from "express";
-import {getContext} from "./context.js";
+import { getContext } from "./context.js";
 
 /**
  * Middleware factory that creates a middleware to check if a community ID is present
@@ -21,7 +21,7 @@ export function communityIdChecker() {
    * @throws AppError If community_id is not valid
    */
   return (_req: Request, _res: Response, next: NextFunction) => {
-    const context = getContext()
+    const context = getContext();
     if (context.community_id !== undefined) {
       next();
     } else {

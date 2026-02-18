@@ -1,0 +1,4 @@
+{
+    "jest.runMode": "on-demand",
+    "jest.jestCommandLine": "npx cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest"
+}

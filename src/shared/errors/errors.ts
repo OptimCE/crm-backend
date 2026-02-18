@@ -7,7 +7,7 @@ export class LocalError {
   /** Human-readable error message */
   readonly message: string;
   field?: string;
-  value?: any;
+  value?: any; // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
   /**
    * Creates a new LocalError instance
@@ -17,6 +17,7 @@ export class LocalError {
    * @param {value} value - Dynamic value
    */
   constructor(errorCode: number, message: string, field?: string, value?: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.errorCode = errorCode;
     this.message = message;
     this.field = field;
@@ -33,7 +34,6 @@ export const SUCCESS: number = 0;
 export const GLOBAL_ERRORS = {
   SUCCESS: new LocalError(0, "global_error:success"),
 
-
   // General Errors
   EXCEPTION: new LocalError(1, "global_error:exception"),
   TIMEOUT: new LocalError(2, "global_error:timeout"),
@@ -43,11 +43,11 @@ export const GLOBAL_ERRORS = {
   AUTHORIZATION_MISSING: new LocalError(5, "global_error:authorization_missing"),
   UNAUTHENTICATED: new LocalError(6, "global_error:unauthenticated"),
 
-  DATABASE:{
-    QUERY_RUNNER_MANDATORY: new LocalError(1000, "global_error:database.query_runner_mandatory")
+  DATABASE: {
+    QUERY_RUNNER_MANDATORY: new LocalError(1000, "global_error:database.query_runner_mandatory"),
   },
   GENERIC_VALIDATION: {
-    WRONG_TYPE:{
+    WRONG_TYPE: {
       STRING: new LocalError(5000, "global_error:validation.generic.wrong_type.string"),
       INTEGER: new LocalError(5001, "global_error:validation.generic.wrong_type.integer"),
       EMAIL: new LocalError(5002, "global_error:validation.generic.wrong_type.email"),
@@ -59,9 +59,9 @@ export const GLOBAL_ERRORS = {
     },
     EMPTY: new LocalError(5008, "global_error:validation.generic.empty"),
     SORT: new LocalError(5009, "global_error:validation.generic.sort"),
-    WRONG_ROLE:{
+    WRONG_ROLE: {
       MEMBER_MANAGER_ADMIN: new LocalError(5010, "global_error:validation.generic.wrong_role.member_manager_admin"),
     },
-    MIN_1: new LocalError(5011, "global_error:validation.generic.min_1")
-  }
+    MIN_1: new LocalError(5011, "global_error:validation.generic.min_1"),
+  },
 };
