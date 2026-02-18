@@ -1,12 +1,12 @@
-import type {NextFunction} from "express";
-import type { Request } from 'express';
-import type {Response} from 'express'
-export interface PaginationReceive{
+import type { NextFunction } from "express";
+import type { Request } from "express";
+import type { Response } from "express";
+export interface PaginationReceive {
   page: number;
   limit: number;
   offset: number;
 }
-export const DEFAULT_ELEMENT_BY_PAGE = 10
+export const DEFAULT_ELEMENT_BY_PAGE = 10;
 /**
  * Middleware for handling pagination in Express routes
  * Extracts and processes pagination parameters from requests

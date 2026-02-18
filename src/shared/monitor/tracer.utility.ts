@@ -1,9 +1,8 @@
 import { context, propagation, SpanStatusCode, trace, Tracer, Context, Span } from "@opentelemetry/api";
 import logger from "./logger.js";
-import { SUCCESS } from "../errors/errors.js";
 import { ApiResponse } from "../dtos/ApiResponses.js";
-import type { Request } from 'express';
-import type {Response} from 'express'
+import type { Request } from "express";
+import type { Response } from "express";
 /**
  * Utility class for working with OpenTelemetry traces
  */
@@ -36,7 +35,7 @@ export class TracerUtility {
    * @param headers - Headers containing context information
    * @returns The created span
    */
-  startSpan(spanName: string, spanAttributes: {} = {}, headers: {} = {}) {
+  startSpan(spanName: string, spanAttributes: any = {}, headers: any = {}) {
     const extractedContext = propagation.extract(context.active(), headers);
     const span = this.tracer.startSpan(spanName, spanAttributes, extractedContext);
     //@ts-expect-error: 'value' may be unknown
@@ -51,7 +50,7 @@ export class TracerUtility {
    * @param spanAttributes - Additional attributes to add to the span
    * @returns The created span
    */
-  startSpanReq(spanName:string, req: Request, spanAttributes: {} = {}) {
+  startSpanReq(spanName: string, req: Request, spanAttributes: any = {}) {
     const span = this.tracer.startSpan(spanName);
     span.setAttribute("http.method", req.method);
     //@ts-expect-error: 'value' may be unknown
@@ -69,13 +68,11 @@ export class TracerUtility {
    * @param fn - The function to execute within the span's context
    * @returns The result of the function execution
    */
-  startActiveSpanReq<T>(spanName: string, req: Request, spanAttributes: {}, context: Context, fn: (span: Span) => Promise<T>): Promise<T> {
+  startActiveSpanReq<T>(spanName: string, req: Request, spanAttributes: any, context: Context, fn: (span: Span) => Promise<T>): Promise<T> {
     return this.tracer.startActiveSpan(spanName, { attributes: spanAttributes }, context, async (span) => {
       span.setAttribute("http.method", req.method);
       try {
         return await fn(span);
-      } catch (e) {
-        throw e;
       } finally {
         span.end();
       }
@@ -91,19 +88,16 @@ export class TracerUtility {
    * @param fn - The function to execute within the span's context
    * @returns The result of the function execution
    */
-  startActiveSpan<T>(spanName: string, spanAttributes: {}, header: {}, fn: (span: Span) => Promise<T>): Promise<T> {
+  startActiveSpan<T>(spanName: string, spanAttributes: any, header: any, fn: (span: Span) => Promise<T>): Promise<T> {
     const ctx = propagation.extract(context.active(), header);
     return this.tracer.startActiveSpan(spanName, { attributes: spanAttributes }, ctx, async (span) => {
       try {
         return await fn(span);
-      } catch (e) {
-        throw e;
       } finally {
         span.end();
       }
     });
   }
-
 
   /**
    * Handles an exception and updates the span accordingly
@@ -114,12 +108,12 @@ export class TracerUtility {
    * @param operationName - The operation name
    * @param errorStatusCode - The HTTP status code to use for the error response (default: 400)
    */
-  handleException(res: Response, span: Span, e:Error, errorReturned:number, operationName: string, errorStatusCode = 400) {
-    logger.error(`(${operationName}) Error: `+ e);
+  handleException(res: Response, span: Span, e: Error, errorReturned: number, operationName: string, errorStatusCode = 400) {
+    logger.error(`(${operationName}) Error: ` + e);
     span.recordException(e);
     span.setStatus({ code: SpanStatusCode.ERROR });
     span.setAttribute("http.status_code", errorStatusCode);
-    res.status(errorStatusCode).json(new ApiResponse( "Error", errorReturned));
+    res.status(errorStatusCode).json(new ApiResponse("Error", errorReturned));
     span.end();
   }
 }

@@ -1,5 +1,5 @@
 import xss from "xss";
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from "express";
 
 /**
  * Recursively sanitizes data
@@ -8,7 +8,7 @@ function xss_object(data: any): any {
   if (data === null) return null;
 
   if (Array.isArray(data)) {
-    return data.map(item => xss_object(item));
+    return data.map((item) => xss_object(item));
   }
 
   if (typeof data === "object") {

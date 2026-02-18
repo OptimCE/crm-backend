@@ -1,7 +1,7 @@
 import type { INotificationService } from "../interfaces/notification.service.interface.js";
 import { NotificationMessage } from "../../../dtos/NotificationMessage.js";
 import config from "config";
-import {callWithTracingHeaders} from "../../api_call.js";
+import { callWithTracingHeaders } from "../../api_call.js";
 
 /**
  * Service for sending notifications through the notification microservice

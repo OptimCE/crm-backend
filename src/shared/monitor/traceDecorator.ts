@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import {context, SpanStatusCode, propagation, Span} from "@opentelemetry/api";
+import { context, SpanStatusCode, propagation, Span } from "@opentelemetry/api";
 import { TracerUtility } from "./tracer.utility.js";
 import logger from "./logger.js";
 
@@ -56,7 +56,6 @@ class TraceDecorator {
             await originalMethod.apply(this, [req, res, next, span]);
             span.setStatus({ code: SpanStatusCode.OK });
           } catch (e) {
-            console.error(e);
             span.recordException(e as Error);
             logger.error("(" + spanName + ")Exception : " + e);
             next(e);

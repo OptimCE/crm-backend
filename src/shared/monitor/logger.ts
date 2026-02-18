@@ -39,7 +39,7 @@ function initLogger(serviceName: string): pino.Logger {
         user_id: ctx.user_id,
         community_id: ctx.community_id,
         role: ctx.role,
-        source_ip: ctx.source_ip
+        source_ip: ctx.source_ip,
       };
     },
     // You can remove the 'user' serializer now, as it's handled by the mixin

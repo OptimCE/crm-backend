@@ -24,6 +24,7 @@
     "typedoc:html": "typedoc src --out docs/typedoc/html --entryPointStrategy expand --name \"OptimCE CRM Backend\"",
     "format": "prettier --write \"**/*.ts\"",
     "lint": "eslint . --ext .ts",
+    "lint-quiet": "eslint . --ext .ts --quiet",
     "audit": "npm audit"
   },
   "keywords": [],

@@ -5,15 +5,15 @@ import { UpdateUserDTO, UserDTO } from "../api/user.dtos.js";
  * Defines operations for managing user profiles.
  */
 export interface IUserService {
-    /**
-     * Retrieves the profile of the current user.
-     * @returns UserDTO containing profile details.
-     */
-    getProfile(): Promise<UserDTO>;
+  /**
+   * Retrieves the profile of the current user.
+   * @returns UserDTO containing profile details.
+   */
+  getProfile(): Promise<UserDTO>;
 
-    /**
-     * Updates the profile of the current user.
-     * @param updated_user - DTO containing updated profile fields.
-     */
-    updateProfile(updated_user: UpdateUserDTO): Promise<void>;
+  /**
+   * Updates the profile of the current user.
+   * @param updated_user - DTO containing updated profile fields.
+   */
+  updateProfile(updated_user: UpdateUserDTO): Promise<void>;
 }

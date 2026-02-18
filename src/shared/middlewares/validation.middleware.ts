@@ -1,9 +1,9 @@
 import { validationResult } from "express-validator";
-import {GLOBAL_ERRORS, LocalError} from "../errors/errors.js";
+import { GLOBAL_ERRORS, LocalError } from "../errors/errors.js";
 import { AppError } from "./error.middleware.js";
 import logger from "../monitor/logger.js";
-import type { Request } from 'express';
-import type {Response} from 'express'
+import type { Request } from "express";
+import type { Response } from "express";
 import type { NextFunction } from "express";
 /**
  * Middleware that validates request data using express-validator

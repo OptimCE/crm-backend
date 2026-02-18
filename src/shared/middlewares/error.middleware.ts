@@ -10,8 +10,8 @@ import * as myRes from "../dtos/ApiResponses.js";
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly errorCode: number;
-    public readonly field?: string;
-    public readonly value?: any;
+  public readonly field?: string;
+  public readonly value?: any;
   /**
    * Creates a new AppError instance
    * @param error - LocalError object containing error code and message
@@ -52,16 +52,15 @@ export class AppError extends Error {
  */
 export const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction) => {
   let { statusCode, message, errorCode } = err;
-  if(err instanceof AppError || err.constructor.name === 'AppError'){
+  if (err instanceof AppError || err.constructor.name === "AppError") {
     const interpolation = {
-      field: err.field || 'Field', // Fallback if undefined
-      value: err.value
+      field: err.field || "Field", // Fallback if undefined
+      value: err.value,
     };
 
     // req.t will look for {{field}} in your translation string and replace it
     message = req.t(message, interpolation);
-  }
-  else {
+  } else {
     let find = false;
     if (err.response) {
       if (err.response.data) {

@@ -10,8 +10,9 @@ export const community_routes = express.Router();
 const community_controller = container.get<CommunityController>(CommunityController);
 
 // Get (/) : Get my communities
-community_routes.get("/my-communities",
-    /* #swagger.summary = 'Get my communities'
+community_routes.get(
+  "/my-communities",
+  /* #swagger.summary = 'Get my communities'
        #swagger.tags = ['Communities']
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/CommunityQuery' }
        #swagger.responses[200] = { $ref: '#/components/responses/MyCommunitiesGetSuccess' }
@@ -22,10 +23,13 @@ community_routes.get("/my-communities",
             "UserIdChecker": []
        }]
     */
-    idChecker(), community_controller.getMyCommunities.bind(community_controller))
+  idChecker(),
+  community_controller.getMyCommunities.bind(community_controller),
+);
 // Get (/users) : Get users of a community
-community_routes.get("/users",
-    /* #swagger.summary = 'Get users of a community'
+community_routes.get(
+  "/users",
+  /* #swagger.summary = 'Get users of a community'
        #swagger.tags = ['Communities']
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/CommunityUsersQuery' }
        #swagger.responses[200] = { $ref: '#/components/responses/CommunityUsersGetSuccess' }
@@ -38,10 +42,15 @@ community_routes.get("/users",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), community_controller.getUsers.bind(community_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  community_controller.getUsers.bind(community_controller),
+);
 // Get (/admins) : Get admins of a community
-community_routes.get("/admins",
-    /* #swagger.summary = 'Get admins of a community'
+community_routes.get(
+  "/admins",
+  /* #swagger.summary = 'Get admins of a community'
        #swagger.tags = ['Communities']
        #swagger.parameters['filters'] = { $ref: '#/components/parameters/CommunityUsersQuery' }
        #swagger.responses[200] = { $ref: '#/components/responses/CommunityAdminsGetSuccess' }
@@ -53,10 +62,14 @@ community_routes.get("/admins",
             "CommunityIdChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), community_controller.getAdmins.bind(community_controller))
+  idChecker(),
+  communityIdChecker(),
+  community_controller.getAdmins.bind(community_controller),
+);
 // Post (/) : Create a new community
-community_routes.post("/",
-    /* #swagger.summary = 'Create a new community'
+community_routes.post(
+  "/",
+  /* #swagger.summary = 'Create a new community'
        #swagger.tags = ['Communities']
        #swagger.requestBody = {
            required: true,
@@ -74,10 +87,13 @@ community_routes.post("/",
             "UserIdChecker": []
        }]
     */
-    idChecker(), community_controller.createCommunity.bind(community_controller))
+  idChecker(),
+  community_controller.createCommunity.bind(community_controller),
+);
 // Put (/) : Update a community
-community_routes.put("/",
-    /* #swagger.summary = 'Update a community'
+community_routes.put(
+  "/",
+  /* #swagger.summary = 'Update a community'
        #swagger.tags = ['Communities']
        #swagger.requestBody = {
            required: true,
@@ -97,10 +113,15 @@ community_routes.put("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), community_controller.updateCommunity.bind(community_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  community_controller.updateCommunity.bind(community_controller),
+);
 // PATCH / : Patch the role of a user
-community_routes.patch("/",
-    /* #swagger.summary = 'Patch the role of a user'
+community_routes.patch(
+  "/",
+  /* #swagger.summary = 'Patch the role of a user'
        #swagger.tags = ['Communities']
        #swagger.requestBody = {
            required: true,
@@ -120,10 +141,15 @@ community_routes.patch("/",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.GESTIONNAIRE), community_controller.patchRoleUser.bind(community_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  community_controller.patchRoleUser.bind(community_controller),
+);
 // DELETE /leave/:id_community : Leave a community
-community_routes.delete("/leave/:id_community",
-    /* #swagger.summary = 'Leave a community'
+community_routes.delete(
+  "/leave/:id_community",
+  /* #swagger.summary = 'Leave a community'
        #swagger.tags = ['Communities']
        #swagger.parameters['id_community'] = { $ref: '#/components/parameters/CommunityId' }
        #swagger.responses[200] = { $ref: '#/components/responses/CommunityLeaveSuccess' }
@@ -135,10 +161,13 @@ community_routes.delete("/leave/:id_community",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), community_controller.leave.bind(community_controller))
+  idChecker(),
+  community_controller.leave.bind(community_controller),
+);
 // DELETE /kick/:id_user : Kick a user from a community
-community_routes.delete("/kick/:id_user",
-    /* #swagger.summary = 'Kick a user from a community'
+community_routes.delete(
+  "/kick/:id_user",
+  /* #swagger.summary = 'Kick a user from a community'
        #swagger.tags = ['Communities']
        #swagger.parameters['id_user'] = { $ref: '#/components/parameters/UserId' }
        #swagger.responses[200] = { $ref: '#/components/responses/CommunityKickSuccess' }
@@ -151,10 +180,15 @@ community_routes.delete("/kick/:id_user",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.ADMIN), community_controller.kickUser.bind(community_controller))
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.ADMIN),
+  community_controller.kickUser.bind(community_controller),
+);
 // DELETE /delete/:id_community : Delete an entire community
-community_routes.delete("/delete/:id_community",
-    /* #swagger.summary = 'Delete an entire community'
+community_routes.delete(
+  "/delete/:id_community",
+  /* #swagger.summary = 'Delete an entire community'
        #swagger.tags = ['Communities']
        #swagger.parameters['id_community'] = { $ref: '#/components/parameters/CommunityId' }
        #swagger.responses[200] = { $ref: '#/components/responses/CommunityDeleteSuccess' }
@@ -167,4 +201,8 @@ community_routes.delete("/delete/:id_community",
             "MinRoleChecker": []
        }]
     */
-    idChecker(), communityIdChecker(), roleChecker(Role.ADMIN), community_controller.deleteCommunity.bind(community_controller));
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.ADMIN),
+  community_controller.deleteCommunity.bind(community_controller),
+);
