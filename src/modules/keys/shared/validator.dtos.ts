@@ -3,7 +3,7 @@ import { GLOBAL_ERRORS } from "../../../shared/errors/errors.js";
 
 @ValidatorConstraint({ name: "IterationsValid", async: false })
 export class AreIterationsSumOneConstraint implements ValidatorConstraintInterface {
-  validate(items: unknown, args: ValidationArguments) {
+  validate(items: unknown, args: ValidationArguments): boolean {
     if (!items || !Array.isArray(items)) return false;
 
     let sum = 0;
@@ -16,14 +16,14 @@ export class AreIterationsSumOneConstraint implements ValidatorConstraintInterfa
     if (sum >= 0.999 && sum <= 1.001) sum = 1;
     return sum === 1;
   }
-  defaultMessage(_args: ValidationArguments) {
+  defaultMessage(_args: ValidationArguments): string {
     return JSON.stringify(GLOBAL_ERRORS.EXCEPTION);
   }
 }
 
 @ValidatorConstraint({ name: "ConsumersValid", async: false })
 export class AreConsumersSumOneConstraint implements ValidatorConstraintInterface {
-  validate(items: unknown, args: ValidationArguments) {
+  validate(items: unknown, args: ValidationArguments): boolean {
     if (!items || !Array.isArray(items)) return false;
 
     let sum = 0;
@@ -47,7 +47,7 @@ export class AreConsumersSumOneConstraint implements ValidatorConstraintInterfac
 
     return true;
   }
-  defaultMessage(_args: ValidationArguments) {
+  defaultMessage(_args: ValidationArguments): string {
     return JSON.stringify(GLOBAL_ERRORS.EXCEPTION);
   }
 }

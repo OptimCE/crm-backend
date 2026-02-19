@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { Document } from "../../../src/modules/documents/domain/document.models.js";
+import type { Document } from "../../../src/modules/documents/domain/document.models.js";
 import { toDocumentExposed } from "../../../src/modules/documents/shared/to_dto.js";
 import { DOCUMENT_ERRORS } from "../../../src/modules/documents/shared/document.errors.js";
 import { ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";

@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { Meter } from "../../../src/modules/meters/domain/meter.models.js";
+import type { Meter } from "../../../src/modules/meters/domain/meter.models.js";
 import { toMeterDTO, toMeterPartialDTO, toMeterConsumptionDTO } from "../../../src/modules/meters/shared/to_dto.js";
 import { METER_ERRORS } from "../../../src/modules/meters/shared/meter.errors.js";
 import { AppError } from "../../../src/shared/middlewares/error.middleware.js";
@@ -451,6 +451,149 @@ export const testCasesDeleteMeter = [
     mocks: {
       meterRepo: {
         deleteMeter: jest.fn(() => Promise.reject(new Error("Fail"))),
+      },
+    },
+  },
+];
+const mockMeterDataEntity = {
+  id_meter_data: 1,
+  start_date: "2024-02-01T00:00:00.000Z",
+  end_date: "2024-03-01T00:00:00.000Z",
+  meter: {
+    EAN: "123456789",
+  },
+};
+export const testCasesDeleteMeterData = [
+  // 1. Success - Simple Delete
+  {
+    description: "Success - Delete without activating previous",
+    body: {
+      id_meter_data: 123,
+      active_previous_meter_data: false,
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      meterRepo: {
+        getMeterData: jest.fn(() => Promise.resolve(mockMeterDataEntity)),
+        deleteMeterData: jest.fn(() => Promise.resolve(true)),
+      },
+    },
+  },
+  // 2. Success - Delete and Activate Previous
+  {
+    description: "Success - Delete and activate previous",
+    body: {
+      id_meter_data: 123,
+      active_previous_meter_data: true,
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      meterRepo: {
+        getMeterData: jest.fn(() => Promise.resolve(mockMeterDataEntity)),
+        deleteMeterData: jest.fn(() => Promise.resolve(true)),
+        activePreviousInactiveMeterData: jest.fn(() => Promise.resolve({ affected: 1 })),
+      },
+    },
+  },
+  // 3. Validation - Missing ID
+  {
+    description: "Fail (Validation) - Missing ID",
+    body: {
+      active_previous_meter_data: true,
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    translation_field: { field: "id_meter_data" },
+    expected_error_code: METER_ERRORS.GENERIC_VALIDATION.EMPTY.errorCode,
+    // Note: exact data match for validation often depends on middleware, keeping generic here
+    expected_data: METER_ERRORS.GENERIC_VALIDATION.EMPTY.message,
+    mocks: {},
+  },
+  // 4. Validation - Wrong Type
+  {
+    description: "Fail (Validation) - ID Wrong Type",
+    body: {
+      id_meter_data: "not-a-number",
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    translation_field: { field: "id_meter_data" },
+    expected_error_code: METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.NUMBER.errorCode,
+    expected_data: METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.NUMBER.message,
+    mocks: {},
+  },
+  // 5. Fail - Meter Data Not Found
+  {
+    description: "Fail (Not Found) - Meter data does not exist",
+    body: {
+      id_meter_data: 999,
+    },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.DELETE_METER_DATA.NOT_FOUND.errorCode,
+    expected_data: METER_ERRORS.DELETE_METER_DATA.NOT_FOUND.message,
+    mocks: {
+      meterRepo: {
+        getMeterData: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+  // 6. Fail - Database Delete Error
+  {
+    description: "Fail (Database) - Delete operation failed",
+    body: {
+      id_meter_data: 123,
+    },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.DELETE_METER_DATA.DELETE_DATABASE.errorCode,
+    expected_data: METER_ERRORS.DELETE_METER_DATA.DELETE_DATABASE.message,
+    mocks: {
+      meterRepo: {
+        getMeterData: jest.fn(() => Promise.resolve(mockMeterDataEntity)),
+        deleteMeterData: jest.fn(() => Promise.resolve(false)), // Simulate delete failure
+      },
+    },
+  },
+  // 7. Fail - Update Previous Data Error
+  {
+    description: "Fail (Database) - Update previous data failed",
+    body: {
+      id_meter_data: 123,
+      active_previous_meter_data: true,
+    },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.DELETE_METER_DATA.UPDATE_DATABASE.errorCode,
+    expected_data: METER_ERRORS.DELETE_METER_DATA.UPDATE_DATABASE.message,
+    mocks: {
+      meterRepo: {
+        getMeterData: jest.fn(() => Promise.resolve(mockMeterDataEntity)),
+        deleteMeterData: jest.fn(() => Promise.resolve(true)),
+        // affected is 0, triggering the error
+        activePreviousInactiveMeterData: jest.fn(() => Promise.resolve({ affected: 0 })),
+      },
+    },
+  },
+  // 8. Fail - Repository Throws Unexpected Error
+  {
+    description: "Fail (Database) - Repository throws exception",
+    body: {
+      id_meter_data: 123,
+    },
+    status_code: 500, // Assuming default global handler maps unknown errors to 500
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.EXCEPTION.errorCode, // Or whatever your global handler returns
+    expected_data: METER_ERRORS.EXCEPTION.message,
+    mocks: {
+      meterRepo: {
+        getMeterData: jest.fn(() => Promise.reject(new Error("DB Connection Lost"))),
       },
     },
   },

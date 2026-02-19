@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { Member } from "../../../src/modules/members/domain/member.models.js";
+import type { Member } from "../../../src/modules/members/domain/member.models.js";
 import { toMemberDTO, toMemberPartialDTO } from "../../../src/modules/members/shared/to_dto.js";
 import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors.js";
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";

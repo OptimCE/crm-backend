@@ -1,8 +1,8 @@
-import { GestionnaireInvitation, UserMemberInvitation } from "./invitation.models.js";
-import { DeleteResult, type QueryRunner } from "typeorm";
-import { UserManagerInvitationQuery, UserMemberInvitationQuery } from "../api/invitation.dtos.js";
-import { User, UserMemberLink } from "../../users/domain/user.models.js";
-import { Member } from "../../members/domain/member.models.js";
+import type { GestionnaireInvitation, UserMemberInvitation } from "./invitation.models.js";
+import type { DeleteResult, QueryRunner } from "typeorm";
+import type { UserManagerInvitationQuery, UserMemberInvitationQuery } from "../api/invitation.dtos.js";
+import type { User, UserMemberLink } from "../../users/domain/user.models.js";
+import type { Member } from "../../members/domain/member.models.js";
 
 export interface IInvitationRepository {
   getInvitationManagerById(invitation_id: number, query_runner?: QueryRunner): Promise<GestionnaireInvitation | null>;

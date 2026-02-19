@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { AllocationKey } from "../../../src/modules/keys/domain/key.models.js";
+import type { AllocationKey } from "../../../src/modules/keys/domain/key.models.js";
 import { toKeyDTO, toKeyPartialDTO } from "../../../src/modules/keys/shared/to_dto.js";
 import { KEY_ERRORS } from "../../../src/modules/keys/shared/key.errors.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";

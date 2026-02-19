@@ -701,6 +701,46 @@
         ]
       }
     },
+    "/invitations/own/member/{id}": {
+      "get": {
+        "tags": [
+          "Invitations"
+        ],
+        "summary": "Get all member linked to pending invitation by id",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MemberInvitationsListSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
     "/invitations/own/managers": {
       "get": {
         "tags": [
@@ -2020,6 +2060,50 @@
         }
       }
     },
+    "/meters/data/delete": {
+      "patch": {
+        "tags": [
+          "Meters"
+        ],
+        "summary": "Delete a future meter data",
+        "description": "",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeterDeleteSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFutureMeterDataDTO"
+              }
+            }
+          }
+        }
+      }
+    },
     "/sharing_operations/": {
       "get": {
         "tags": [
@@ -2153,6 +2237,96 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/SharingOperationDeleteSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+          }
+        ]
+      }
+    },
+    "/sharing_operations/{id}/meters": {
+      "get": {
+        "tags": [
+          "SharingOperations"
+        ],
+        "summary": "Get paginated meters list of meters in the sharing operation (past, now or future)",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/parameters/SharingOperationConsumptionQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SharingOperationConsumptionsGetSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+          }
+        ]
+      }
+    },
+    "/sharing_operations/{id}/keys": {
+      "get": {
+        "tags": [
+          "SharingOperations"
+        ],
+        "summary": "Get paginated historical keys list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/parameters/SharingOperationConsumptionQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SharingOperationConsumptionsGetSuccess",
             "description": "OK"
           },
           "400": {
@@ -5764,6 +5938,212 @@
           }
         }
       },
+      "SharingOperationMetersQueryType": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "number"
+          },
+          "enum": {
+            "type": "array",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "SharingOperationMetersQuery": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Page number to retrieve (1-based index). Defaults to 1."
+                  }
+                }
+              },
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Number of items per page. Defaults to system configuration."
+                  }
+                }
+              },
+              "street": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by street name."
+                  }
+                }
+              },
+              "postcode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by postcode."
+                  }
+                }
+              },
+              "address_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by address number."
+                  }
+                }
+              },
+              "city": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by city name."
+                  }
+                }
+              },
+              "supplement": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by address supplement (box, etc.)."
+                  }
+                }
+              },
+              "EAN": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by EAN code."
+                  }
+                }
+              },
+              "meter_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by meter number."
+                  }
+                }
+              },
+              "status": {
+                "$ref": "#/components/schemas/MeterDataStatus"
+              },
+              "holder_id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by generic member ID holder."
+                  }
+                }
+              },
+              "type": {
+                "$ref": "#/components/schemas/SharingOperationMetersQueryType"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "limit",
+              "page",
+              "type"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "MeterDataStatus": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "number"
+          },
+          "enum": {
+            "type": "array",
+            "example": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
       "SharingOperationConsumptionQuery": {
         "type": "object",
         "properties": {
@@ -5961,7 +6341,6 @@
               "id",
               "key",
               "start_date",
-              "end_date",
               "status"
             ],
             "items": {
@@ -6040,22 +6419,6 @@
               "key": {
                 "$ref": "#/components/schemas/SharingOperationKeyDTO"
               },
-              "history_keys": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "array"
-                  },
-                  "items": {
-                    "$ref": "#/components/schemas/SharingOperationKeyDTO"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "History of keys."
-                  }
-                }
-              },
               "key_waiting_approval": {
                 "$ref": "#/components/schemas/SharingOperationKeyDTO"
               }
@@ -6064,7 +6427,6 @@
           "required": {
             "type": "array",
             "example": [
-              "history_keys",
               "id",
               "key",
               "key_waiting_approval",
@@ -7158,27 +7520,6 @@
           "description": {
             "type": "string",
             "example": "DTO for updating the status of a meter within a sharing operation."
-          }
-        }
-      },
-      "MeterDataStatus": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "number"
-          },
-          "enum": {
-            "type": "array",
-            "example": [
-              1,
-              2,
-              3,
-              4
-            ],
-            "items": {
-              "type": "number"
-            }
           }
         }
       },
@@ -9991,6 +10332,63 @@
           "description": {
             "type": "string",
             "example": "DTO for patching meter data configuration. Requires EAN to identify the meter to update."
+          }
+        }
+      },
+      "DeleteFutureMeterDataDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id_meter_data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID meter data to delete"
+                  }
+                }
+              },
+              "active_previous_meter_data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "boolean"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "If true, take the previous meter data and reactive it"
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "id_meter_data"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "description": {
+            "type": "string",
+            "example": "DTO for deleting future meter data Require ID Meter data to identify the entry to remove"
           }
         }
       },

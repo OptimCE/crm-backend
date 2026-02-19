@@ -1,6 +1,6 @@
-import { CreateKeyDTO, KeyDTO, KeyPartialDTO, KeyPartialQuery, UpdateKeyDTO } from "../api/key.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
-import ExcelJS from "exceljs";
+import type { CreateKeyDTO, KeyDTO, KeyPartialDTO, KeyPartialQuery, UpdateKeyDTO } from "../api/key.dtos.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type ExcelJS from "exceljs";
 
 /**
  * Interface for Key Service.

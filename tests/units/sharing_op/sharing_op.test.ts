@@ -12,7 +12,9 @@ import {
   testCasesDownload,
   testCasesGetSharingOperation,
   testCasesGetSharingOperationConsumptions,
+  testCasesGetSharingOperationKeysList,
   testCasesGetSharingOperationList,
+  testCasesGetSharingOperationMetersList,
   testCasesPatchKey,
   testCasesPatchMeter,
 } from "./sharing_op.const.js";
@@ -399,4 +401,99 @@ describe("(Unit) Sharing Operation Module", () => {
       },
     );
   });
+});
+
+describe("(Unit) Get Sharing Operation Meters List", () => {
+  useUnitTestDb();
+
+  it.each(testCasesGetSharingOperationMetersList)(
+    "GET /sharing_operations/:id/meters : $description",
+    async ({ id, query, status_code, expected_error_code, expected_data, expected_pagination, mocks, orgs, translation_field }) => {
+      if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+      const i18next = appModule.i18next;
+
+      const response = await request(app)
+        .get(`/sharing_operations/${id}/meters`)
+        .query(query)
+        .set("x-user-id", "1")
+        .set("x-community-id", "1")
+        .set("x-user-orgs", orgs);
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(status_code);
+
+        if (response.body.error_code) {
+          expect(response.body.error_code).toBe(expected_error_code);
+        }
+
+        let result = expected_data;
+        if (response.status !== 200 && typeof expected_data === "string") {
+          if (translation_field) {
+            result = i18next.t(expected_data, translation_field);
+          } else {
+            result = i18next.t(expected_data);
+          }
+        }
+
+        // Use toEqual for objects/arrays matches
+        if (expected_data !== null) {
+          expect(response.body.data).toEqual(result);
+        }
+
+        if (expected_pagination) {
+          expect(response.body.pagination).toEqual(expected_pagination);
+        }
+      });
+    },
+  );
+});
+
+describe("(Unit) Get Sharing Operation Keys List", () => {
+  useUnitTestDb();
+
+  it.each(testCasesGetSharingOperationKeysList)(
+    "GET /sharing_operations/:id/keys : $description",
+    async ({ id, query, status_code, expected_error_code, expected_data, expected_pagination, mocks, orgs, translation_field }) => {
+      if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+      const i18next = appModule.i18next;
+
+      const response = await request(app)
+        .get(`/sharing_operations/${id}/keys`)
+        .query(query)
+        .set("x-user-id", "1")
+        .set("x-community-id", "1")
+        .set("x-user-orgs", orgs);
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(status_code);
+
+        if (response.body.error_code) {
+          expect(response.body.error_code).toBe(expected_error_code);
+        }
+
+        let result = expected_data;
+        if (response.status !== 200 && typeof expected_data === "string") {
+          if (translation_field) {
+            result = i18next.t(expected_data, translation_field);
+          } else {
+            result = i18next.t(expected_data);
+          }
+        }
+
+        if (expected_data !== null) {
+          expect(response.body.data).toEqual(result);
+        }
+
+        if (expected_pagination) {
+          expect(response.body.pagination).toEqual(expected_pagination);
+        }
+      });
+    },
+  );
 });

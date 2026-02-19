@@ -18,9 +18,13 @@ import {
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
   SharingOperationDTO,
+  SharingOperationKeyDTO,
+  SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
 } from "./sharing_operation.dtos.js";
+import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
+import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
 
 const sharing_operationControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 @injectable()
@@ -34,7 +38,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationList", { url: "/sharing_operations/", method: "get" })
-  async getSharingOperationList(req: Request, res: Response, _next: NextFunction) {
+  async getSharingOperationList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(SharingOperationPartialQuery, req.query);
     const [result, pagination]: [SharingOperationPartialDTO[], Pagination] = await this.sharing_operationService.getSharingOperationList(queryObject);
     logger.info("Sharing operation list successfully retrieved");
@@ -48,10 +52,44 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperation", { url: "/sharing_operations/:id", method: "get" })
-  async getSharingOperation(req: Request, res: Response, _next: NextFunction) {
+  async getSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: SharingOperationDTO = await this.sharing_operationService.getSharingOperation(+req.params.id);
     logger.info("Sharing operation successfully retrieved");
     res.status(200).json(new ApiResponse<SharingOperationDTO>(result, SUCCESS));
+  }
+
+  /**
+   * Retrieves list of meters linked to a sharing operation by ID.
+   * @param req - Express request object. Params: id.
+   * @param res - Express response object. Returns SharingOperationDTO.
+   * @param _next - Express next middleware.
+   */
+  @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationMetersList", { url: "/sharing_operations/:id/meters", method: "get" })
+  async getSharingOperationMetersList(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(SharingOperationMetersQuery, req.query);
+    const [result, pagination]: [PartialMeterDTO[], Pagination] = await this.sharing_operationService.getSharingOperationMetersList(
+      +req.params.id,
+      queryObject,
+    );
+    logger.info("Meters list successfully retrieved");
+    res.status(200).json(new ApiResponsePaginated<PartialMeterDTO[]>(result, pagination, SUCCESS));
+  }
+
+  /**
+   * Retrieves list of keys linked to a sharing operation by ID.
+   * @param req - Express request object. Params: id.
+   * @param res - Express response object. Returns SharingOperationDTO.
+   * @param _next - Express next middleware.
+   */
+  @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationKeysList", { url: "/sharing_operations/:id/keys", method: "get" })
+  async getSharingOperationKeysList(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(KeyPartialQuery, req.query);
+    const [result, pagination]: [SharingOperationKeyDTO[], Pagination] = await this.sharing_operationService.getSharingOperationKeysList(
+      +req.params.id,
+      queryObject,
+    );
+    logger.info("Keys list successfully retrieved");
+    res.status(200).json(new ApiResponsePaginated<SharingOperationKeyDTO[]>(result, pagination, SUCCESS));
   }
 
   /**
@@ -64,7 +102,7 @@ export class SharingOperationController {
     url: "/sharing_operations/:id/consumptions",
     method: "get",
   })
-  async getSharingOperationConsumptions(req: Request, res: Response, _next: NextFunction) {
+  async getSharingOperationConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(SharingOperationConsumptionQuery, req.query);
     const result: SharingOpConsumptionDTO = await this.sharing_operationService.getSharingOperationConsumption(+req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully retrieved");
@@ -81,7 +119,7 @@ export class SharingOperationController {
     url: "/sharing_operations/:id/consumptions/download",
     method: "get",
   })
-  async downloadSharingOperationConsumptions(req: Request, res: Response, _next: NextFunction) {
+  async downloadSharingOperationConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(SharingOperationConsumptionQuery, req.query);
     const buffer: Buffer = await this.sharing_operationService.downloadSharingOperationConsumptions(+req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully download");
@@ -97,7 +135,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("createSharingOperation", { url: "/sharing_operations/", method: "post" })
-  async createSharingOperation(req: Request, res: Response, _next: NextFunction) {
+  async createSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_sharing_operations = await validateDto(CreateSharingOperationDTO, req.body);
     await this.sharing_operationService.createSharingOperation(new_sharing_operations);
     logger.info("Sharing operation consumptions successfully created");
@@ -111,7 +149,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("addKeyToSharing", { url: "/sharing_operations/key", method: "post" })
-  async addKeyToSharing(req: Request, res: Response, _next: NextFunction) {
+  async addKeyToSharing(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_key_to_operation = await validateDto(AddKeyToSharingOperationDTO, req.body);
     await this.sharing_operationService.addKeyToSharing(new_key_to_operation);
     logger.info("Key added to waiting in a sharing operation");
@@ -125,7 +163,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("addMeterToSharing", { url: "/sharing_operations/meter", method: "post" })
-  async addMeterToSharing(req: Request, res: Response, _next: NextFunction) {
+  async addMeterToSharing(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_meters_to_operation = await validateDto(AddMeterToSharingOperationDTO, req.body);
     await this.sharing_operationService.addMeterToSharing(new_meters_to_operation);
     logger.info("Meter added to waiting in a sharing operation");
@@ -139,7 +177,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("addConsumptionDataToSharing", { url: "/sharing_operations/consumptions", method: "post" })
-  async addConsumptionDataToSharing(req: Request, res: Response, _next: NextFunction) {
+  async addConsumptionDataToSharing(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const payload = {
       ...req.body,
       file: req.file,
@@ -157,7 +195,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("patchKeyStatus", { url: "/sharing_operations/key", method: "patch" })
-  async patchKeyStatus(req: Request, res: Response, _next: NextFunction) {
+  async patchKeyStatus(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_key_status = await validateDto(PatchKeyToSharingOperationDTO, req.body);
     await this.sharing_operationService.patchKeyStatus(patched_key_status);
     logger.info("Key linked to sharing operation patched");
@@ -171,7 +209,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("patchMeterStatus", { url: "/sharing_operations/meter", method: "patch" })
-  async patchMeterStatus(req: Request, res: Response, _next: NextFunction) {
+  async patchMeterStatus(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_meter_status = await validateDto(PatchMeterToSharingOperationDTO, req.body);
     await this.sharing_operationService.patchMeterStatus(patched_meter_status);
     logger.info("Meter linked to sharing operation patched");
@@ -185,7 +223,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("deleteSharingOperation", { url: "/sharing_operations/:id", method: "delete" })
-  async deleteSharingOperation(req: Request, res: Response, _next: NextFunction) {
+  async deleteSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.sharing_operationService.deleteSharingOperation(+req.params.id);
     logger.info("Sharing operation deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
@@ -198,7 +236,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("deleteMeterFromSharingOperation", { url: "/sharing_operations/:id/meter", method: "delete" })
-  async deleteMeterFromSharingOperation(req: Request, res: Response, _next: NextFunction) {
+  async deleteMeterFromSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const removed_meter_status = await validateDto(RemoveMeterFromSharingOperationDTO, req.body);
     await this.sharing_operationService.deleteMeterFromSharingOperation(removed_meter_status);
     logger.info("Meter removed from operation");

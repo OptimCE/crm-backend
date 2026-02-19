@@ -1,5 +1,5 @@
-import { DocumentExposedDTO, DocumentQueryDTO, DownloadDocument, UploadDocumentDTO } from "../api/document.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { DocumentExposedDTO, DocumentQueryDTO, DownloadDocument, UploadDocumentDTO } from "../api/document.dtos.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
 
 /**
  * Interface for Document Service.

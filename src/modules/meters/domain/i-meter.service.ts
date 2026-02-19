@@ -1,5 +1,6 @@
-import {
+import type {
   CreateMeterDTO,
+  DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
   MeterPartialQuery,
@@ -8,7 +9,7 @@ import {
   PatchMeterDataDTO,
   UpdateMeterDTO,
 } from "../api/meter.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type {Pagination} from "../../../shared/dtos/ApiResponses.js";
 
 /**
  * Interface for Meter Service.
@@ -62,4 +63,10 @@ export interface IMeterService {
    * @param id - EAN or internal ID.
    */
   deleteMeter(id: string): Promise<void>;
+
+  /**
+   * Deletes latest meter data configuration.
+   * @param delete_meter_data - DTO including ID meter data.
+   */
+  deleteLatestMeterData(delete_meter_data: DeleteFutureMeterDataDTO): Promise<void>;
 }

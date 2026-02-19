@@ -30,7 +30,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("getKeysList", { url: "/keys/", method: "get" })
-  async getKeysList(req: Request, res: Response, _next: NextFunction) {
+  async getKeysList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(KeyPartialQuery, req.query);
     const [result, pagination] = await this.keyService.getPartialKeyList(queryObject);
     logger.info("Key list successfully retrieved");
@@ -44,7 +44,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("getKey", { url: "/keys/:id", method: "get" })
-  async getKey(req: Request, res: Response, _next: NextFunction) {
+  async getKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.keyService.getKey(+req.params.id);
     logger.info("Key successfully retrieved");
     res.status(200).json(new ApiResponse<KeyDTO>(result, SUCCESS));
@@ -57,14 +57,15 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("downloadKey", { url: "/keys/:id/download", method: "get" })
-  async downloadKey(req: Request, res: Response, _next: NextFunction) {
+  async downloadKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const workbook = await this.keyService.downloadKey(+req.params.id);
-    logger.info("Key list successfully retrieved, ready to download");
+    logger.info("Key successfully retrieved, ready to download");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     const filenameBase = req.t("download_key.download_name", { ns: "key" }) + ".xlsx";
-    res.setHeader("Content-Disposition", `attachment; filename="${filenameBase}.xlsx"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${filenameBase}"`);
     await (workbook as ExcelJS.Workbook).xlsx.write(res);
     res.end();
+    logger.info("Key download completed successfully");
   }
 
   /**
@@ -74,7 +75,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("addKey", { url: "/keys/", method: "post" })
-  async addKey(req: Request, res: Response, _next: NextFunction) {
+  async addKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_key = await validateDto(CreateKeyDTO, req.body);
     await this.keyService.addKey(new_key);
     logger.info("Key added successfully");
@@ -88,7 +89,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("updateKey", { url: "/keys/", method: "put" })
-  async updateKey(req: Request, res: Response, _next: NextFunction) {
+  async updateKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_key = await validateDto(UpdateKeyDTO, req.body);
     await this.keyService.updateKey(updated_key);
     logger.info("Key updated successfully");
@@ -102,7 +103,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("deleteKey", { url: "/keys/:id", method: "delete" })
-  async deleteKey(req: Request, res: Response, _next: NextFunction) {
+  async deleteKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.keyService.deleteKey(+req.params.id);
     logger.info("Key deleted successfully");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));

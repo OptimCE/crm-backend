@@ -23,6 +23,12 @@ export default tseslint.config(
         },
       },
       rules: {
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-misused-promises": "error",
+        "@typescript-eslint/consistent-type-imports": "warn",
+        "@typescript-eslint/explicit-function-return-type": "warn",
+        "eqeqeq": ["error", "always"],
+        "no-console": "warn",
         "@typescript-eslint/no-wrapper-object-types": "off",
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-unused-vars": [

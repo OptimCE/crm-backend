@@ -1,5 +1,5 @@
-import { GestionnaireInvitation, UserMemberInvitation } from "../domain/invitation.models.js";
-import { UserManagerInvitationDTO, UserMemberInvitationDTO } from "../api/invitation.dtos.js";
+import type { GestionnaireInvitation, UserMemberInvitation } from "../domain/invitation.models.js";
+import type { UserManagerInvitationDTO, UserMemberInvitationDTO } from "../api/invitation.dtos.js";
 import { toCommunityPartial } from "../../communities/shared/to_dto.js";
 
 export function toUserManagerInvitationDTO(invitation: GestionnaireInvitation): UserManagerInvitationDTO {

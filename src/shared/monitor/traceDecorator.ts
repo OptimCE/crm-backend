@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { context, SpanStatusCode, propagation, Span } from "@opentelemetry/api";
+import { context, SpanStatusCode, propagation, type Span } from "@opentelemetry/api";
 import { TracerUtility } from "./tracer.utility.js";
 import logger from "./logger.js";
 

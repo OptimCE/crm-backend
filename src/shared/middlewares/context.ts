@@ -26,6 +26,8 @@ function parseUserOrgs(user_orgs: string) {
       const splitted = match.split(" ");
       let roles = splitted[2].split(":")[1];
       // Parse role that contain an array
+      console.log("roles", roles);
+      console.log("user_orgs", user_orgs);
       roles = roles.substring(1, roles.length - 1);
       const roleList = roles.split(",");
       const higherRole = resolveHighestRole(roleList);

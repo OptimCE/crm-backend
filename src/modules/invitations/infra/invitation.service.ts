@@ -29,7 +29,6 @@ import type { ICommunityRepository } from "../../communities/domain/i-community.
 import { INVITATION_ERRORS } from "../shared/invitation.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
-import { query } from "express-validator";
 import { toMemberDTO } from "../../members/shared/to_dto.js";
 
 /**

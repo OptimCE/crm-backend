@@ -1,8 +1,8 @@
-import { MemberLinkQueryDTO, MemberPartialQuery } from "../api/member.dtos.js";
-import { Company, Individual, Manager, Member } from "./member.models.js";
-import { DeleteResult, type QueryRunner } from "typeorm";
-import { UserMemberLink } from "../../users/domain/user.models.js";
-import { UserMemberInvitation } from "../../invitations/domain/invitation.models.js";
+import type { MemberLinkQueryDTO, MemberPartialQuery } from "../api/member.dtos.js";
+import type { Company, Individual, Manager, Member } from "./member.models.js";
+import type { DeleteResult, QueryRunner } from "typeorm";
+import type { UserMemberLink } from "../../users/domain/user.models.js";
+import type { UserMemberInvitation } from "../../invitations/domain/invitation.models.js";
 
 export interface IMemberRepository {
   getMembersList(query: MemberPartialQuery, query_runner?: QueryRunner): Promise<[Member[], number]>;

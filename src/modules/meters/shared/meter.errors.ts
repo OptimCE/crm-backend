@@ -26,6 +26,11 @@ export const METER_ERRORS = {
   UPDATE_METER: {
     DATABASE_UPDATE: new LocalError(60008, "meter:update_meter.database_update"),
   },
+  DELETE_METER_DATA: {
+    NOT_FOUND: new LocalError(60009, "meter:delete_meter_data.not_found"),
+    DELETE_DATABASE: new LocalError(600010, "meter:delete_meter_data.delete_database"),
+    UPDATE_DATABASE: new LocalError(600011, "meter:delete_meter_data.update_database"),
+  },
   VALIDATION: {
     WRONG_TYPE: {
       METER_DATA_STATUS: new LocalError(65000, "meter:validation.wrong_type.meter_data_status"),
@@ -35,6 +40,7 @@ export const METER_ERRORS = {
       PRODUCTION_CHAIN: new LocalError(65004, "meter:validation.wrong_type.production_chain"),
       TARIF_GROUP: new LocalError(65005, "meter:validation.wrong_type.tarif_group"),
       READING_FREQUENCY: new LocalError(65006, "meter:validation.wrong_type.reading_frequency"),
+      SHARING_OPERATION_METER_QUERY_TYPE: new LocalError(65007, "meter:validation.wrong_type.sharing_operation_meter_query_type"),
     },
     CREATE_METER: {
       PHASE_NUMBER_MIN_1: new LocalError(65007, "meter:validation.create_meter.phase_number_min_1"),

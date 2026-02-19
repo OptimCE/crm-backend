@@ -1,5 +1,5 @@
-import { AddressDTO } from "./address.dtos.js";
-import { Address } from "./address.models.js";
+import type { AddressDTO } from "./address.dtos.js";
+import type { Address } from "./address.models.js";
 
 export function toAddressDTO(address: Address): AddressDTO {
   return {

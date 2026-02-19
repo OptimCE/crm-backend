@@ -180,6 +180,34 @@ meter_router.patch(
   roleChecker(Role.GESTIONNAIRE),
   meter_controller.patchMeterData.bind(meter_controller),
 );
+// PATCH (/data/delete): Delete a future meter data
+meter_router.patch(
+  "/data/delete",
+  /* #swagger.summary = 'Delete a future meter data'
+     #swagger.tags = ['Meters']
+       #swagger.requestBody = {
+           required: true,
+           content: {
+               "application/json": {
+                   schema: { $ref: "#/components/schemas/DeleteFutureMeterDataDTO" }
+               }
+           }
+       }
+     #swagger.responses[200] = { $ref: '#/components/responses/MeterDeleteSuccess' }
+     #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+     #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+     #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+     #swagger.security = [{
+          "UserIdChecker": [],
+          "CommunityIdChecker": [],
+          "MinRoleChecker": []
+     }]
+  */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  meter_controller.deleteLatestMeterData.bind(meter_controller),
+);
 // DELETE (/:id): Delete a meter
 meter_router.delete(
   "/:id",

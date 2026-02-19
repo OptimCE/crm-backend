@@ -9,6 +9,7 @@ import { ApiResponse, ApiResponsePaginated, Pagination } from "../../../shared/d
 import { SUCCESS } from "../../../shared/errors/errors.js";
 import {
   CreateMeterDTO,
+  DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
   MeterPartialQuery,
@@ -30,7 +31,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("getMetersList", { url: "/meters/", method: "get" })
-  async getMetersList(req: Request, res: Response, _next: NextFunction) {
+  async getMetersList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(MeterPartialQuery, req.query);
     const [result, pagination]: [PartialMeterDTO[], Pagination] = await this.meterService.getMetersList(queryObject);
     logger.info("Meters list successfully retrieved");
@@ -44,7 +45,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("getMeter", { url: "/meters/:id", method: "get" })
-  async getMeter(req: Request, res: Response, _next: NextFunction) {
+  async getMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: MetersDTO = await this.meterService.getMeter(req.params.id);
     logger.info("Meter successfully retrieved");
     res.status(200).json(new ApiResponse<MetersDTO>(result, SUCCESS));
@@ -57,7 +58,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("getMeterConsumptions", { url: "/meters/:id/consumptions", method: "get" })
-  async getMeterConsumptions(req: Request, res: Response, _next: NextFunction) {
+  async getMeterConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const result: MeterConsumptionDTO = await this.meterService.getMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Meter consumptions successfully retrieved");
@@ -71,7 +72,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("downloadMeterConsumptions", { url: "/meters/:id/consumptions/download", method: "get" })
-  async downloadMeterConsumptions(req: Request, res: Response, _next: NextFunction) {
+  async downloadMeterConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const buffer: Buffer = await this.meterService.downloadMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully download");
@@ -87,7 +88,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("addMeter", { url: "/meters/", method: "post" })
-  async addMeter(req: Request, res: Response, _next: NextFunction) {
+  async addMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_meter = await validateDto(CreateMeterDTO, req.body);
     await this.meterService.addMeter(new_meter);
     logger.info("Meter added");
@@ -101,7 +102,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("updateMeter", { url: "/meters/", method: "put" })
-  async updateMeter(req: Request, res: Response, _next: NextFunction) {
+  async updateMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_meter = await validateDto(UpdateMeterDTO, req.body);
     await this.meterService.updateMeter(updated_meter);
     logger.info("Meter updated");
@@ -115,10 +116,24 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("patchMeterData", { url: "/meters/data", method: "patch" })
-  async patchMeterData(req: Request, res: Response, _next: NextFunction) {
+  async patchMeterData(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_meter_data = await validateDto(PatchMeterDataDTO, req.body);
     await this.meterService.patchMeterData(patched_meter_data);
     logger.info("Meter data patched");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Delete latest meter data configuration
+   * @param req - Express request object. Body: PatchMeterDataDTO.
+   * @param res - Express response object. Returns success message.
+   * @param _next - Express next middleware.
+   */
+  @meterControllerTraceDecorator.traceSpan("deleteLatestMeterData", { url: "/meters/data/delete", method: "patch" })
+  async deleteLatestMeterData(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const deleted_meter_data = await validateDto(DeleteFutureMeterDataDTO, req.body);
+    await this.meterService.deleteLatestMeterData(deleted_meter_data);
+    logger.info("Meter data deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 
@@ -129,7 +144,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("patchMeterData", { url: "/meters/:id", method: "delete" })
-  async deleteMeter(req: Request, res: Response, _next: NextFunction) {
+  async deleteMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.meterService.deleteMeter(req.params.id);
     logger.info("Meter deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));

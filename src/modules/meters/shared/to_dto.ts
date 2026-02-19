@@ -1,5 +1,5 @@
-import { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
-import { MeterConsumptionDTO, MetersDataDTO, MetersDTO, PartialMeterDTO } from "../api/meter.dtos.js";
+import type { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
+import { MeterConsumptionDTO, MetersDataDTO, MetersDTO, type PartialMeterDTO } from "../api/meter.dtos.js";
 import { toAddressDTO } from "../../../shared/address/to_dto.js";
 import { toMemberPartialDTO } from "../../members/shared/to_dto.js";
 import { toSharingOperationPartialDTO } from "../../sharing_operations/shared/to_dto.js";

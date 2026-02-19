@@ -1,5 +1,5 @@
-import { Document } from "../domain/document.models.js";
-import { DocumentExposedDTO } from "../api/document.dtos.js";
+import type { Document } from "../domain/document.models.js";
+import type { DocumentExposedDTO } from "../api/document.dtos.js";
 
 export function toDocumentExposed(document: Document): DocumentExposedDTO {
   return {

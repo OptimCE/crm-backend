@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { GLOBAL_ERRORS, LocalError } from "../errors/errors.js";
+import { GLOBAL_ERRORS, type LocalError } from "../errors/errors.js";
 import logger from "../monitor/logger.js";
 import * as myRes from "../dtos/ApiResponses.js";
 

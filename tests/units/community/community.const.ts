@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { Role } from "../../../src/shared/dtos/role.js";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { Community, CommunityUser } from "../../../src/modules/communities/domain/community.models.js";
+import type { Community, CommunityUser } from "../../../src/modules/communities/domain/community.models.js";
 import { toMyCommunityDTO, toUsersCommunityDTO } from "../../../src/modules/communities/shared/to_dto.js";
 import { COMMUNITY_ERRORS } from "../../../src/modules/communities/shared/community.errors.js";
 import { AppError } from "../../../src/shared/middlewares/error.middleware.js";

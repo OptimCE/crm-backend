@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
 import { Role } from "../../../src/shared/dtos/role.js";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { GestionnaireInvitation, UserMemberInvitation } from "../../../src/modules/invitations/domain/invitation.models.js";
-import { UserMemberInvitationDTO, UserManagerInvitationDTO } from "../../../src/modules/invitations/api/invitation.dtos.js";
+import type { GestionnaireInvitation, UserMemberInvitation } from "../../../src/modules/invitations/domain/invitation.models.js";
+import type { UserMemberInvitationDTO, UserManagerInvitationDTO } from "../../../src/modules/invitations/api/invitation.dtos.js";
 import { INVITATION_ERRORS } from "../../../src/modules/invitations/shared/invitation.errors.js";
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
-import { HttpMethod, ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
+import { type HttpMethod, ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 import { mockIndividualEntity, mockMemberDTOJSON } from "../member/member.const.js";
 
 // --- Mock Data ---

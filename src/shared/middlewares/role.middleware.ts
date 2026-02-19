@@ -1,4 +1,4 @@
-import { Role, ROLE_HIERARCHY } from "../dtos/role.js";
+import { type Role, ROLE_HIERARCHY } from "../dtos/role.js";
 import type { Request } from "express";
 import type { Response } from "express";
 import type { NextFunction } from "express";

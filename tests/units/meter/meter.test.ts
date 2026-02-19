@@ -5,6 +5,7 @@ import { expectWithLog, mockMeterRepositoryModule } from "../../utils/helper.js"
 import {
   testCasesAddMeter,
   testCasesDeleteMeter,
+  testCasesDeleteMeterData,
   testCasesDownloadMeterConsumptions,
   testCasesGetMeter,
   testCasesGetMeterConsumptions,
@@ -218,4 +219,50 @@ describe("(Unit) Meter Module", () => {
       },
     );
   });
+});
+describe("(Unit) Patch Meter Data Delete", () => {
+  useUnitTestDb();
+
+  it.each(testCasesDeleteMeterData)(
+    "PATCH /meters/data/delete : $description",
+    async ({ body, status_code, expected_error_code, expected_data, mocks, orgs, translation_field }) => {
+      if (mocks?.meterRepo) await mockMeterRepositoryModule(mocks.meterRepo);
+
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+      const i18next = appModule.i18next;
+
+      const response = await request(app)
+        .patch("/meters/data/delete")
+        .send(body)
+        .set("x-user-id", "1")
+        .set("x-community-id", "1")
+        .set("x-user-orgs", orgs);
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(status_code);
+
+        // Handle Validation errors structure vs AppError structure
+        if (response.body.error_code) {
+          expect(response.body.error_code).toBe(expected_error_code);
+        }
+
+        let result = expected_data;
+        // Translate expected error message if not 200 OK
+        if (response.status !== 200 && typeof expected_data === "string") {
+          if (translation_field) {
+            result = i18next.t(expected_data, translation_field);
+          } else {
+            result = i18next.t(expected_data);
+          }
+        }
+
+        // For validation errors, the data might be an array or object depending on your middleware
+        // For this test suite, we check strict equality on data
+        if (expected_data !== null) {
+          expect(response.body.data).toEqual(result);
+        }
+      });
+    },
+  );
 });

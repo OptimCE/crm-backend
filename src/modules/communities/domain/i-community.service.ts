@@ -1,4 +1,4 @@
-import {
+import type {
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
   CreateCommunityDTO,
@@ -6,7 +6,7 @@ import {
   PatchRoleUserDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
 
 /**
  * Interface for the Community Service.

@@ -1,5 +1,5 @@
-import { CreateCommunityDTO } from "../../modules/communities/api/community.dtos.js";
-import { Role } from "../dtos/role.js";
+import type { CreateCommunityDTO } from "../../modules/communities/api/community.dtos.js";
+import type { Role } from "../dtos/role.js";
 
 /**
  * Interface for Identity and Access Management (IAM) Service.

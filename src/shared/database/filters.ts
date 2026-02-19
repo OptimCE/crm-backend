@@ -1,4 +1,4 @@
-import { ObjectLiteral, SelectQueryBuilder } from "typeorm";
+import type { ObjectLiteral, SelectQueryBuilder } from "typeorm";
 import type { Sort } from "../dtos/query.dtos.js";
 
 export type FilterDef<T extends ObjectLiteral> = {
@@ -17,7 +17,7 @@ export function applyFilters<TEntity extends ObjectLiteral, TQuery>(
   filters: FilterDef<TEntity>[],
   qb: SelectQueryBuilder<TEntity>,
   q: TQuery, // Accepts your DTO class directly
-) {
+): SelectQueryBuilder<TEntity> {
   for (const f of filters) {
     // Safe access to the DTO property
     const raw = (q as any)[f.key]; // eslint-disable-next-line @typescript-eslint/no-explicit-any

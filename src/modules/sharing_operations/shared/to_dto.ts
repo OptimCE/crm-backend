@@ -1,5 +1,5 @@
-import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
-import { SharingOpConsumptionDTO, SharingOperationDTO, SharingOperationKeyDTO, SharingOperationPartialDTO } from "../api/sharing_operation.dtos.js";
+import type { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
+import { SharingOpConsumptionDTO, SharingOperationDTO, SharingOperationKeyDTO, type SharingOperationPartialDTO } from "../api/sharing_operation.dtos.js";
 import { toKeyPartialDTO } from "../../keys/shared/to_dto.js";
 import { SharingKeyStatus } from "./sharing_operation.types.js";
 
@@ -33,33 +33,17 @@ export function toSharingOperation(value: SharingOperation): SharingOperationDTO
   dto.name = value.name;
   dto.type = value.type;
 
-  // Initialize arrays
-  dto.history_keys = [];
-
   // Safety check if keys are not loaded
   const keys = value.keys || [];
 
-  // Logic to categorize keys
-  // Since the Repository sorts keys by start_date DESC (newest first):
-  // 1. The first PENDING key found is 'key_waiting_approval'.
-  // 2. The first APPROVED key found is the active 'key'.
-  // 3. All others go to 'history_keys'.
-
   let activeKeyFound = false;
-  let pendingKeyFound = false;
-
   for (const keyEntity of keys) {
     const keyDto = toSharingOperationKeyDTO(keyEntity);
-
-    if (keyEntity.status === SharingKeyStatus.PENDING && !pendingKeyFound) {
+    if (keyEntity.status === SharingKeyStatus.PENDING) {
       dto.key_waiting_approval = keyDto;
-      pendingKeyFound = true;
     } else if (keyEntity.status === SharingKeyStatus.APPROVED && !activeKeyFound) {
       dto.key = keyDto;
       activeKeyFound = true;
-    } else {
-      // Any subsequent Approved/Pending keys, or any Rejected keys, go to history
-      dto.history_keys.push(keyDto);
     }
   }
 

@@ -1,4 +1,4 @@
-import { User } from "./user.models.js";
+import type { User } from "./user.models.js";
 import type { QueryRunner } from "typeorm";
 
 export interface IUserRepository {

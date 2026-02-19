@@ -25,7 +25,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("getDocuments", { url: "/documents/:member_id", method: "get" })
-  async getDocuments(req: Request, res: Response, _next: NextFunction) {
+  async getDocuments(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(DocumentQueryDTO, req.query);
     const [result, pagination]: [DocumentExposedDTO[], Pagination] = await this.documentService.getDocuments(+req.params.member_id, queryObject);
     logger.info("Document list successfully retrieved");
@@ -39,7 +39,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("downloadDocument", { url: "/documents/:member_id/:document_id", method: "get" })
-  async downloadDocument(req: Request, res: Response, _next: NextFunction) {
+  async downloadDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: DownloadDocument = await this.documentService.downloadDocument(+req.params.document_id);
     logger.info("Document successfully retrieved");
     res.set({
@@ -57,7 +57,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("uploadDocument", { url: "/documents", method: "post" })
-  async uploadDocument(req: Request, res: Response, _next: NextFunction) {
+  async uploadDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const payload = {
       ...req.body,
       file: req.file,
@@ -74,7 +74,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("deleteDocument", { url: "/documents/:document_id", method: "delete" })
-  async deleteDocument(req: Request, res: Response, _next: NextFunction) {
+  async deleteDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.documentService.deleteDocument(+req.params.document_id);
     logger.info("Document successfully deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));

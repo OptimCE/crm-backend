@@ -54,6 +54,49 @@ sharing_operation_routes.get(
   roleChecker(Role.GESTIONNAIRE),
   sharing_operation_controller.getSharingOperation.bind(sharing_operation_controller),
 );
+// GET (:id/meters): Get paginated meters list of meters in the sharing operation (past, now or future)
+sharing_operation_routes.get(
+  "/:id/meters",
+  /* #swagger.summary = 'Get paginated meters list of meters in the sharing operation (past, now or future)'
+     #swagger.tags = ['SharingOperations']
+     #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationMetersQuery' }
+     #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationConsumptionQuery' }
+     #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationConsumptionsGetSuccess' }
+     #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+     #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+     #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+     #swagger.security = [{
+          "UserIdChecker": [],
+          "CommunityIdChecker": [],
+          "MinRoleChecker": []
+     }]
+  */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.getSharingOperationMetersList.bind(sharing_operation_controller),
+);
+// GET (:id/meters): Get paginated meters list of meters in the sharing operation (past, now or future)
+sharing_operation_routes.get(
+  "/:id/keys",
+  /* #swagger.summary = 'Get paginated historical keys list'
+     #swagger.tags = ['SharingOperations']
+     #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationConsumptionQuery' }
+     #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationConsumptionsGetSuccess' }
+     #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+     #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+     #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+     #swagger.security = [{
+          "UserIdChecker": [],
+          "CommunityIdChecker": [],
+          "MinRoleChecker": []
+     }]
+  */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.getSharingOperationKeysList.bind(sharing_operation_controller),
+);
 // Get (/:id/consumptions): Get consumptions information about a sharing operation
 sharing_operation_routes.get(
   "/:id/consumptions",

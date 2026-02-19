@@ -34,7 +34,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("getMembersPendingInvitation", { url: "/invitations/", method: "get" })
-  async getMembersPendingInvitation(req: Request, res: Response, _next: NextFunction) {
+  async getMembersPendingInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject: UserMemberInvitationQuery = await validateDto(UserMemberInvitationQuery, req.query);
     const [result, pagination]: [UserMemberInvitationDTO[], Pagination] = await this.invitationService.getMembersPendingInvitation(queryObject);
     logger.info("Members pending invitations successfully retrieved");
@@ -48,7 +48,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("getManagersPendingInvitation", { url: "/invitations/managers", method: "get" })
-  async getManagersPendingInvitation(req: Request, res: Response, _next: NextFunction) {
+  async getManagersPendingInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject: UserManagerInvitationQuery = await validateDto(UserManagerInvitationQuery, req.query);
     const [result, pagination]: [UserManagerInvitationDTO[], Pagination] = await this.invitationService.getManagersPendingInvitation(queryObject);
     logger.info("Managers pending invitations successfully retrieved");
@@ -62,7 +62,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("getOwnMemberPendingInvitation", { url: "/invitations/own", method: "get" })
-  async getOwnMemberPendingInvitation(req: Request, res: Response, _next: NextFunction) {
+  async getOwnMemberPendingInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject: UserMemberInvitationQuery = await validateDto(UserMemberInvitationQuery, req.query);
     const [result, pagination]: [UserMemberInvitationDTO[], Pagination] = await this.invitationService.getOwnMemberPendingInvitation(queryObject);
     logger.info("Members pending invitations successfully retrieved");
@@ -76,7 +76,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("getOwnMemberPendingInvitation", { url: "/invitations/own/member/:id", method: "get" })
-  async getOwnMemberPendingInvitationById(req: Request, res: Response, _next: NextFunction) {
+  async getOwnMemberPendingInvitationById(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.invitationService.getOwnMemberPendingInvitationById(+req.params.id);
     logger.info("Members pending invitations successfully retrieved");
     res.status(200).json(new ApiResponse<IndividualDTO | CompanyDTO>(result, SUCCESS));
@@ -89,7 +89,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("getOwnManagerPendingInvitation", { url: "/invitations/own/managers", method: "get" })
-  async getOwnManagerPendingInvitation(req: Request, res: Response, _next: NextFunction) {
+  async getOwnManagerPendingInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject: UserManagerInvitationQuery = await validateDto(UserManagerInvitationQuery, req.query);
     const [result, pagination]: [UserManagerInvitationDTO[], Pagination] = await this.invitationService.getOwnManagerPendingInvitation(queryObject);
     logger.info("Managers pending invitations successfully retrieved");
@@ -103,7 +103,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("inviteUserToBecomeMember", { url: "/invitations/member", method: "post" })
-  async inviteUserToBecomeMember(req: Request, res: Response, _next: NextFunction) {
+  async inviteUserToBecomeMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const invitation: InviteUser = await validateDto(InviteUser, req.body);
     await this.invitationService.inviteUserToBecomeMember(invitation);
     logger.info("User invited successfully to become a member");
@@ -117,7 +117,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("inviteUserToBecomeManager", { url: "/invitations/manager", method: "post" })
-  async inviteUserToBecomeManager(req: Request, res: Response, _next: NextFunction) {
+  async inviteUserToBecomeManager(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const invitation: InviteUser = await validateDto(InviteUser, req.body);
     await this.invitationService.inviteUserToBecomeManager(invitation);
     logger.info("User invited successfully to become a manager");
@@ -131,7 +131,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("acceptInvitationMember", { url: "/invitations/accept", method: "post" })
-  async acceptInvitationMember(req: Request, res: Response, _next: NextFunction) {
+  async acceptInvitationMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const accept_invitation: AcceptInvitationDTO = await validateDto(AcceptInvitationDTO, req.body);
     await this.invitationService.acceptInvitationMember(accept_invitation);
     logger.info("Invitation successfully accepted");
@@ -145,7 +145,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("acceptInvitationMemberWEncoded", { url: "/invitations/accept/encoded", method: "post" })
-  async acceptInvitationMemberWEncoded(req: Request, res: Response, _next: NextFunction) {
+  async acceptInvitationMemberWEncoded(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const accept_invitation: AcceptInvitationWEncodedDTO = await validateDto(AcceptInvitationWEncodedDTO, req.body);
     await this.invitationService.acceptInvitationMemberWEncoded(accept_invitation);
     logger.info("Invitation successfully accepted with encoded");
@@ -159,7 +159,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("acceptInvitationManager", { url: "/invitations/accept/manager", method: "post" })
-  async acceptInvitationManager(req: Request, res: Response, _next: NextFunction) {
+  async acceptInvitationManager(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const accept_invitation: AcceptInvitationDTO = await validateDto(AcceptInvitationDTO, req.body);
     await this.invitationService.acceptInvitationManager(accept_invitation);
     logger.info("Invitation successfully accepted");
@@ -173,7 +173,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("cancelMemberInvitation", { url: "/invitations/:id_invitation/member", method: "delete" })
-  async cancelMemberInvitation(req: Request, res: Response, _next: NextFunction) {
+  async cancelMemberInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.invitationService.cancelMemberInvitation(+req.params.id_invitation);
     logger.info("Invitation successfully cancelled");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
@@ -186,7 +186,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("cancelMemberInvitation", { url: "/invitations/:id_invitation/manager", method: "delete" })
-  async cancelManagerInvitation(req: Request, res: Response, _next: NextFunction) {
+  async cancelManagerInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.invitationService.cancelManagerInvitation(+req.params.id_invitation);
     logger.info("Invitation successfully cancelled");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
@@ -199,7 +199,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("cancelMemberInvitation", { url: "/invitations/:id_invitation/own/member", method: "delete" })
-  async refuseMemberInvitation(req: Request, res: Response, _next: NextFunction) {
+  async refuseMemberInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.invitationService.refuseMemberInvitation(+req.params.id_invitation);
     logger.info("Invitation successfully refused");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
@@ -212,7 +212,7 @@ export class InvitationController {
    * @param _next - Express next middleware.
    */
   @invitationControllerTraceDecorator.traceSpan("cancelMemberInvitation", { url: "/invitations/:id_invitation/own/manager", method: "delete" })
-  async refuseManagerInvitation(req: Request, res: Response, _next: NextFunction) {
+  async refuseManagerInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.invitationService.refuseManagerInvitation(+req.params.id_invitation);
     logger.info("Invitation successfully refused");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));

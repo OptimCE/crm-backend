@@ -1,5 +1,5 @@
-import { LocalError } from "./errors.js";
-import { ValidationArguments, ValidationOptions } from "class-validator";
+import type { LocalError } from "./errors.js";
+import type { ValidationArguments, ValidationOptions } from "class-validator";
 
 export const withError = (errorBase: LocalError, options?: ValidationOptions): ValidationOptions => {
   return {

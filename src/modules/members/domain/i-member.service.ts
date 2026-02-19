@@ -1,4 +1,4 @@
-import {
+import type {
   CompanyDTO,
   CreateMemberDTO,
   IndividualDTO,
@@ -10,9 +10,9 @@ import {
   PatchMemberStatusDTO,
   UpdateMemberDTO,
 } from "../api/member.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import type { QueryRunner } from "typeorm";
-import { Company, Individual } from "./member.models.js";
+import type { Company, Individual } from "./member.models.js";
 
 /**
  * Interface for Member Service.

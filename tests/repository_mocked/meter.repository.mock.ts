@@ -12,5 +12,9 @@ export function createMockMeterRepository(): jest.Mocked<IMeterRepository> {
     getMeter: jest.fn(),
     getMeterConsumptions: jest.fn(),
     getMetersList: jest.fn(),
+    activePreviousInactiveMeterData: jest.fn(),
+    deleteMeterData: jest.fn(),
+    getMeterData: jest.fn(),
+    updateMeter: jest.fn(),
   };
 }

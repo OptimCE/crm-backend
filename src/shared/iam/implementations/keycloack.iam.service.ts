@@ -36,6 +36,7 @@ export class KeycloakIamService implements IIamService {
     });
 
     if (!groupRep.id) {
+      logger.error({ operation: "createCommunity" }, "Fail to create community on keycloack service");
       throw new Error(`Failed to create community: ${new_community.name}`);
     }
 
@@ -53,6 +54,7 @@ export class KeycloakIamService implements IIamService {
         );
       } catch (error) {
         // Ignore 409 Conflict (group already exists), rethrow others
+        logger.error({ operation: "createCommunity", error: error }, "Error while trying to add child group into keycloack");
         if ((error as any).response?.status !== 409) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           throw error;

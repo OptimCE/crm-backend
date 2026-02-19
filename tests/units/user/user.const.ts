@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { User } from "../../../src/modules/users/domain/user.models.js";
+import type { User } from "../../../src/modules/users/domain/user.models.js";
 import { toUserDTO } from "../../../src/modules/users/shared/to_dto.js";
 import { USER_ERRORS } from "../../../src/modules/users/shared/user.errors.js";
 import { AppError } from "../../../src/shared/middlewares/error.middleware.js";

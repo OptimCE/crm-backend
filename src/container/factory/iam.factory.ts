@@ -9,9 +9,9 @@ import type { IIamService } from "../../shared/iam/i-iam.service.js";
  * and binds the appropriate implementation to the DI container.
  * @throws Error if configuration or settings are missing/invalid.
  */
-export function intializeIAMService() {
-  const iam_service: string = config.get("iam_service.name");
-  if (iam_service == null) {
+export function intializeIAMService(): void {
+  const iam_service: string|null = config.get("iam_service.name");
+  if (iam_service === null) {
     throw new Error("Missing iam_service.name");
   }
   switch (iam_service.toUpperCase()) {

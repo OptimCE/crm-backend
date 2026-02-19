@@ -32,7 +32,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("getMembersList", { url: "/members/", method: "get" })
-  async getMembersList(req: Request, res: Response, _next: NextFunction) {
+  async getMembersList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject: MemberPartialQuery = await validateDto(MemberPartialQuery, req.query);
     const [result, pagination]: [MembersPartialDTO[], Pagination] = await this.member_service.getMembersList(queryObject);
     logger.info("Members list successfully retrieved");
@@ -46,7 +46,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("getMember", { url: "/members/:id_member", method: "get" })
-  async getMember(req: Request, res: Response, _next: NextFunction) {
+  async getMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: IndividualDTO | CompanyDTO = await this.member_service.getMember(+req.params.id_member);
     logger.info("Member successfully retrieved");
     res.status(200).json(new ApiResponse<IndividualDTO | CompanyDTO>(result, SUCCESS));
@@ -59,7 +59,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("getMemberLink", { url: "/members/:id_member/link", method: "get" })
-  async getMemberLink(req: Request, res: Response, _next: NextFunction) {
+  async getMemberLink(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query = await validateDto(MemberLinkQueryDTO, req.query);
     const result: MemberLinkDTO = await this.member_service.getMemberLink(+req.params.id_member, query);
     logger.info("Member link status successfully retrieved");
@@ -73,7 +73,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("addMember", { url: "/members/", method: "post" })
-  async addMember(req: Request, res: Response, _next: NextFunction) {
+  async addMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_member: CreateMemberDTO = await validateDto(CreateMemberDTO, req.body);
     await this.member_service.addMember(new_member);
     logger.info("Member successfully created");
@@ -87,7 +87,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("addMember", { url: "/members/", method: "put" })
-  async updateMember(req: Request, res: Response, _next: NextFunction) {
+  async updateMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_member: UpdateMemberDTO = await validateDto(UpdateMemberDTO, req.body);
     await this.member_service.updateMember(updated_member);
     logger.info("Member successfully updated");
@@ -101,7 +101,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("patchMemberStatus", { url: "/members/status", method: "patch" })
-  async patchMemberStatus(req: Request, res: Response, _next: NextFunction) {
+  async patchMemberStatus(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_member_status: PatchMemberStatusDTO = await validateDto(PatchMemberStatusDTO, req.body);
     await this.member_service.patchMemberStatus(patched_member_status);
     logger.info("Member status successfully patched");
@@ -115,7 +115,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("patchMemberLink", { url: "/members/invite", method: "patch" })
-  async patchMemberLink(req: Request, res: Response, _next: NextFunction) {
+  async patchMemberLink(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_member_invite_user: PatchMemberInviteUserDTO = await validateDto(PatchMemberInviteUserDTO, req.body);
     await this.member_service.patchMemberLink(patched_member_invite_user);
     logger.info("Member invite user successfully done");
@@ -129,7 +129,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("deleteMember", { url: "/members/:id_member", method: "delete" })
-  async deleteMember(req: Request, res: Response, _next: NextFunction) {
+  async deleteMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.member_service.deleteMember(+req.params.id_member);
     logger.info("Member successfully deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
@@ -142,7 +142,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("deleteMemberLink", { url: "/members/:id_member/link", method: "delete" })
-  async deleteMemberLink(req: Request, res: Response, _next: NextFunction) {
+  async deleteMemberLink(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.member_service.deleteMemberLink(+req.params.id_member);
     logger.info("Member link successfully deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));

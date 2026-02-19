@@ -1,4 +1,4 @@
-import { context, propagation, SpanStatusCode, trace, Tracer, Context, Span } from "@opentelemetry/api";
+import { context, propagation, SpanStatusCode, trace, type Tracer, type Context, type Span } from "@opentelemetry/api";
 import logger from "./logger.js";
 import { ApiResponse } from "../dtos/ApiResponses.js";
 import type { Request } from "express";

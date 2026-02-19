@@ -1,4 +1,4 @@
-import {
+import type {
   AddConsumptionDataDTO,
   AddKeyToSharingOperationDTO,
   AddMeterToSharingOperationDTO,
@@ -9,10 +9,14 @@ import {
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
   SharingOperationDTO,
+  SharingOperationKeyDTO,
+  SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
 } from "../api/sharing_operation.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
+import type { KeyPartialQuery } from "../../keys/api/key.dtos.js";
 
 /**
  * Interface for Sharing Operation Service.
@@ -96,4 +100,18 @@ export interface ISharingOperationService {
    * @param removed_meter_status - DTO identifying meter and sharing operation.
    */
   deleteMeterFromSharingOperation(removed_meter_status: RemoveMeterFromSharingOperationDTO): Promise<void>;
+
+  /**
+   * Retrieve a list of meter from a sharing operation. The meters fetched could be either the actuel, the past or the future
+   * @param sharing_operation_id
+   * @param query
+   */
+  getSharingOperationMetersList(sharing_operation_id: number, query: SharingOperationMetersQuery): Promise<[PartialMeterDTO[], Pagination]>;
+
+  /**
+   * Retrieve a list of meter from a sharing operation. The meters fetched could be either the actuel, the past or the future
+   * @param sharing_operation_id
+   * @param query
+   */
+  getSharingOperationKeysList(sharing_operation_id: number, query: KeyPartialQuery): Promise<[SharingOperationKeyDTO[], Pagination]>;
 }

@@ -1,14 +1,21 @@
 import { inject, injectable } from "inversify";
 import type { ISharingOperationRepository } from "../domain/i-sharing_operation.repository.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
-import { CreateSharingOperationDTO, SharingOperationConsumptionQuery, SharingOperationPartialQuery } from "../api/sharing_operation.dtos.js";
+import {
+  CreateSharingOperationDTO,
+  SharingOperationConsumptionQuery,
+  SharingOperationMetersQuery,
+  SharingOperationMetersQueryType,
+  SharingOperationPartialQuery,
+} from "../api/sharing_operation.dtos.js";
 import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
-import { DeleteResult, In, type QueryRunner } from "typeorm";
+import {DeleteResult, In, type QueryRunner, SelectQueryBuilder} from "typeorm";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
-import { MeterData } from "../../meters/domain/meter.models.js";
+import { Meter, MeterData } from "../../meters/domain/meter.models.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { SharingKeyStatus } from "../shared/sharing_operation.types.js";
+import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
 
 @injectable()
 export class SharingOperationRepository implements ISharingOperationRepository {
@@ -226,6 +233,18 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       .execute();
   }
 
+  async rejectSpecificKeyEntry(id_sharing: number, id_key: number, end_date: Date, query_runner?: QueryRunner): Promise<void> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    await manager
+      .createQueryBuilder(SharingOperationKey, "key")
+      .update(SharingOperationKey)
+      .set({ end_date: end_date.toISOString().split("T")[0], status: SharingKeyStatus.REJECTED })
+      .where("sharing_operation = :id_sharing", { id_sharing })
+      .andWhere("allocation_key = :id_key", { id_key })
+      .andWhere("end_date IS NULL") // Only close currently open entries
+      .execute();
+  }
   /**
    * Closes any currently APPROVED (active) keys for this sharing operation.
    * Used when a new key is approved to replace the old one.
@@ -250,5 +269,152 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       id: id_sharing,
       community: { id: internal_community_id },
     });
+  }
+  meterFilters: FilterDef<Meter>[] = [
+    { key: "EAN", apply: (qb, val) => qb.andWhere("meter.EAN LIKE :ean", { ean: `%${val}%` }) },
+    { key: "meter_number", apply: (qb, val) => qb.andWhere("meter.meter_number LIKE :mn", { mn: `%${val}%` }) },
+
+    // Address Filters
+    { key: "street", apply: (qb, val) => qb.andWhere("address.street LIKE :street", { street: `%${val}%` }) },
+    { key: "city", apply: (qb, val) => qb.andWhere("address.city LIKE :city", { city: `%${val}%` }) },
+    { key: "postcode", apply: (qb, val) => qb.andWhere("address.postcode = :post", { post: val }) },
+    { key: "address_number", apply: (qb, val) => qb.andWhere("address.address_number = :an", { an: val }) },
+    { key: "supplement", apply: (qb, val) => qb.andWhere("address.supplement LIKE :supp", { supp: `%${val}%` }) },
+
+    // Active Meter Data Filters (Status, Holder, Sharing Op)
+    // These rely on the 'active_data' join defined in getMetersList
+    {
+      key: "status",
+      apply: (qb, val) => qb.andWhere("active_data.status = :status", { status: val }),
+    },
+    {
+      key: "holder_id",
+      apply: (qb, val) => qb.andWhere("active_data.member = :hid", { hid: val }),
+    },
+    {
+      key: "sharing_operation_id",
+      apply: (qb, val) => qb.andWhere("active_data.sharing_operation = :soid", { soid: val }),
+    },
+    {
+      key: "not_sharing_operation_id",
+      apply: (qb, val): SelectQueryBuilder<Meter> => {
+        const now = new Date();
+
+        return qb
+          .andWhere((sub) => {
+            const subQuery = sub
+              .subQuery()
+              .select("md.meter") // or "md.meterEAN" depending on your mapping
+              .from(MeterData, "md")
+              .where("md.sharing_operation = :not_soid")
+              .andWhere("md.start_date <= :now")
+              .andWhere("(md.end_date IS NULL OR md.end_date > :now)") // or >= if inclusive
+              .getQuery();
+
+            return `meter.EAN NOT IN ${subQuery}`;
+          })
+          .setParameters({ not_soid: val, now });
+      },
+    },
+  ];
+  getSharingOperationMetersList(id_sharing: number, query: SharingOperationMetersQuery, query_runner?: QueryRunner): Promise<[Meter[], number]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const qb = manager.createQueryBuilder(Meter, "meter");
+    const now = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+    // 1. Join Address
+    qb.leftJoinAndSelect("meter.address", "address");
+
+    // 2. Select the specific MeterData based on the Query Type
+    // We use an Inner Join here because we only want meters that
+    // actually HAVE data matching the requested sharing operation period.
+    qb.innerJoinAndSelect("meter.meter_data", "active_data");
+
+    // 3. Apply Temporal Logic + Sharing Operation ID
+    qb.where("active_data.id_sharing_operation = :id_sharing", { id_sharing });
+
+    switch (query.type) {
+      case SharingOperationMetersQueryType.PAST:
+        qb.andWhere("active_data.end_date <= :now", { now });
+        // Logic: Pick the most recent historical record
+        qb.andWhere((sub) => {
+          const subQuery = sub
+            .subQuery()
+            .select("MAX(md.start_date)")
+            .from(MeterData, "md")
+            .where("md.ean = meter.ean")
+            .andWhere("md.id_sharing_operation = :id_sharing")
+            .andWhere("md.end_date <= :now")
+            .getQuery();
+          return "active_data.start_date = " + subQuery;
+        });
+        break;
+
+      case SharingOperationMetersQueryType.NOW:
+        qb.andWhere("active_data.start_date <= :now", { now });
+        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date > :now)", { now });
+        break;
+
+      case SharingOperationMetersQueryType.FUTURE:
+        qb.andWhere("active_data.start_date > :now", { now });
+        // Logic: Pick the nearest upcoming record
+        qb.andWhere((sub) => {
+          const subQuery = sub
+            .subQuery()
+            .select("MIN(md.start_date)")
+            .from(MeterData, "md")
+            .where("md.ean = meter.ean")
+            .andWhere("md.id_sharing_operation = :id_sharing")
+            .andWhere("md.start_date > :now")
+            .getQuery();
+          return "active_data.start_date = " + subQuery;
+        });
+        break;
+    }
+
+    // 4. Scopes and Filters
+    withCommunityScope(qb, "meter");
+    applyFilters(this.meterFilters, qb, query);
+
+    // 5. Pagination
+    const take = query.limit || 10;
+    const skip = ((query.page || 1) - 1) * take;
+
+    qb.orderBy("meter.EAN", "ASC").skip(skip).take(take);
+
+    return qb.getManyAndCount();
+  }
+  keyPartialFilters: FilterDef<SharingOperationKey>[] = [
+    {
+      key: "description",
+      apply: (qb, val) => qb.andWhere("key.description LIKE :desc", { desc: `%${val}%` }),
+    },
+    {
+      key: "name",
+      apply: (qb, val) => qb.andWhere("key.name LIKE :name", { name: `%${val}%` }),
+    },
+  ];
+  keyPartialSorts: SortDef<SharingOperationKey>[] = [
+    {
+      key: "sort_name", // Looks for 'sort_name' in the DTO
+      apply: (qb, direction) => qb.addOrderBy("key.name", direction),
+    },
+  ];
+  getSharingOperationKeysList(id_sharing: number, query: KeyPartialQuery, query_runner?: QueryRunner): Promise<[SharingOperationKey[], number]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    let qb = manager
+      .createQueryBuilder(SharingOperationKey, "op_key")
+      .leftJoinAndSelect("op_key.allocation_key", "key")
+      .where("op_key.id_sharing_operation = :id_sharing", { id_sharing });
+    withCommunityScope(qb, "op_key");
+    qb = applyFilters(this.keyPartialFilters, qb, query);
+
+    qb = applySorts(this.keyPartialSorts, qb, query);
+
+    // 3. Pagination
+    const take = query.limit;
+    const skip = (query.page - 1) * take;
+
+    return qb.skip(skip).take(take).getManyAndCount();
   }
 }

@@ -13,25 +13,30 @@ import {
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
   SharingOperationDTO,
+  SharingOperationKeyDTO,
+  SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
 } from "../api/sharing_operation.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
-import { SharingOpConsumption, SharingOperation } from "../domain/sharing_operation.models.js";
+import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
-import { toSharingOperation, toSharingOperationConsumptions, toSharingOperationPartialDTO } from "../shared/to_dto.js";
+import { toSharingOperation, toSharingOperationConsumptions, toSharingOperationKeyDTO, toSharingOperationPartialDTO } from "../shared/to_dto.js";
 import * as xlsx from "xlsx";
 import type { QueryRunner } from "typeorm";
 import { Transactional } from "../../../shared/transactional/transaction.uow.js";
 import type { IMeterRepository } from "../../meters/domain/i-meter.repository.js";
-import { MeterConsumption } from "../../meters/domain/meter.models.js";
+import { Meter, MeterConsumption } from "../../meters/domain/meter.models.js";
 import type { IKeyRepository } from "../../keys/domain/i-key.repository.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
 import { MEMBER_ERRORS } from "../../members/shared/member.errors.js";
 import { SharingKeyStatus } from "../shared/sharing_operation.types.js";
 import { MeterDataStatus } from "../../meters/shared/meter.types.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
+import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
+import { toMeterPartialDTO } from "../../meters/shared/to_dto.js";
+import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
 
 @injectable()
 export class SharingOperationService implements ISharingOperationService {
@@ -149,7 +154,7 @@ export class SharingOperationService implements ISharingOperationService {
         for (const col of columnMap) {
           const value = row[col.index];
           // Skip nulls or non-numbers
-          if (value == null || isNaN(parseFloat(value))) continue;
+          if (value === null || isNaN(parseFloat(value))) continue;
           const numValue = parseFloat(value);
 
           sheetData.push({
@@ -513,21 +518,23 @@ export class SharingOperationService implements ISharingOperationService {
     prevEndDate.setDate(prevEndDate.getDate() - 1);
 
     try {
-      // 2. Manage Lifecycle based on status
-      if (status === SharingKeyStatus.APPROVED || status === SharingKeyStatus.REJECTED) {
-        // If Approved or Rejected, we close the previous open entry for THIS specific key
-        // (e.g. closing the PENDING entry for this key)
-        await this.sharing_operationRepository.closeSpecificKeyEntry(id_sharing, id_key, prevEndDate, query_runner);
+      if (status === SharingKeyStatus.REJECTED) {
+        await this.sharing_operationRepository.rejectSpecificKeyEntry(id_sharing, id_key, prevEndDate, query_runner);
+        return;
       }
 
       if (status === SharingKeyStatus.APPROVED) {
-        // If we are activating a new key, we must close any CURRENTLY active (Approved) key
-        // for this sharing operation to ensure only one active key exists at a time.
+        // Close any currently active approved key for this sharing op (so only one active)
+        // (depends on your model; keep if needed)
         await this.sharing_operationRepository.closeActiveApprovedKey(id_sharing, prevEndDate, query_runner);
-      }
 
-      // 3. Create the new entry
-      await this.sharing_operationRepository.addSharingKeyEntry(id_sharing, id_key, newStartDate, status, query_runner);
+        // Close the current open entry for this key (pending)
+        await this.sharing_operationRepository.closeSpecificKeyEntry(id_sharing, id_key, prevEndDate, query_runner);
+
+        // Create the new approved entry starting at decisionDate (if your model uses a new row)
+        await this.sharing_operationRepository.addSharingKeyEntry(id_sharing, id_key, prevEndDate, status, query_runner);
+        return;
+      }
     } catch (err) {
       logger.error({ operation: "patchKeyStatus", error: err }, "Failed to patch key status");
       throw new AppError(SHARING_OPERATION_ERRORS.PATCH_KEY_STATUS.DATABASE_UPDATE, 400);
@@ -680,5 +687,22 @@ export class SharingOperationService implements ISharingOperationService {
       logger.error({ operation: "deleteMeterFromSharingOperation", error: err }, "Failed to remove meter from sharing operation");
       throw new AppError(SHARING_OPERATION_ERRORS.DELETE_METER_FROM_SHARING.DATABASE_ADD, 400);
     }
+  }
+
+  async getSharingOperationMetersList(sharing_operation_id: number, query: SharingOperationMetersQuery): Promise<[PartialMeterDTO[], Pagination]> {
+    const [values, total]: [Meter[], number] = await this.sharing_operationRepository.getSharingOperationMetersList(sharing_operation_id, query);
+    const return_values = values.map((value) => toMeterPartialDTO(value));
+    const total_pages = Math.ceil(total / query.limit);
+    return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
+  }
+
+  async getSharingOperationKeysList(sharing_operation_id: number, query: KeyPartialQuery): Promise<[SharingOperationKeyDTO[], Pagination]> {
+    const [values, total]: [SharingOperationKey[], number] = await this.sharing_operationRepository.getSharingOperationKeysList(
+      sharing_operation_id,
+      query,
+    );
+    const return_values = values.map((value) => toSharingOperationKeyDTO(value));
+    const total_pages = Math.ceil(total / query.limit);
+    return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
   }
 }

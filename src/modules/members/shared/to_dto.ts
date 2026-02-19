@@ -1,5 +1,5 @@
-import { Manager, Member } from "../domain/member.models.js";
-import { CompanyDTO, IndividualDTO, ManagerDTO, MembersPartialDTO } from "../api/member.dtos.js";
+import type { Manager, Member } from "../domain/member.models.js";
+import type { CompanyDTO, IndividualDTO, ManagerDTO, MembersPartialDTO } from "../api/member.dtos.js";
 import { toAddressDTO } from "../../../shared/address/to_dto.js";
 import { MemberType } from "./member.types.js";
 export function toManagerDTO(manager: Manager): ManagerDTO {

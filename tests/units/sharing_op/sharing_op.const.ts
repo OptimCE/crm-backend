@@ -10,6 +10,7 @@ import { SHARING_OPERATION_ERRORS } from "../../../src/modules/sharing_operation
 import { SharingKeyStatus, SharingOperationType } from "../../../src/modules/sharing_operations/shared/sharing_operation.types.js";
 import { MeterDataStatus } from "../../../src/modules/meters/shared/meter.types.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
+import { KEY_ERRORS } from "../../../src/modules/keys/shared/key.errors.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
@@ -739,6 +740,185 @@ export const testCasesDeleteMeter = [
         areMetersInCommunity: jest.fn(() => Promise.resolve(true)),
         getLastMeterData: jest.fn(() => Promise.resolve({ sharing_operation: { id: 1 } })),
         addMeterData: jest.fn(() => Promise.reject(new Error("Fail DB"))),
+      },
+    },
+  },
+];
+
+const mockMeterEntity = {
+  id: 1,
+  EAN: "1234567890123",
+  meter_number: "METER-001",
+  address: {
+    street: "Test St",
+    number: 1,
+    city: "Test City",
+    postcode: 1000,
+  },
+  meter_data: [
+    {
+      id: 1,
+      status: MeterDataStatus.ACTIVE,
+    },
+  ],
+};
+
+// Expected DTO for Meter (Simulating result of toMeterPartialDTO)
+// Note: dates are usually serialized to strings in HTTP response
+const mockMeterDTO = {
+  EAN: "1234567890123",
+  meter_number: "METER-001",
+  address: {
+    street: "Test St",
+    number: 1,
+    city: "Test City",
+    postcode: 1000,
+  },
+  status: MeterDataStatus.ACTIVE,
+};
+
+// Mock Sharing Operation Key Entity
+const mockSharingKeyEntity = {
+  id: 100,
+  allocation_key: {
+    id: 50,
+    name: "Master Key",
+    description: "Main entrance",
+  },
+  start_date: new Date("2024-01-01T00:00:00.000Z"),
+  end_date: null,
+  status: 1, // Active
+};
+
+// Expected DTO for Key
+const mockSharingKeyDTO = {
+  id: 100,
+  key: {
+    id: 50,
+    name: "Master Key",
+    description: "Main entrance",
+  },
+  start_date: "2024-01-01T00:00:00.000Z",
+  status: 1,
+};
+
+export const testCasesGetSharingOperationMetersList = [
+  // 1. Success
+  {
+    description: "Success - Get Meters List",
+    id: 1,
+    query: {
+      page: 1,
+      limit: 10,
+      type: 1, // Assuming 1 maps to a valid SharingOperationMetersQueryType enum value
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: [mockMeterDTO],
+    expected_pagination: { page: 1, limit: 10, total: 1, total_pages: 1 },
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationMetersList: jest.fn(() => Promise.resolve([[mockMeterEntity], 1])),
+      },
+    },
+  },
+  // 2. Fail (Validation - Missing required type)
+  {
+    description: "Fail (Validation) - Missing type",
+    id: 1,
+    query: {
+      page: 1,
+      limit: 10,
+      // Type is missing but required by @IsNotEmpty
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    translation_field: { field: "type" },
+    expected_error_code: SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY.message,
+    mocks: {},
+  },
+  // 4. Fail (Validation - Query Param Wrong Type)
+  {
+    description: "Fail (Validation) - Postcode string instead of number",
+    id: 1,
+    query: {
+      type: 1,
+      postcode: "not-a-number",
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    translation_field: { field: "postcode" },
+    expected_error_code: SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER.message,
+    mocks: {},
+  },
+  // 5. Fail (DB Error)
+  {
+    description: "Fail (Database) - Repository Exception",
+    id: 1,
+    query: {
+      type: 1,
+    },
+    status_code: 500,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.EXCEPTION.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.EXCEPTION.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationMetersList: jest.fn(() => Promise.reject(new Error("DB Error"))),
+      },
+    },
+  },
+];
+
+export const testCasesGetSharingOperationKeysList = [
+  // 1. Success
+  {
+    description: "Success - Get Keys List",
+    id: 1,
+    query: {
+      page: 1,
+      limit: 10,
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: [mockSharingKeyDTO],
+    expected_pagination: { page: 1, limit: 10, total: 1, total_pages: 1 },
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationKeysList: jest.fn(() => Promise.resolve([[mockSharingKeyEntity], 1])),
+      },
+    },
+  },
+  // 2. Fail (Validation - Wrong Sort Enum)
+  {
+    description: "Fail (Validation) - Invalid sort option",
+    id: 1,
+    query: {
+      sort_name: "INVALID_SORT",
+    },
+    status_code: 422,
+    translation_field: { field: "sort_name" },
+    orgs: ORGS_ADMIN,
+    expected_error_code: KEY_ERRORS.GENERIC_VALIDATION.SORT.errorCode,
+    expected_data: KEY_ERRORS.GENERIC_VALIDATION.SORT.message,
+    mocks: {},
+  },
+  // 3. Fail (DB Error)
+  {
+    description: "Fail (Database) - Repository Exception",
+    id: 1,
+    query: {},
+    status_code: 500,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.EXCEPTION.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.EXCEPTION.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationKeysList: jest.fn(() => Promise.reject(new Error("DB Error"))),
       },
     },
   },

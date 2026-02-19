@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 import { context, propagation } from "@opentelemetry/api";
 import * as https from "https";
 

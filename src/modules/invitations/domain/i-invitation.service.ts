@@ -1,4 +1,4 @@
-import {
+import type {
   AcceptInvitationDTO,
   AcceptInvitationWEncodedDTO,
   InviteUser,
@@ -7,8 +7,8 @@ import {
   UserMemberInvitationDTO,
   UserMemberInvitationQuery,
 } from "../api/invitation.dtos.js";
-import { Pagination } from "../../../shared/dtos/ApiResponses.js";
-import { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
 
 /**
  * Interface for Invitation Service.

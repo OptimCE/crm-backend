@@ -23,6 +23,7 @@ export class CreateAddressDTO {
   city!: string;
 
   @Expose()
+  @Type(() => String)
   @IsString(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.EMPTY))
   postcode!: string;

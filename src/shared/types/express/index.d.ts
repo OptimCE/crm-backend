@@ -1,4 +1,4 @@
-import { PaginationReceive } from "../../middlewares/pagination.middleware.js";
+import type { PaginationReceive } from "../../middlewares/pagination.middleware.js";
 export {};
 declare module "express-serve-static-core" {
   interface Request {

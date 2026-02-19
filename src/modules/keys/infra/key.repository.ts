@@ -127,7 +127,7 @@ export class KeyRepository implements IKeyRepository {
     });
     if (existing_iterations.length > 0) {
       const iterationsRemoved = await manager.remove(existing_iterations);
-      return iterationsRemoved.length == existing_iterations.length;
+      return iterationsRemoved.length === existing_iterations.length;
     }
     return true;
   }

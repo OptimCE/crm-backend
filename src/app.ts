@@ -4,7 +4,6 @@ import express from "express";
 import bodyParser from "body-parser";
 import config from "config";
 
-import cors from "cors";
 import { xss_middleware } from "./shared/middlewares/xss.middleware.js";
 import init from "./shared/monitor/tracer.js";
 import { errorHandler } from "./shared/middlewares/error.middleware.js";
@@ -16,6 +15,7 @@ import Backend from "i18next-fs-backend";
 import * as middleware from "i18next-http-middleware";
 import path from "path";
 import { fileURLToPath } from "url";
+import logger from "./shared/monitor/logger.js";
 
 // 1. Recreate __filename and __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -25,17 +25,10 @@ init(config.get("microservice_name"));
 const app = express();
 const port: number = config.get("server.port");
 const host: string = config.get("server.host");
-const origin: string = config.get("allowed_origin");
+// const origin: string = config.get("allowed_origin");
 
-const corsOptions = {
-  origin: origin,
-  credentials: true,
-};
-
-const startServer = async () => {
+const startServer = async (): Promise<void> => {
   try {
-    console.log("Loading translations from:", path.join(__dirname, "../assets/{{lng}}/{{ns}}.json"));
-
     // Await the initialization of i18next
 
     await i18next
@@ -52,9 +45,8 @@ const startServer = async () => {
         saveMissing: true,
       });
 
-    console.log("Translations loaded successfully.");
 
-    app.use(cors(corsOptions));
+    // app.use(cors(corsOptions));
     app.use(middleware.handle(i18next));
     app.use(bodyParser.json());
     app.use(contextMiddleware());
@@ -64,13 +56,13 @@ const startServer = async () => {
 
     // 4. Start Server only after translations are ready
     if (process.env.NODE_ENV !== "test") {
-      app.listen(port, host, async () => {
         await AppDataSource.initialize();
-        console.log(`Express is listening at http://${host}:${port}`);
+        app.listen(port, host, () => {
+        logger.info({operation:'startServer'}, `Express is listening at http://${host}:${port}`)
       });
     }
   } catch (error) {
-    console.error("Failed to initialize app:", error);
+      logger.error({operation:'startServer', err: error}, "Failed to initialize app")
     process.exit(1);
   }
 };

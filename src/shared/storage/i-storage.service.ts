@@ -1,4 +1,4 @@
-import { UploadedDocument } from "./storage.dtos.js";
+import type { UploadedDocument } from "./storage.dtos.js";
 
 /**
  * Interface for File Storage Service.

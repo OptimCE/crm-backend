@@ -1,4 +1,4 @@
-import { NotificationMessage } from "../../../dtos/NotificationMessage.js";
+import type { NotificationMessage } from "../../../dtos/NotificationMessage.js";
 
 /**
  * Interface for notification service operations

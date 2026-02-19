@@ -25,7 +25,7 @@ export class UserController {
    * @param _next - Express next middleware.
    */
   @userControllerTraceDecorator.traceSpan("getProfile", { url: "/users/", method: "get" })
-  async getProfile(req: Request, res: Response, _next: NextFunction) {
+  async getProfile(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.userService.getProfile();
     logger.info("Profile successfully fetched");
     res.status(200).json(new ApiResponse<UserDTO>(result, SUCCESS));
@@ -38,7 +38,7 @@ export class UserController {
    * @param _next - Express next middleware.
    */
   @userControllerTraceDecorator.traceSpan("updateProfile", { url: "/users/", method: "put" })
-  async updateProfile(req: Request, res: Response, _next: NextFunction) {
+  async updateProfile(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_user = await validateDto(UpdateUserDTO, req.body);
     await this.userService.updateProfile(updated_user);
     logger.info("Profile successfully updated");

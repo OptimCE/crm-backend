@@ -2,7 +2,7 @@ import type { IMeterRepository } from "../domain/i-meter.repository.js";
 import { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
 import { inject, injectable } from "inversify";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
-import { DeepPartial, DeleteResult, In, type QueryRunner, UpdateResult } from "typeorm";
+import {DeepPartial, DeleteResult, In, type QueryRunner, SelectQueryBuilder, UpdateResult} from "typeorm";
 import { CreateMeterDTO, MeterConsumptionQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 import { applyFilters, FilterDef } from "../../../shared/database/filters.js";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
@@ -46,20 +46,23 @@ export class MeterRepository implements IMeterRepository {
     },
     {
       key: "not_sharing_operation_id",
-      apply: (qb, val) => {
-        // Filter out meters that are CURRENTLY part of the specified sharing operation
+      apply: (qb, val): SelectQueryBuilder<Meter> => {
+        const now = new Date();
+
         return qb
           .andWhere((sub) => {
             const subQuery = sub
               .subQuery()
-              .select("md.meter") // Select EAN
+              .select("md.meter") // or "md.meterEAN" depending on your mapping
               .from(MeterData, "md")
               .where("md.sharing_operation = :not_soid")
-              .andWhere("md.end_date IS NULL") // Only check active configurations
+              .andWhere("md.start_date <= :now")
+              .andWhere("(md.end_date IS NULL OR md.end_date > :now)") // or >= if inclusive
               .getQuery();
-            return "meter.EAN NOT IN " + subQuery;
+
+            return `meter.EAN NOT IN ${subQuery}`;
           })
-          .setParameter("not_soid", val);
+          .setParameters({ not_soid: val, now });
       },
     },
   ];
@@ -245,11 +248,22 @@ export class MeterRepository implements IMeterRepository {
 
     // Join ONLY the active MeterData to allow filtering by current status/holder/sharing
     // 'active_data' alias is used in the filters above
-    qb.leftJoinAndSelect("meter.meter_data", "active_data", "active_data.end_date IS NULL");
+    const now = new Date();
 
+    qb.leftJoinAndSelect(
+      "meter.meter_data",
+      "active_data",
+      `
+        active_data.start_date <= :now
+        AND (
+          active_data.end_date IS NULL
+          OR active_data.end_date > :now
+        )
+        `,
+      { now },
+    );
     // 3. Apply Filters
     qb = applyFilters(this.meterFilters, qb, query);
-
     // 4. Pagination
     const take = query.limit;
     const skip = (query.page - 1) * take;
@@ -326,5 +340,53 @@ export class MeterRepository implements IMeterRepository {
         reading_frequency: update_meter.reading_frequency,
       },
     );
+  }
+  async getMeterData(id: number, query_runner?: QueryRunner): Promise<MeterData | null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    return manager.findOne(MeterData, {
+      where: { id },
+      relations: ["meter"], // Essential because your service accesses latest_meter_data.meter.EAN
+    });
+  }
+  async activePreviousInactiveMeterData(
+    ean: string,
+    previous_start_date: string,
+    previous_end_date?: string | null,
+    query_runner?: QueryRunner,
+  ): Promise<UpdateResult> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    /**
+     * Logic: Find the record for this meter where its end_date
+     * matches the start_date of the record we just removed.
+     */
+    const prevEndDate = new Date(previous_start_date);
+    prevEndDate.setDate(prevEndDate.getDate() - 1);
+    const previousRecord = await manager.findOne(MeterData, {
+      where: {
+        meter: { EAN: ean },
+        end_date: prevEndDate.toISOString().split("T")[0],
+      },
+    });
+
+    if (!previousRecord) {
+      // If no direct predecessor exists, we return an empty update result
+      return { affected: -1, raw: [], generatedMaps: [] };
+    }
+
+    // Update the predecessor to "inherit" the deleted record's end_date
+    return manager.update(
+      MeterData,
+      { id: previousRecord.id },
+      {
+        end_date: previous_end_date,
+      },
+    );
+  }
+
+  deleteMeterData(meter_data: MeterData, query_runner?: QueryRunner): Promise<MeterData> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    return manager.remove(meter_data);
   }
 }

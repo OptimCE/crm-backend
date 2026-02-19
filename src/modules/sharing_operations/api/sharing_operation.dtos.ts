@@ -1,14 +1,13 @@
 import { Expose, Type } from "class-transformer";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
-import { IsArray, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
 import { KeyPartialDTO } from "../../keys/api/key.dtos.js";
 import { HasMimeType, IsFile, MaxFileSize } from "../../../shared/dtos/file.validators.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import { SharingKeyStatus, SharingOperationType } from "../shared/sharing_operation.types.js";
 import { MeterDataStatus } from "../../meters/shared/meter.types.js";
-
 /**
  * Query parameters for filtering and paginating a list of sharing operations.
  */
@@ -42,6 +41,95 @@ export class SharingOperationPartialQuery extends PaginationQuery {
   @IsIn(["ASC", "DESC"], withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.SORT))
   @IsOptional()
   sort_type?: Sort;
+}
+
+export enum SharingOperationMetersQueryType {
+  PAST = 1,
+  NOW = 2,
+  FUTURE = 3,
+}
+
+export class SharingOperationMetersQuery extends PaginationQuery {
+  /**
+   * Filter by street name.
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  street?: string;
+
+  /**
+   * Filter by postcode.
+   */
+  @Type(() => Number)
+  @Min(1, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.MIN_1))
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @IsOptional()
+  postcode?: number;
+
+  /**
+   * Filter by address number.
+   */
+  @Type(() => Number)
+  @Min(1, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.MIN_1))
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @IsOptional()
+  address_number?: number;
+
+  /**
+   * Filter by city name.
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  city?: string;
+
+  /**
+   * Filter by address supplement (box, etc.).
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  supplement?: string;
+
+  /**
+   * Filter by EAN code.
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  EAN?: string;
+
+  /**
+   * Filter by meter number.
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  meter_number?: string;
+
+  /**
+   * Filter by current status (active, inactive, etc.).
+   */
+  @Type(() => Number)
+  @IsEnum(MeterDataStatus, withError(SHARING_OPERATION_ERRORS.VALIDATION.WRONG_TYPE.METER_DATA_STATUS))
+  @IsOptional()
+  status?: MeterDataStatus;
+
+  /**
+   * Filter by generic member ID holder.
+   */
+  @Type(() => Number)
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @IsOptional()
+  holder_id?: number;
+  /**
+   * Filter by street name.
+   */
+  @Type(() => Number)
+  @IsEnum(SharingOperationMetersQueryType, withError(SHARING_OPERATION_ERRORS.VALIDATION.WRONG_TYPE.METER_DATA_STATUS))
+  @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  type!: SharingOperationMetersQueryType;
 }
 
 /**
@@ -108,11 +196,6 @@ export class SharingOperationDTO extends SharingOperationPartialDTO {
    */
   @Expose()
   key!: SharingOperationKeyDTO;
-  /**
-   * History of keys.
-   */
-  @Expose()
-  history_keys!: SharingOperationKeyDTO[];
   /**
    * Key waiting for approval, if any.
    */

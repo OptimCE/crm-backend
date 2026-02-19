@@ -2,7 +2,7 @@ import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import { Expose, Type } from "class-transformer";
 import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 import { MembersPartialDTO } from "../../members/api/member.dtos.js";
-import { IsDate, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { IsBoolean, IsDate, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
 import { SharingOperationPartialDTO } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
@@ -557,4 +557,28 @@ export class PatchMeterDataDTO extends CreateMeterDataDTO {
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
   EAN!: string;
+}
+
+/**
+ * DTO for deleting future meter data
+ * Require ID Meter data to identify the entry to remove
+ */
+export class DeleteFutureMeterDataDTO {
+  /**
+   * ID meter data to delete
+   */
+  @Expose()
+  @Type(() => Number)
+  @IsNumber({}, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.NUMBER))
+  @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
+  id_meter_data!: number;
+
+  /**
+   * If true, take the previous meter data and reactive it
+   */
+  @Expose()
+  @Type(() => Boolean)
+  @IsBoolean(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.BOOLEAN))
+  @IsOptional()
+  active_previous_meter_data?: boolean;
 }

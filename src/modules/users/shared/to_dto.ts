@@ -1,5 +1,5 @@
-import { User } from "../domain/user.models.js";
-import { UserDTO } from "../api/user.dtos.js";
+import type { User } from "../domain/user.models.js";
+import type { UserDTO } from "../api/user.dtos.js";
 import { toAddressDTO } from "../../../shared/address/to_dto.js";
 
 export function toUserDTO(user: User): UserDTO {

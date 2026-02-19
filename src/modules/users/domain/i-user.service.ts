@@ -1,4 +1,4 @@
-import { UpdateUserDTO, UserDTO } from "../api/user.dtos.js";
+import type { UpdateUserDTO, UserDTO } from "../api/user.dtos.js";
 
 /**
  * Interface for User Service.

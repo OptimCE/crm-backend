@@ -1,5 +1,5 @@
-import { CommunityDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
-import { Community, CommunityUser } from "../domain/community.models.js";
+import type { CommunityDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
+import type { Community, CommunityUser } from "../domain/community.models.js";
 
 export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommunityDTO {
   return {

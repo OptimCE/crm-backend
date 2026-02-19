@@ -23,7 +23,7 @@ import type { IIamService } from "../../src/shared/iam/i-iam.service.js";
 import { createMockStorageService } from "../external_mocking/storage_service.mock.js";
 import type { IStorageService } from "../../src/shared/storage/i-storage.service.js";
 import { createMockAuthContextRepository } from "../repository_mocked/authcontext.repository.mock.js";
-import { IAuthContextRepository } from "../../src/shared/context/i-authcontext.repository.js";
+import type { IAuthContextRepository } from "../../src/shared/context/i-authcontext.repository.js";
 
 export const expectWithLog = async (response: any, assertionCallback: any) => {
   try {

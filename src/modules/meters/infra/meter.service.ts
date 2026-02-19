@@ -4,6 +4,7 @@ import { AppDataSource } from "../../../shared/database/database.connector.js";
 import type { IMeterRepository } from "../domain/i-meter.repository.js";
 import {
   CreateMeterDTO,
+  DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
   MeterPartialQuery,
@@ -224,6 +225,33 @@ export class MeterService implements IMeterService {
       throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
     }
   }
+
+  @Transactional()
+  async deleteLatestMeterData(delete_meter_data: DeleteFutureMeterDataDTO, query_runner?: QueryRunner): Promise<void> {
+    const latest_meter_data = await this.meterRepository.getMeterData(delete_meter_data.id_meter_data, query_runner);
+    if (!latest_meter_data) {
+      logger.error({ operation: "deleteLatestMeterData" }, "Meter data not found");
+      throw new AppError(METER_ERRORS.DELETE_METER_DATA.NOT_FOUND, 400);
+    }
+    const deleted = await this.meterRepository.deleteMeterData(latest_meter_data, query_runner);
+    if (!deleted) {
+      logger.error({ operation: "deleteLatestMeterData" }, "An error happend during the deletion of a meter data");
+      throw new AppError(METER_ERRORS.DELETE_METER_DATA.DELETE_DATABASE, 400);
+    }
+    if (delete_meter_data.active_previous_meter_data) {
+      const updated = await this.meterRepository.activePreviousInactiveMeterData(
+        latest_meter_data.meter.EAN,
+        latest_meter_data.start_date,
+        latest_meter_data.end_date,
+        query_runner,
+      );
+      if (updated.affected !== 1 && updated.affected !== -1) {
+        logger.error({ operation: "deleteLatestMeterData" }, "An error happend during the update of the last meter data");
+        throw new AppError(METER_ERRORS.DELETE_METER_DATA.UPDATE_DATABASE, 400);
+      }
+    }
+  }
+
   @Transactional()
   async updateMeter(updated_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<void> {
     try {

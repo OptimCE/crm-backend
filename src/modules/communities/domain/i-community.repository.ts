@@ -1,7 +1,7 @@
-import { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO } from "../api/community.dtos.js";
+import type { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO } from "../api/community.dtos.js";
 import type { QueryRunner } from "typeorm";
-import { Community, CommunityUser } from "./community.models.js";
-import { Role } from "../../../shared/dtos/role.js";
+import type { Community, CommunityUser } from "./community.models.js";
+import type { Role } from "../../../shared/dtos/role.js";
 
 export interface ICommunityRepository {
   addCommunity(new_community: CreateCommunityDTO, org_id: string, query_runner?: QueryRunner): Promise<Community>;

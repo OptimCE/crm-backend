@@ -1,5 +1,5 @@
-import { AllocationKey, Consumer, Iteration } from "../domain/key.models.js";
-import { ConsumerDTO, IterationDTO, KeyDTO, KeyPartialDTO } from "../api/key.dtos.js";
+import type { AllocationKey, Consumer, Iteration } from "../domain/key.models.js";
+import type { ConsumerDTO, IterationDTO, KeyDTO, KeyPartialDTO } from "../api/key.dtos.js";
 
 export function toKeyPartialDTO(key: AllocationKey): KeyPartialDTO {
   return {

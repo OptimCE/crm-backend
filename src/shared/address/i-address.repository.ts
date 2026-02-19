@@ -1,6 +1,6 @@
-import { CreateAddressDTO } from "./address.dtos.js";
+import type { CreateAddressDTO } from "./address.dtos.js";
 import type { QueryRunner } from "typeorm";
-import { Address } from "./address.models.js";
+import type { Address } from "./address.models.js";
 
 /**
  * Interface for Address Repository.

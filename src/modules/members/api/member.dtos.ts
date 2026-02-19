@@ -310,7 +310,7 @@ export class CreateMemberDTO {
   @Expose()
   @IsString(withError(MEMBER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY))
-  @ValidateIf((o) => o.member_type == MemberType.INDIVIDUAL)
+  @ValidateIf((o) => o.member_type === MemberType.INDIVIDUAL)
   first_name!: string;
 
   /**
@@ -319,7 +319,7 @@ export class CreateMemberDTO {
   @Expose()
   @IsString(withError(MEMBER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY))
-  @ValidateIf((o) => o.member_type == MemberType.INDIVIDUAL)
+  @ValidateIf((o) => o.member_type === MemberType.INDIVIDUAL)
   NRN!: string; // National Registry Number
 
   /**

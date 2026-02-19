@@ -1,6 +1,6 @@
-import { CreateIterationDTO, CreateKeyDTO, KeyPartialQuery } from "../api/key.dtos.js";
-import { AllocationKey } from "./key.models.js";
-import { DeleteResult, type QueryRunner } from "typeorm";
+import type { CreateIterationDTO, CreateKeyDTO, KeyPartialQuery } from "../api/key.dtos.js";
+import type { AllocationKey } from "./key.models.js";
+import type { DeleteResult, QueryRunner } from "typeorm";
 
 export interface IKeyRepository {
   getPartialKeyList(query: KeyPartialQuery, query_runner?: QueryRunner): Promise<[AllocationKey[], number]>;

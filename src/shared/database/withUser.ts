@@ -1,4 +1,4 @@
-import { ObjectLiteral, SelectQueryBuilder } from "typeorm";
+import type { ObjectLiteral, SelectQueryBuilder } from "typeorm";
 import { getContext } from "../middlewares/context.js";
 
 /**

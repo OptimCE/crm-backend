@@ -1,6 +1,6 @@
-import { Meter, MeterConsumption, MeterData } from "./meter.models.js";
-import { DeleteResult, type QueryRunner, UpdateResult } from "typeorm";
-import { CreateMeterDTO, MeterConsumptionQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
+import type { Meter, MeterConsumption, MeterData } from "./meter.models.js";
+import type { DeleteResult, QueryRunner, UpdateResult } from "typeorm";
+import type { CreateMeterDTO, MeterConsumptionQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 
 export interface IMeterRepository {
   addMeterConsumptions(id_sharing: number, consumptions: (Partial<MeterConsumption> & { ean: string })[], query_runner?: QueryRunner): Promise<void>;
@@ -13,4 +13,12 @@ export interface IMeterRepository {
   createMeter(new_meter: CreateMeterDTO, query_runner?: QueryRunner): Promise<Meter>;
   deleteMeter(id: string, query_runner?: QueryRunner): Promise<DeleteResult>;
   updateMeter(update_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<UpdateResult>;
+  getMeterData(id: number, query_runner?: QueryRunner): Promise<MeterData | null>;
+  deleteMeterData(meter_data: MeterData, query_runner?: QueryRunner): Promise<MeterData>;
+  activePreviousInactiveMeterData(
+    ean: string,
+    previous_start_date: string,
+    previous_end_date?: string | null,
+    query_runner?: QueryRunner,
+  ): Promise<UpdateResult>;
 }
