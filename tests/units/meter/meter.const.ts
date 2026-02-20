@@ -1,11 +1,13 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import type { Meter } from "../../../src/modules/meters/domain/meter.models.js";
+import type { Meter, MeterConsumption } from "../../../src/modules/meters/domain/meter.models.js";
 import { toMeterDTO, toMeterPartialDTO, toMeterConsumptionDTO } from "../../../src/modules/meters/shared/to_dto.js";
 import { METER_ERRORS } from "../../../src/modules/meters/shared/meter.errors.js";
 import { AppError } from "../../../src/shared/middlewares/error.middleware.js";
 import { ClientType, MeterDataStatus, MeterRate, ReadingFrequency, TarifGroup } from "../../../src/modules/meters/shared/meter.types.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
+import type { Community } from "../../../src/modules/communities/domain/community.models.js";
+import type { Address } from "../../../src/shared/address/address.models.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
@@ -13,7 +15,7 @@ export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 const mockAddress = {
   id: 1,
   street: "Main St",
-  number: "1",
+  number: 1,
   city: "Brussels",
   postcode: "1000",
   created_at: mockDate,
@@ -30,8 +32,8 @@ export const mockMeterEntity: Meter = {
   reading_frequency: ReadingFrequency.MONTHLY,
   created_at: mockDate,
   updated_at: mockDate,
-  address: mockAddress as any,
-  community: mockCommunity as any,
+  address: mockAddress as Address,
+  community: mockCommunity as Community,
   meter_data: [
     {
       id: 1,
@@ -49,8 +51,8 @@ export const mockMeterEntity: Meter = {
       total_generating_capacity: null,
       member: null,
       sharing_operation: null,
-      meter: {} as any,
-      community: {} as any,
+      meter: {} as Meter,
+      community: {} as Community,
       created_at: mockDate,
       updated_at: mockDate,
     },
@@ -74,22 +76,16 @@ export const mockConsumptions = [
     inj_gross: 5,
     inj_net: 4,
     inj_shared: 1,
-    meter: {} as any,
+    meter: {},
     sharing_operation: null,
-    community: {} as any,
+    community: {},
     created_at: mockDate,
     updated_at: mockDate,
   },
 ];
 
-export const mockMeterConsumptionDTO = toMeterConsumptionDTO(mockMeterEntity.EAN, mockConsumptions);
+export const mockMeterConsumptionDTO = toMeterConsumptionDTO(mockMeterEntity.EAN, mockConsumptions as MeterConsumption[]);
 export const mockMeterConsumptionDTOJSON = JSON.parse(JSON.stringify(mockMeterConsumptionDTO));
-
-export const mockWorkbook = {
-  xlsx: {
-    writeBuffer: jest.fn<() => Promise<Buffer>>().mockResolvedValue(Buffer.from("excel-content") as any),
-  },
-};
 
 // --- Test Cases ---
 

@@ -7,17 +7,16 @@ export class LocalError {
   /** Human-readable error message */
   readonly message: string;
   field?: string;
-  value?: any; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value?: unknown;
 
   /**
    * Creates a new LocalError instance
    * @param {number} errorCode - Numeric identifier for the error
    * @param {string} message - Human-readable error message
    * @param {string} field - Dynamic field
-   * @param {value} value - Dynamic value
+   * @param {unknown} value - Dynamic value
    */
-  constructor(errorCode: number, message: string, field?: string, value?: any) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(errorCode: number, message: string, field?: string, value?: unknown) {
     this.errorCode = errorCode;
     this.message = message;
     this.field = field;

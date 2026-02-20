@@ -100,7 +100,7 @@ describe("(Unit) Invitation Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result: any = expected_data;
+            let result = expected_data;
             if (response.status !== 200) {
               if (translation_field) {
                 result = i18next.t(expected_data, translation_field);
@@ -150,7 +150,7 @@ describe("(Unit) Invitation Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result: any = expected_data;
+            let result = expected_data;
             if (response.status !== 200) {
               if (translation_field) {
                 result = i18next.t(expected_data, translation_field);
@@ -204,7 +204,7 @@ describe("(Unit) Invitation Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result: any = expected_data;
+            let result = expected_data;
             if (response.status !== 200) {
               if (translation_field) {
                 result = i18next.t(expected_data, translation_field);
@@ -258,7 +258,7 @@ describe("(Unit) Invitation Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result: any = expected_data;
+            let result = expected_data;
             if (response.status !== 200) {
               if (translation_field) {
                 result = i18next.t(expected_data, translation_field);
@@ -417,7 +417,7 @@ describe("(Unit) Invitation Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result: any = expected_data;
+            let result = expected_data;
             if (response.status !== 200) {
               result = i18next.t(expected_data as string);
             }
@@ -440,7 +440,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)[method](endpoint)
+        const response = await request(app)
+          [method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
@@ -473,7 +474,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)[method](endpoint)
+        const response = await request(app)
+          [method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
@@ -506,7 +508,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)[method](endpoint)
+        const response = await request(app)
+          [method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
@@ -539,7 +542,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)[method](endpoint)
+        const response = await request(app)
+          [method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);

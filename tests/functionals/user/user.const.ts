@@ -20,8 +20,8 @@ export const testCasesGetProfile = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.email === existingUserEmail;
+    check_data: (data: unknown): boolean => {
+      return (data as { email: string }).email === existingUserEmail;
     },
   },
   {
@@ -32,8 +32,8 @@ export const testCasesGetProfile = [
     orgs: ORGS_MEMBER,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.email === newUserEmail; // Mock IAM returns this email
+    check_data: (data: unknown): boolean => {
+      return (data as { email: string }).email === newUserEmail;
     },
   },
 ];

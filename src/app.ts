@@ -45,7 +45,6 @@ const startServer = async (): Promise<void> => {
         saveMissing: true,
       });
 
-
     // app.use(cors(corsOptions));
     app.use(middleware.handle(i18next));
     app.use(bodyParser.json());
@@ -56,13 +55,13 @@ const startServer = async (): Promise<void> => {
 
     // 4. Start Server only after translations are ready
     if (process.env.NODE_ENV !== "test") {
-        await AppDataSource.initialize();
-        app.listen(port, host, () => {
-        logger.info({operation:'startServer'}, `Express is listening at http://${host}:${port}`)
+      await AppDataSource.initialize();
+      app.listen(port, host, () => {
+        logger.info({ operation: "startServer" }, `Express is listening at http://${host}:${port}`);
       });
     }
   } catch (error) {
-      logger.error({operation:'startServer', err: error}, "Failed to initialize app")
+    logger.error({ operation: "startServer", err: error }, "Failed to initialize app");
     process.exit(1);
   }
 };

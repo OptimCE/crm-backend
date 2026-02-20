@@ -13,13 +13,13 @@ import type { NextFunction } from "express";
  * @param next - The next middleware function
  * @throws AppError If validation fails
  */
-export const validate = (req: Request, _res: Response, next: NextFunction) => {
+export const validate = (req: Request, _res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (errors.isEmpty()) {
     return next();
   }
   const firstError = errors.array()[0];
-  let error: any;
+  let error: AppError;
   try {
     if (firstError.msg instanceof LocalError) {
       error = new AppError(firstError.msg, 422);

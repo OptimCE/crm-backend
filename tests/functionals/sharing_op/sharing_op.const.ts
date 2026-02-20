@@ -24,8 +24,8 @@ export const testCasesGetList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length >= 2 && data.some((op: any) => op.id === existingSharingOpId1);
+    check_data: (data: unknown[]): boolean => {
+      return data.length >= 2 && (data as Array<{ id: number }>).some((op) => op.id === existingSharingOpId1);
     },
   },
   {
@@ -34,8 +34,8 @@ export const testCasesGetList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length === 1 && data[0].id === existingSharingOpId1;
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { id: number }).id === existingSharingOpId1;
     },
   },
 ];
@@ -48,8 +48,9 @@ export const testCasesGetDetail = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.id === existingSharingOpId1 && data.key !== undefined;
+    check_data: (data: unknown): boolean => {
+      const d = data as { id: number; key: unknown };
+      return d.id === existingSharingOpId1 && d.key !== undefined;
     },
   },
   {

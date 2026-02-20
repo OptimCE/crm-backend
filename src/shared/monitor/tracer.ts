@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -12,7 +13,7 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
  * @param serviceName - The name of the service to be used in traces
  * @returns Object containing the initialized SDK
  */
-const init = function (serviceName: string) {
+const init = function (serviceName: string): { sdk: NodeSDK | undefined } {
   let sdk: NodeSDK | undefined;
 
   if (process.env.REMOTE_LOGGING && process.env.REMOTE_LOGGING === "true") {

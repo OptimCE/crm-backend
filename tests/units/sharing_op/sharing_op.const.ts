@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import { SharingOperation } from "../../../src/modules/sharing_operations/domain/sharing_operation.models.js";
+import type { SharingOpConsumption, SharingOperation } from "../../../src/modules/sharing_operations/domain/sharing_operation.models.js";
 import {
   toSharingOperation,
   toSharingOperationPartialDTO,
@@ -11,6 +11,7 @@ import { SharingKeyStatus, SharingOperationType } from "../../../src/modules/sha
 import { MeterDataStatus } from "../../../src/modules/meters/shared/meter.types.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
 import { KEY_ERRORS } from "../../../src/modules/keys/shared/key.errors.js";
+import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
@@ -22,7 +23,7 @@ export const mockSharingOperationEntity: SharingOperation = {
   type: SharingOperationType.LOCAL,
   created_at: mockDate,
   updated_at: mockDate,
-  community: mockCommunity as any,
+  community: mockCommunity as Community,
   keys: [],
 };
 
@@ -37,7 +38,7 @@ export const mockSharingOpConsumption = [
     inj_net: 4,
     inj_shared: 1,
     sharing_operation: mockSharingOperationEntity,
-    community: mockCommunity as any,
+    community: mockCommunity,
     created_at: mockDate,
     updated_at: mockDate,
   },
@@ -45,7 +46,7 @@ export const mockSharingOpConsumption = [
 
 export const mockSharingOperationDTO = toSharingOperation(mockSharingOperationEntity);
 export const mockSharingOperationPartialDTO = toSharingOperationPartialDTO(mockSharingOperationEntity);
-export const mockSharingOpConsumptionDTO = toSharingOperationConsumptions(mockSharingOpConsumption);
+export const mockSharingOpConsumptionDTO = toSharingOperationConsumptions(mockSharingOpConsumption as SharingOpConsumption[]);
 
 // JSON compatible
 export const mockSharingOperationDTOJSON = JSON.parse(JSON.stringify(mockSharingOperationDTO));

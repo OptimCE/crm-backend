@@ -23,8 +23,8 @@ export const testCasesGetMetersList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length >= 2 && data.some((m: any) => m.EAN === existingEAN);
+    check_data: (data: unknown[]): boolean => {
+      return data.length >= 2 && (data as Array<{ EAN: string }>).some((m) => m.EAN === existingEAN);
     },
   },
   {
@@ -33,8 +33,8 @@ export const testCasesGetMetersList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length === 1 && data[0].EAN === existingEAN;
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { EAN: string }).EAN === existingEAN;
     },
   },
 ];
@@ -47,8 +47,9 @@ export const testCasesGetMeter = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.EAN === existingEAN && data.meter_data !== undefined;
+    check_data: (data: unknown): boolean => {
+      const d = data as { EAN: string; meter_data: unknown };
+      return d.EAN === existingEAN && d.meter_data !== undefined;
     },
   },
   {
@@ -69,8 +70,9 @@ export const testCasesGetConsumptions = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.EAN === existingEAN && data.timestamps.length === 1; // init.sql has 1 row
+    check_data: (data: unknown): boolean => {
+      const d = data as { EAN: string; timestamps: unknown[] };
+      return d.EAN === existingEAN && d.timestamps.length === 1;
     },
   },
 ];

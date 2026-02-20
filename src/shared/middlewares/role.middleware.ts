@@ -11,14 +11,14 @@ import { getContext } from "./context.js";
  * @param allowedRole - The minimum role level required to access the resource
  * @returns Express middleware function that checks user role
  */
-export function roleChecker(allowedRole: Role) {
+export function roleChecker(allowedRole: Role): (req: Request, res: Response, next: NextFunction) => void {
   /**
    * Express middleware that verifies user role against required role
    * @param _req - Express request object (unused)
    * @param _res - Express response object (unused)
    * @param next - Express next function
    */
-  return (_req: Request, _res: Response, next: NextFunction) => {
+  return (_req: Request, _res: Response, next: NextFunction): void => {
     const { role } = getContext();
     if (!role) {
       logger.error("Role missing");

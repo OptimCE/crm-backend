@@ -22,7 +22,7 @@ class TraceDecorator {
    * @param headers - The headers object to inject into
    * @returns The headers with tracing information added
    */
-  injectTracingHeaders(headers = {}) {
+  injectTracingHeaders(headers = {}): Record<string, unknown> {
     const carrier = {};
     propagation.inject(context.active(), carrier);
     return { ...headers, ...carrier };
@@ -34,18 +34,18 @@ class TraceDecorator {
    * @param spanAttributes - Additional attributes to add to the span
    * @returns A decorator function for route handlers
    */
-  traceSpan(spanName: string, spanAttributes: Record<string, any> = {}) {
+  traceSpan(spanName: string, spanAttributes: Record<string, string> = {}) {
     const tracingUtility = this.tracingUtility;
 
-    return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
+    return function (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor): void {
       const originalMethod = descriptor.value;
 
-      descriptor.value = async function (req: Request, res: Response, next: NextFunction) {
+      descriptor.value = async function (req: Request, res: Response, next: NextFunction): Promise<void> {
         const extractedContext = propagation.extract(context.active(), req.headers);
         await tracingUtility.startActiveSpanReq(spanName, req, spanAttributes, extractedContext, async (span: Span) => {
           if (!res.locals.patched) {
             const originalStatus = res.status.bind(res);
-            res.status = (code: number) => {
+            res.status = (code: number): Response => {
               span.setAttribute("http.status_code", code);
               res.locals.statusCode = code;
               return originalStatus(code);

@@ -21,10 +21,10 @@ export class NotificationService implements INotificationService {
 
   /**
    * Sends a notification through the notification microservice
-   * @param {NotificationMessage<any>} notification - The notification message to send
+   * @param {NotificationMessage<unknown>} notification - The notification message to send
    * @returns {Promise<void>} Promise that resolves when the notification is sent
    */
-  async sendNotification(notification: NotificationMessage<any>): Promise<void> {
+  async sendNotification(notification: NotificationMessage<unknown>): Promise<void> {
     await callWithTracingHeaders({
       method: "POST",
       url: this._notification_url + "/post",

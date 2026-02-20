@@ -22,8 +22,8 @@ export class TracerUtility {
    * @param headers - The headers object to inject into
    * @returns The headers with tracing information added
    */
-  injectTracingHeaders(headers = {}) {
-    const carrier = {};
+  injectTracingHeaders(headers: Record<string, string> = {}): Record<string, string> {
+    const carrier: Record<string, string> = {};
     propagation.inject(context.active(), carrier);
     return { ...headers, ...carrier };
   }
@@ -35,10 +35,9 @@ export class TracerUtility {
    * @param headers - Headers containing context information
    * @returns The created span
    */
-  startSpan(spanName: string, spanAttributes: any = {}, headers: any = {}) {
+  startSpan(spanName: string, spanAttributes: Record<string, string> = {}, headers: Record<string, string> = {}): Span {
     const extractedContext = propagation.extract(context.active(), headers);
     const span = this.tracer.startSpan(spanName, spanAttributes, extractedContext);
-    //@ts-expect-error: 'value' may be unknown
     Object.entries(spanAttributes).forEach(([key, value]) => span.setAttribute(key, value));
     return span;
   }
@@ -50,10 +49,9 @@ export class TracerUtility {
    * @param spanAttributes - Additional attributes to add to the span
    * @returns The created span
    */
-  startSpanReq(spanName: string, req: Request, spanAttributes: any = {}) {
+  startSpanReq(spanName: string, req: Request, spanAttributes: Record<string, string> = {}): Span {
     const span = this.tracer.startSpan(spanName);
     span.setAttribute("http.method", req.method);
-    //@ts-expect-error: 'value' may be unknown
     Object.entries(spanAttributes).forEach(([key, value]) => span.setAttribute(key, value));
     return span;
   }
@@ -68,8 +66,14 @@ export class TracerUtility {
    * @param fn - The function to execute within the span's context
    * @returns The result of the function execution
    */
-  startActiveSpanReq<T>(spanName: string, req: Request, spanAttributes: any, context: Context, fn: (span: Span) => Promise<T>): Promise<T> {
-    return this.tracer.startActiveSpan(spanName, { attributes: spanAttributes }, context, async (span) => {
+  startActiveSpanReq<T>(
+    spanName: string,
+    req: Request,
+    spanAttributes: Record<string, string>,
+    context: Context,
+    fn: (span: Span) => Promise<T>,
+  ): Promise<T> {
+    return this.tracer.startActiveSpan(spanName, { attributes: spanAttributes }, context, async (span: Span) => {
       span.setAttribute("http.method", req.method);
       try {
         return await fn(span);
@@ -88,9 +92,14 @@ export class TracerUtility {
    * @param fn - The function to execute within the span's context
    * @returns The result of the function execution
    */
-  startActiveSpan<T>(spanName: string, spanAttributes: any, header: any, fn: (span: Span) => Promise<T>): Promise<T> {
+  startActiveSpan<T>(
+    spanName: string,
+    spanAttributes: Record<string, string>,
+    header: Record<string, string>,
+    fn: (span: Span) => Promise<T>,
+  ): Promise<T> {
     const ctx = propagation.extract(context.active(), header);
-    return this.tracer.startActiveSpan(spanName, { attributes: spanAttributes }, ctx, async (span) => {
+    return this.tracer.startActiveSpan(spanName, { attributes: spanAttributes }, ctx, async (span: Span) => {
       try {
         return await fn(span);
       } finally {
@@ -108,7 +117,7 @@ export class TracerUtility {
    * @param operationName - The operation name
    * @param errorStatusCode - The HTTP status code to use for the error response (default: 400)
    */
-  handleException(res: Response, span: Span, e: Error, errorReturned: number, operationName: string, errorStatusCode = 400) {
+  handleException(res: Response, span: Span, e: Error, errorReturned: number, operationName: string, errorStatusCode = 400): void {
     logger.error(`(${operationName}) Error: ` + e);
     span.recordException(e);
     span.setStatus({ code: SpanStatusCode.ERROR });

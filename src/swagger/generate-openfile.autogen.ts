@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import swaggerAutogen from "swagger-autogen";
 import path from "path";
 import fs from "fs";
@@ -11,7 +12,9 @@ import { KeyParameters, KeyResponses } from "../modules/keys/api/key.swagger.js"
 import { MeterParameters, MeterResponses } from "../modules/meters/api/meter.swagger.js";
 import { SharingOperationParameters, SharingOperationResponses } from "../modules/sharing_operations/api/sharing_operation.swagger.js";
 import { UserParameters, UserResponses } from "../modules/users/api/user.swagger.js";
-
+interface TsSchemas {
+  definitions: Record<string, unknown>;
+}
 const tsConfigPath = path.join(process.cwd(), "tsconfig.json");
 const dtoPath = path.join(process.cwd(), "src/**/*.dtos.ts");
 
@@ -27,7 +30,7 @@ const config = {
 
 console.log("Extracting types from TypeScript...");
 
-let tsSchemas: any = { definitions: {} };
+let tsSchemas: TsSchemas = { definitions: {} };
 try {
   const generator = createGenerator(config);
   const originalSchemas = generator.createSchema(config.type);
@@ -120,6 +123,10 @@ const doc = {
 const generate = swaggerAutogen();
 console.log(`Generating Swagger to: ${outputFile}`);
 
-generate(outputFile, endpointsFiles, doc).then(() => {
-  console.log("Swagger documentation generated successfully!");
-});
+generate(outputFile, endpointsFiles, doc)
+  .then(() => {
+    console.log("Swagger documentation generated successfully!");
+  })
+  .catch((err) => {
+    console.error(err);
+  });

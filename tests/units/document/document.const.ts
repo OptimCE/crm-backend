@@ -4,6 +4,8 @@ import type { Document } from "../../../src/modules/documents/domain/document.mo
 import { toDocumentExposed } from "../../../src/modules/documents/shared/to_dto.js";
 import { DOCUMENT_ERRORS } from "../../../src/modules/documents/shared/document.errors.js";
 import { ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
+import type { Member } from "../../../src/modules/members/domain/member.models.js";
+import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
 // --- Mock Data ---
 
@@ -11,8 +13,8 @@ export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 
 export const mockDocumentEntity: Document = {
   id: 100,
-  member: { id: 1 } as any, // Simplified member
-  community: { id: 1 } as any, // Simplified community
+  member: { id: 1 } as Member, // Simplified member
+  community: { id: 1 } as Community, // Simplified community
   file_name: "test_report.pdf",
   file_url: "http://storage.com/bucket/test_report.pdf",
   file_size: 1024,

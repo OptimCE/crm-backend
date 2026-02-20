@@ -5,6 +5,8 @@ import { toMemberDTO, toMemberPartialDTO } from "../../../src/modules/members/sh
 import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors.js";
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
+import type { Address } from "../../../src/shared/address/address.models.js";
+import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
@@ -12,7 +14,7 @@ export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 const mockAddress = {
   id: 1,
   street: "Main St",
-  number: "1",
+  number: 1,
   city: "Brussels",
   postcode: "1000",
   created_at: mockDate,
@@ -29,9 +31,9 @@ export const mockIndividualEntity: Member = {
   member_type: MemberType.INDIVIDUAL,
   created_at: mockDate,
   updated_at: mockDate,
-  home_address: mockAddress as any,
-  billing_address: mockAddress as any,
-  community: mockCommunity as any,
+  home_address: mockAddress as Address,
+  billing_address: mockAddress as Address,
+  community: mockCommunity as Community,
   individual_details: {
     id: 1,
     first_name: "John",
@@ -40,29 +42,9 @@ export const mockIndividualEntity: Member = {
     phone_number: "0470123456",
     social_rate: false,
     manager: null,
-    member: {} as any,
+    member: {} as Member,
   },
-  company_details: undefined as any,
-};
-
-export const mockCompanyEntity: Member = {
-  id: 2,
-  name: "Acme Corp",
-  IBAN: "BE0987654321",
-  status: MemberStatus.ACTIVE,
-  member_type: MemberType.COMPANY,
-  created_at: mockDate,
-  updated_at: mockDate,
-  home_address: mockAddress as any,
-  billing_address: mockAddress as any,
-  community: mockCommunity as any,
-  company_details: {
-    id: 2,
-    vat_number: "BE0123456789",
-    manager: { id: 10, name: "Manager", surname: "One", email: "mgr@test.com", NRN: "1" } as any,
-    member: {} as any,
-  },
-  individual_details: undefined as any,
+  company_details: undefined,
 };
 
 export const mockMemberDTO = toMemberDTO(mockIndividualEntity);

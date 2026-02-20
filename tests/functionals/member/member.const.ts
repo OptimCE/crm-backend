@@ -21,8 +21,8 @@ export const testCasesGetMembersList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length >= 2 && data.some((m: any) => m.id === existingIndividualId);
+    check_data: (data: unknown[]): boolean => {
+      return data.length >= 2 && (data as Array<{ id: number }>).some((m) => m.id === existingIndividualId);
     },
   },
   {
@@ -31,8 +31,8 @@ export const testCasesGetMembersList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length === 1 && data[0].name === "Member One";
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { name: string }).name === "Member One";
     },
   },
 ];
@@ -45,8 +45,9 @@ export const testCasesGetMember = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.id === existingIndividualId && data.member_type === 1; // 1 = Individual
+    check_data: (data: unknown): boolean => {
+      const d = data as { id: number; member_type: number };
+      return d.id === existingIndividualId && d.member_type === 1;
     },
   },
   {
@@ -55,8 +56,9 @@ export const testCasesGetMember = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.id === existingCompanyId && data.member_type === 2; // 2 = Company
+    check_data: (data: unknown): boolean => {
+      const d = data as { id: number; member_type: number };
+      return d.id === existingCompanyId && d.member_type === 2;
     },
   },
   {
@@ -77,8 +79,8 @@ export const testCasesGetMemberLink = [
     status_code: 200,
     expected_error_code: SUCCESS,
     query: { email: "john@test.com" },
-    check_data: (data: any) => {
-      return typeof data.status === "number";
+    check_data: (data: unknown): boolean => {
+      return typeof (data as { status: unknown }).status === "number";
     },
   },
 ];

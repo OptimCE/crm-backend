@@ -9,7 +9,7 @@ import { getContext } from "../middlewares/context.js";
  * @returns Configured Pino logger instance
  */
 function initLogger(serviceName: string): pino.Logger {
-  const targets: any = [
+  const targets: pino.TransportTargetOptions[] = [
     {
       target: "pino-pretty",
       level: "info",
@@ -43,7 +43,7 @@ function initLogger(serviceName: string): pino.Logger {
     },
     // You can remove the 'user' serializer now, as it's handled by the mixin
     serializers: {
-      request: (request: any) => {
+      request: (request: unknown) => {
         return {
           object: request,
         };

@@ -18,8 +18,10 @@ export const testCasesGetPendingMembers = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.some((i: any) => i.id === existingMemberInvitationId && i.user_email === "invitee@test.com");
+    check_data: (data: unknown[]): boolean => {
+      return (data as Array<{ id: number; user_email: string }>).some(
+        (i) => i.id === existingMemberInvitationId && i.user_email === "invitee@test.com",
+      );
     },
   },
   {
@@ -39,8 +41,10 @@ export const testCasesGetPendingManagers = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.some((i: any) => i.id === existingManagerInvitationId && i.user_email === "future_admin@test.com");
+    check_data: (data: unknown[]): boolean => {
+      return (data as Array<{ id: number; user_email: string }>).some(
+        (i) => i.id === existingManagerInvitationId && i.user_email === "future_admin@test.com",
+      );
     },
   },
 ];

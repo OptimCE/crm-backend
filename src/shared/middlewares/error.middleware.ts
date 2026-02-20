@@ -2,7 +2,18 @@ import type { Request, Response, NextFunction } from "express";
 import { GLOBAL_ERRORS, type LocalError } from "../errors/errors.js";
 import logger from "../monitor/logger.js";
 import * as myRes from "../dtos/ApiResponses.js";
-
+interface HttpErrorResponse {
+  response?: {
+    status?: number;
+    data?: {
+      error_code?: number;
+      data?: string;
+    };
+  };
+  field?: string;
+  value?: unknown;
+  stack?: string;
+}
 /**
  * Custom application error class that extends the standard Error
  * Includes additional properties for HTTP status code and application error code
@@ -11,7 +22,7 @@ export class AppError extends Error {
   public readonly statusCode: number;
   public readonly errorCode: number;
   public readonly field?: string;
-  public readonly value?: any;
+  public readonly value?: unknown;
   /**
    * Creates a new AppError instance
    * @param error - LocalError object containing error code and message
@@ -30,7 +41,7 @@ export class AppError extends Error {
    * Serializes the error to a JSON object
    * @returns Object containing statusCode, errorCode, and message
    */
-  toJSON() {
+  toJSON(): Record<string, unknown> {
     return {
       statusCode: this.statusCode,
       errorCode: this.errorCode,
@@ -50,28 +61,30 @@ export class AppError extends Error {
  * @param _next - Express next middleware function
  * @returns void - Sends error response to client
  */
-export const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction) => {
-  let { statusCode, message, errorCode } = err;
-  if (err instanceof AppError || err.constructor.name === "AppError") {
-    const interpolation = {
-      field: err.field || "Field", // Fallback if undefined
-      value: err.value,
-    };
+export const errorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction): void => {
+  const appError = err instanceof AppError ? err : null;
+  const httpErr = err as HttpErrorResponse;
 
-    // req.t will look for {{field}} in your translation string and replace it
-    message = req.t(message, interpolation);
+  let statusCode: number = 500;
+  let errorCode: number = GLOBAL_ERRORS.EXCEPTION.errorCode;
+  let message: string = GLOBAL_ERRORS.EXCEPTION.message;
+
+  if (appError || (err as { constructor: { name: string } }).constructor?.name === "AppError") {
+    const e = err as AppError;
+    statusCode = e.statusCode;
+    errorCode = e.errorCode;
+    message = req.t(e.message, {
+      field: e.field ?? "Field",
+      value: e.value,
+    });
   } else {
     let find = false;
-    if (err.response) {
-      if (err.response.data) {
-        const errorData = err.response.data;
-        if (errorData && errorData.error_code && errorData.data) {
-          message = errorData.data;
-          errorCode = errorData.error_code;
-          statusCode = err.response.status;
-          find = true;
-        }
-      }
+    const responseData = httpErr.response?.data;
+    if (responseData?.error_code && responseData?.data) {
+      message = responseData.data;
+      errorCode = responseData.error_code;
+      statusCode = httpErr.response?.status ?? 500;
+      find = true;
     }
     if (!find) {
       statusCode = 500;
@@ -79,13 +92,15 @@ export const errorHandler = (err: any, req: Request, res: Response, _next: NextF
       errorCode = GLOBAL_ERRORS.EXCEPTION.errorCode;
     }
   }
+
   logger.error({
     message,
     errorCode,
     statusCode,
-    field: err.field,
-    stack: err.stack,
+    field: httpErr.field,
+    stack: httpErr.stack,
     path: req.path,
   });
+
   res.status(statusCode).json(new myRes.ApiResponse(message, errorCode));
 };

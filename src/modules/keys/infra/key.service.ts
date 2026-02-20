@@ -53,7 +53,13 @@ export class KeyService implements IKeyService {
     }
     return toKeyDTO(value);
   }
-
+  private autoFitColumns(worksheet: ExcelJS.Worksheet): void {
+    worksheet.columns.forEach((column: Partial<Column>) => {
+      const length = column.header!.length;
+      const maxWidth = column.values!.map((v: CellValue) => v?.toString()?.length ?? 15);
+      column.width = Math.max(length, 15, ...maxWidth);
+    });
+  }
   /**
    * Generates an Excel file for the key distribution simulation.
    * @param key_id - ID of the key.
@@ -79,12 +85,7 @@ export class KeyService implements IKeyService {
       });
       worksheetHome.getCell("C2").font = { color: { argb: "FF0000FF" } };
       worksheetHome.getCell("D2").font = { color: { argb: "FF0000FF" } };
-      worksheetHome.columns.forEach((column: Partial<Column>) => {
-        const length = column.header!.length;
-        const maxWidth = column.values!.map((v: CellValue) => v?.toString()?.length ?? 15);
-        const minWidth = 15;
-        column.width = Math.max(length, minWidth, ...maxWidth.filter((v: any) => typeof v === "number"));
-      });
+      this.autoFitColumns(worksheetHome);
       const worksheet = workbook.addWorksheet("Clef de répartition");
       worksheet.columns = [
         { header: "Iteration n°", key: "number" },
@@ -114,12 +115,7 @@ export class KeyService implements IKeyService {
           });
         });
       });
-      worksheet.columns.forEach((column: Partial<Column>) => {
-        const length = column.header!.length;
-        const maxWidth = column.values!.map((v: CellValue) => v?.toString()?.length ?? 15);
-        const minWidth = 15;
-        column.width = Math.max(length, minWidth, ...maxWidth.filter((v: any) => typeof v === "number"));
-      });
+      this.autoFitColumns(worksheet);
       return await this.addCreditToExcel(workbook);
     } catch (err) {
       if (isAppErrorLike(err)) {

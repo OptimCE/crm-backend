@@ -1,5 +1,10 @@
 import type { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
-import { SharingOpConsumptionDTO, SharingOperationDTO, SharingOperationKeyDTO, type SharingOperationPartialDTO } from "../api/sharing_operation.dtos.js";
+import {
+  SharingOpConsumptionDTO,
+  SharingOperationDTO,
+  SharingOperationKeyDTO,
+  type SharingOperationPartialDTO,
+} from "../api/sharing_operation.dtos.js";
 import { toKeyPartialDTO } from "../../keys/shared/to_dto.js";
 import { SharingKeyStatus } from "./sharing_operation.types.js";
 

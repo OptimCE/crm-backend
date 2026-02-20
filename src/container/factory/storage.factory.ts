@@ -10,7 +10,7 @@ import { OpenfileStorageService } from "../../shared/storage/implementations/ope
  * @throws Error if configuration or settings are missing/invalid.
  */
 export function initializeStorageService(): void {
-  const storage_service: string|null = config.get<string>("storage_service.name");
+  const storage_service: string | null = config.get<string>("storage_service.name");
   if (storage_service === null) {
     throw new Error("Missing storage_service.name");
   }

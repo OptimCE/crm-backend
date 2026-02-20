@@ -10,9 +10,9 @@ import * as https from "https";
  * @param headersInput - Additional headers to include in the request
  * @returns Promise resolving to the response data cast to type T
  */
-export async function call<T>(requestConfig: AxiosRequestConfig, headersInput = {}): Promise<T> {
+export async function call<T>(requestConfig: AxiosRequestConfig, headersInput: Record<string, string> = {}): Promise<T> {
   const headers = { ...requestConfig.headers, ...headersInput };
-  const configWithHeaders = { ...requestConfig, headers, validateStatus: () => true };
+  const configWithHeaders = { ...requestConfig, headers, validateStatus: (): boolean => true };
 
   const response = await axios(configWithHeaders);
   return response.data as T;
@@ -25,14 +25,18 @@ export async function call<T>(requestConfig: AxiosRequestConfig, headersInput = 
  * @param headersInput - Additional headers to include in the request
  * @returns Promise resolving to the response data cast to type T
  */
-export async function callWithTracingHeadersCertificate<T>(certificate: any, requestConfig: AxiosRequestConfig, headersInput = {}): Promise<T> {
+export async function callWithTracingHeadersCertificate<T>(
+  certificate: Buffer | string,
+  requestConfig: AxiosRequestConfig,
+  headersInput = {},
+): Promise<T> {
   const carrier: Record<string, string> = {};
   propagation.inject(context.active(), carrier);
   const headers = { ...requestConfig.headers, ...headersInput, ...carrier };
   const httpsAgent = new https.Agent({
     ca: certificate,
   });
-  const configWithHeaders = { ...requestConfig, headers, httpsAgent, validateStatus: () => true };
+  const configWithHeaders = { ...requestConfig, headers, httpsAgent, validateStatus: (): boolean => true };
   const response = await axios(configWithHeaders);
   return response.data as T;
 }
@@ -44,12 +48,12 @@ export async function callWithTracingHeadersCertificate<T>(certificate: any, req
  * @param headersInput - Additional headers to include in the request
  * @returns Promise resolving to the response data cast to type T
  */
-export async function callWithTracingHeaders<T>(requestConfig: AxiosRequestConfig, headersInput: Record<string, any> = {}): Promise<T> {
+export async function callWithTracingHeaders<T>(requestConfig: AxiosRequestConfig, headersInput: Record<string, unknown> = {}): Promise<T> {
   const carrier: Record<string, string> = {};
   propagation.inject(context.active(), carrier);
   const headers = { ...requestConfig.headers, ...headersInput, ...carrier };
 
-  const configWithHeaders = { ...requestConfig, headers, validateStatus: () => true };
+  const configWithHeaders = { ...requestConfig, headers, validateStatus: (): boolean => true };
   const response = await axios(configWithHeaders);
   return response.data as T;
 }

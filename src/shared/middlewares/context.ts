@@ -17,7 +17,7 @@ interface OrgToken {
 
 const requestContext = new AsyncLocalStorage<Context>();
 
-function parseUserOrgs(user_orgs: string) {
+function parseUserOrgs(user_orgs: string): OrgToken[] {
   // Example:[orgId:2c8a0ea5-d597-49d6-ae12-4dceb9e9a018 orgPath:/aaaa roles:[ADMIN]],map[orgId:a221664e-866e-46f6-9f7b-1087447c579e orgPath:/bbbb roles:[ADMIN]],map[orgId:585cded0-219e-43ff-8bee-774ddca28d7a orgPath:/cccc roles:[ADMIN]]
   const matches = user_orgs.match(/(?<=\[)[^\]]+]/gm);
   const orgToken: OrgToken[] = [];
@@ -26,8 +26,6 @@ function parseUserOrgs(user_orgs: string) {
       const splitted = match.split(" ");
       let roles = splitted[2].split(":")[1];
       // Parse role that contain an array
-      console.log("roles", roles);
-      console.log("user_orgs", user_orgs);
       roles = roles.substring(1, roles.length - 1);
       const roleList = roles.split(",");
       const higherRole = resolveHighestRole(roleList);
@@ -45,8 +43,8 @@ function parseUserOrgs(user_orgs: string) {
  * Middleware that extracts context information from request headers.
  * Populates AsyncLocalStorage with user_id, community_id, role, and source_ip.
  */
-export function contextMiddleware() {
-  return (req: Request, _res: Response, next: NextFunction) => {
+export function contextMiddleware(): (req: Request, _res: Response, next: NextFunction) => void {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     const extractHeader = (key: string): string | undefined => {
       const header = req.headers[key];
       const returnedHeder = Array.isArray(header) ? header[0] : header;

@@ -10,7 +10,7 @@ import type { IIamService } from "../../shared/iam/i-iam.service.js";
  * @throws Error if configuration or settings are missing/invalid.
  */
 export function intializeIAMService(): void {
-  const iam_service: string|null = config.get("iam_service.name");
+  const iam_service: string | null = config.get("iam_service.name");
   if (iam_service === null) {
     throw new Error("Missing iam_service.name");
   }

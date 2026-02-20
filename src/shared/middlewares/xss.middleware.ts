@@ -1,10 +1,11 @@
 import xss from "xss";
 import type { Request, Response, NextFunction } from "express";
+type Sanitizable = string | number | boolean | null | Sanitizable[] | { [key: string]: Sanitizable };
 
 /**
  * Recursively sanitizes data
  */
-function xss_object(data: any): any {
+function xss_object(data: unknown): Sanitizable {
   if (data === null) return null;
 
   if (Array.isArray(data)) {
@@ -12,15 +13,11 @@ function xss_object(data: any): any {
   }
 
   if (typeof data === "object") {
-    const newObject: any = {};
-    for (const key in data) {
-      // SECURITY: Skip dangerous keys to prevent Prototype Pollution
-      if (key === "__proto__" || key === "constructor" || key === "prototype") {
-        continue;
-      }
-
+    const newObject: { [key: string]: Sanitizable } = {};
+    for (const key in data as object) {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
       if (Object.prototype.hasOwnProperty.call(data, key)) {
-        newObject[key] = xss_object(data[key]);
+        newObject[key] = xss_object((data as Record<string, unknown>)[key]);
       }
     }
     return newObject;
@@ -30,7 +27,8 @@ function xss_object(data: any): any {
     return xss(data);
   }
 
-  return data;
+  // number, boolean, etc. — pass through unchanged
+  return data as Sanitizable;
 }
 
 /**
@@ -41,7 +39,7 @@ function xss_object(data: any): any {
  * @param _res - Express response
  * @param next - Express next function
  */
-export function xss_middleware(req: Request, _res: Response, next: NextFunction) {
+export function xss_middleware(req: Request, _res: Response, next: NextFunction): void {
   const contentType = req.headers["content-type"];
   // Skip multipart (file uploads) to avoid corrupting binary streams / Multipart form-data are being check properly on routes
   if (contentType && contentType.includes("multipart/form-data")) {

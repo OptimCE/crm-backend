@@ -4,7 +4,7 @@ import type { ValidationArguments, ValidationOptions } from "class-validator";
 export const withError = (errorBase: LocalError, options?: ValidationOptions): ValidationOptions => {
   return {
     ...options,
-    message: (args: ValidationArguments) => {
+    message: (args: ValidationArguments): string => {
       const dynamicError = {
         ...errorBase,
         field: args.property || "/",

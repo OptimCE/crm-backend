@@ -12,7 +12,7 @@ import { getContext } from "./context.js";
  * @returns Express middleware function that validates the community_id property
  * @throws AppError If community_id is not valid (undefined)
  */
-export function communityIdChecker() {
+export function communityIdChecker(): (_req: Request, _res: Response, next: NextFunction) => void {
   /**
    * Express middleware that checks for a valid community ID
    * @param _req - Express request object (unused)
@@ -20,7 +20,7 @@ export function communityIdChecker() {
    * @param next - Express next function
    * @throws AppError If community_id is not valid
    */
-  return (_req: Request, _res: Response, next: NextFunction) => {
+  return (_req: Request, _res: Response, next: NextFunction): void => {
     const context = getContext();
     if (context.community_id !== undefined) {
       next();

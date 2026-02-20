@@ -13,14 +13,14 @@ export type SortDef<T extends ObjectLiteral> = {
   apply: (qb: SelectQueryBuilder<T>, direction: Sort) => void;
 };
 
-export function applyFilters<TEntity extends ObjectLiteral, TQuery>(
+export function applyFilters<TEntity extends ObjectLiteral, TQuery extends object>(
   filters: FilterDef<TEntity>[],
   qb: SelectQueryBuilder<TEntity>,
-  q: TQuery, // Accepts your DTO class directly
+  q: TQuery,
 ): SelectQueryBuilder<TEntity> {
   for (const f of filters) {
     // Safe access to the DTO property
-    const raw = (q as any)[f.key]; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = (q as Record<string, unknown>)[f.key];
 
     if (raw === undefined || raw === null || raw === "") continue;
     const val = f.parse ? f.parse(raw) : raw;
@@ -29,10 +29,14 @@ export function applyFilters<TEntity extends ObjectLiteral, TQuery>(
   return qb;
 }
 
-export function applySorts<TEntity extends ObjectLiteral, TQuery>(sorts: SortDef<TEntity>[], qb: SelectQueryBuilder<TEntity>, q: TQuery) {
+export function applySorts<TEntity extends ObjectLiteral, TQuery extends object>(
+  sorts: SortDef<TEntity>[],
+  qb: SelectQueryBuilder<TEntity>,
+  q: TQuery,
+): SelectQueryBuilder<TEntity> {
   for (const s of sorts) {
     // Access the DTO property (e.g., q.sort_name)
-    const direction = (q as any)[s.key]; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const direction = (q as Record<string, unknown>)[s.key];
 
     // Only apply if the value is explicitly ASC or DESC
     if (direction === "ASC" || direction === "DESC") {

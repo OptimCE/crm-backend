@@ -3,7 +3,9 @@ import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { expectWithLog, mockKeyRepositoryModule } from "../../utils/helper.js";
 import { testCasesAddKey, testCasesDeleteKey, testCasesDownloadKey, testCasesGetKey, testCasesGetKeysList, testCasesUpdateKey } from "./key.const.js";
+import type { Response } from "supertest";
 
+type ParserCallback = (err: Error | null, body?: unknown) => void;
 describe("(Unit) Key Module", () => {
   // --- GET KEYS LIST ---
   describe("(Unit) Get Keys List", () => {
@@ -71,7 +73,7 @@ describe("(Unit) Key Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const smartParser = (res: any, callback: any) => {
+        const smartParser = (res: Response, callback: ParserCallback): void => {
           const contentType = (res.headers["content-type"] ?? "").toLowerCase();
 
           // Collect raw bytes first
@@ -80,18 +82,14 @@ describe("(Unit) Key Module", () => {
           res.on("data", (chunk: string) => (data += chunk));
           res.on("end", () => {
             const buf = Buffer.from(data, "binary");
-
-            // If JSON, decode to object
             if (contentType.includes("application/json") || contentType.includes("+json")) {
               try {
                 callback(null, JSON.parse(buf.toString("utf8")));
               } catch (e) {
-                callback(e);
+                callback(e instanceof Error ? e : new Error(String(e)));
               }
               return;
             }
-
-            // Otherwise keep as Buffer (xlsx, etc.)
             callback(null, buf);
           });
         };

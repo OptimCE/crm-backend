@@ -7,6 +7,9 @@ import { INVITATION_ERRORS } from "../../../src/modules/invitations/shared/invit
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 import { type HttpMethod, ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 import { mockIndividualEntity, mockMemberDTOJSON } from "../member/member.const.js";
+import type { Member } from "../../../src/modules/members/domain/member.models.js";
+import type { User } from "../../../src/modules/users/domain/user.models.js";
+import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
 // --- Mock Data ---
 
@@ -14,12 +17,12 @@ export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 
 export const mockUserMemberInvitation: UserMemberInvitation = {
   id: 1,
-  member: { id: 1, name: "John Doe" } as any,
+  member: { id: 1, name: "John Doe" } as Member,
   memberName: "John Doe",
   userEmail: "john@example.com",
-  user: { id: 10, email: "john@example.com" } as any,
+  user: { id: 10, email: "john@example.com" } as User,
   toBeEncoded: false,
-  community: { id: 1, name: "Community A", auth_community_id: "org1" } as any,
+  community: { id: 1, name: "Community A", auth_community_id: "org1" } as Community,
   created_at: mockDate,
   updated_at: mockDate,
 };
@@ -27,8 +30,8 @@ export const mockUserMemberInvitation: UserMemberInvitation = {
 export const mockUserManagerInvitation: GestionnaireInvitation = {
   id: 2,
   userEmail: "manager@example.com",
-  user: { id: 11, email: "manager@example.com" } as any,
-  community: { id: 1, name: "Community A", auth_community_id: "org1" } as any,
+  user: { id: 11, email: "manager@example.com" } as User,
+  community: { id: 1, name: "Community A", auth_community_id: "org1" } as Community,
   created_at: mockDate,
   updated_at: mockDate,
 };
@@ -41,14 +44,14 @@ export const mockUserMemberInvitationDTO: UserMemberInvitationDTO = {
   user_email: "john@example.com",
   created_at: mockDate,
   to_be_encoded: false,
-  community: { id: 1, name: "Community A" } as any,
+  community: { id: 1, name: "Community A" } as Community,
 };
 
 export const mockUserManagerInvitationDTO: UserManagerInvitationDTO = {
   id: 2,
   user_email: "manager@example.com",
   created_at: mockDate,
-  community: { id: 1, name: "Community A" } as any,
+  community: { id: 1, name: "Community A" } as Community,
 };
 
 const mockUserMemberInvitationDTOJSON = JSON.parse(JSON.stringify(mockUserMemberInvitationDTO));
@@ -311,7 +314,7 @@ export const testCasesInvite = [
     expected_data: "success",
     mocks: {
       userRepo: {
-        getUserByEmail: jest.fn(() => Promise.resolve({ id: 99, email: "new@example.com" } as any)),
+        getUserByEmail: jest.fn(() => Promise.resolve({ id: 99, email: "new@example.com" })),
       },
       invitationRepo: {
         inviteUserToBecomeMember: jest.fn(() => Promise.resolve({})),
@@ -349,7 +352,7 @@ export const testCasesInvite = [
     expected_data: "success",
     mocks: {
       userRepo: {
-        getUserByEmail: jest.fn(() => Promise.resolve({ id: 100, email: "new_manager@example.com" } as any)),
+        getUserByEmail: jest.fn(() => Promise.resolve({ id: 100, email: "new_manager@example.com" })),
       },
       invitationRepo: {
         inviteUserToBecomeManager: jest.fn(() => Promise.resolve({})),

@@ -18,8 +18,8 @@ export const testCasesGetKeysList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length >= 2 && data.some((k: any) => k.id === existingKeyId);
+    check_data: (data: unknown[]): boolean => {
+      return data.length >= 2 && (data as Array<{ id: number }>).some((k) => k.id === existingKeyId);
     },
   },
   {
@@ -28,8 +28,8 @@ export const testCasesGetKeysList = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length === 1 && data[0].name === "Key 1";
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { name: string }).name === "Key 1";
     },
   },
 ];
@@ -42,8 +42,9 @@ export const testCasesGetKey = [
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.id === existingKeyId && data.iterations.length > 0;
+    check_data: (data: unknown): boolean => {
+      const d = data as { id: number; iterations: unknown[] };
+      return d.id === existingKeyId && d.iterations.length > 0;
     },
   },
   {

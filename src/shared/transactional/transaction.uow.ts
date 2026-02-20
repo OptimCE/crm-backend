@@ -19,9 +19,9 @@ export function Transactional() {
    * @param descriptor - The descriptor of the method
    * @returns The modified descriptor with transaction handling
    */
-  return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_target: object, _propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const originalMethod = descriptor.value;
-    descriptor.value = async function (this: HasDataSource, ...args: any[]) {
+    descriptor.value = async function (this: HasDataSource, ...args: unknown[]): Promise<unknown> {
       if (!this.dataSource) {
         throw new Error("UnitOfWork decorator requires 'dataSource' property on the class instance");
       }

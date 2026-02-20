@@ -30,7 +30,7 @@ export class PaginationMiddleware {
    * @param _res - Express response object
    * @param next - Express next function
    */
-  paginationMiddleware(req: Request, _res: Response, next: NextFunction) {
+  paginationMiddleware(req: Request, _res: Response, next: NextFunction): void {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || this.elementByPage;
     const offset = (page - 1) * limit;

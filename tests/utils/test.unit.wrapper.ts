@@ -1,12 +1,14 @@
 import { beforeEach, afterEach, jest } from "@jest/globals";
 import { initalizeDb, initializeExternalServices, tearDownDB } from "./helper.js";
+import type { TestHookOverrides } from "./shared.consts.js";
+
 /**
  * Registers standard DB setup/teardown hooks for the current describe block.
  * Call this at the top of your describe block.
  * @param {boolean} [initializeExternal] - Optional: Do we initialize external services
  * @param {Object} [hookOverrides] - Optional: { beforeEach, afterEach } overrides
  */
-export const useUnitTestDb = (initializeExternal: boolean = true, hookOverrides: any = {}) => {
+export const useUnitTestDb = (initializeExternal: boolean = true, hookOverrides: TestHookOverrides = {}): void => {
   beforeEach(async () => {
     jest.resetModules();
     if (hookOverrides.beforeEach) {

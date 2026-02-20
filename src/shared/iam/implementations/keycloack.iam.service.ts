@@ -6,6 +6,7 @@ import { Role } from "../../dtos/role.js";
 import config from "config";
 import { GrantTypes } from "@keycloak/keycloak-admin-client/lib/utils/auth.js";
 import logger from "../../monitor/logger.js";
+import { isHttpError } from "../../errors/isHttpError.js";
 // Configuration for the Keycloak Client
 @injectable()
 export class KeycloakIamService implements IIamService {
@@ -17,10 +18,16 @@ export class KeycloakIamService implements IIamService {
       baseUrl: config.get<string>("iam_service.settings.baseUrl"),
       realmName: config.get<string>("iam_service.settings.realmName"), // Usually initialized with master to perform admin ops
     });
-    this.authenticate();
+    this.authenticate()
+      .then(() => {
+        logger.info({ operation: "Keycloak constructor" }, "Authentication succesfull");
+      })
+      .catch((err) => {
+        logger.error({ operation: "Keycloak constructor", error: err }, "Authentication failed");
+      });
   }
 
-  private async authenticate() {
+  private async authenticate(): Promise<void> {
     await this.kcAdminClient.auth({
       clientId: config.get<string>("iam_service.settings.clientId"),
       grantType: config.get<GrantTypes>("iam_service.settings.grantType"),
@@ -55,8 +62,7 @@ export class KeycloakIamService implements IIamService {
       } catch (error) {
         // Ignore 409 Conflict (group already exists), rethrow others
         logger.error({ operation: "createCommunity", error: error }, "Error while trying to add child group into keycloack");
-        if ((error as any).response?.status !== 409) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!isHttpError(error) || error.response.status !== 409) {
           throw error;
         }
       }
@@ -156,15 +162,8 @@ export class KeycloakIamService implements IIamService {
         realm: this.realm,
       });
     } catch (error) {
-      // Idempotency: If the group is already gone (404), we consider it a success.
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        typeof (error as any).response?.status === "number" && // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (error as any).response.status === 404
-      ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      logger.error({ operation: "deleteCommunity", error: error }, "An error happen while deleting a community to Keycloak");
+      if (isHttpError(error) && error.response.status === 404) {
         return;
       }
       throw error;

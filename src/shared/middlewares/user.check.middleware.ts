@@ -10,8 +10,8 @@ import { getContext } from "./context.js";
  * @returns Express middleware function that validates the userId property
  * @throws AppError if userId is not valid (undefined)
  */
-export function idChecker() {
-  return (req: Request, _res: Response, next: NextFunction) => {
+export function idChecker(): (req: Request, res: Response, next: NextFunction) => void {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     const { user_id } = getContext();
     if (user_id !== undefined) {
       next();

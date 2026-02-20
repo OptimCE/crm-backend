@@ -5,7 +5,9 @@ import { COMMUNITY_ERRORS } from "../../../src/modules/communities/shared/commun
 import { ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 
 export const existingCommunityId = 1;
-
+interface UserResponse {
+  role: Role;
+}
 // --- Test Cases ---
 
 // 1. Get My Communities
@@ -16,8 +18,8 @@ export const testCasesGetMyCommunities = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length === 1 && data[0].id === existingCommunityId;
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { id: number }).id === existingCommunityId;
     },
   },
   // Functional: Test Filter
@@ -27,7 +29,7 @@ export const testCasesGetMyCommunities = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.length === 1,
+    check_data: (data: unknown[]): boolean => data.length === 1,
   },
   {
     description: "Success - Filter by Name (No match)",
@@ -35,7 +37,7 @@ export const testCasesGetMyCommunities = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.length === 0,
+    check_data: (data: unknown[]): boolean => data.length === 0,
   },
 ];
 
@@ -47,7 +49,7 @@ export const testCasesGetUsers = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.length >= 3, // Admin, Manager, Member from seed
+    check_data: (data: unknown[]): boolean => data.length >= 3, // Admin, Manager, Member from seed
   },
   // Functional: Test Filter
   {
@@ -56,7 +58,9 @@ export const testCasesGetUsers = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.every((u: any) => u.role === Role.ADMIN),
+    check_data: (data: unknown[]): boolean =>
+      data.every((u): u is UserResponse => typeof u === "object" && u !== null && "role" in u) &&
+      data.every((u: UserResponse): boolean => u.role === Role.ADMIN),
   },
 ];
 
@@ -68,7 +72,9 @@ export const testCasesGetAdmins = [
     orgs: ORGS_MEMBER, // Members can view admins
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.every((u: any) => u.role === Role.ADMIN || u.role === Role.GESTIONNAIRE),
+    check_data: (data: unknown[]): boolean =>
+      data.every((u): u is UserResponse => typeof u === "object" && u !== null && "role" in u) &&
+      data.every((u: UserResponse): boolean => u.role === Role.ADMIN || u.role === Role.GESTIONNAIRE),
   },
 ];
 

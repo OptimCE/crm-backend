@@ -15,7 +15,7 @@ import { Address } from "../../../shared/address/address.models.js";
 import { MemberStatus, MemberType } from "../shared/member.types.js";
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 interface IIndividual extends Individual {}
-interface ICompany extends Company {} /* eslint-disable @typescript-eslint/no-empty-object-type */
+interface ICompany extends Company {}
 type CommunityType = Community;
 
 /**
@@ -89,13 +89,13 @@ export class Member {
    * Optional details if member is an Individual.
    */
   @OneToOne(() => Individual, (ind) => ind.member)
-  individual_details!: IIndividual;
+  individual_details?: IIndividual;
 
   /**
    * Optional details if member is a Company.
    */
   @OneToOne(() => Company, (le) => le.member)
-  company_details!: ICompany;
+  company_details?: ICompany;
 }
 
 /**

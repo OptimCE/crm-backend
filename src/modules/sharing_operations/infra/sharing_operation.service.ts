@@ -117,11 +117,11 @@ export class SharingOperationService implements ISharingOperationService {
       const sheet = workbook.Sheets[sheetName];
       if (!sheet) continue; // Skip if sheet missing
 
-      const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
+      const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 }) as unknown[][];
       if (rows.length < 2) continue;
 
       const headers: string[] = rows[0] as string[];
-      const eans = rows[1];
+      const eans = rows[1] as (string | number | null)[];
 
       // Map columns to EANs and Types
       const columnMap = headers
@@ -145,17 +145,17 @@ export class SharingOperationService implements ISharingOperationService {
       // Skip headers (start at index 4 based on legacy code)
       for (let i = 4; i < rows.length; i++) {
         const row = rows[i];
-        const rawTimestamp = row[0];
+        const rawTimestamp = row[0] as string | number | null;
         if (!rawTimestamp) continue;
 
         const timestamp = this.parseExcelDate(rawTimestamp);
         const isoTimestamp = timestamp.toISOString();
 
         for (const col of columnMap) {
-          const value = row[col.index];
-          // Skip nulls or non-numbers
-          if (value === null || isNaN(parseFloat(value))) continue;
-          const numValue = parseFloat(value);
+          const value = row[col.index] as string | number | null;
+          if (value === null || value === undefined) continue;
+          const numValue = typeof value === "number" ? value : parseFloat(String(value));
+          if (isNaN(numValue)) continue;
 
           sheetData.push({
             timestamp: isoTimestamp,
@@ -366,7 +366,7 @@ export class SharingOperationService implements ISharingOperationService {
         await this.meterRepository.addMeterData(
           ean,
           {
-            sharing_operation: { id: id_sharing } as any,
+            sharing_operation: { id: id_sharing } as SharingOperation,
             start_date: new Date(date).toISOString().split("T")[0], // Ensure YYYY-MM-DD
             status: MeterDataStatus.WAITING_GRD,
           },
@@ -674,7 +674,7 @@ export class SharingOperationService implements ISharingOperationService {
       await this.meterRepository.addMeterData(
         id_meter,
         {
-          sharing_operation: null as any, // Explicitly remove link
+          sharing_operation: null,
           start_date: new Date(date).toISOString().split("T")[0],
           status: MeterDataStatus.INACTIVE,
         },

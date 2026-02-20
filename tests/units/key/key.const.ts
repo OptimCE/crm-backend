@@ -1,9 +1,10 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import type { AllocationKey } from "../../../src/modules/keys/domain/key.models.js";
+import type { AllocationKey, Iteration } from "../../../src/modules/keys/domain/key.models.js";
 import { toKeyDTO, toKeyPartialDTO } from "../../../src/modules/keys/shared/to_dto.js";
 import { KEY_ERRORS } from "../../../src/modules/keys/shared/key.errors.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
+import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
 // --- Mock Data ---
 
@@ -15,7 +16,7 @@ export const mockAllocKeyEntity: AllocationKey = {
   description: "Test Description",
   created_at: mockDate,
   updated_at: mockDate,
-  community: {} as any,
+  community: {} as Community,
   iterations: [
     {
       id: 1,
@@ -23,15 +24,15 @@ export const mockAllocKeyEntity: AllocationKey = {
       energy_allocated_percentage: 1,
       created_at: mockDate,
       updated_at: mockDate,
-      allocation_key: {} as any,
-      community: {} as any,
+      allocation_key: {} as AllocationKey,
+      community: {} as Community,
       consumers: [
         {
           id: 1,
           name: "Consumer 1",
           energy_allocated_percentage: 1,
-          iteration: {} as any,
-          community: {} as any,
+          iteration: {} as Iteration,
+          community: {} as Community,
           created_at: mockDate,
           updated_at: mockDate,
         },

@@ -9,7 +9,7 @@ import {
   SharingOperationPartialQuery,
 } from "../api/sharing_operation.dtos.js";
 import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
-import {DeleteResult, In, type QueryRunner, SelectQueryBuilder} from "typeorm";
+import { DeleteResult, In, type QueryRunner, SelectQueryBuilder } from "typeorm";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import { Meter, MeterData } from "../../meters/domain/meter.models.js";

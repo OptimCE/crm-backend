@@ -9,7 +9,7 @@ import type {
   PatchMeterDataDTO,
   UpdateMeterDTO,
 } from "../api/meter.dtos.js";
-import type {Pagination} from "../../../shared/dtos/ApiResponses.js";
+import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
 
 /**
  * Interface for Meter Service.

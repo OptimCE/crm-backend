@@ -12,7 +12,7 @@ import { GLOBAL_ERRORS, LocalError } from "../errors/errors.js";
  * @returns A promise resolving to the typed DTO instance if valid.
  * @throws AppError if validation fails (422 Unprocessable Entity).
  */
-export const validateDto = async <T extends object>(DtoClass: { new (): T }, body: any): Promise<T> => {
+export const validateDto = async <T extends object>(DtoClass: { new (): T }, body: unknown): Promise<T> => {
   const output = plainToInstance(DtoClass, body);
   const errors = await validate(output);
   if (errors.length > 0) {

@@ -2,7 +2,7 @@ import type { IMeterRepository } from "../domain/i-meter.repository.js";
 import { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
 import { inject, injectable } from "inversify";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
-import {DeepPartial, DeleteResult, In, type QueryRunner, SelectQueryBuilder, UpdateResult} from "typeorm";
+import { DeepPartial, DeleteResult, In, type QueryRunner, SelectQueryBuilder, UpdateResult } from "typeorm";
 import { CreateMeterDTO, MeterConsumptionQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 import { applyFilters, FilterDef } from "../../../shared/database/filters.js";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";

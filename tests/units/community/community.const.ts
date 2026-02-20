@@ -6,6 +6,7 @@ import { toMyCommunityDTO, toUsersCommunityDTO } from "../../../src/modules/comm
 import { COMMUNITY_ERRORS } from "../../../src/modules/communities/shared/community.errors.js";
 import { AppError } from "../../../src/shared/middlewares/error.middleware.js";
 import { ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
+import type { User } from "../../../src/modules/users/domain/user.models.js";
 
 // --- Mock Data ---
 
@@ -20,19 +21,19 @@ export const mockCommunityEntity: Community = {
   users: [],
 };
 
-export const mockUserEntity = {
+export const mockUserEntity: Partial<User> = {
   id: 1,
   auth_user_id: "auth0|user_123",
   email: "test@test.com",
   memberships: [],
-} as any;
+};
 
 export const mockCommunityUserEntity: CommunityUser = {
   id_community: 100,
   id_user: 1,
   role: Role.GESTIONNAIRE,
   community: mockCommunityEntity,
-  user: mockUserEntity,
+  user: mockUserEntity as User,
 };
 
 export const mockMyCommunityDTO = toMyCommunityDTO(mockCommunityUserEntity);

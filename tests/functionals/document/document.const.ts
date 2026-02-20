@@ -19,8 +19,8 @@ export const testCasesGetDocuments = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => {
-      return data.length === 1 && data[0].id === existingDocumentId;
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { id: number }).id === existingDocumentId;
     },
   },
   {
@@ -30,7 +30,7 @@ export const testCasesGetDocuments = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.length === 1,
+    check_data: (data: unknown[]): boolean => data.length === 1,
   },
   {
     description: "Success - Filter by Filename (No match)",
@@ -39,7 +39,7 @@ export const testCasesGetDocuments = [
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
-    check_data: (data: any) => data.length === 0,
+    check_data: (data: unknown[]): boolean => data.length === 0,
   },
 ];
 
