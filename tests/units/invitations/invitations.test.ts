@@ -440,8 +440,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)
-          [method](endpoint)
+        const response =
+            await request(app)[method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
@@ -474,8 +474,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)
-          [method](endpoint)
+        const response =
+            await request(app)[method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
@@ -508,8 +508,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)
-          [method](endpoint)
+        const response =
+            await request(app)[method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
@@ -542,8 +542,8 @@ describe("(Unit) Invitation Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app)
-          [method](endpoint)
+        const response =
+            await request(app)[method](endpoint)
           .set("x-user-id", id_user.toString())
           .set("x-community-id", id_community.toString())
           .set("x-user-orgs", orgs);
