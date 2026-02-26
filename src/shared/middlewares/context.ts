@@ -47,10 +47,10 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
   return (req: Request, _res: Response, next: NextFunction): void => {
     const extractHeader = (key: string): string | undefined => {
       const header = req.headers[key];
-      const returnedHeder = Array.isArray(header) ? header[0] : header;
-      if (returnedHeder) {
-        if (returnedHeder.length > 0) {
-          return returnedHeder;
+      const returnedHeader = Array.isArray(header) ? header[0] : header;
+      if (returnedHeader) {
+        if (returnedHeader.length > 0) {
+          return returnedHeader;
         }
       }
     };

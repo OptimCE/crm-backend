@@ -5,7 +5,8 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
-import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { ATTR_SERVICE_NAME } from'@opentelemetry/semantic-conventions'
+import config from "config";
 
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
 /**
@@ -16,7 +17,7 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
 const init = function (serviceName: string): { sdk: NodeSDK | undefined } {
   let sdk: NodeSDK | undefined;
 
-  if (process.env.REMOTE_LOGGING && process.env.REMOTE_LOGGING === "true") {
+  if (config.get("remote_logging.status") && config.get("remote_logging.status") === "true") {
     const traceExporter = new OTLPTraceExporter({});
 
     sdk = new NodeSDK({
