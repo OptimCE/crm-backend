@@ -37,7 +37,7 @@
     "@keycloak/keycloak-admin-client": "^26.4.7",
     "@nestjs/mapped-types": "^2.1.0",
     "@opentelemetry/auto-instrumentations-node": "^0.67.3",
-    "@opentelemetry/resources": "^2.2.0",
+    "@opentelemetry/resources": "^2.5.1",
     "@opentelemetry/sdk-node": "^0.208.0",
     "axios": "^1.13.5",
     "class-transformer": "^0.5.1",
