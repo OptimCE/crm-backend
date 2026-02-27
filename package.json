@@ -65,8 +65,6 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "husky": "^8.0.0",
-    "lint-staged": "^16.2.7",
     "@eslint/js": "^9.39.2",
     "@redocly/cli": "^2.14.5",
     "@types/config": "^3.3.5",
@@ -81,7 +79,9 @@
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
+    "husky": "^8.0.0",
     "jest": "^30.2.0",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "rimraf": "^6.1.2",
     "shins": "^2.6.0",
@@ -98,6 +98,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "prettier --write",
+      "eslint --fix",
       "git add"
     ]
   }
