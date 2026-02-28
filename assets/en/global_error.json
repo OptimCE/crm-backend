@@ -1,7 +1,7 @@
 {
   "success": "Success",
   "exception": "An unexpected error occurred",
-  "timeout": "Timeout exceeded",
+  "timeout": "Request timed out",
   "decorator": "Decorator execution failed",
   "unauthorized": "Unauthorized",
   "authorization_missing": "Authorization missing",
@@ -21,10 +21,10 @@
         "number": "The field '{{field}}' must be a number",
         "array": "The field '{{field}}' must be a valid array"
       },
-      "sort": "The field '{{field}}' must be either 'ASC' or 'DESC'",
+      "sort": "The field '{{field}} must be either 'ASC' or 'DESC'",
       "empty": "The field '{{field}}' is empty",
       "wrong_role": {
-        "member_manager_admin": "The field '{{field}}' must be one of 'MEMBER', 'MANAGER', or 'ADMIN'"
+        "member_manager_admin": "The field '{{field}}' must be one of 'MEMBER', 'MANAGER' or 'ADMIN'"
       },
       "min_1": "The field '{{field}}' must be greater than or equal to 1"
     }

@@ -1,45 +1,46 @@
 {
   "get_key": {
-    "key_not_found": "Key not found"
+    "key_not_found": "The allocation key could not be found"
   },
   "download_key": {
     "download_key": "An error occurred while generating the Excel file",
-    "add_credit": "An error occurred while generating credits for the Excel file"
+    "add_credit": "An error occurred while generating the Excel credits",
+    "download_name": "allocation_key"
   },
   "add_key": {
     "add_key_database": "An error occurred while adding the key to the database",
-    "add_children_database": "An error occurred while adding iterations and consumers to the database"
+    "add_children_database": "An error occurred while adding the iterations and consumers to the database"
   },
   "update_key": {
-    "key_not_found": "Key not found",
+    "key_not_found": "The allocation key could not be found",
     "update_key_database": "An error occurred while updating the key in the database",
-    "delete_children_database": "An error occurred while deleting previous iterations and consumers from the database",
-    "add_children_database": "An error occurred while adding iterations and consumers to the database"
+    "delete_children_database": "An error occurred while deleting the previous iterations and consumers in the database",
+    "add_children_database": "An error occurred while adding the iterations and consumers to the database"
   },
   "delete_key": {
     "database_delete": "An error occurred while deleting the key from the database"
   },
   "validation": {
     "key_partial_query": {
-      "description_wrong_type": "The 'description' field must be a string",
-      "name_wrong_type": "The 'name' field must be a string",
-      "sort_name_out_of_range": "The value of 'sort_name' must be between 'ASC' and 'DESC'"
+      "description_wrong_type": "The field 'description' must be a string",
+      "name_wrong_type": "The field 'name' must be a string",
+      "sort_name_out_of_range": "The value of 'sort_name' must be either 'ASC' or 'DESC'"
     },
     "create_consumer": {
-      "energy_allocated_percentage_min_minus_1": "The 'energy_allocated_percentage' field is incorrect, the minimum value is -1",
-      "energy_allocated_percentage_max_1": "The 'energy_allocated_percentage' field is incorrect, the maximum value is 1"
+      "energy_allocated_percentage_min_minus_1": "The field 'energy_allocated_percentage' is invalid, the minimum value is -1",
+      "energy_allocated_percentage_max_1": "The field 'energy_allocated_percentage' is invalid, the maximum value is 1"
     },
     "create_iteration": {
-      "number_min_0": "The 'number' field is incorrect, the minimum value is 0",
-      "number_max_2": "The 'number' field is incorrect, the maximum value is 2",
-      "energy_allocated_percentage_min_0": "The 'energy_allocated_percentage' field is incorrect, the minimum value is 0",
-      "consumer_sum_1": "The sum of 'energy_allocated_percentage' for consumers must be equal to 1"
+      "number_min_0": "The field 'number' is invalid, the minimum value is 0",
+      "number_max_2": "The field 'number' is invalid, the maximum value is 2",
+      "energy_allocated_percentage_min_0": "The field 'energy_allocated_percentage' is invalid, the minimum value is 0",
+      "consumer_sum_1": "The sum of consumers' 'energy_allocated_percentage' must equal 1"
     },
     "create_key": {
-      "iteration_sum_1": "The sum of 'energy_allocated_percentage' for iterations must be equal to 1"
+      "iteration_sum_1": "The sum of iterations' 'energy_allocated_percentage' must equal 1"
     },
     "update_key": {
-      "iteration_sum_1": "The sum of 'energy_allocated_percentage' for iterations must be equal to 1"
+      "iteration_sum_1": "The sum of iterations' 'energy_allocated_percentage' must equal 1"
     }
   }
 }

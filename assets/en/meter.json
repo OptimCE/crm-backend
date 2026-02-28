@@ -1,17 +1,17 @@
 {
   "add_meter": {
-    "already_exist": "Meter already exists",
+    "already_exist": "The meter already exists",
     "database_add": "An error occurred while adding the meter to the database"
   },
   "delete_meter": {
     "database_delete": "An error occurred while deleting the meter from the database"
   },
   "download_meter_consumptions": {
-    "no_consumptions": "No consumption found"
+    "no_consumptions": "No consumption data was found"
   },
   "patch_meter_data": {
     "meter_not_found": "Meter not found",
-    "database_update": "An error occurred while updating meter data in the database"
+    "database_update": "An error occurred while updating the meter data in the database"
   },
   "add_meter_data": {
     "conflict_config_already_existing": "Meter data already exists for this period"
@@ -19,15 +19,18 @@
   "get_meter": {
     "meter_not_found": "Meter not found"
   },
+  "update_meter": {
+    "database_update": "An error occurred while updating the meter data in the database"
+  },
   "validation": {
     "wrong_type": {
-      "meter_data_status": "The '{{field}}' field must be of type 'MeterDataStatus'",
-      "meter_rate": "The '{{field}}' field must be of type 'MeterRate'",
-      "client_type": "The '{{field}}' field must be of type 'ClientType'",
-      "injection_status": "The '{{field}}' field must be of type 'InjectionStatus'",
-      "production_chain": "The '{{field}}' field must be of type 'ProductionChain'",
-      "tarif_group": "The '{{field}}' field must be of type 'TarifGroup'",
-      "reading_frequency": "The '{{field}}' field must be of type 'ReadingFrequency'"
+      "meter_data_status": "The field '{{field}}' must be of type 'MeterDataStatus'",
+      "meter_rate": "The field '{{field}}' must be of type 'MeterRate'",
+      "client_type": "The field '{{field}}' must be of type 'ClientType'",
+      "injection_status": "The field '{{field}}' must be of type 'InjectionStatus'",
+      "production_chain": "The field '{{field}}' must be of type 'ProductionChain'",
+      "tarif_group": "The field '{{field}}' must be of type 'TarifGroup'",
+      "reading_frequency": "The field '{{field}}' must be of type 'ReadingFrequency'"
     }
   }
 }

@@ -1,10 +1,10 @@
 {
   "get_profile": {
     "database_add": "Er is een fout opgetreden bij het aanmaken van het gebruikersprofiel in de database",
-    "user_not_found": "Gebruikersprofiel niet gevonden"
+    "user_not_found": "Het gebruikersprofiel kon niet worden gevonden"
   },
   "update_profile": {
-    "user_not_found": "Gebruikersprofiel niet gevonden",
+    "user_not_found": "Het gebruikersprofiel kon niet worden gevonden",
     "database_update": "Er is een fout opgetreden bij het bijwerken van het gebruikersprofiel in de database"
   },
   "update_invitation": {

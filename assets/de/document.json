@@ -1,18 +1,18 @@
 {
   "delete_document": {
-    "storage_service_delete": "Beim Löschen des Dokuments aus dem Speicherdienst ist ein Fehler aufgetreten",
-    "database_delete": "Beim Löschen des Dokuments aus der Datenbank ist ein Fehler aufgetreten"
+    "storage_service_delete": "Beim Löschen des Dokuments über den Speicherdienst ist ein Fehler aufgetreten",
+    "database_delete": "Beim Löschen des Dokuments in der Datenbank ist ein Fehler aufgetreten"
   },
   "download_document": {
-    "document_not_found": "Dokument nicht gefunden"
+    "document_not_found": "Das Dokument konnte nicht gefunden werden"
   },
   "upload_document": {
-    "storage_service_upload": "Beim Hochladen des Dokuments in den Speicherdienst ist ein Fehler aufgetreten",
+    "storage_service_upload": "Beim Hochladen des Dokuments zum Speicherdienst ist ein Fehler aufgetreten",
     "database_upload": "Beim Hinzufügen des neuen Dokuments zur Datenbank ist ein Fehler aufgetreten"
   },
   "validation": {
     "upload_document": {
-      "file_too_big": "Die Datei ist zu groß (maximal 5Mb)"
+      "file_too_big": "Die Datei ist zu groß (maximal 5 MB)"
     }
   }
 }

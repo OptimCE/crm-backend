@@ -1,10 +1,10 @@
 {
   "delete_document": {
-    "storage_service_delete": "An error occurred while deleting the document from the storage service",
-    "database_delete": "An error occurred while deleting the document from the database"
+    "storage_service_delete": "An error occurred while deleting the document with the storage service",
+    "database_delete": "An error occurred while deleting the document in the database"
   },
   "download_document": {
-    "document_not_found": "Document not found"
+    "document_not_found": "The document could not be found"
   },
   "upload_document": {
     "storage_service_upload": "An error occurred while uploading the document to the storage service",
@@ -12,7 +12,7 @@
   },
   "validation": {
     "upload_document": {
-      "file_too_big": "The file is too large (maximum 5Mb)"
+      "file_too_big": "The file is too large (5MB maximum)"
     }
   }
 }

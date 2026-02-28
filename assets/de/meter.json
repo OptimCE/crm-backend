@@ -7,17 +7,20 @@
     "database_delete": "Beim Löschen des Zählers aus der Datenbank ist ein Fehler aufgetreten"
   },
   "download_meter_consumptions": {
-    "no_consumptions": "Kein Verbrauch gefunden"
+    "no_consumptions": "Keine Verbrauchsdaten gefunden"
   },
   "patch_meter_data": {
     "meter_not_found": "Zähler nicht gefunden",
     "database_update": "Beim Aktualisieren der Zählerdaten in der Datenbank ist ein Fehler aufgetreten"
   },
   "add_meter_data": {
-    "conflict_config_already_existing": "Für diesen Zeitraum liegen bereits Zählerdaten vor"
+    "conflict_config_already_existing": "Für diesen Zeitraum sind bereits Zählerdaten vorhanden"
   },
   "get_meter": {
     "meter_not_found": "Zähler nicht gefunden"
+  },
+  "update_meter": {
+    "database_update": "Beim Aktualisieren der Zählerdaten in der Datenbank ist ein Fehler aufgetreten"
   },
   "validation": {
     "wrong_type": {

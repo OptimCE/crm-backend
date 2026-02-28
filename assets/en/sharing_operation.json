@@ -1,18 +1,18 @@
 {
   "add_consumption_data": {
-    "database_add": "An error occurred while adding consumption data to the database",
+    "database_add": "An error occurred while adding the consumption data to the database",
     "no_meter_authorized": "No valid meter was found"
   },
   "parse_excel_data": {
     "invalid_date_format": "A date in the file has an invalid format"
   },
   "add_key_to_sharing": {
-    "sharing_operation_not_found": "Sharing operation not found",
-    "allocation_key_not_found": "Allocation key not found",
+    "sharing_operation_not_found": "The sharing operation could not be found",
+    "allocation_key_not_found": "The allocation key could not be found",
     "database_add": "An error occurred while adding the allocation key to the sharing operation in the database"
   },
   "add_meter_to_sharing": {
-    "sharing_operation_not_found": "Sharing operation not found",
+    "sharing_operation_not_found": "The sharing operation could not be found",
     "meters_invalid": "One or more meters do not belong to the community",
     "database_add": "An error occurred while adding the meter to the sharing operation in the database"
   },
@@ -20,14 +20,14 @@
     "database_add": "An error occurred while adding the sharing operation to the database"
   },
   "get_sharing_operation": {
-    "sharing_operation_not_found": "Sharing operation not found"
+    "sharing_operation_not_found": "The sharing operation could not be found"
   },
   "patch_key_status": {
-    "sharing_operation_not_found": "Sharing operation not found",
+    "sharing_operation_not_found": "The sharing operation could not be found",
     "database_update": "An error occurred while updating the status associated with the sharing operation in the database"
   },
   "patch_meter_status": {
-    "sharing_operation_not_found": "Sharing operation not found",
+    "sharing_operation_not_found": "The sharing operation could not be found",
     "meter_not_in_community": "One or more meters do not belong to the community",
     "latest_meter_data_not_found": "No valid meter information was found",
     "meter_not_part_of_sharing": "The meter is not currently part of the sharing operation",
@@ -37,7 +37,7 @@
     "database_delete": "An error occurred while deleting the sharing operation from the database"
   },
   "delete_meter_from_sharing": {
-    "sharing_operation_not_found": "Sharing operation not found",
+    "sharing_operation_not_found": "The sharing operation could not be found",
     "meter_not_in_community": "One or more meters do not belong to the community",
     "latest_meter_data_not_found": "No valid meter information was found",
     "meter_not_part_of_sharing": "The meter is not currently part of the sharing operation",
@@ -48,16 +48,16 @@
   },
   "validation": {
     "wrong_type": {
-      "sharing_operation_type": "The '{{field}}' field must be of type 'SharingOperationType'",
-      "sharing_key_status": "The '{{field}}' field must be of type 'SharingKeyStatus'",
-      "meter_data_status": "The '{{field}}' field must be of type 'MeterDataStatus'"
+      "sharing_operation_type": "The field '{{field}}' must be of type 'SharingOperationType'",
+      "sharing_key_status": "The field '{{field}}' must be of type 'SharingKeyStatus'",
+      "meter_data_status": "The field '{{field}}' must be of type 'MeterDataStatus'"
     },
     "add_consumption_data": {
-      "file_too_big": "The file is too large (maximum 5Mb)",
-      "has_mime_type": "The file must be a CSV or Excel"
+      "file_too_big": "The file is too large (5MB maximum)",
+      "has_mime_type": "The file must be a CSV or Excel file"
     },
     "patch_meter_to_sharing_operation": {
-      "status_out_of_range": "The value of the '{{field}}' field must be between 1, 3, and 4"
+      "status_out_of_range": "The value of field '{{field}}' must be one of 1, 3 or 4"
     }
   }
 }

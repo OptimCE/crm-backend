@@ -1,30 +1,30 @@
 {
   "add_community": {
-    "iam_creation": "Beim Hinzufügen zum IAM-Dienst ist ein Fehler aufgetreten",
+    "iam_creation": "Beim Registrieren beim IAM-Dienst ist ein Fehler aufgetreten",
     "database_save": "Beim Speichern in der Datenbank ist ein Fehler aufgetreten"
   },
   "update_community": {
-    "community_not_found": "Community nicht gefunden",
-    "iam_update": "Beim Aktualisieren der Community im IAM-Dienst ist ein Fehler aufgetreten",
-    "database_update": "Beim Aktualisieren der Community in der Datenbank ist ein Fehler aufgetreten"
+    "community_not_found": "Die Gemeinschaft konnte nicht gefunden werden",
+    "iam_update": "Beim Aktualisieren der Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten",
+    "database_update": "Beim Aktualisieren der Gemeinschaft in der Datenbank ist ein Fehler aufgetreten"
   },
   "delete_user_community": {
-    "community_user_not_found": "Die Verknüpfung zwischen Benutzer und Community wurde nicht gefunden",
-    "database_delete_user": "Beim Löschen der Verknüpfung zwischen Benutzer und Community aus der Datenbank ist ein Fehler aufgetreten",
-    "iam_delete_user": "Beim Löschen der Verknüpfung zwischen Benutzer und Community im IAM-Dienst ist ein Fehler aufgetreten"
+    "community_user_not_found": "Die Verknüpfung zwischen dem Benutzer und der Gemeinschaft konnte nicht gefunden werden",
+    "database_delete_user": "Beim Löschen der Verknüpfung zwischen dem Benutzer und der Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
+    "iam_delete_user": "Beim Löschen der Verknüpfung zwischen dem Benutzer und der Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten"
   },
   "update_user_role": {
-    "database_update_user_role": "Beim Aktualisieren der Benutzerrolle der Community in der Datenbank ist ein Fehler aufgetreten",
-    "iam_update_user_role": "Beim Aktualisieren der Benutzerrolle der Community im IAM-Dienst ist ein Fehler aufgetreten"
+    "database_update_user_role": "Beim Aktualisieren der Rolle des Gemeinschaftsbenutzers in der Datenbank ist ein Fehler aufgetreten",
+    "iam_update_user_role": "Beim Aktualisieren der Rolle des Gemeinschaftsbenutzers über den IAM-Dienst ist ein Fehler aufgetreten"
   },
   "patch_user_role": {
-    "community_user_not_found": "Die Verknüpfung zwischen Benutzer und Community wurde nicht gefunden",
+    "community_user_not_found": "Die Verknüpfung zwischen dem Benutzer und der Gemeinschaft konnte nicht gefunden werden",
     "exception": "Beim Aktualisieren der Benutzerrolle ist eine Ausnahme aufgetreten"
   },
   "delete_community": {
-    "community_not_found": "Community nicht gefunden",
-    "mismatch_id": "Die Community-ID stimmt nicht mit der zu löschenden Community überein",
-    "database_delete_exception": "Beim Löschen der Community aus der Datenbank ist ein Fehler aufgetreten",
-    "iam_delete_community": "Beim Löschen der Community im IAM-Dienst ist ein Fehler aufgetreten"
+    "community_not_found": "Die Gemeinschaft konnte nicht gefunden werden",
+    "mismatch_id": "Die Gemeinschafts-ID stimmt nicht mit der zu löschenden Gemeinschaft überein",
+    "database_delete_exception": "Beim Löschen der Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
+    "iam_delete_community": "Beim Löschen der Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten"
   }
 }
