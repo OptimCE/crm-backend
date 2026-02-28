@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, jest } from "@jest/globals";
-import { initalizeDb, initializeExternalServices, resetDb, tearDownCache, tearDownDB } from "./helper.js";
+import { initalizeDb, initializeCaching, initializeExternalServices, resetDb, tearDownCache, tearDownDB } from "./helper.js";
 import type { TestHookOverrides } from "./shared.consts.js";
 
 /**
@@ -8,7 +8,7 @@ import type { TestHookOverrides } from "./shared.consts.js";
  * @param {boolean} [initializeExternal] - Optional: Do we initialize external services
  * @param {Object} [hookOverrides] - Optional: { beforeEach, afterEach } overrides
  */
-export const useFunctionalTestDb = (initializeExternal: boolean = true, hookOverrides: TestHookOverrides = {}): void => {
+export const useFunctionalCacheTestDb = (initializeExternal: boolean = true, hookOverrides: TestHookOverrides = {}): void => {
   beforeEach(async () => {
     jest.resetModules();
     if (hookOverrides.beforeEach) {
@@ -16,6 +16,7 @@ export const useFunctionalTestDb = (initializeExternal: boolean = true, hookOver
     } else {
       await initalizeDb();
       await resetDb();
+      await initializeCaching();
       if (initializeExternal) {
         await initializeExternalServices();
       }

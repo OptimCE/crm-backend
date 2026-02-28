@@ -51,6 +51,7 @@ import { intializeIAMService } from "./factory/iam.factory.js";
 import { initializeStorageService } from "./factory/storage.factory.js";
 import type { IAuthContextRepository } from "../shared/context/i-authcontext.repository.js";
 import { AuthContextRepository } from "../shared/context/authcontext.repository.js";
+import { initializeCacheService } from "./factory/cache.factory.js";
 
 if (process.env.NODE_ENV !== "test") {
   container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
@@ -59,6 +60,9 @@ if (process.env.NODE_ENV !== "test") {
 
   // Storage service
   initializeStorageService();
+
+  // Cache Service
+  initializeCacheService();
 }
 if (!container.isBound("AuthContext")) {
   container.bind<IAuthContextRepository>("AuthContext").to(AuthContextRepository);

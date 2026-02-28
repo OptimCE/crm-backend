@@ -10,6 +10,8 @@ import type { IAuthContextRepository } from "../../../shared/context/i-authconte
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
+import { withUserScope } from "../../../shared/database/withUser.js";
+import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 
 @injectable()
 export class CommunityRepository implements ICommunityRepository {
@@ -105,15 +107,13 @@ export class CommunityRepository implements ICommunityRepository {
 
   async getAdmins(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
 
     let qb = manager
       .createQueryBuilder(CommunityUser, "community_user")
       .leftJoinAndSelect("community_user.user", "user")
-      .where("community_user.id_community = :communityId", { communityId: internal_community_id })
       // Specific constraint for getAdmins: Only GESTIONNAIRE or ADMIN
       .andWhere("community_user.role IN (:...adminRoles)", { adminRoles: [Role.GESTIONNAIRE, Role.ADMIN] });
-
+    withCommunityScope(qb, "community_user");
     // Apply Filters (allows further refining, e.g. searching by name within the admin list)
     qb = applyFilters(this.communityUserFilters, qb, query);
 
@@ -129,14 +129,8 @@ export class CommunityRepository implements ICommunityRepository {
 
   async getMyCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    // Retrieve the ID of the user making the request from the context
-    const internal_user_id = await this.authContext.getInternalUserId(query_runner);
-
-    let qb = manager
-      .createQueryBuilder(CommunityUser, "community_user")
-      .leftJoinAndSelect("community_user.community", "community")
-      .where("community_user.id_user = :userId", { userId: internal_user_id });
-
+    let qb = manager.createQueryBuilder(CommunityUser, "community_user").leftJoinAndSelect("community_user.community", "community");
+    withUserScope(qb, "community_user");
     // Apply Filters (e.g. searching for a specific community name)
     qb = applyFilters(this.myCommunityFilters, qb, query);
 
@@ -152,13 +146,8 @@ export class CommunityRepository implements ICommunityRepository {
 
   async getUsers(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
-
-    let qb = manager
-      .createQueryBuilder(CommunityUser, "community_user")
-      .leftJoinAndSelect("community_user.user", "user")
-      .where("community_user.id_community = :communityId", { communityId: internal_community_id });
-
+    let qb = manager.createQueryBuilder(CommunityUser, "community_user").leftJoinAndSelect("community_user.user", "user");
+    withCommunityScope(qb, "community_user");
     // Apply Filters
     qb = applyFilters(this.communityUserFilters, qb, query);
 

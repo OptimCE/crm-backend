@@ -27,6 +27,8 @@ import { createMockAuthContextRepository } from "../repository_mocked/authcontex
 import type { IAuthContextRepository } from "../../src/shared/context/i-authcontext.repository.js";
 import type { QueryRunner } from "typeorm";
 import type { Response } from "supertest";
+import { InMemoryCacheService } from "../../src/shared/cache/implementations/in-memory.cache.service.js";
+import type { ICacheService } from "../../src/shared/cache/i-cache.service.js";
 
 export const expectWithLog = async (response: Response, assertionCallback: () => void | Promise<void>): Promise<void> => {
   try {
@@ -80,6 +82,22 @@ export async function tearDownDB(): Promise<void> {
     await AppDataSource.destroy();
   }
   jest.clearAllMocks();
+}
+export async function initializeCaching(): Promise<void> {
+  const container = (await import("../../src/container/di-container.js")).container;
+  if (container.isBound("CacheService")) {
+    return;
+  }
+  container.bind<ICacheService>("CacheService").toConstantValue(new InMemoryCacheService());
+}
+
+export async function tearDownCache(): Promise<void> {
+  const container = (await import("../../src/container/di-container.js")).container;
+  if (container.isBound("CacheService")) {
+    const cache = container.get<ICacheService>("CacheService");
+    await cache.clear();
+    await container.unbind("CacheService");
+  }
 }
 type ApiCallMocks = {
   call: jest.Mock;
