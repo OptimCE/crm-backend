@@ -7,7 +7,8 @@
     "database_delete": "Beim Löschen des Zählers aus der Datenbank ist ein Fehler aufgetreten"
   },
   "download_meter_consumptions": {
-    "no_consumptions": "Keine Verbrauchsdaten gefunden"
+    "no_consumptions": "Keine Verbrauchsdaten gefunden",
+    "download_name": "Verbrauchsdaten"
   },
   "patch_meter_data": {
     "meter_not_found": "Zähler nicht gefunden",

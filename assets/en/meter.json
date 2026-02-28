@@ -7,7 +7,8 @@
     "database_delete": "An error occurred while deleting the meter from the database"
   },
   "download_meter_consumptions": {
-    "no_consumptions": "No consumption data was found"
+    "no_consumptions": "No consumption data was found",
+    "download_name": "consumptions"
   },
   "patch_meter_data": {
     "meter_not_found": "Meter not found",

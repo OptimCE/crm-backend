@@ -7,7 +7,8 @@
     "database_delete": "Er is een fout opgetreden bij het verwijderen van de meter uit de database"
   },
   "download_meter_consumptions": {
-    "no_consumptions": "Geen verbruiksgegevens gevonden"
+    "no_consumptions": "Geen verbruiksgegevens gevonden",
+    "download_name": "verbruiksgegevens"
   },
   "patch_meter_data": {
     "meter_not_found": "Meter niet gevonden",

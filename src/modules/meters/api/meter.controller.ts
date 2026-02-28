@@ -76,7 +76,8 @@ export class MeterController {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const buffer: Buffer = await this.meterService.downloadMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully download");
-    res.setHeader("Content-Disposition", `attachment; filename=consommations-${req.query.id}.xlsx`);
+    const filenameBase = req.t("download_meter_consumptions.download_name", { ns: "meter" }) + ".xlsx";
+    res.setHeader("Content-Disposition", `attachment; filename=${filenameBase}`);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.send(buffer);
   }
