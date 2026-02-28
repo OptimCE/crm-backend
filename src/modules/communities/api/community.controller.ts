@@ -85,7 +85,7 @@ export class CommunityController {
    * @param _next - Express next middleware function.
    */
   @communityControllerTraceDecorator.traceSpan("createCommunity", { url: "/communities/", method: "post" })
-  @InvalidateCache([cachePattern("communities", "user")])
+  @InvalidateCache([cachePattern("communities:user-list", "user")])
   async createCommunity(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_community = await validateDto(CreateCommunityDTO, req.body);
     await this.communityService.addCommunity(new_community);
@@ -99,7 +99,11 @@ export class CommunityController {
    * @param _next - Express next middleware function.
    */
   @communityControllerTraceDecorator.traceSpan("updateCommunity", { url: "/communities/", method: "put" })
-  @InvalidateCache([cachePattern("communities", "community")])
+  @InvalidateCache([
+    cachePattern("communities:users", "community"),
+    cachePattern("communities:admins", "community"),
+    cachePattern("communities:user-list", "user"),
+  ])
   async updateCommunity(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_community = await validateDto(CreateCommunityDTO, req.body);
     await this.communityService.updateCommunity(updated_community);
@@ -114,7 +118,7 @@ export class CommunityController {
    * @param _next - Express next middleware function.
    */
   @communityControllerTraceDecorator.traceSpan("patchRoleUser", { url: "/communities/", method: "patch" })
-  @InvalidateCache([cachePattern("communities", "none")])
+  @InvalidateCache([cachePattern("communities:users", "community"), cachePattern("communities:admins", "community")])
   async patchRoleUser(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_role = await validateDto(PatchRoleUserDTO, req.body);
     await this.communityService.patchRoleUser(patched_role);
@@ -129,7 +133,11 @@ export class CommunityController {
    * @param _next - Express next middleware function.
    */
   @communityControllerTraceDecorator.traceSpan("leave", { url: "/communities/leave/:id_community", method: "delete" })
-  @InvalidateCache([cachePattern("communities", "user"), cachePattern("communities", "community")])
+  @InvalidateCache([
+    cachePattern("communities:user-list", "user"),
+    cachePattern("communities:users", "community"),
+    cachePattern("communities:admins", "community"),
+  ])
   async leave(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.communityService.leave(+req.params.id_community);
     logger.info("Community successfully leaved");
