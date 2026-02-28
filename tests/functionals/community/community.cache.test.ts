@@ -741,7 +741,7 @@ describe("(Cache Integration) Community Module", () => {
       // Attempt patchRole with non-existent user → should fail with non-2xx
       const failRes = await request(app)
         .patch("/communities/")
-        .send({ id_user: 999, new_role: Role.GESTIONNAIRE })
+        .send({ id_user: 999, new_role: "MANAGER" })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", ORGS_ADMIN);
