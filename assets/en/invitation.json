@@ -12,7 +12,8 @@
     "mismatch_user_id": "This invitation is not addressed to you",
     "database_save_user_member_link": "An error occurred while adding the member link in the database",
     "database_save_user_community": "An error occurred while adding to the community in the database",
-    "iam_service_save_user_community": "An error occurred while adding to the community with the IAM service"
+    "iam_service_save_user_community": "An error occurred while adding to the community with the IAM service",
+    "delete_invitation_failed": "An error occurred while deleting the invitation"
   },
   "accept_invitation_member_encoded": {
     "invitation_manager_not_found": "The invitation could not be found",
@@ -20,7 +21,8 @@
     "database_save_user_member_link": "An error occurred while adding the member link in the database",
     "database_save_user_community": "An error occurred while adding to the community in the database",
     "iam_service_save_user_community": "An error occurred while adding to the community with the IAM service",
-    "database_member_save": "An error occurred while adding the member to the database"
+    "database_member_save": "An error occurred while adding the member to the database",
+    "delete_invitation_failed": "An error occurred while deleting the invitation"
   },
   "cancel_manager_invitation": {
     "database_cancel": "An error occurred while cancelling the manager invitation"

@@ -12,7 +12,8 @@
     "mismatch_user_id": "Diese Einladung ist nicht an Sie gerichtet",
     "database_save_user_member_link": "Beim Hinzufügen der Mitgliederverknüpfung in der Datenbank ist ein Fehler aufgetreten",
     "database_save_user_community": "Beim Hinzufügen zur Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
-    "iam_service_save_user_community": "Beim Hinzufügen zur Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten"
+    "iam_service_save_user_community": "Beim Hinzufügen zur Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten",
+    "delete_invitation_failed": "Beim Löschen der Einladung ist ein Fehler aufgetreten"
   },
   "accept_invitation_member_encoded": {
     "invitation_manager_not_found": "Die Einladung konnte nicht gefunden werden",
@@ -20,7 +21,8 @@
     "database_save_user_member_link": "Beim Hinzufügen der Mitgliederverknüpfung in der Datenbank ist ein Fehler aufgetreten",
     "database_save_user_community": "Beim Hinzufügen zur Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
     "iam_service_save_user_community": "Beim Hinzufügen zur Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten",
-    "database_member_save": "Beim Hinzufügen des Mitglieds zur Datenbank ist ein Fehler aufgetreten"
+    "database_member_save": "Beim Hinzufügen des Mitglieds zur Datenbank ist ein Fehler aufgetreten",
+    "delete_invitation_failed": "Beim Löschen der Einladung ist ein Fehler aufgetreten"
   },
   "cancel_manager_invitation": {
     "database_cancel": "Beim Stornieren der Verwalter-Einladung ist ein Fehler aufgetreten"

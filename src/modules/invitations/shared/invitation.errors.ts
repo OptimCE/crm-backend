@@ -17,6 +17,7 @@ export const INVITATION_ERRORS = {
     DATABASE_SAVE_USER_MEMBER_LINK: new LocalError(30008, "invitation:accept_invitation_member.database_save_user_member_link"),
     DATABASE_SAVE_USER_COMMUNITY: new LocalError(30009, "invitation:accept_invitation_member.database_save_user_community"),
     IAM_SERVICE_SAVE_USER_COMMUNITY: new LocalError(30010, "invitation:accept_invitation_member.iam_service_save_user_community"),
+    DELETE_INVITATION_FAILED: new LocalError(3024, "invitation:accept_invitation_member.delete_invitation_failed"),
   },
   ACCEPT_INVITATION_MEMBER_ENCODED: {
     INVITATION_MEMBER_NOT_FOUND: new LocalError(30011, "invitation:accept_invitation_member_encoded.invitation_member_not_found"),

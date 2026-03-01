@@ -12,7 +12,8 @@
     "mismatch_user_id": "L'invitation ne vous est pas adressée",
     "database_save_user_member_link": "Une erreur est survenue lors de l'ajout du lien avec le membre dans la base de données",
     "database_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté dans la base de données",
-    "iam_service_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté auprès du service IAM"
+    "iam_service_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté auprès du service IAM",
+    "delete_invitation_failed": "Une erreur est survenue lors de la suppression de l'invitation"
   },
   "accept_invitation_member_encoded": {
     "invitation_manager_not_found": "L'invitation est introuvable",
@@ -20,7 +21,8 @@
     "database_save_user_member_link": "Une erreur est survenue lors de l'ajout du lien avec le membre dans la base de données",
     "database_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté dans la base de données",
     "iam_service_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté auprès du service IAM",
-    "database_member_save": "Une erreur est survenue lors de l'ajout du membre dans la base de données"
+    "database_member_save": "Une erreur est survenue lors de l'ajout du membre dans la base de données",
+    "delete_invitation_failed": "Une erreur est survenue lors de la suppression de l'invitation"
   },
   "cancel_manager_invitation": {
     "database_cancel": "Une erreur est survenue lors de l'annulation de l'invitation à devenir gestionnaire"

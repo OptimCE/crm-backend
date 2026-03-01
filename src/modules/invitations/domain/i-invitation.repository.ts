@@ -19,4 +19,5 @@ export interface IInvitationRepository {
   getOwnMembersPendingInvitationById(id: number, query_runner?: QueryRunner): Promise<Member | null>;
   inviteUserToBecomeManager(user_email: string, user?: User | null, query_runner?: QueryRunner): Promise<GestionnaireInvitation>;
   inviteUserToBecomeMember(user_email: string, user?: User | null, query_runner?: QueryRunner): Promise<UserMemberInvitation>;
+  deleteUserMemberInvitation(id_invitation: number, query_runner?: QueryRunner): Promise<DeleteResult>;
 }

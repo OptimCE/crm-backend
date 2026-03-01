@@ -167,6 +167,17 @@ export class InvitationService implements IInvitationService {
     } else {
       logger.info({ operation: "acceptInvitationMember" }, "The user is already part of this community");
     }
+    // Delete the invitation
+    const result = await this.invitationRepository.deleteUserMemberInvitation(invitation.id);
+    if (result.affected !== 1) {
+      logger.error(
+        {
+          operation: "acceptInvitationMember",
+        },
+        "An error happend while deleting the user invitation at the end",
+      );
+      throw new AppError(INVITATION_ERRORS.ACCEPT_INVITATION_MEMBER.DELETE_INVITATION_FAILED, 400);
+    }
   }
 
   /**
@@ -207,7 +218,7 @@ export class InvitationService implements IInvitationService {
     }
     // Add the member link
     try {
-      await this.invitationRepository.saveUserMemberLink(internal_user_id, invitation.member!.id, query_runner);
+      await this.invitationRepository.saveUserMemberLink(internal_user_id, new_member.id, query_runner);
     } catch (err) {
       logger.error({ operation: "acceptInvitationMemberWEncoded", error: err }, "An error happened during the saving of the user member link");
       throw new AppError(INVITATION_ERRORS.ACCEPT_INVITATION_MEMBER_ENCODED.DATABASE_SAVE_USER_MEMBER_LINK, 400);
@@ -237,6 +248,17 @@ export class InvitationService implements IInvitationService {
       }
     } else {
       logger.info({ operation: "acceptInvitationMemberWEncoded" }, "The user is already part of this community");
+    }
+    // Delete the invitation
+    const result = await this.invitationRepository.deleteUserMemberInvitation(invitation.id);
+    if (result.affected !== 1) {
+      logger.error(
+        {
+          operation: "acceptInvitationMember",
+        },
+        "An error happend while deleting the user invitation at the end",
+      );
+      throw new AppError(INVITATION_ERRORS.ACCEPT_INVITATION_MEMBER.DELETE_INVITATION_FAILED, 400);
     }
   }
 

@@ -36,7 +36,7 @@ export class User {
   phoneNumber?: string | null;
 
   @Column({ name: "iban", type: "text", nullable: true })
-  iban!: string | null;
+  iban?: string | null;
 
   @ManyToOne(() => Address)
   @JoinColumn({ name: "id_home_address" })

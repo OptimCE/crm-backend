@@ -287,9 +287,14 @@ export class InvitationRepository implements IInvitationRepository {
   async saveUserMemberLink(internal_user_id: number, id_member: number, query_runner?: QueryRunner): Promise<UserMemberLink> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const new_user_member_link: UserMemberLink = manager.create(UserMemberLink, {
-      user: { id: internal_user_id },
-      member: { id: id_member },
+      user: { id: internal_user_id } as User,
+      member: { id: id_member } as Member,
     });
     return await manager.save(new_user_member_link);
+  }
+
+  async deleteUserMemberInvitation(id_invitation: number, query_runner?: QueryRunner): Promise<DeleteResult> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    return await manager.delete(UserMemberInvitation, { id: id_invitation });
   }
 }

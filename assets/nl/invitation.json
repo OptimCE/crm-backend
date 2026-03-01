@@ -12,7 +12,8 @@
     "mismatch_user_id": "Deze uitnodiging is niet aan u gericht",
     "database_save_user_member_link": "Er is een fout opgetreden bij het toevoegen van de ledenkoppeling in de database",
     "database_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap in de database",
-    "iam_service_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap via de IAM-service"
+    "iam_service_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap via de IAM-service",
+    "delete_invitation_failed": "Er is een fout opgetreden bij het verwijderen van de uitnodiging"
   },
   "accept_invitation_member_encoded": {
     "invitation_manager_not_found": "De uitnodiging kon niet worden gevonden",
@@ -20,7 +21,8 @@
     "database_save_user_member_link": "Er is een fout opgetreden bij het toevoegen van de ledenkoppeling in de database",
     "database_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap in de database",
     "iam_service_save_user_community": "Er is een fout opgetreden bij het toevoegen aan de gemeenschap via de IAM-service",
-    "database_member_save": "Er is een fout opgetreden bij het toevoegen van het lid aan de database"
+    "database_member_save": "Er is een fout opgetreden bij het toevoegen van het lid aan de database",
+    "delete_invitation_failed": "Er is een fout opgetreden bij het verwijderen van de uitnodiging"
   },
   "cancel_manager_invitation": {
     "database_cancel": "Er is een fout opgetreden bij het annuleren van de beheerder-uitnodiging"
