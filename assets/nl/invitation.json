@@ -5,7 +5,8 @@
     "admin_cant_accept_manager_invitation": "Een beheerder kan geen uitnodiging accepteren om beheerder te worden",
     "already_manager": "U bent al beheerder",
     "database_save_update": "Er is een fout opgetreden bij het bijwerken van de database",
-    "iam_service_save_update": "Er is een fout opgetreden bij het bijwerken via de IAM-service"
+    "iam_service_save_update": "Er is een fout opgetreden bij het bijwerken via de IAM-service",
+    "delete_invitation_failed": "Er is een fout opgetreden bij het verwijderen van de uitnodiging"
   },
   "accept_invitation_member": {
     "invitation_manager_not_found": "De uitnodiging kon niet worden gevonden",

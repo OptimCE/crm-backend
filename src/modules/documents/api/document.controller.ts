@@ -8,6 +8,8 @@ import logger from "../../../shared/monitor/logger.js";
 import { ApiResponse, ApiResponsePaginated, Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { SUCCESS } from "../../../shared/errors/errors.js";
 import { DocumentExposedDTO, DocumentQueryDTO, DownloadDocument, UploadDocumentDTO } from "./document.dtos.js";
+import { Cache, InvalidateCache } from "../../../shared/cache/decorator/cache.decorators.js";
+import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 const documentControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
 /**
@@ -25,6 +27,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("getDocuments", { url: "/documents/:member_id", method: "get" })
+  @Cache(cacheKey("documents:document-list", "community", (req) => req.params.member_id + ":" + JSON.stringify(req.query)), 60)
   async getDocuments(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(DocumentQueryDTO, req.query);
     const [result, pagination]: [DocumentExposedDTO[], Pagination] = await this.documentService.getDocuments(+req.params.member_id, queryObject);
@@ -57,6 +60,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("uploadDocument", { url: "/documents", method: "post" })
+  @InvalidateCache([cachePattern("documents:document-list", "community")])
   async uploadDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const payload = {
       ...req.body,
@@ -74,6 +78,7 @@ export class DocumentController {
    * @param _next - Express next middleware function.
    */
   @documentControllerTraceDecorator.traceSpan("deleteDocument", { url: "/documents/:document_id", method: "delete" })
+  @InvalidateCache([cachePattern("documents:document-list", "community")])
   async deleteDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.documentService.deleteDocument(+req.params.document_id);
     logger.info("Document successfully deleted");

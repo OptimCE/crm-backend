@@ -13,6 +13,8 @@ import { createMockKeyRepository } from "../repository_mocked/key.repository.moc
 import type { IKeyRepository } from "../../src/modules/keys/domain/i-key.repository.js";
 import { createMockMemberRepository } from "../repository_mocked/member.repository.mock.js";
 import type { IMemberRepository } from "../../src/modules/members/domain/i-member.repository.js";
+import { createMockMeRepository } from "../repository_mocked/me.repository.mock.js";
+import type { IMeRepository } from "../../src/modules/me/domain/i-me.repository.js";
 import { createMockMeterRepository } from "../repository_mocked/meter.repository.mock.js";
 import type { IMeterRepository } from "../../src/modules/meters/domain/i-meter.repository.js";
 import { createMockSharingOperationRepository } from "../repository_mocked/sharing_operation.repository.mock.js";
@@ -59,6 +61,36 @@ export async function initalizeDb(): Promise<void> {
   }
 }
 
+export async function initiliazeDbMock(): Promise<void> {
+  const { container } = await import("../../src/container/di-container.js");
+  const mockQueryRunner = {
+    startTransaction: jest.fn(),
+    commitTransaction: jest.fn(),
+    rollbackTransaction: jest.fn(),
+    release: jest.fn(),
+    manager: {
+      create: jest.fn(),
+    },
+  };
+  const mockDataSource = {
+    isInitialized: true,
+    initialize: jest.fn(),
+    getRepository: jest.fn(),
+    manager: {
+      transaction: jest.fn(),
+    },
+    destroy: jest.fn(),
+    createQueryRunner: (): unknown => mockQueryRunner,
+  };
+
+  // Bind the mock into your Inversify container
+  if (container.isBound("AppDataSource")) {
+    (await container.rebind("AppDataSource")).toConstantValue(mockDataSource);
+  } else {
+    container.bind("AppDataSource").toConstantValue(mockDataSource);
+  }
+}
+
 export async function resetDb(): Promise<void> {
   const sql = await readFile("tests/sql/init.sql", "utf8");
   const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
@@ -83,6 +115,7 @@ export async function tearDownDB(): Promise<void> {
   }
   jest.clearAllMocks();
 }
+
 export async function initializeCaching(): Promise<void> {
   const container = (await import("../../src/container/di-container.js")).container;
   if (container.isBound("CacheService")) {
@@ -173,6 +206,12 @@ export async function mockKeyRepositoryModule(overrides: { [K in keyof IKeyRepos
   const mock = createMockKeyRepository();
   Object.assign(mock, overrides);
   return await mockModule<IKeyRepository>(mock, "KeyRepository");
+}
+
+export async function mockMeRepositoryModule(overrides: { [K in keyof IMeRepository]?: jest.Mock }): Promise<jest.Mocked<IMeRepository>> {
+  const mock = createMockMeRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IMeRepository>(mock, "MeRepository");
 }
 
 export async function mockMemberRepositoryModule(overrides: { [K in keyof IMemberRepository]?: jest.Mock }): Promise<jest.Mocked<IMemberRepository>> {

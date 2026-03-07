@@ -5,7 +5,8 @@
     "admin_cant_accept_manager_invitation": "Un administrateur ne peut accepter une invitation pour devenir gestionnaire",
     "already_manager": "Vous êtes déjà gestionnaire",
     "database_save_update": "Une erreur est survenue lors de la mise à jour de la base de données",
-    "iam_service_save_update": "Une erreur est survenue lors de la mise à jour auprès du service IAM"
+    "iam_service_save_update": "Une erreur est survenue lors de la mise à jour auprès du service IAM",
+    "delete_invitation_failed": "Une erreur est survenue lors de la suppression de l'invitation"
   },
   "accept_invitation_member": {
     "invitation_manager_not_found": "L'invitation est introuvable",

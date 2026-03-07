@@ -664,120 +664,6 @@
         ]
       }
     },
-    "/invitations/own": {
-      "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Get all own member pending invitations",
-        "description": "",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserMemberInvitationQuery"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/MemberInvitationsListSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ]
-      }
-    },
-    "/invitations/own/member/{id}": {
-      "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Get all member linked to pending invitation by id",
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/MemberInvitationsListSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ]
-      }
-    },
-    "/invitations/own/managers": {
-      "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Get all own managers pending invitations",
-        "description": "",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UserManagerInvitationQuery"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/ManagerInvitationsListSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ]
-      }
-    },
     "/invitations/member": {
       "post": {
         "tags": [
@@ -866,132 +752,6 @@
         }
       }
     },
-    "/invitations/accept": {
-      "post": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Accept an invitation member",
-        "description": "",
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/InvitationSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AcceptInvitationDTO"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invitations/accept/encoded": {
-      "post": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Accept an invitation with encoded member",
-        "description": "",
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/InvitationSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AcceptInvitationWEncodedDTO"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invitations/accept/manager": {
-      "post": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Accept an invitation for manager",
-        "description": "",
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/InvitationSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AcceptInvitationDTO"
-              }
-            }
-          }
-        }
-      }
-    },
     "/invitations/{id_invitation}/member": {
       "delete": {
         "tags": [
@@ -1066,68 +826,6 @@
             "UserIdChecker": [],
             "CommunityIdChecker": [],
             "MinRoleChecker": []
-          }
-        ]
-      }
-    },
-    "/invitations/{id_invitation}/own/member": {
-      "delete": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Cancel a member own invitation",
-        "description": "",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/InvitationId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/InvitationSuccess",
-            "description": "OK"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
-          }
-        ]
-      }
-    },
-    "/invitations/{id_invitation}/own/manager": {
-      "delete": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Cancel a manager own invitation",
-        "description": "",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/InvitationId"
-          }
-        ],
-        "responses": {
-          "400": {
-            "$ref": "#/components/responses/BadRequest",
-            "description": "Bad Request"
-          }
-        },
-        "security": [
-          {
-            "UserIdChecker": []
           }
         ]
       }
@@ -1366,6 +1064,539 @@
             "UserIdChecker": [],
             "CommunityIdChecker": [],
             "MinRoleChecker": []
+          }
+        ]
+      }
+    },
+    "/me/documents": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Retrieve all documents related to this user",
+        "description": "Retrieve documents with optional filters defined in MeDocumentPartialQuery.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeDocumentFilters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeDocumentsListSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/documents/{id}": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Download a document by ID",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeDocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeDocumentDownloadSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/members": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Retrieve all members represented by this user",
+        "description": "Retrieve members with optional filters defined in MeMemberPartialQuery.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeMemberFilters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeMembersListSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/members/{id}": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Retrieve a specific member by ID",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeMemberId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeMemberGetSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/meters": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Retrieve all meters owned by this user",
+        "description": "Retrieve meters with optional filters defined in MeMetersPartialQuery.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeMeterFilters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeMetersListSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/meters/{id}": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Retrieve a specific meter by EAN",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeMeterId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MeMeterGetSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/invitations": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Get all own member pending invitations",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserMemberInvitationQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MemberInvitationsListSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/invitations/member/{id}": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Get member linked to a pending invitation by ID",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeDocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MemberInvitationByIdSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/invitations/managers": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Get all own managers pending invitations",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserManagerInvitationQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ManagerInvitationsListSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/invitations/accept": {
+      "post": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Accept an invitation member",
+        "description": "",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InvitationSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/invitations/accept/encoded": {
+      "post": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Accept an invitation with encoded member",
+        "description": "",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InvitationSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationWEncodedDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/invitations/accept/manager": {
+      "post": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Accept an invitation for manager",
+        "description": "",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InvitationSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInvitationDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/invitations/{id_invitation}/member": {
+      "delete": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Refuse a member own invitation",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InvitationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InvitationSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
+          }
+        ]
+      }
+    },
+    "/me/invitations/{id_invitation}/manager": {
+      "delete": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Refuse a manager own invitation",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InvitationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InvitationSuccess",
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "UserIdChecker": []
           }
         ]
       }
@@ -3066,6 +3297,93 @@
           "date_start": "2023-01-01T00:00:00Z",
           "date_end": "2023-01-31T23:59:59Z"
         }
+      },
+      "MeDocumentFilters": {
+        "name": "filters",
+        "in": "query",
+        "description": "Pagination and filter options for documents",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/MeDocumentPartialQuery"
+        },
+        "style": "form",
+        "explode": true,
+        "example": {
+          "file_name": "invoice",
+          "file_type": "application/pdf",
+          "sort_upload_date": "DESC",
+          "page": 1,
+          "limit": 15
+        }
+      },
+      "MeDocumentId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "ID of the document",
+        "example": 7
+      },
+      "MeMemberFilters": {
+        "name": "filters",
+        "in": "query",
+        "description": "Pagination and filter options for members",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/MeMemberPartialQuery"
+        },
+        "style": "form",
+        "explode": true,
+        "example": {
+          "name": "Dupont",
+          "member_type": 1,
+          "status": 1,
+          "community_name": "Coopérative",
+          "sort_name": "ASC",
+          "page": 1,
+          "limit": 15
+        }
+      },
+      "MeMemberId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "ID of the member",
+        "example": 42
+      },
+      "MeMeterFilters": {
+        "name": "filters",
+        "in": "query",
+        "description": "Pagination and filter options for meters",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/MeMetersPartialQuery"
+        },
+        "style": "form",
+        "explode": true,
+        "example": {
+          "street": "Rue de la Gare",
+          "city": "Brussels",
+          "EAN": "541448820000000000",
+          "community_name": "Coopérative",
+          "page": 1,
+          "limit": 15
+        }
+      },
+      "MeMeterId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "EAN code of the meter",
+        "example": "541448820000000000"
       }
     },
     "responses": {
@@ -3453,7 +3771,7 @@
         }
       },
       "MemberInvitationsListSuccess": {
-        "description": "Successful list of member invitations",
+        "description": "Successful list of pending member invitations for the authenticated user",
         "content": {
           "application/json": {
             "schema": {
@@ -3472,21 +3790,21 @@
               "error_code": 0,
               "data": [
                 {
-                  "id": 789,
+                  "id": 5,
                   "member_id": 42,
                   "member_name": "Jean Dupont",
                   "user_email": "jean.dupont@example.com",
-                  "created_at": "2023-11-15T09:00:00Z",
+                  "created_at": "2024-03-01T08:00:00.000Z",
                   "to_be_encoded": false,
                   "community": {
-                    "id": 10,
-                    "name": "Résidence des Fleurs"
+                    "id": 1,
+                    "name": "Coopérative Energie"
                   }
                 }
               ],
               "pagination": {
                 "page": 1,
-                "limit": 10,
+                "limit": 15,
                 "total": 1
               }
             }
@@ -3494,7 +3812,7 @@
         }
       },
       "ManagerInvitationsListSuccess": {
-        "description": "Successful list of manager invitations",
+        "description": "Successful list of pending manager invitations for the authenticated user",
         "content": {
           "application/json": {
             "schema": {
@@ -3513,18 +3831,18 @@
               "error_code": 0,
               "data": [
                 {
-                  "id": 800,
+                  "id": 3,
                   "user_email": "manager@example.com",
-                  "created_at": "2023-11-10T14:00:00Z",
+                  "created_at": "2024-03-10T09:00:00.000Z",
                   "community": {
-                    "id": 10,
-                    "name": "Résidence des Fleurs"
+                    "id": 1,
+                    "name": "Coopérative Energie"
                   }
                 }
               ],
               "pagination": {
                 "page": 1,
-                "limit": 10,
+                "limit": 15,
                 "total": 1
               }
             }
@@ -3532,7 +3850,7 @@
         }
       },
       "InvitationSuccess": {
-        "description": "Operation successful",
+        "description": "Invitation action completed successfully",
         "content": {
           "application/json": {
             "schema": {
@@ -3627,36 +3945,21 @@
         }
       },
       "KeyDownloadSuccess": {
-        "description": "Successful key download retrieval",
+        "description": "Successful key download",
         "content": {
-          "application/json": {
+          "application/octet-stream": {
             "schema": {
-              "error_code": 0,
-              "data": {
-                "$ref": "#/components/schemas/KeyDTO"
-              }
-            },
-            "example": {
-              "error_code": 0,
-              "data": {
-                "id": 10,
-                "name": "Clef de répartition 2023",
-                "description": "Répartition pour l'année 2023",
-                "iterations": [
-                  {
-                    "id": 100,
-                    "number": 0,
-                    "energy_allocated_percentage": 1,
-                    "consumers": [
-                      {
-                        "id": 1001,
-                        "name": "Appartement 1",
-                        "energy_allocated_percentage": 0.5
-                      }
-                    ]
-                  }
-                ]
-              }
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        },
+        "headers": {
+          "Content-Disposition": {
+            "description": "Attachment filename",
+            "schema": {
+              "type": "string",
+              "example": "attachment; filename=\"key_10.xlsx\""
             }
           }
         }
@@ -4407,6 +4710,299 @@
             },
             "example": {
               "data": "success"
+            }
+          }
+        }
+      },
+      "MeDocumentsListSuccess": {
+        "description": "Successful list of documents for the authenticated user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "error_code": 0,
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MeDocumentDTO"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            },
+            "example": {
+              "error_code": 0,
+              "data": [
+                {
+                  "id": 7,
+                  "file_name": "invoice_2024.pdf",
+                  "file_size": 204800,
+                  "upload_date": "2024-03-15T10:30:00.000Z",
+                  "file_type": "application/pdf",
+                  "community": {
+                    "id": 1,
+                    "name": "Coopérative Energie"
+                  }
+                }
+              ],
+              "pagination": {
+                "page": 1,
+                "limit": 15,
+                "total": 1
+              }
+            }
+          }
+        }
+      },
+      "MeDocumentDownloadSuccess": {
+        "description": "Document file binary content",
+        "content": {
+          "application/octet-stream": {
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        }
+      },
+      "MeMembersListSuccess": {
+        "description": "Successful list of members represented by the authenticated user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "error_code": 0,
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MeMembersPartialDTO"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            },
+            "example": {
+              "error_code": 0,
+              "data": [
+                {
+                  "id": 42,
+                  "name": "Jean Dupont",
+                  "member_type": 1,
+                  "status": 1,
+                  "community": {
+                    "id": 1,
+                    "name": "Coopérative Energie"
+                  }
+                },
+                {
+                  "id": 43,
+                  "name": "SPRL Immobilière",
+                  "member_type": 2,
+                  "status": 1,
+                  "community": {
+                    "id": 2,
+                    "name": "Solar Community"
+                  }
+                }
+              ],
+              "pagination": {
+                "page": 1,
+                "limit": 15,
+                "total": 2
+              }
+            }
+          }
+        }
+      },
+      "MeMemberGetSuccess": {
+        "description": "Successful member details for the authenticated user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "error_code": 0,
+              "data": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/MeIndividualDTO"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MeCompanyDTO"
+                  }
+                ]
+              }
+            },
+            "example": {
+              "error_code": 0,
+              "data": {
+                "id": 42,
+                "name": "Jean Dupont",
+                "member_type": 1,
+                "status": 1,
+                "iban": "BE12345678901234",
+                "NRN": "80010112345",
+                "first_name": "Jean",
+                "email": "jean.dupont@example.com",
+                "phone_number": "+32470123456",
+                "social_rate": false,
+                "home_address": {
+                  "street": "Rue de la Gare",
+                  "number": "10",
+                  "box": "A",
+                  "city": "Brussels",
+                  "zip_code": "1000",
+                  "country": "Belgium"
+                },
+                "billing_address": {
+                  "street": "Rue de la Gare",
+                  "number": "10",
+                  "box": "A",
+                  "city": "Brussels",
+                  "zip_code": "1000",
+                  "country": "Belgium"
+                },
+                "community": {
+                  "id": 1,
+                  "name": "Coopérative Energie"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MeMetersListSuccess": {
+        "description": "Successful list of meters owned by the authenticated user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "error_code": 0,
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MePartialMeterDTO"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            },
+            "example": {
+              "error_code": 0,
+              "data": [
+                {
+                  "EAN": "541448820000000001",
+                  "meter_number": "MTR-001",
+                  "address": {
+                    "street": "Rue de la Gare",
+                    "number": "10",
+                    "box": null,
+                    "city": "Brussels",
+                    "zip_code": "1000",
+                    "country": "Belgium"
+                  },
+                  "holder": {
+                    "id": 42,
+                    "name": "Jean Dupont",
+                    "member_type": 1,
+                    "status": 1
+                  },
+                  "status": 1,
+                  "community": {
+                    "id": 1,
+                    "name": "Coopérative Energie"
+                  }
+                }
+              ],
+              "pagination": {
+                "page": 1,
+                "limit": 15,
+                "total": 1
+              }
+            }
+          }
+        }
+      },
+      "MeMeterGetSuccess": {
+        "description": "Successful meter detail for the authenticated user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "error_code": 0,
+              "data": {
+                "$ref": "#/components/schemas/MeMeterDTO"
+              }
+            },
+            "example": {
+              "error_code": 0,
+              "data": {
+                "EAN": "541448820000000001",
+                "meter_number": "MTR-001",
+                "address": {
+                  "street": "Rue de la Gare",
+                  "number": "10",
+                  "box": null,
+                  "city": "Brussels",
+                  "zip_code": "1000",
+                  "country": "Belgium"
+                },
+                "holder": {
+                  "id": 42,
+                  "name": "Jean Dupont",
+                  "member_type": 1,
+                  "status": 1
+                },
+                "tarif_group": 1,
+                "phases_number": 3,
+                "reading_frequency": 1,
+                "meter_data": {
+                  "id": 10,
+                  "description": "Standard residential",
+                  "sampling_power": 0,
+                  "status": 1,
+                  "amperage": 25,
+                  "rate": 1,
+                  "client_type": 1,
+                  "start_date": "2023-01-01T00:00:00.000Z",
+                  "end_date": null,
+                  "injection_status": 0,
+                  "production_chain": 0,
+                  "totalGenerating_capacity": 0,
+                  "grd": "Sibelga"
+                },
+                "meter_data_history": [],
+                "futur_meter_data": [],
+                "community": {
+                  "id": 1,
+                  "name": "Coopérative Energie"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MemberInvitationByIdSuccess": {
+        "description": "Successful member invitation details linked to the authenticated user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "error_code": 0,
+              "data": {
+                "$ref": "#/components/schemas/UserMemberInvitationDTO"
+              }
+            },
+            "example": {
+              "error_code": 0,
+              "data": {
+                "id": 5,
+                "member_id": 42,
+                "member_name": "Jean Dupont",
+                "user_email": "jean.dupont@example.com",
+                "created_at": "2024-03-01T08:00:00.000Z",
+                "to_be_encoded": false,
+                "community": {
+                  "id": 1,
+                  "name": "Coopérative Energie"
+                }
+              }
             }
           }
         }
@@ -10761,6 +11357,51 @@
               },
               "role": {
                 "$ref": "#/components/schemas/Role"
+              },
+              "first_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "array",
+                    "example": [
+                      "string",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "last_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "array",
+                    "example": [
+                      "string",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "phone": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "array",
+                    "example": [
+                      "string",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
               }
             }
           },
@@ -10875,6 +11516,1454 @@
           "description": {
             "type": "string",
             "example": "DTO for patching (updating) a user's role within a community."
+          }
+        }
+      },
+      "DocumentQueryDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Page number to retrieve (1-based index). Defaults to 1."
+                  }
+                }
+              },
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Number of items per page. Defaults to system configuration."
+                  }
+                }
+              },
+              "file_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter documents by file name."
+                  }
+                }
+              },
+              "file_type": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter documents by file type (MIME type)."
+                  }
+                }
+              },
+              "sort_upload_date": {
+                "$ref": "#/components/schemas/Sort"
+              },
+              "sort_file_size": {
+                "$ref": "#/components/schemas/Sort"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "limit",
+              "page"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "example": "DTO for querying and filtering documents."
+          }
+        }
+      },
+      "UploadDocumentDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id_member": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID of the member who owns the document."
+                  }
+                }
+              },
+              "file": {
+                "$ref": "#/components/schemas/global.Express.Multer.File"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "id_member",
+              "file"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "description": {
+            "type": "string",
+            "example": "DTO for uploading a new document."
+          }
+        }
+      },
+      "DownloadDocument": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "document": {
+                "$ref": "#/components/schemas/global.Buffer"
+              },
+              "fileName": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "The name of the file."
+                  }
+                }
+              },
+              "fileType": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "The MIME type of the file."
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "document",
+              "fileName",
+              "fileType"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "description": {
+            "type": "string",
+            "example": "DTO representing a downloaded document."
+          }
+        }
+      },
+      "DocumentExposedDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Unique identifier of the document."
+                  }
+                }
+              },
+              "file_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Name of the file."
+                  }
+                }
+              },
+              "file_size": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Size of the file in bytes."
+                  }
+                }
+              },
+              "upload_date": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Date when the document was uploaded."
+                  }
+                }
+              },
+              "file_type": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "MIME type of the file."
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "id",
+              "file_name",
+              "file_size",
+              "upload_date",
+              "file_type"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "description": {
+            "type": "string",
+            "example": "DTO exposed to the API clients representing a document."
+          }
+        }
+      },
+      "DocumentDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Unique identifier of the document."
+                  }
+                }
+              },
+              "file_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Name of the file."
+                  }
+                }
+              },
+              "file_size": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Size of the file in bytes."
+                  }
+                }
+              },
+              "upload_date": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Date when the document was uploaded."
+                  }
+                }
+              },
+              "file_type": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "MIME type of the file."
+                  }
+                }
+              },
+              "member_id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "ID of the member who owns the document."
+                  }
+                }
+              },
+              "file_url": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "URL of the file in the storage service."
+                  }
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "file_name",
+              "file_size",
+              "file_type",
+              "file_url",
+              "id",
+              "member_id",
+              "upload_date"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "description": {
+            "type": "string",
+            "example": "Internal DTO representing a document, including sensitive or internal fields. Extends DocumentExposedDTO."
+          }
+        }
+      },
+      "MeMemberPartialQuery": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Page number to retrieve (1-based index). Defaults to 1."
+                  }
+                }
+              },
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Number of items per page. Defaults to system configuration."
+                  }
+                }
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by member name."
+                  }
+                }
+              },
+              "member_type": {
+                "$ref": "#/components/schemas/MemberType"
+              },
+              "status": {
+                "$ref": "#/components/schemas/MemberStatus"
+              },
+              "sort_name": {
+                "$ref": "#/components/schemas/Sort"
+              },
+              "community_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  }
+                }
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "limit",
+              "page"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MeMetersPartialQuery": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Page number to retrieve (1-based index). Defaults to 1."
+                  }
+                }
+              },
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Number of items per page. Defaults to system configuration."
+                  }
+                }
+              },
+              "street": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by street name."
+                  }
+                }
+              },
+              "postcode": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by postcode."
+                  }
+                }
+              },
+              "address_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by address number."
+                  }
+                }
+              },
+              "city": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by city name."
+                  }
+                }
+              },
+              "supplement": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by address supplement (box, etc.)."
+                  }
+                }
+              },
+              "EAN": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by EAN code."
+                  }
+                }
+              },
+              "meter_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by meter number."
+                  }
+                }
+              },
+              "status": {
+                "$ref": "#/components/schemas/MeterDataStatus"
+              },
+              "sharing_operation_id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by active sharing operation ID."
+                  }
+                }
+              },
+              "not_sharing_operation_id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by explicitly NOT being in a specific sharing operation ID."
+                  }
+                }
+              },
+              "holder_id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter by generic member ID holder."
+                  }
+                }
+              },
+              "community_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  }
+                }
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "limit",
+              "page"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MeDocumentPartialQuery": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Page number to retrieve (1-based index). Defaults to 1."
+                  }
+                }
+              },
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Number of items per page. Defaults to system configuration."
+                  }
+                }
+              },
+              "file_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter documents by file name."
+                  }
+                }
+              },
+              "file_type": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Filter documents by file type (MIME type)."
+                  }
+                }
+              },
+              "sort_upload_date": {
+                "$ref": "#/components/schemas/Sort"
+              },
+              "sort_file_size": {
+                "$ref": "#/components/schemas/Sort"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "limit",
+              "page"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MeMembersPartialDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Unique ID of the member."
+                  }
+                }
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Name of the member."
+                  }
+                }
+              },
+              "member_type": {
+                "$ref": "#/components/schemas/MemberType"
+              },
+              "status": {
+                "$ref": "#/components/schemas/MemberStatus"
+              },
+              "community": {
+                "$ref": "#/components/schemas/CommunityDTO"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "community",
+              "id",
+              "member_type",
+              "name",
+              "status"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "MeIndividualDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Unique ID of the member."
+                  }
+                }
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Name of the member."
+                  }
+                }
+              },
+              "member_type": {
+                "$ref": "#/components/schemas/MemberType"
+              },
+              "status": {
+                "$ref": "#/components/schemas/MemberStatus"
+              },
+              "iban": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "IBAN of the member."
+                  }
+                }
+              },
+              "home_address": {
+                "$ref": "#/components/schemas/AddressDTO"
+              },
+              "billing_address": {
+                "$ref": "#/components/schemas/AddressDTO"
+              },
+              "user_link_email": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Linked user email, if associated with a user account."
+                  }
+                }
+              },
+              "NRN": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "National Registry Number."
+                  }
+                }
+              },
+              "first_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "First name."
+                  }
+                }
+              },
+              "email": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Contact email."
+                  }
+                }
+              },
+              "phone_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Phone number."
+                  }
+                }
+              },
+              "social_rate": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "boolean"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Whether the social rate applies."
+                  }
+                }
+              },
+              "manager": {
+                "$ref": "#/components/schemas/ManagerDTO"
+              },
+              "community": {
+                "$ref": "#/components/schemas/CommunityDTO"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "NRN",
+              "billing_address",
+              "community",
+              "email",
+              "first_name",
+              "home_address",
+              "iban",
+              "id",
+              "member_type",
+              "name",
+              "phone_number",
+              "social_rate",
+              "status"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "MeCompanyDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Unique ID of the member."
+                  }
+                }
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Name of the member."
+                  }
+                }
+              },
+              "member_type": {
+                "$ref": "#/components/schemas/MemberType"
+              },
+              "status": {
+                "$ref": "#/components/schemas/MemberStatus"
+              },
+              "iban": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "IBAN of the member."
+                  }
+                }
+              },
+              "home_address": {
+                "$ref": "#/components/schemas/AddressDTO"
+              },
+              "billing_address": {
+                "$ref": "#/components/schemas/AddressDTO"
+              },
+              "user_link_email": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Linked user email, if associated with a user account."
+                  }
+                }
+              },
+              "vat_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "VAT number of the company."
+                  }
+                }
+              },
+              "manager": {
+                "$ref": "#/components/schemas/ManagerDTO"
+              },
+              "community": {
+                "$ref": "#/components/schemas/CommunityDTO"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "billing_address",
+              "community",
+              "home_address",
+              "iban",
+              "id",
+              "manager",
+              "member_type",
+              "name",
+              "status",
+              "vat_number"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "MePartialMeterDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "EAN": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "EAN code of the meter."
+                  }
+                }
+              },
+              "meter_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Physical meter number."
+                  }
+                }
+              },
+              "address": {
+                "$ref": "#/components/schemas/AddressDTO"
+              },
+              "holder": {
+                "$ref": "#/components/schemas/MembersPartialDTO"
+              },
+              "status": {
+                "$ref": "#/components/schemas/MeterDataStatus"
+              },
+              "sharing_operation": {
+                "$ref": "#/components/schemas/SharingOperationPartialDTO"
+              },
+              "community": {
+                "$ref": "#/components/schemas/CommunityDTO"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "EAN",
+              "address",
+              "community",
+              "meter_number",
+              "status"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "MeMeterDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "EAN": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  }
+                }
+              },
+              "meter_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  }
+                }
+              },
+              "address": {
+                "$ref": "#/components/schemas/AddressDTO"
+              },
+              "holder": {
+                "$ref": "#/components/schemas/MembersPartialDTO"
+              },
+              "tarif_group": {
+                "$ref": "#/components/schemas/TarifGroup"
+              },
+              "phases_number": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  }
+                }
+              },
+              "reading_frequency": {
+                "$ref": "#/components/schemas/ReadingFrequency"
+              },
+              "meter_data": {
+                "$ref": "#/components/schemas/MetersDataDTO"
+              },
+              "meter_data_history": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "array"
+                  },
+                  "items": {
+                    "$ref": "#/components/schemas/MetersDataDTO"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Historical meter data configurations."
+                  }
+                }
+              },
+              "futur_meter_data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "array"
+                  },
+                  "items": {
+                    "$ref": "#/components/schemas/MetersDataDTO"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Future scheduled meter data configurations."
+                  }
+                }
+              },
+              "community": {
+                "$ref": "#/components/schemas/CommunityDTO"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "EAN",
+              "address",
+              "community",
+              "meter_number",
+              "phases_number",
+              "reading_frequency",
+              "tarif_group"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "MeDocumentDTO": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Unique identifier of the document."
+                  }
+                }
+              },
+              "file_name": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Name of the file."
+                  }
+                }
+              },
+              "file_size": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "number"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Size of the file in bytes."
+                  }
+                }
+              },
+              "upload_date": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Date when the document was uploaded."
+                  }
+                }
+              },
+              "file_type": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "MIME type of the file."
+                  }
+                }
+              },
+              "community": {
+                "$ref": "#/components/schemas/CommunityDTO"
+              }
+            }
+          },
+          "required": {
+            "type": "array",
+            "example": [
+              "community",
+              "file_name",
+              "file_size",
+              "file_type",
+              "id",
+              "upload_date"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": {
+            "type": "boolean",
+            "example": false
           }
         }
       },
@@ -11378,442 +13467,6 @@
           "description": {
             "type": "string",
             "example": "DTO for accepting an invitation with additional member details. Used when the member needs to be encoded/created during acceptance."
-          }
-        }
-      },
-      "DocumentQueryDTO": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "object"
-          },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "page": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Page number to retrieve (1-based index). Defaults to 1."
-                  }
-                }
-              },
-              "limit": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Number of items per page. Defaults to system configuration."
-                  }
-                }
-              },
-              "file_name": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Filter documents by file name."
-                  }
-                }
-              },
-              "file_type": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Filter documents by file type (MIME type)."
-                  }
-                }
-              },
-              "sort_upload_date": {
-                "$ref": "#/components/schemas/Sort"
-              },
-              "sort_file_size": {
-                "$ref": "#/components/schemas/Sort"
-              }
-            }
-          },
-          "additionalProperties": {
-            "type": "boolean",
-            "example": false
-          },
-          "required": {
-            "type": "array",
-            "example": [
-              "limit",
-              "page"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "description": {
-            "type": "string",
-            "example": "DTO for querying and filtering documents."
-          }
-        }
-      },
-      "UploadDocumentDTO": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "object"
-          },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "id_member": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "ID of the member who owns the document."
-                  }
-                }
-              },
-              "file": {
-                "$ref": "#/components/schemas/global.Express.Multer.File"
-              }
-            }
-          },
-          "required": {
-            "type": "array",
-            "example": [
-              "id_member",
-              "file"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": {
-            "type": "boolean",
-            "example": false
-          },
-          "description": {
-            "type": "string",
-            "example": "DTO for uploading a new document."
-          }
-        }
-      },
-      "DownloadDocument": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "object"
-          },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "document": {
-                "$ref": "#/components/schemas/global.Buffer"
-              },
-              "fileName": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "The name of the file."
-                  }
-                }
-              },
-              "fileType": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "The MIME type of the file."
-                  }
-                }
-              }
-            }
-          },
-          "required": {
-            "type": "array",
-            "example": [
-              "document",
-              "fileName",
-              "fileType"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": {
-            "type": "boolean",
-            "example": false
-          },
-          "description": {
-            "type": "string",
-            "example": "DTO representing a downloaded document."
-          }
-        }
-      },
-      "DocumentExposedDTO": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "object"
-          },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Unique identifier of the document."
-                  }
-                }
-              },
-              "file_name": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Name of the file."
-                  }
-                }
-              },
-              "file_size": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Size of the file in bytes."
-                  }
-                }
-              },
-              "upload_date": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "format": {
-                    "type": "string",
-                    "example": "date-time"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Date when the document was uploaded."
-                  }
-                }
-              },
-              "file_type": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "MIME type of the file."
-                  }
-                }
-              }
-            }
-          },
-          "required": {
-            "type": "array",
-            "example": [
-              "id",
-              "file_name",
-              "file_size",
-              "upload_date",
-              "file_type"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": {
-            "type": "boolean",
-            "example": false
-          },
-          "description": {
-            "type": "string",
-            "example": "DTO exposed to the API clients representing a document."
-          }
-        }
-      },
-      "DocumentDTO": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "object"
-          },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Unique identifier of the document."
-                  }
-                }
-              },
-              "file_name": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Name of the file."
-                  }
-                }
-              },
-              "file_size": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Size of the file in bytes."
-                  }
-                }
-              },
-              "upload_date": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "format": {
-                    "type": "string",
-                    "example": "date-time"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Date when the document was uploaded."
-                  }
-                }
-              },
-              "file_type": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "MIME type of the file."
-                  }
-                }
-              },
-              "member_id": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "number"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "ID of the member who owns the document."
-                  }
-                }
-              },
-              "file_url": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "URL of the file in the storage service."
-                  }
-                }
-              }
-            }
-          },
-          "required": {
-            "type": "array",
-            "example": [
-              "file_name",
-              "file_size",
-              "file_type",
-              "file_url",
-              "id",
-              "member_id",
-              "upload_date"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": {
-            "type": "boolean",
-            "example": false
-          },
-          "description": {
-            "type": "string",
-            "example": "Internal DTO representing a document, including sensitive or internal fields. Extends DocumentExposedDTO."
           }
         }
       }

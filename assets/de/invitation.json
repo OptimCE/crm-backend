@@ -5,7 +5,8 @@
     "admin_cant_accept_manager_invitation": "Ein Administrator kann keine Einladung annehmen, um Verwalter zu werden",
     "already_manager": "Sie sind bereits Verwalter",
     "database_save_update": "Beim Aktualisieren der Datenbank ist ein Fehler aufgetreten",
-    "iam_service_save_update": "Beim Aktualisieren über den IAM-Dienst ist ein Fehler aufgetreten"
+    "iam_service_save_update": "Beim Aktualisieren über den IAM-Dienst ist ein Fehler aufgetreten",
+    "delete_invitation_failed": "Beim Löschen der Einladung ist ein Fehler aufgetreten"
   },
   "accept_invitation_member": {
     "invitation_manager_not_found": "Die Einladung konnte nicht gefunden werden",

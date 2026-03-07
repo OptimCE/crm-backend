@@ -5,7 +5,8 @@
     "admin_cant_accept_manager_invitation": "An administrator cannot accept an invitation to become a manager",
     "already_manager": "You are already a manager",
     "database_save_update": "An error occurred while updating the database",
-    "iam_service_save_update": "An error occurred while updating with the IAM service"
+    "iam_service_save_update": "An error occurred while updating with the IAM service",
+    "delete_invitation_failed": "An error occurred while deleting the invitation"
   },
   "accept_invitation_member": {
     "invitation_manager_not_found": "The invitation could not be found",

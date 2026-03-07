@@ -100,34 +100,21 @@ export const KeyResponses = {
     },
   },
   KeyDownloadSuccess: {
-    description: "Successful key download retrieval",
+    description: "Successful key download",
     content: {
-      "application/json": {
+      "application/octet-stream": {
         schema: {
-          error_code: 0,
-          data: { $ref: "#/components/schemas/KeyDTO" },
+          type: "string",
+          format: "binary",
         },
-        example: {
-          error_code: 0,
-          data: {
-            id: 10,
-            name: "Clef de répartition 2023",
-            description: "Répartition pour l'année 2023",
-            iterations: [
-              {
-                id: 100,
-                number: 0,
-                energy_allocated_percentage: 1.0,
-                consumers: [
-                  {
-                    id: 1001,
-                    name: "Appartement 1",
-                    energy_allocated_percentage: 0.5,
-                  },
-                ],
-              },
-            ],
-          },
+      },
+    },
+    headers: {
+      "Content-Disposition": {
+        description: "Attachment filename",
+        schema: {
+          type: "string",
+          example: 'attachment; filename="key_10.xlsx"',
         },
       },
     },

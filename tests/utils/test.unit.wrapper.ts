@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, jest } from "@jest/globals";
-import { initalizeDb, initializeExternalServices, tearDownCache, tearDownDB } from "./helper.js";
+import { initializeExternalServices, initiliazeDbMock, tearDownCache } from "./helper.js";
 import type { TestHookOverrides } from "./shared.consts.js";
 
 /**
@@ -14,7 +14,7 @@ export const useUnitTestDb = (initializeExternal: boolean = true, hookOverrides:
     if (hookOverrides.beforeEach) {
       await hookOverrides.beforeEach();
     } else {
-      await initalizeDb();
+      await initiliazeDbMock();
       if (initializeExternal) {
         await initializeExternalServices();
       }
@@ -25,7 +25,6 @@ export const useUnitTestDb = (initializeExternal: boolean = true, hookOverrides:
     if (hookOverrides.afterEach) {
       await hookOverrides.afterEach();
     } else {
-      await tearDownDB();
       await tearDownCache();
     }
   });

@@ -8,6 +8,8 @@ import { CreateKeyDTO, KeyDTO, KeyPartialDTO, KeyPartialQuery, UpdateKeyDTO } fr
 import { ApiResponse, ApiResponsePaginated } from "../../../shared/dtos/ApiResponses.js";
 import { SUCCESS } from "../../../shared/errors/errors.js";
 import logger from "../../../shared/monitor/logger.js";
+import { Cache, InvalidateCache } from "../../../shared/cache/decorator/cache.decorators.js";
+import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 import ExcelJS from "exceljs";
 const keyControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
@@ -30,6 +32,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("getKeysList", { url: "/keys/", method: "get" })
+  @Cache(cacheKey("keys:list", "community", (req) => JSON.stringify(req.query)), 60)
   async getKeysList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(KeyPartialQuery, req.query);
     const [result, pagination] = await this.keyService.getPartialKeyList(queryObject);
@@ -44,6 +47,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("getKey", { url: "/keys/:id", method: "get" })
+  @Cache(cacheKey("keys:detail", "community", (req) => req.params.id), 60)
   async getKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.keyService.getKey(+req.params.id);
     logger.info("Key successfully retrieved");
@@ -75,6 +79,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("addKey", { url: "/keys/", method: "post" })
+  @InvalidateCache([cachePattern("keys:list", "community")])
   async addKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_key = await validateDto(CreateKeyDTO, req.body);
     await this.keyService.addKey(new_key);
@@ -89,6 +94,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("updateKey", { url: "/keys/", method: "put" })
+  @InvalidateCache([cachePattern("keys:list", "community"), cachePattern("keys:detail", "community")])
   async updateKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_key = await validateDto(UpdateKeyDTO, req.body);
     await this.keyService.updateKey(updated_key);
@@ -103,6 +109,7 @@ export class KeyController {
    * @param _next - Express next middleware.
    */
   @keyControllerTraceDecorator.traceSpan("deleteKey", { url: "/keys/:id", method: "delete" })
+  @InvalidateCache([cachePattern("keys:list", "community"), cachePattern("keys:detail", "community")])
   async deleteKey(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.keyService.deleteKey(+req.params.id);
     logger.info("Key deleted successfully");

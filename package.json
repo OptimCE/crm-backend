@@ -9,6 +9,7 @@
     "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:unit": "npm run test -- --selectProjects unit",
     "test:functional": "npm run test -- --selectProjects functional --runInBand",
+    "test:cache": "npm run test -- --selectProjects cache --runInBand",
     "coverage": "npm run test -- --coverage --runInBand  --max-old-space-size=8192",
     "prebuild": "npm run clean",
     "copy-assets": "copyfiles -u 1 assets/**/* dist/assets",
