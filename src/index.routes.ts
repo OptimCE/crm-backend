@@ -7,6 +7,7 @@ import { invitation_routes } from "./modules/invitations/api/invitation.routes.j
 import { meter_router } from "./modules/meters/api/meter.routes.js";
 import { sharing_operation_routes } from "./modules/sharing_operations/api/sharing_operation.routes.js";
 import { user_router } from "./modules/users/api/user.routes.js";
+import { health_routes } from "./modules/health/api/health.routes.js";
 
 export const router = express.Router();
 router.use("/communities", community_routes);
@@ -17,3 +18,4 @@ router.use("/members", member_routes);
 router.use("/meters", meter_router);
 router.use("/sharing_operations", sharing_operation_routes);
 router.use("/users", user_router);
+router.use("/health", health_routes);

@@ -7,9 +7,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=crm_db
-    volumes:
+    # volumes:
       # - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./tests/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
   crm-backend:
@@ -36,12 +35,12 @@ services:
       - logging=false
       # IAM Configuration
       - IAM_SERVICE_NAME=KEYCLOACK
-      - IAM_REALM=master
-      - IAM_REALM_NAME=master
-      - IAM_BASE_URL=http://keycloak:8080
+      - IAM_REALM=optimce-realm
+      - IAM_REALM_NAME=optimce-realm
+      - IAM_CLIENT_ID=optimce-backend
       - IAM_GRANT_TYPE=client_credentials
-      - IAM_CLIENT_ID=admin
-      - IAM_CLIENT_SECRET=admin
+      - IAM_CLIENT_SECRET=changeme_keycloak_admin_password
+      - IAM_BASE_URL=http://keycloak:8080
       #OpenFiles Configuration
       - STORAGE_SERVICE_NAME=openfiles
       - STORAGE_TARGET=http://openfiles:8001
@@ -55,8 +54,6 @@ services:
     depends_on:
       - crm-db
 
-
-
   keycloak-db:
     image: postgres:18-alpine
     environment:
@@ -67,24 +64,27 @@ services:
       - "5433:5432"
 
   keycloak:
-    image: keycloak/keycloak:latest
+    image: ghcr.io/optimce/kc-groupid-mapper:main
+    command: ["start-dev", "--import-realm", "--verbose"]
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_IMPORT=/opt/keycloak/data/import/dev-config.json
       - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak
+      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak      
       - KC_DB_USERNAME=postgres
       - KC_DB_PASSWORD=postgres
       - KC_HOSTNAME=localhost
-
+      - KC_HEALT_ENABLED=true
+      - KC_METRICS_ENABLED=true
+    volumes:
+      - ./keycloak/dev-config.json:/opt/keycloak/data/import/dev-config.json
     ports:
       - "8080:8080"
     depends_on:
       - keycloak-db
-    command:
-      - start-dev
 
-#Note: no persistance between test runs, so data will be lost when the containers are stopped. This is intentional for testing purposes.
+  #Note: no persistance between test runs, so data will be lost when the containers are stopped. This is intentional for testing purposes.
   openfiles:
     image: totalplatform/openfiles:latest
     ports:
