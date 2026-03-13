@@ -46,7 +46,7 @@ export class CommunityService implements ICommunityService {
    */
   @Transactional()
   async addCommunity(new_community: CreateCommunityDTO, query_runner?: QueryRunner): Promise<void> {
-    //TODO: Handle where there is an exception (like delete the community in keycloack and so )
+    //TODO: Handle where there is an exception (like delete the community in keycloak and so )
     // 1. Create the community in the IAM provider
     // Retrieve the new org_id
     let org_id: string;
