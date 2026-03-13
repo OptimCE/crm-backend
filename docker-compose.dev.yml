@@ -35,7 +35,7 @@ services:
       # Logging Behavior
       - logging=false
       # IAM Configuration
-      - IAM_SERVICE_NAME=KEYCLOACK
+      - IAM_SERVICE_NAME=KEYCLOAK
       - IAM_REALM=master
       - IAM_REALM_NAME=master
       - IAM_BASE_URL=http://keycloak:8080
