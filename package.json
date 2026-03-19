@@ -34,7 +34,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@keycloak/keycloak-admin-client": "^26.4.7",
+    "@keycloak/keycloak-admin-client": "^26.5.5",
     "@nestjs/mapped-types": "^2.1.0",
     "@opentelemetry/auto-instrumentations-node": "^0.67.3",
     "@opentelemetry/resources": "^2.5.1",
