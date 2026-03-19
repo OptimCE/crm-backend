@@ -63,7 +63,8 @@
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.28",
     "xlsx": "^0.18.5",
-    "xss": "^1.0.15"
+    "xss": "^1.0.15",
+    "ioredis": "^5.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -88,7 +89,7 @@
     "shins": "^2.6.0",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.6",
-    "ts-json-schema-generator": "^2.4.0",
+    "ts-json-schema-generator": "^2.9.0",
     "tsx": "^4.21.0",
     "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^4.9.0",
