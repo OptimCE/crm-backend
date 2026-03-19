@@ -21,6 +21,11 @@ import type { ISharingOperationRepository } from "../modules/sharing_operations/
 import { SharingOperationRepository } from "../modules/sharing_operations/infra/sharing_operation.repository.js";
 import type { IUserRepository } from "../modules/users/domain/i-user.repository.js";
 import { UserRepository } from "../modules/users/infra/user.repository.js";
+import type { IMeRepository } from "../modules/me/domain/i-me.repository.js";
+import { MeRepository } from "../modules/me/infra/me.repository.js";
+import type { IMeService } from "../modules/me/domain/i-me.service.js";
+import { MeService } from "../modules/me/infra/me.service.js";
+import { MeController } from "../modules/me/api/me.controller.js";
 import type { IAddressRepository } from "../shared/address/i-address.repository.js";
 import { AddressRepository } from "../shared/address/address.repository.js";
 import type { ICommunityService } from "../modules/communities/domain/i-community.service.js";
@@ -51,6 +56,7 @@ import { intializeIAMService } from "./factory/iam.factory.js";
 import { initializeStorageService } from "./factory/storage.factory.js";
 import type { IAuthContextRepository } from "../shared/context/i-authcontext.repository.js";
 import { AuthContextRepository } from "../shared/context/authcontext.repository.js";
+import { initializeCacheService } from "./factory/cache.factory.js";
 
 if (process.env.NODE_ENV !== "test") {
   container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
@@ -59,6 +65,9 @@ if (process.env.NODE_ENV !== "test") {
 
   // Storage service
   initializeStorageService();
+
+  // Cache Service
+  initializeCacheService();
 }
 if (!container.isBound("AuthContext")) {
   container.bind<IAuthContextRepository>("AuthContext").to(AuthContextRepository);
@@ -78,6 +87,9 @@ if (!container.isBound("InvitationRepository")) {
 if (!container.isBound("KeyRepository")) {
   container.bind<IKeyRepository>("KeyRepository").to(KeyRepository);
 }
+if (!container.isBound("MeRepository")) {
+  container.bind<IMeRepository>("MeRepository").to(MeRepository);
+}
 if (!container.isBound("MemberRepository")) {
   container.bind<IMemberRepository>("MemberRepository").to(MemberRepository);
 }
@@ -96,6 +108,7 @@ container.bind<ICommunityService>("CommunityService").to(CommunityService);
 container.bind<IDocumentService>("DocumentService").to(DocumentService);
 container.bind<IInvitationService>("InvitationService").to(InvitationService);
 container.bind<IKeyService>("KeyService").to(KeyService);
+container.bind<IMeService>("MeService").to(MeService);
 container.bind<IMemberService>("MemberService").to(MemberService);
 container.bind<IMeterService>("MeterService").to(MeterService);
 container.bind<ISharingOperationService>("SharingOperationService").to(SharingOperationService);
@@ -105,6 +118,7 @@ container.bind<CommunityController>(CommunityController).toSelf();
 container.bind<DocumentController>(DocumentController).toSelf();
 container.bind<InvitationController>(InvitationController).toSelf();
 container.bind<KeyController>(KeyController).toSelf();
+container.bind<MeController>(MeController).toSelf();
 container.bind<MemberController>(MemberController).toSelf();
 container.bind<MeterController>(MeterController).toSelf();
 container.bind<SharingOperationController>(SharingOperationController).toSelf();

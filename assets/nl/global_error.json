@@ -1,11 +1,11 @@
 {
-  "success": "Succes",
+  "success": "Geslaagd",
   "exception": "Er is een onverwachte fout opgetreden",
-  "timeout": "Time-out verstreken",
-  "decorator": "Uitvoering van de decorator is mislukt",
+  "timeout": "Verzoek verlopen",
+  "decorator": "Uitvoering van de decorator mislukt",
   "unauthorized": "Niet geautoriseerd",
   "authorization_missing": "Autorisatie ontbreekt",
-  "unauthenticated": "Niet geauthenticeerd",
+  "unauthenticated": "Niet geverifieerd",
   "database": {
     "query_runner_mandatory": "Er is een fout opgetreden met betrekking tot de unieke transactie"
   },
@@ -21,12 +21,12 @@
         "number": "Het veld '{{field}}' moet een getal zijn",
         "array": "Het veld '{{field}}' moet een geldige array zijn"
       },
-      "sort": "Het veld '{{field}}' moet 'ASC' of 'DESC' zijn",
+      "sort": "Het veld '{{field}} moet 'ASC' of 'DESC' zijn",
       "empty": "Het veld '{{field}}' is leeg",
       "wrong_role": {
         "member_manager_admin": "Het veld '{{field}}' moet 'MEMBER', 'MANAGER' of 'ADMIN' zijn"
       },
-      "min_1": "Het veld '{{field}}' moet groter of gelijk aan 1 zijn"
+      "min_1": "Het veld '{{field}}' moet groter dan of gelijk aan 1 zijn"
     }
   }
 }

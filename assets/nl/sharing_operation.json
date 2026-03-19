@@ -7,12 +7,12 @@
     "invalid_date_format": "Een datum in het bestand heeft een ongeldig formaat"
   },
   "add_key_to_sharing": {
-    "sharing_operation_not_found": "Deeloperatie niet gevonden",
-    "allocation_key_not_found": "Verdeelsleutel niet gevonden",
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
+    "allocation_key_not_found": "De verdeelsleutel kon niet worden gevonden",
     "database_add": "Er is een fout opgetreden bij het toevoegen van de verdeelsleutel aan de deeloperatie in de database"
   },
   "add_meter_to_sharing": {
-    "sharing_operation_not_found": "Deeloperatie niet gevonden",
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
     "meters_invalid": "Een of meer meters behoren niet tot de gemeenschap",
     "database_add": "Er is een fout opgetreden bij het toevoegen van de meter aan de deeloperatie in de database"
   },
@@ -20,14 +20,14 @@
     "database_add": "Er is een fout opgetreden bij het toevoegen van de deeloperatie aan de database"
   },
   "get_sharing_operation": {
-    "sharing_operation_not_found": "Deeloperatie niet gevonden"
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden"
   },
   "patch_key_status": {
-    "sharing_operation_not_found": "Deeloperatie niet gevonden",
-    "database_update": "Er is een fout opgetreden bij het bijwerken van de status die aan de deeloperatie is gekoppeld in de database"
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de status gekoppeld aan de deeloperatie in de database"
   },
   "patch_meter_status": {
-    "sharing_operation_not_found": "Deeloperatie niet gevonden",
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
     "meter_not_in_community": "Een of meer meters behoren niet tot de gemeenschap",
     "latest_meter_data_not_found": "Geen geldige meterinformatie gevonden",
     "meter_not_part_of_sharing": "De meter maakt momenteel geen deel uit van de deeloperatie",
@@ -37,14 +37,14 @@
     "database_delete": "Er is een fout opgetreden bij het verwijderen van de deeloperatie uit de database"
   },
   "delete_meter_from_sharing": {
-    "sharing_operation_not_found": "Deeloperatie niet gevonden",
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
     "meter_not_in_community": "Een of meer meters behoren niet tot de gemeenschap",
     "latest_meter_data_not_found": "Geen geldige meterinformatie gevonden",
     "meter_not_part_of_sharing": "De meter maakt momenteel geen deel uit van de deeloperatie",
     "database_add": "Er is een fout opgetreden bij het bijwerken van de meterinformatie in de database"
   },
   "get_sharing_operation_consumption": {
-    "no_consumption_found": "Geen verbruik gevonden tussen deze twee data"
+    "no_consumption_found": "Geen verbruik gevonden tussen deze twee datums"
   },
   "validation": {
     "wrong_type": {
@@ -53,11 +53,11 @@
       "meter_data_status": "Het veld '{{field}}' moet van het type 'MeterDataStatus' zijn"
     },
     "add_consumption_data": {
-      "file_too_big": "Het bestand is te groot (maximaal 5Mb)",
-      "has_mime_type": "Het bestand moet een CSV of Excel zijn"
+      "file_too_big": "Het bestand is te groot (maximaal 5 MB)",
+      "has_mime_type": "Het bestand moet een CSV- of Excel-bestand zijn"
     },
     "patch_meter_to_sharing_operation": {
-      "status_out_of_range": "De waarde van het veld '{{field}}' moet tussen 1, 3 en 4 liggen"
+      "status_out_of_range": "De waarde van het veld '{{field}}' moet 1, 3 of 4 zijn"
     }
   }
 }

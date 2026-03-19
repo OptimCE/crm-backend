@@ -10,9 +10,6 @@ export function withUserScope<T extends ObjectLiteral>(qb: SelectQueryBuilder<T>
   const { user_id } = getContext(); // This is the Auth0/Keycloak String ID
 
   if (user_id) {
-    // We must JOIN the community table to check the auth_community_id
-    // We use innerJoin because an AllocationKey MUST belong to a community
-    // preventing "orphan" data from showing up.
     qb.innerJoin(`${alias}.user`, "scope_user").andWhere("scope_user.auth_user_id = :contextAuthId", {
       contextAuthId: user_id,
     });

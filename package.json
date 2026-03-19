@@ -9,6 +9,7 @@
     "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:unit": "npm run test -- --selectProjects unit",
     "test:functional": "npm run test -- --selectProjects functional --runInBand",
+    "test:cache": "npm run test -- --selectProjects cache --runInBand",
     "coverage": "npm run test -- --coverage --runInBand  --max-old-space-size=8192",
     "prebuild": "npm run clean",
     "copy-assets": "copyfiles -u 1 assets/**/* dist/assets",
@@ -65,8 +66,6 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "husky": "^8.0.0",
-    "lint-staged": "^16.2.7",
     "@eslint/js": "^9.39.2",
     "@redocly/cli": "^2.14.5",
     "@types/config": "^3.3.5",
@@ -74,14 +73,16 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.3.2",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
+    "husky": "^8.0.0",
     "jest": "^30.2.0",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "rimraf": "^6.1.2",
     "shins": "^2.6.0",
@@ -98,7 +99,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "prettier --write",
-      "git add"
+      "eslint --fix"
     ]
   }
 }

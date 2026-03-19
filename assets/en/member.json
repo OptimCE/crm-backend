@@ -6,21 +6,21 @@
     "database_delete": "An error occurred while deleting the member from the database"
   },
   "delete_member_link": {
-    "database_delete": "An error occurred while deleting the link between the user and the member from the database"
+    "database_delete": "An error occurred while deleting the link between the user and the member in the database"
   },
   "get_member": {
-    "member_not_found": "Member not found"
+    "member_not_found": "The member could not be found"
   },
   "patch_member_status": {
-    "member_not_found": "Member not found",
+    "member_not_found": "The member could not be found",
     "database_update": "An error occurred while updating the database"
   },
   "patch_member_link": {
-    "member_not_found": "Member not found",
+    "member_not_found": "The member could not be found",
     "database_add": "An error occurred while adding the invitation to the database"
   },
   "update_member": {
-    "member_not_found": "Member not found",
+    "member_not_found": "The member could not be found",
     "database_save_address": "An error occurred while adding/retrieving the address in the database",
     "database_save_member": "An error occurred while updating the member in the database",
     "database_save_individual": "An error occurred while updating the individual in the database",
@@ -28,7 +28,7 @@
   },
   "validation": {
     "wrong_type": {
-      "member_type": "The '{{field}}' field must be of type 'MemberType'"
+      "member_type": "The field '{{field}}' must be of type 'MemberType'"
     }
   }
 }

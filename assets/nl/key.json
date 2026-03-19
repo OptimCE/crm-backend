@@ -1,20 +1,21 @@
 {
   "get_key": {
-    "key_not_found": "Sleutel niet gevonden"
+    "key_not_found": "De verdeelsleutel kon niet worden gevonden"
   },
   "download_key": {
     "download_key": "Er is een fout opgetreden bij het genereren van het Excel-bestand",
-    "add_credit": "Er is een fout opgetreden bij het genereren van de credits voor het Excel-bestand"
+    "add_credit": "Er is een fout opgetreden bij het genereren van de Excel-credits",
+    "download_name": "verdeelsleutel"
   },
   "add_key": {
     "add_key_database": "Er is een fout opgetreden bij het toevoegen van de sleutel aan de database",
-    "add_children_database": "Er is een fout opgetreden bij het toevoegen van iteraties en verbruikers aan de database"
+    "add_children_database": "Er is een fout opgetreden bij het toevoegen van de iteraties en consumenten aan de database"
   },
   "update_key": {
-    "key_not_found": "Sleutel niet gevonden",
+    "key_not_found": "De verdeelsleutel kon niet worden gevonden",
     "update_key_database": "Er is een fout opgetreden bij het bijwerken van de sleutel in de database",
-    "delete_children_database": "Er is een fout opgetreden bij het verwijderen van vorige iteraties en verbruikers uit de database",
-    "add_children_database": "Er is een fout opgetreden bij het toevoegen van iteraties en verbruikers aan de database"
+    "delete_children_database": "Er is een fout opgetreden bij het verwijderen van de vorige iteraties en consumenten in de database",
+    "add_children_database": "Er is een fout opgetreden bij het toevoegen van de iteraties en consumenten aan de database"
   },
   "delete_key": {
     "database_delete": "Er is een fout opgetreden bij het verwijderen van de sleutel uit de database"
@@ -23,17 +24,17 @@
     "key_partial_query": {
       "description_wrong_type": "Het veld 'description' moet een string zijn",
       "name_wrong_type": "Het veld 'name' moet een string zijn",
-      "sort_name_out_of_range": "De waarde van 'sort_name' moet tussen 'ASC' en 'DESC' liggen"
+      "sort_name_out_of_range": "De waarde van 'sort_name' moet 'ASC' of 'DESC' zijn"
     },
     "create_consumer": {
-      "energy_allocated_percentage_min_minus_1": "Het veld 'energy_allocated_percentage' is onjuist, de minimumwaarde is -1",
-      "energy_allocated_percentage_max_1": "Het veld 'energy_allocated_percentage' is onjuist, de maximumwaarde is 1"
+      "energy_allocated_percentage_min_minus_1": "Het veld 'energy_allocated_percentage' is ongeldig, de minimumwaarde is -1",
+      "energy_allocated_percentage_max_1": "Het veld 'energy_allocated_percentage' is ongeldig, de maximumwaarde is 1"
     },
     "create_iteration": {
-      "number_min_0": "Het veld 'number' is onjuist, de minimumwaarde is 0",
-      "number_max_2": "Het veld 'number' is onjuist, de maximumwaarde is 2",
-      "energy_allocated_percentage_min_0": "Het veld 'energy_allocated_percentage' is onjuist, de minimumwaarde is 0",
-      "consumer_sum_1": "De som van 'energy_allocated_percentage' van de verbruikers moet gelijk zijn aan 1"
+      "number_min_0": "Het veld 'number' is ongeldig, de minimumwaarde is 0",
+      "number_max_2": "Het veld 'number' is ongeldig, de maximumwaarde is 2",
+      "energy_allocated_percentage_min_0": "Het veld 'energy_allocated_percentage' is ongeldig, de minimumwaarde is 0",
+      "consumer_sum_1": "De som van 'energy_allocated_percentage' van de consumenten moet gelijk zijn aan 1"
     },
     "create_key": {
       "iteration_sum_1": "De som van 'energy_allocated_percentage' van de iteraties moet gelijk zijn aan 1"

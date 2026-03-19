@@ -1,30 +1,30 @@
 {
   "add_community": {
-    "iam_creation": "An error occurred while adding to the IAM service",
+    "iam_creation": "An error occurred while registering with the IAM service",
     "database_save": "An error occurred while saving to the database"
   },
   "update_community": {
-    "community_not_found": "Community not found",
+    "community_not_found": "The community could not be found",
     "iam_update": "An error occurred while updating the community with the IAM service",
     "database_update": "An error occurred while updating the community in the database"
   },
   "delete_user_community": {
-    "community_user_not_found": "The link between the user and the community was not found",
-    "database_delete_user": "An error occurred while deleting the link between the user and the community from the database",
+    "community_user_not_found": "The link between the user and the community could not be found",
+    "database_delete_user": "An error occurred while deleting the link between the user and the community in the database",
     "iam_delete_user": "An error occurred while deleting the link between the user and the community with the IAM service"
   },
   "update_user_role": {
-    "database_update_user_role": "An error occurred while updating the community user role in the database",
-    "iam_update_user_role": "An error occurred while updating the community user role with the IAM service"
+    "database_update_user_role": "An error occurred while updating the community user's role in the database",
+    "iam_update_user_role": "An error occurred while updating the community user's role with the IAM service"
   },
   "patch_user_role": {
-    "community_user_not_found": "The link between the user and the community was not found",
-    "exception": "An exception occurred while updating the user role"
+    "community_user_not_found": "The link between the user and the community could not be found",
+    "exception": "An exception occurred while updating the user's role"
   },
   "delete_community": {
-    "community_not_found": "Community not found",
+    "community_not_found": "The community could not be found",
     "mismatch_id": "The community identifier does not match the community to be deleted",
-    "database_delete_exception": "An error occurred while deleting the community from the database",
+    "database_delete_exception": "An error occurred while deleting the community in the database",
     "iam_delete_community": "An error occurred while deleting the community with the IAM service"
   }
 }

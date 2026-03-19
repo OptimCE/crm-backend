@@ -148,6 +148,15 @@ export class UsersCommunityDTO {
    */
   @Expose()
   role!: Role;
+
+  @Expose()
+  first_name?: string | null;
+
+  @Expose()
+  last_name?: string | null;
+
+  @Expose()
+  phone?: string | null;
 }
 
 /**

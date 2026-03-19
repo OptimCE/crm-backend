@@ -7,6 +7,9 @@ export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommuni
     role: community_user.role,
     id_community: community_user.id_community,
     id_user: community_user.id_user,
+    first_name: community_user.user.firstName,
+    last_name: community_user.user.lastName,
+    phone: community_user.user.phoneNumber,
   };
 }
 

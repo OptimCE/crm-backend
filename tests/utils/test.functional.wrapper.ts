@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, jest } from "@jest/globals";
-import { initalizeDb, initializeExternalServices, resetDb, tearDownDB } from "./helper.js";
+import { initalizeDb, initializeExternalServices, resetDb, tearDownCache, tearDownDB } from "./helper.js";
 import type { TestHookOverrides } from "./shared.consts.js";
 
 /**
@@ -27,6 +27,7 @@ export const useFunctionalTestDb = (initializeExternal: boolean = true, hookOver
       await hookOverrides.afterEach();
     } else {
       await tearDownDB();
+      await tearDownCache();
     }
   });
 };

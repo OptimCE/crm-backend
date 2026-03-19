@@ -1,13 +1,13 @@
 {
-  "success": "Erfolg",
+  "success": "Erfolgreich",
   "exception": "Ein unerwarteter Fehler ist aufgetreten",
-  "timeout": "Zeitüberschreitung",
-  "decorator": "Die Ausführung des Decorators ist fehlgeschlagen",
+  "timeout": "Zeitüberschreitung der Anfrage",
+  "decorator": "Ausführung des Dekorators fehlgeschlagen",
   "unauthorized": "Nicht autorisiert",
   "authorization_missing": "Autorisierung fehlt",
   "unauthenticated": "Nicht authentifiziert",
   "database": {
-    "query_runner_mandatory": "Ein Fehler bezüglich der eindeutigen Transaktion ist aufgetreten"
+    "query_runner_mandatory": "Ein Fehler im Zusammenhang mit der eindeutigen Transaktion ist aufgetreten"
   },
   "validation": {
     "generic": {
@@ -21,12 +21,12 @@
         "number": "Das Feld '{{field}}' muss eine Zahl sein",
         "array": "Das Feld '{{field}}' muss ein gültiges Array sein"
       },
-      "sort": "Das Feld '{{field}}' muss entweder 'ASC' oder 'DESC' sein",
+      "sort": "Das Feld '{{field}} muss 'ASC' oder 'DESC' sein",
       "empty": "Das Feld '{{field}}' ist leer",
       "wrong_role": {
         "member_manager_admin": "Das Feld '{{field}}' muss 'MEMBER', 'MANAGER' oder 'ADMIN' sein"
       },
-      "min_1": "Das Feld '{{field}}' muss größer oder gleich 1 sein"
+      "min_1": "Das Feld '{{field}}' muss größer als oder gleich 1 sein"
     }
   }
 }

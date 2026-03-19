@@ -1,7 +1,7 @@
 import config from "config";
 import pino from "pino";
 import { context, trace } from "@opentelemetry/api";
-import {getContext} from "../middlewares/context.js";
+import { getContext } from "../middlewares/context.js";
 
 /**
  * Initializes a Pino logger with OpenTelemetry integration
@@ -24,7 +24,7 @@ function initLogger(serviceName: string): pino.Logger {
         resourceAttributes: {
           "service.name": serviceName,
         },
-        endpoint: config.get("remote_logging.opentelemetry.exporterEndpoint"),
+        endpoint: config.get("remote_logging.opentelemetry.exporter_endpoint"),
         includeTraceContext: true,
       },
     });

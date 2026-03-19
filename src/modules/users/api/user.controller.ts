@@ -8,6 +8,8 @@ import { ApiResponse } from "../../../shared/dtos/ApiResponses.js";
 import { SUCCESS } from "../../../shared/errors/errors.js";
 import { UpdateUserDTO, UserDTO } from "./user.dtos.js";
 import { validateDto } from "../../../shared/utils/dto.validator.js";
+import { Cache, InvalidateCache } from "../../../shared/cache/decorator/cache.decorators.js";
+import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 
 const userControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 @injectable()
@@ -25,6 +27,7 @@ export class UserController {
    * @param _next - Express next middleware.
    */
   @userControllerTraceDecorator.traceSpan("getProfile", { url: "/users/", method: "get" })
+  @Cache(cacheKey("users:profile", "user", (req) => JSON.stringify(req.query)), 120)
   async getProfile(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.userService.getProfile();
     logger.info("Profile successfully fetched");
@@ -38,6 +41,7 @@ export class UserController {
    * @param _next - Express next middleware.
    */
   @userControllerTraceDecorator.traceSpan("updateProfile", { url: "/users/", method: "put" })
+  @InvalidateCache([cachePattern("users:profile", "user")])
   async updateProfile(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_user = await validateDto(UpdateUserDTO, req.body);
     await this.userService.updateProfile(updated_user);

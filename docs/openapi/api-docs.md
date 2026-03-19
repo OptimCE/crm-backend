@@ -26,356 +26,6 @@ Base URLs:
 
 # Authentication
 
-<h1 id="optimce-crm-backend-api-documentation-default">Default</h1>
-
-## Patch the role of a user
-
-> Code samples
-
-`PATCH /communities/`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id_user": {
-      "type": "number"
-    },
-    "new_role": {
-      "type": "string",
-      "enum": [
-        "MEMBER",
-        "MANAGER",
-        "ADMIN"
-      ]
-    }
-  },
-  "required": [
-    "id_user",
-    "new_role"
-  ],
-  "additionalProperties": false
-}
-```
-
-<h3 id="patch-the-role-of-a-user-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[PatchRoleUserDTO](#schemapatchroleuserdto)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="patch-the-role-of-a-user-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|User role in community successfully patched|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="patch-the-role-of-a-user-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
-## Leave a community
-
-> Code samples
-
-`DELETE /communities/leave/{id_community}`
-
-<h3 id="leave-a-community-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id_community|path|integer|true|ID of the community|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="leave-a-community-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successfully left the community|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="leave-a-community-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker & MinRoleChecker
-</aside>
-
-## Kick a user from a community
-
-> Code samples
-
-`DELETE /communities/kick/{id_user}`
-
-<h3 id="kick-a-user-from-a-community-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id_user|path|integer|true|ID of the user|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="kick-a-user-from-a-community-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|User successfully kicked from the community|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="kick-a-user-from-a-community-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
-## Delete an entire community
-
-> Code samples
-
-`DELETE /communities/delete/{id_community}`
-
-<h3 id="delete-an-entire-community-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id_community|path|integer|true|ID of the community|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="delete-an-entire-community-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Community successfully deleted|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="delete-an-entire-community-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
-## Cancel a manager own invitation
-
-> Code samples
-
-`DELETE /invitations/{id_invitation}/own/manager`
-
-<h3 id="cancel-a-manager-own-invitation-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id_invitation|path|undefined|true|none|
-
-<h3 id="cancel-a-manager-own-invitation-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|default|Default|none|None|
-
-<aside class="success">
-This operation does not require authentication
-</aside>
-
-## Delete a link between member and user
-
-> Code samples
-
-`DELETE /members/{id_member}/link`
-
-<h3 id="delete-a-link-between-member-and-user-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id_member|path|integer|true|ID of the member|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="delete-a-link-between-member-and-user-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Member link successfully deleted|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="delete-a-link-between-member-and-user-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
 <h1 id="optimce-crm-backend-api-documentation-communities">Communities</h1>
 
 Operation related to managing Communities CRUD operations
@@ -397,7 +47,37 @@ Operation related to managing Communities CRUD operations
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 1,
+      "auth_community_id": "auth0|123456",
+      "name": "Résidence Les Lilas",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "auth_community_id": "auth0|789012",
+      "name": "Immeuble Central",
+      "role": "member"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-my-communities-responses">Responses</h3>
@@ -415,7 +95,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -423,7 +102,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -431,7 +109,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -457,7 +134,37 @@ UserIdChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id_user": 101,
+      "id_community": 1,
+      "email": "jane.doe@example.com",
+      "role": "gestionnaire"
+    },
+    {
+      "id_user": 102,
+      "id_community": 1,
+      "email": "bob.smith@example.com",
+      "role": "member"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-users-of-a-community-responses">Responses</h3>
@@ -467,6 +174,7 @@ null
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of community users|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
 
 <h3 id="get-users-of-a-community-responseschema">Response Schema</h3>
 
@@ -474,7 +182,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -482,7 +189,13 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -508,7 +221,37 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id_user": 101,
+      "id_community": 1,
+      "email": "jane.doe@example.com",
+      "role": "gestionnaire"
+    },
+    {
+      "id_user": 105,
+      "id_community": 1,
+      "email": "admin.user@example.com",
+      "role": "admin"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-admins-of-a-community-responses">Responses</h3>
@@ -526,7 +269,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -534,7 +276,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -542,7 +283,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -564,13 +304,15 @@ UserIdChecker & CommunityIdChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "The name of the community. Must be a non-empty string."
     }
   },
   "required": [
     "name"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating or updating a community."
 }
 ```
 
@@ -585,7 +327,18 @@ UserIdChecker & CommunityIdChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="create-a-new-community-responses">Responses</h3>
@@ -603,7 +356,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -611,7 +363,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -619,7 +370,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -641,13 +391,15 @@ UserIdChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "The name of the community. Must be a non-empty string."
     }
   },
   "required": [
     "name"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating or updating a community."
 }
 ```
 
@@ -662,7 +414,18 @@ UserIdChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="update-a-community-responses">Responses</h3>
@@ -680,7 +443,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -688,7 +450,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -696,7 +457,307 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Patch the role of a user
+
+> Code samples
+
+`PATCH /communities/`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id_user": {
+      "type": "number",
+      "description": "The ID of the user whose role is being updated. Must be an integer."
+    },
+    "new_role": {
+      "type": "string",
+      "enum": [
+        "MEMBER",
+        "MANAGER",
+        "ADMIN"
+      ],
+      "description": "Enum representing user roles in the system with increasing privilege levels"
+    }
+  },
+  "required": [
+    "id_user",
+    "new_role"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for patching (updating) a user's role within a community."
+}
+```
+
+<h3 id="patch-the-role-of-a-user-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[PatchRoleUserDTO](#schemapatchroleuserdto)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="patch-the-role-of-a-user-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|User role in community successfully patched|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="patch-the-role-of-a-user-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Leave a community
+
+> Code samples
+
+`DELETE /communities/leave/{id_community}`
+
+<h3 id="leave-a-community-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id_community|path|integer|true|ID of the community|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="leave-a-community-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successfully left the community|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="leave-a-community-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & MinRoleChecker
+</aside>
+
+## Kick a user from a community
+
+> Code samples
+
+`DELETE /communities/kick/{id_user}`
+
+<h3 id="kick-a-user-from-a-community-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id_user|path|integer|true|ID of the user|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="kick-a-user-from-a-community-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|User successfully kicked from the community|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="kick-a-user-from-a-community-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Delete an entire community
+
+> Code samples
+
+`DELETE /communities/delete/{id_community}`
+
+<h3 id="delete-an-entire-community-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id_community|path|integer|true|ID of the community|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="delete-an-entire-community-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Community successfully deleted|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="delete-an-entire-community-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -727,7 +788,39 @@ Operation related to managing Documents CRUD operations and interaction with the
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 10,
+      "file_name": "contrat_location.pdf",
+      "file_size": 102400,
+      "upload_date": "2023-10-27T10:00:00Z",
+      "file_type": "application/pdf"
+    },
+    {
+      "id": 11,
+      "file_name": "facture_electricite.png",
+      "file_size": 204800,
+      "upload_date": "2023-11-01T14:30:00Z",
+      "file_type": "image/png"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-all-documents-linked-to-a-member-responses">Responses</h3>
@@ -745,7 +838,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -753,7 +845,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -761,7 +852,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -791,7 +881,6 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 
 ```json
 {
-  "success": false,
   "error": "UNAUTHENTICATED",
   "statusCode": 400
 }
@@ -812,7 +901,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -820,7 +908,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -828,7 +915,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -864,7 +950,18 @@ id_member: 0
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="upload-a-document-responses">Responses</h3>
@@ -882,7 +979,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -890,7 +986,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -898,7 +993,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -924,7 +1018,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="delete-a-specific-document-responses">Responses</h3>
@@ -942,7 +1047,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -950,7 +1054,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -958,7 +1061,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -988,14 +1090,44 @@ Operation related to managing invitation of new user in the community
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 5,
+      "member_id": 42,
+      "member_name": "Jean Dupont",
+      "user_email": "jean.dupont@example.com",
+      "created_at": "2024-03-01T08:00:00.000Z",
+      "to_be_encoded": false,
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-all-member-pending-invitations-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of member invitations|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of pending member invitations for the authenticated user|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -1006,7 +1138,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1014,7 +1145,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1022,7 +1152,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1048,14 +1177,41 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 3,
+      "user_email": "manager@example.com",
+      "created_at": "2024-03-10T09:00:00.000Z",
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-all-managers-pending-invitations-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of manager invitations|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of pending manager invitations for the authenticated user|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -1066,7 +1222,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1074,7 +1229,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1082,133 +1236,12 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
-## Get all own member pending invitations
-
-> Code samples
-
-`GET /invitations/own`
-
-<h3 id="get-all-own-member-pending-invitations-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|filters|query|[UserMemberInvitationQuery](#schemausermemberinvitationquery)|false|Pagination and filter options for member invitations|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="get-all-own-member-pending-invitations-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of member invitations|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="get-all-own-member-pending-invitations-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker
-</aside>
-
-## Get all own managers pending invitations
-
-> Code samples
-
-`GET /invitations/own/managers`
-
-<h3 id="get-all-own-managers-pending-invitations-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|filters|query|[UserManagerInvitationQuery](#schemausermanagerinvitationquery)|false|Pagination and filter options for manager invitations|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="get-all-own-managers-pending-invitations-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of manager invitations|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="get-all-own-managers-pending-invitations-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker
 </aside>
 
 ## Invite a user to become a member
@@ -1224,13 +1257,15 @@ UserIdChecker
   "type": "object",
   "properties": {
     "user_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email of the user to invite."
     }
   },
   "required": [
     "user_email"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for sending an invitation."
 }
 ```
 
@@ -1245,14 +1280,25 @@ UserIdChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="invite-a-user-to-become-a-member-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -1263,7 +1309,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1271,7 +1316,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1279,7 +1323,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1301,13 +1344,15 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "user_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email of the user to invite."
     }
   },
   "required": [
     "user_email"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for sending an invitation."
 }
 ```
 
@@ -1322,14 +1367,25 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="invite-a-user-to-become-a-manager-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -1340,7 +1396,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1348,7 +1403,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1356,360 +1410,12 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
-## Accept an invitation member
-
-> Code samples
-
-`POST /invitations/accept`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invitation_id": {
-      "type": "number"
-    }
-  },
-  "required": [
-    "invitation_id"
-  ],
-  "additionalProperties": false
-}
-```
-
-<h3 id="accept-an-invitation-member-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[AcceptInvitationDTO](#schemaacceptinvitationdto)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="accept-an-invitation-member-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="accept-an-invitation-member-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker
-</aside>
-
-## Accept an invitation with encoded member
-
-> Code samples
-
-`POST /invitations/accept/encoded`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invitation_id": {
-      "type": "number"
-    },
-    "member": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "member_type": {
-          "type": "number",
-          "enum": [
-            1,
-            2
-          ]
-        },
-        "status": {
-          "type": "number",
-          "enum": [
-            1,
-            2,
-            3
-          ]
-        },
-        "iban": {
-          "type": "string"
-        },
-        "home_address": {
-          "type": "object",
-          "properties": {
-            "street": {
-              "type": "string"
-            },
-            "number": {
-              "type": "number"
-            },
-            "city": {
-              "type": "string"
-            },
-            "postcode": {
-              "type": "string"
-            },
-            "supplement": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "street",
-            "number",
-            "city",
-            "postcode"
-          ],
-          "additionalProperties": false
-        },
-        "billing_address": {
-          "type": "object",
-          "properties": {
-            "street": {
-              "type": "string"
-            },
-            "number": {
-              "type": "number"
-            },
-            "city": {
-              "type": "string"
-            },
-            "postcode": {
-              "type": "string"
-            },
-            "supplement": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "street",
-            "number",
-            "city",
-            "postcode"
-          ],
-          "additionalProperties": false
-        },
-        "first_name": {
-          "type": "string"
-        },
-        "NRN": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "phone_number": {
-          "type": "string"
-        },
-        "social_rate": {
-          "type": "boolean"
-        },
-        "vat_number": {
-          "type": "string"
-        },
-        "manager_id": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "name",
-        "member_type",
-        "status",
-        "iban",
-        "home_address",
-        "billing_address",
-        "first_name",
-        "NRN",
-        "email",
-        "social_rate",
-        "vat_number"
-      ],
-      "additionalProperties": false
-    }
-  },
-  "required": [
-    "invitation_id",
-    "member"
-  ],
-  "additionalProperties": false
-}
-```
-
-<h3 id="accept-an-invitation-with-encoded-member-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[AcceptInvitationWEncodedDTO](#schemaacceptinvitationwencodeddto)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="accept-an-invitation-with-encoded-member-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="accept-an-invitation-with-encoded-member-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker
-</aside>
-
-## Accept an invitation for manager
-
-> Code samples
-
-`POST /invitations/accept/manager`
-
-> Body parameter
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invitation_id": {
-      "type": "number"
-    }
-  },
-  "required": [
-    "invitation_id"
-  ],
-  "additionalProperties": false
-}
-```
-
-<h3 id="accept-an-invitation-for-manager-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[AcceptInvitationDTO](#schemaacceptinvitationdto)|true|none|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="accept-an-invitation-for-manager-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="accept-an-invitation-for-manager-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker
 </aside>
 
 ## Cancel a member invitation
@@ -1729,14 +1435,25 @@ UserIdChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="cancel-a-member-invitation-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -1747,7 +1464,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1755,7 +1471,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1763,7 +1478,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1789,14 +1503,25 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="cancel-a-manager-invitation-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -1807,7 +1532,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1815,7 +1539,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1823,73 +1546,12 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
 UserIdChecker & CommunityIdChecker & MinRoleChecker
-</aside>
-
-## Cancel a member own invitation
-
-> Code samples
-
-`DELETE /invitations/{id_invitation}/own/member`
-
-<h3 id="cancel-a-member-own-invitation-parameters">Parameters</h3>
-
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|id_invitation|path|integer|true|ID of the invitation|
-
-> Example responses
-
-> 200 Response
-
-```json
-null
-```
-
-<h3 id="cancel-a-member-own-invitation-responses">Responses</h3>
-
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Operation successful|Inline|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
-|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
-
-<h3 id="cancel-a-member-own-invitation-responseschema">Response Schema</h3>
-
-Status Code **400**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **401**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-Status Code **403**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» success|boolean|false|none|none|
-|» error|string|false|none|none|
-|» statusCode|integer|false|none|none|
-
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-UserIdChecker
 </aside>
 
 <h1 id="optimce-crm-backend-api-documentation-keys">Keys</h1>
@@ -1913,7 +1575,35 @@ Operation related to managing allocation key of communities
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 10,
+      "name": "Clef de répartition 2023",
+      "description": "Répartition pour l'année 2023"
+    },
+    {
+      "id": 11,
+      "name": "Clef par défaut",
+      "description": "Répartition standard"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-partial-list-of-keys-responses">Responses</h3>
@@ -1931,7 +1621,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1939,7 +1628,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1947,7 +1635,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -1969,10 +1656,12 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the key."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description of the key."
     },
     "iterations": {
       "type": "array",
@@ -1980,10 +1669,12 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
         "type": "object",
         "properties": {
           "number": {
-            "type": "number"
+            "type": "number",
+            "description": "Iteration number (0, 1, or 2)."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Total energy percentage for this iteration."
           },
           "consumers": {
             "type": "array",
@@ -1991,18 +1682,22 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
               "type": "object",
               "properties": {
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Name of the consumer."
                 },
                 "energy_allocated_percentage": {
-                  "type": "number"
+                  "type": "number",
+                  "description": "Energy allocated. Range: -1 (PRORATA) to 1 (100%)."
                 }
               },
               "required": [
                 "name",
                 "energy_allocated_percentage"
               ],
-              "additionalProperties": false
-            }
+              "additionalProperties": false,
+              "description": "DTO for creating a new consumer."
+            },
+            "description": "List of consumers. Must adhere to sum constraints."
           }
         },
         "required": [
@@ -2010,8 +1705,10 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
           "energy_allocated_percentage",
           "consumers"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO for creating a new iteration."
+      },
+      "description": "Iterations for the key. Must sum up correctly."
     }
   },
   "required": [
@@ -2019,7 +1716,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "description",
     "iterations"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new key."
 }
 ```
 
@@ -2034,7 +1732,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="add-a-key-responses">Responses</h3>
@@ -2052,7 +1761,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2060,7 +1768,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2068,7 +1775,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2090,13 +1796,16 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the key to update."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "New name."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "New description."
     },
     "iterations": {
       "type": "array",
@@ -2104,10 +1813,12 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
         "type": "object",
         "properties": {
           "number": {
-            "type": "number"
+            "type": "number",
+            "description": "Iteration number (0, 1, or 2)."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Total energy percentage for this iteration."
           },
           "consumers": {
             "type": "array",
@@ -2115,18 +1826,22 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
               "type": "object",
               "properties": {
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Name of the consumer."
                 },
                 "energy_allocated_percentage": {
-                  "type": "number"
+                  "type": "number",
+                  "description": "Energy allocated. Range: -1 (PRORATA) to 1 (100%)."
                 }
               },
               "required": [
                 "name",
                 "energy_allocated_percentage"
               ],
-              "additionalProperties": false
-            }
+              "additionalProperties": false,
+              "description": "DTO for creating a new consumer."
+            },
+            "description": "List of consumers. Must adhere to sum constraints."
           }
         },
         "required": [
@@ -2134,8 +1849,10 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
           "energy_allocated_percentage",
           "consumers"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO for creating a new iteration."
+      },
+      "description": "New iterations configuration."
     }
   },
   "required": [
@@ -2144,7 +1861,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "description",
     "iterations"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating an existing key."
 }
 ```
 
@@ -2159,7 +1877,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="update-a-key-responses">Responses</h3>
@@ -2177,7 +1906,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2185,7 +1913,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2193,7 +1920,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2219,7 +1945,42 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "id": 10,
+    "name": "Clef de répartition 2023",
+    "description": "Répartition pour l'année 2023",
+    "iterations": [
+      {
+        "id": 100,
+        "number": 0,
+        "energy_allocated_percentage": 1,
+        "consumers": [
+          {
+            "id": 1001,
+            "name": "Appartement 1",
+            "energy_allocated_percentage": 0.5
+          },
+          {
+            "id": 1002,
+            "name": "Appartement 2",
+            "energy_allocated_percentage": 0.5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-a-detailed-key-responses">Responses</h3>
@@ -2237,7 +1998,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2245,7 +2005,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2253,7 +2012,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2279,7 +2037,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="delete-a-key-responses">Responses</h3>
@@ -2297,7 +2066,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2305,7 +2073,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2313,7 +2080,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2338,15 +2104,20 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 
 > 200 Response
 
+> 400 Response
+
 ```json
-null
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-download-a-detailled-key-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful key download retrieval|Inline|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful key download|string|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
 |403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
@@ -2357,7 +2128,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2365,7 +2135,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2373,9 +2142,14 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
+
+### Response Headers
+
+|Status|Header|Type|Format|Description|
+|---|---|---|---|---|
+|200|Content-Disposition|string||Attachment filename|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -2405,7 +2179,37 @@ Retrieve members with optional filters defined in MemberPartialQuery.
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 42,
+      "name": "Jean Dupont",
+      "member_type": 1,
+      "status": 1
+    },
+    {
+      "id": 43,
+      "name": "SPRL Immobilière",
+      "member_type": 2,
+      "status": 1
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="retrieve-a-paginated-list-of-members-responses">Responses</h3>
@@ -2423,7 +2227,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2431,7 +2234,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2439,7 +2241,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2461,7 +2262,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the member (Full name or Company name)."
     },
     "member_type": {
       "type": "number",
@@ -2479,7 +2281,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
       ]
     },
     "iban": {
-      "type": "string"
+      "type": "string",
+      "description": "IBAN of the member."
     },
     "home_address": {
       "type": "object",
@@ -2506,7 +2309,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "billing_address": {
       "type": "object",
@@ -2533,28 +2337,65 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "first_name": {
-      "type": "string"
+      "type": "string",
+      "description": "First name (Individual only)."
     },
     "NRN": {
-      "type": "string"
+      "type": "string",
+      "description": "National Registry Number (Individual only)."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Contact email (Individual only)."
     },
     "phone_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Phone number (Individual only)."
     },
     "social_rate": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Social rate eligibility (Individual only)."
     },
     "vat_number": {
-      "type": "string"
+      "type": "string",
+      "description": "VAT number (Company only)."
     },
-    "manager_id": {
-      "type": "number"
+    "manager": {
+      "type": "object",
+      "properties": {
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
+        },
+        "name": {
+          "type": "string",
+          "description": "First name of the manager."
+        },
+        "surname": {
+          "type": "string",
+          "description": "Surname of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the manager."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number of the manager."
+        }
+      },
+      "required": [
+        "NRN",
+        "name",
+        "surname",
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
     }
   },
   "required": [
@@ -2570,7 +2411,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "social_rate",
     "vat_number"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new member. Contains common fields and type-specific fields (Individual vs Company). Uses conditional validation based on `member_type`."
 }
 ```
 
@@ -2585,7 +2427,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="create-a-new-member-responses">Responses</h3>
@@ -2603,7 +2456,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2611,7 +2463,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2619,7 +2470,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2641,10 +2491,12 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member to update."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "New name."
     },
     "status": {
       "type": "number",
@@ -2655,7 +2507,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
       ]
     },
     "iban": {
-      "type": "string"
+      "type": "string",
+      "description": "New IBAN."
     },
     "home_address": {
       "type": "object",
@@ -2676,7 +2529,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for updating an existing address. All fields are optional."
     },
     "billing_address": {
       "type": "object",
@@ -2697,34 +2551,72 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for updating an existing address. All fields are optional."
     },
     "first_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Update first name."
     },
     "NRN": {
-      "type": "string"
+      "type": "string",
+      "description": "Update NRN."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Update email."
     },
     "phone_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Update phone number."
     },
     "social_rate": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Update social rate."
     },
     "vat_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Update VAT number."
     },
-    "manager_id": {
-      "type": "number"
+    "manager": {
+      "type": "object",
+      "properties": {
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
+        },
+        "name": {
+          "type": "string",
+          "description": "First name of the manager."
+        },
+        "surname": {
+          "type": "string",
+          "description": "Surname of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the manager."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number of the manager."
+        }
+      },
+      "required": [
+        "NRN",
+        "name",
+        "surname",
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
     }
   },
   "required": [
     "id"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating an existing member. Most fields are optional to allow partial updates."
 }
 ```
 
@@ -2739,7 +2631,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="update-a-member-responses">Responses</h3>
@@ -2757,7 +2660,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2765,7 +2667,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2773,7 +2674,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2799,7 +2699,46 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "id": 42,
+    "name": "Jean Dupont",
+    "member_type": 1,
+    "status": 1,
+    "iban": "BE12345678901234",
+    "NRN": "80010112345",
+    "first_name": "Jean",
+    "email": "jean.dupont@example.com",
+    "phone_number": "+32470123456",
+    "social_rate": false,
+    "home_address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": "A",
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    },
+    "billing_address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": "A",
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    }
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="retrieve-a-specific-member-responses">Responses</h3>
@@ -2817,7 +2756,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2825,7 +2763,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2833,7 +2770,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2859,7 +2795,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="delete-a-member-responses">Responses</h3>
@@ -2877,7 +2824,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2885,7 +2831,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2893,7 +2838,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2919,7 +2863,23 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "user_email": "jean.dupont@example.com",
+    "user_id": 101,
+    "status": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="retrieve-the-member-link-status-responses">Responses</h3>
@@ -2937,7 +2897,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2945,7 +2904,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2953,7 +2911,74 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Delete a link between member and user
+
+> Code samples
+
+`DELETE /members/{id_member}/link`
+
+<h3 id="delete-a-link-between-member-and-user-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id_member|path|integer|true|ID of the member|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="delete-a-link-between-member-and-user-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Member link successfully deleted|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="delete-a-link-between-member-and-user-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -2975,7 +3000,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "id_member": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member."
     },
     "status": {
       "type": "number",
@@ -2990,7 +3016,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "id_member",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for patching member status only."
 }
 ```
 
@@ -3005,7 +3032,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="update-a-member-status-responses">Responses</h3>
@@ -3023,7 +3061,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3031,7 +3068,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3039,7 +3075,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3061,17 +3096,20 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "id_member": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member."
     },
     "user_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email of the user to invite."
     }
   },
   "required": [
     "id_member",
     "user_email"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for inviting a user to link to a member account."
 }
 ```
 
@@ -3086,7 +3124,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="invite-an-user-to-create-a-link-with-this-member-responses">Responses</h3>
@@ -3104,7 +3153,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3112,7 +3160,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3120,7 +3167,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3150,7 +3196,37 @@ Physical meter management and reading history
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "EAN": "541448800000000000",
+      "meter_number": "12345678",
+      "status": 1,
+      "address": {
+        "street": "Rue de la Gare",
+        "number": "10",
+        "city": "Bruxelles",
+        "zip_code": "1000",
+        "country": "Belgium"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-a-partial-list-of-meters-responses">Responses</h3>
@@ -3168,7 +3244,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3176,7 +3251,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3184,7 +3258,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3206,10 +3279,12 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "type": "object",
   "properties": {
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "EAN Code (Unique Identifier)."
     },
     "meter_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Physical Meter Number."
     },
     "address": {
       "type": "object",
@@ -3236,7 +3311,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "tarif_group": {
       "type": "number",
@@ -3246,7 +3322,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
       ]
     },
     "phases_number": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of phases (min 1)."
     },
     "reading_frequency": {
       "type": "number",
@@ -3260,11 +3337,13 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
       "properties": {
         "start_date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "Start date of validity for this configuration."
         },
         "end_date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "End date of validity (optional)."
         },
         "status": {
           "type": "number",
@@ -3292,16 +3371,20 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
           ]
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Description or label."
         },
         "sampling_power": {
-          "type": "number"
+          "type": "number",
+          "description": "Sampling power."
         },
         "amperage": {
-          "type": "number"
+          "type": "number",
+          "description": "Amperage."
         },
         "grd": {
-          "type": "string"
+          "type": "string",
+          "description": "GRD (DSO) identifier."
         },
         "injection_status": {
           "type": "number",
@@ -3325,13 +3408,16 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
           ]
         },
         "total_generating_capacity": {
-          "type": "number"
+          "type": "number",
+          "description": "Total generating capacity."
         },
         "member_id": {
-          "type": "number"
+          "type": "number",
+          "description": "ID of the associated member (holder)."
         },
         "sharing_operation_id": {
-          "type": "number"
+          "type": "number",
+          "description": "ID of the associated sharing operation."
         }
       },
       "required": [
@@ -3340,7 +3426,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
         "rate",
         "client_type"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating or updating a MeterData configuration period."
     }
   },
   "required": [
@@ -3352,7 +3439,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "reading_frequency",
     "initial_data"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new physical meter and its initial configuration."
 }
 ```
 
@@ -3367,7 +3455,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="add-a-new-meter-responses">Responses</h3>
@@ -3385,7 +3484,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3393,7 +3491,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3401,7 +3498,147 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Update a meter
+
+> Code samples
+
+`PUT /meters/`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "EAN": {
+      "type": "string",
+      "description": "EAN Code (Unique Identifier)."
+    },
+    "meter_number": {
+      "type": "string",
+      "description": "Physical Meter Number."
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "city": {
+          "type": "string"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "street",
+        "number",
+        "city",
+        "postcode"
+      ],
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
+    },
+    "tarif_group": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "phases_number": {
+      "type": "number",
+      "description": "Number of phases (min 1)."
+    },
+    "reading_frequency": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    }
+  },
+  "required": [
+    "EAN",
+    "meter_number",
+    "address",
+    "tarif_group",
+    "phases_number",
+    "reading_frequency"
+  ],
+  "additionalProperties": false
+}
+```
+
+<h3 id="update-a-meter-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[UpdateMeterDTO](#schemaupdatemeterdto)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="update-a-meter-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Meter successfully added|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="update-a-meter-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3427,7 +3664,40 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "EAN": "541448800000000000",
+    "meter_number": "12345678",
+    "phases_number": 3,
+    "reading_frequency": 1,
+    "tarif_group": 0,
+    "address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "city": "Bruxelles",
+      "zip_code": "1000",
+      "country": "Belgium"
+    },
+    "meter_data": {
+      "id": 1,
+      "description": "Compteur principal",
+      "status": 1,
+      "client_type": 1,
+      "rate": 1,
+      "start_date": "2023-01-01T00:00:00Z"
+    }
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-a-detailed-meter-responses">Responses</h3>
@@ -3445,7 +3715,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3453,7 +3722,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3461,7 +3729,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3487,7 +3754,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="delete-a-meter-responses">Responses</h3>
@@ -3505,7 +3783,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3513,7 +3790,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3521,7 +3797,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3548,7 +3823,49 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "EAN": "541448800000000000",
+    "timestamps": [
+      "2023-01-01T00:00:00Z",
+      "2023-01-01T00:15:00Z"
+    ],
+    "gross": [
+      0.5,
+      0.6
+    ],
+    "net": [
+      0.5,
+      0.6
+    ],
+    "shared": [
+      0,
+      0
+    ],
+    "inj_gross": [
+      0,
+      0
+    ],
+    "inj_net": [
+      0,
+      0
+    ],
+    "inj_shared": [
+      0,
+      0
+    ]
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-the-consumption-of-a-meter-responses">Responses</h3>
@@ -3566,7 +3883,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3574,7 +3890,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3582,7 +3897,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3612,7 +3926,6 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 
 ```json
 {
-  "success": false,
   "error": "UNAUTHENTICATED",
   "statusCode": 400
 }
@@ -3633,7 +3946,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3641,7 +3953,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3649,7 +3960,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3672,11 +3982,13 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
   "properties": {
     "start_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Start date of validity for this configuration."
     },
     "end_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "End date of validity (optional)."
     },
     "status": {
       "type": "number",
@@ -3704,16 +4016,20 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
       ]
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description or label."
     },
     "sampling_power": {
-      "type": "number"
+      "type": "number",
+      "description": "Sampling power."
     },
     "amperage": {
-      "type": "number"
+      "type": "number",
+      "description": "Amperage."
     },
     "grd": {
-      "type": "string"
+      "type": "string",
+      "description": "GRD (DSO) identifier."
     },
     "injection_status": {
       "type": "number",
@@ -3737,16 +4053,20 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
       ]
     },
     "total_generating_capacity": {
-      "type": "number"
+      "type": "number",
+      "description": "Total generating capacity."
     },
     "member_id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the associated member (holder)."
     },
     "sharing_operation_id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the associated sharing operation."
     },
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "EAN Code of the meter to update."
     }
   },
   "required": [
@@ -3756,7 +4076,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "start_date",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for patching meter data configuration. Requires EAN to identify the meter to update."
 }
 ```
 
@@ -3771,7 +4092,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="patch-meter-data-responses">Responses</h3>
@@ -3789,7 +4121,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3797,7 +4128,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3805,7 +4135,97 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Delete a future meter data
+
+> Code samples
+
+`PATCH /meters/data/delete`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id_meter_data": {
+      "type": "number",
+      "description": "ID meter data to delete"
+    },
+    "active_previous_meter_data": {
+      "type": "boolean",
+      "description": "If true, take the previous meter data and reactive it"
+    }
+  },
+  "required": [
+    "id_meter_data"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for deleting future meter data Require ID Meter data to identify the entry to remove"
+}
+```
+
+<h3 id="delete-a-future-meter-data-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[DeleteFutureMeterDataDTO](#schemadeletefuturemeterdatadto)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="delete-a-future-meter-data-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Meter successfully deleted|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="delete-a-future-meter-data-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3835,7 +4255,35 @@ Operation related to managing Sharing Operation living within the community
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 1,
+      "name": "Partage Résidence",
+      "type": 1
+    },
+    {
+      "id": 2,
+      "name": "Partage Local",
+      "type": 2
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-partial-list-of-sharing-operations-responses">Responses</h3>
@@ -3853,7 +4301,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3861,7 +4308,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3869,7 +4315,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3906,7 +4351,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "name",
     "type"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new sharing operation."
 }
 ```
 
@@ -3921,7 +4367,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="create-a-new-sharing-operation-responses">Responses</h3>
@@ -3939,7 +4396,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3947,7 +4403,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3955,7 +4410,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -3981,7 +4435,35 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "id": 1,
+    "name": "Partage Résidence",
+    "type": 1,
+    "key": {
+      "id": 10,
+      "key": {
+        "id": 5,
+        "name": "Clé Principale"
+      },
+      "start_date": "2023-01-01T00:00:00Z",
+      "end_date": "2023-12-31T23:59:59Z",
+      "status": 1
+    },
+    "history_keys": [],
+    "key_waiting_approval": null
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-a-detailed-sharing-operations-responses">Responses</h3>
@@ -3999,7 +4481,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4007,7 +4488,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4015,7 +4495,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4041,7 +4520,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="delete-a-sharing-operation-responses">Responses</h3>
@@ -4059,7 +4549,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4067,7 +4556,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4075,7 +4563,206 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Get paginated meters list of meters in the sharing operation (past, now or future)
+
+> Code samples
+
+`GET /sharing_operations/{id}/meters`
+
+<h3 id="get-paginated-meters-list-of-meters-in-the-sharing-operation-(past,-now-or-future)-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|undefined|true|none|
+|filters|query|[SharingOperationConsumptionQuery](#schemasharingoperationconsumptionquery)|false|Date range filters for sharing operation consumptions|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": {
+    "id": 1,
+    "timestamps": [
+      "2023-01-01T00:00:00Z",
+      "2023-01-01T00:15:00Z"
+    ],
+    "gross": [
+      10.5,
+      11.2
+    ],
+    "net": [
+      10.5,
+      11.2
+    ],
+    "shared": [
+      5,
+      5.5
+    ],
+    "inj_gross": [
+      2,
+      2.1
+    ],
+    "inj_net": [
+      1.8,
+      1.9
+    ],
+    "inj_shared": [
+      1,
+      1
+    ]
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="get-paginated-meters-list-of-meters-in-the-sharing-operation-(past,-now-or-future)-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful sharing operation consumptions retrieval|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="get-paginated-meters-list-of-meters-in-the-sharing-operation-(past,-now-or-future)-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker & CommunityIdChecker & MinRoleChecker
+</aside>
+
+## Get paginated historical keys list
+
+> Code samples
+
+`GET /sharing_operations/{id}/keys`
+
+<h3 id="get-paginated-historical-keys-list-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|undefined|true|none|
+|filters|query|[SharingOperationConsumptionQuery](#schemasharingoperationconsumptionquery)|false|Date range filters for sharing operation consumptions|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": {
+    "id": 1,
+    "timestamps": [
+      "2023-01-01T00:00:00Z",
+      "2023-01-01T00:15:00Z"
+    ],
+    "gross": [
+      10.5,
+      11.2
+    ],
+    "net": [
+      10.5,
+      11.2
+    ],
+    "shared": [
+      5,
+      5.5
+    ],
+    "inj_gross": [
+      2,
+      2.1
+    ],
+    "inj_net": [
+      1.8,
+      1.9
+    ],
+    "inj_shared": [
+      1,
+      1
+    ]
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="get-paginated-historical-keys-list-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful sharing operation consumptions retrieval|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="get-paginated-historical-keys-list-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4102,7 +4789,49 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "id": 1,
+    "timestamps": [
+      "2023-01-01T00:00:00Z",
+      "2023-01-01T00:15:00Z"
+    ],
+    "gross": [
+      10.5,
+      11.2
+    ],
+    "net": [
+      10.5,
+      11.2
+    ],
+    "shared": [
+      5,
+      5.5
+    ],
+    "inj_gross": [
+      2,
+      2.1
+    ],
+    "inj_net": [
+      1.8,
+      1.9
+    ],
+    "inj_shared": [
+      1,
+      1
+    ]
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-consumptions-information-about-a-sharing-operation-responses">Responses</h3>
@@ -4120,7 +4849,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4128,7 +4856,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4136,7 +4863,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4166,7 +4892,6 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 
 ```json
 {
-  "success": false,
   "error": "UNAUTHENTICATED",
   "statusCode": 400
 }
@@ -4187,7 +4912,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4195,7 +4919,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4203,7 +4926,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4235,7 +4957,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "id_key",
     "id_sharing"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for associating a key with a sharing operation."
 }
 ```
 
@@ -4250,7 +4973,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="add-a-new-key-to-the-sharing-operation-responses">Responses</h3>
@@ -4268,7 +5002,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4276,7 +5009,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4284,7 +5016,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4330,7 +5061,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "status",
     "date"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating the status of a key in a sharing operation."
 }
 ```
 
@@ -4345,7 +5077,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="change-the-status-of-a-key-in-the-sharing-operation-responses">Responses</h3>
@@ -4363,7 +5106,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4371,7 +5113,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4379,7 +5120,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4419,7 +5159,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "date",
     "ean_list"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for adding meters to a sharing operation."
 }
 ```
 
@@ -4434,7 +5175,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="add-a-new-meter-to-the-sharing-operation-responses">Responses</h3>
@@ -4452,7 +5204,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4460,7 +5211,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4468,7 +5218,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4515,7 +5264,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "status",
     "date"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating the status of a meter within a sharing operation."
 }
 ```
 
@@ -4530,7 +5280,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="change-the-status-of-a-meter-in-the-sharing-operation-responses">Responses</h3>
@@ -4548,7 +5309,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4556,7 +5316,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4564,7 +5323,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4600,7 +5358,18 @@ id_sharing_operation: 0
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="upload-external-consumptions-data-responses">Responses</h3>
@@ -4618,7 +5387,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4626,7 +5394,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4634,7 +5401,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4671,7 +5437,8 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
     "id_sharing",
     "date"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for removing a meter from a sharing operation."
 }
 ```
 
@@ -4687,7 +5454,18 @@ UserIdChecker & CommunityIdChecker & MinRoleChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="delete-a-meter-from-a-sharing-operation-responses">Responses</h3>
@@ -4705,7 +5483,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4713,7 +5490,6 @@ Status Code **401**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4721,7 +5497,6 @@ Status Code **403**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4745,7 +5520,43 @@ Operation related to managing users of the application
 > 200 Response
 
 ```json
-null
+{
+  "error_code": 0,
+  "data": {
+    "id": 42,
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "nrn": "80010112345",
+    "phone_number": "+32470123456",
+    "email": "jean.dupont@example.com",
+    "iban": "BE12345678901234",
+    "home_address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": "A",
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    },
+    "billing_address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": "A",
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    }
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="get-the-user-profile-responses">Responses</h3>
@@ -4761,7 +5572,6 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4822,7 +5632,8 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "billing_address": {
       "type": "object",
@@ -4849,10 +5660,12 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating user information. All fields are optional; only provided fields will be updated."
 }
 ```
 
@@ -4867,7 +5680,18 @@ UserIdChecker
 > 200 Response
 
 ```json
-null
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
 ```
 
 <h3 id="update-the-user-profile-responses">Responses</h3>
@@ -4883,7 +5707,1370 @@ Status Code **400**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» success|boolean|false|none|none|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+<h1 id="optimce-crm-backend-api-documentation-me">Me</h1>
+
+## Retrieve all documents related to this user
+
+> Code samples
+
+`GET /me/documents`
+
+Retrieve documents with optional filters defined in MeDocumentPartialQuery.
+
+<h3 id="retrieve-all-documents-related-to-this-user-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filters|query|[MeDocumentPartialQuery](#schemamedocumentpartialquery)|false|Pagination and filter options for documents|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 7,
+      "file_name": "invoice_2024.pdf",
+      "file_size": 204800,
+      "upload_date": "2024-03-15T10:30:00.000Z",
+      "file_type": "application/pdf",
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="retrieve-all-documents-related-to-this-user-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of documents for the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="retrieve-all-documents-related-to-this-user-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Download a document by ID
+
+> Code samples
+
+`GET /me/documents/{id}`
+
+<h3 id="download-a-document-by-id-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|ID of the document|
+
+> Example responses
+
+> 200 Response
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="download-a-document-by-id-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Document file binary content|string|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="download-a-document-by-id-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Retrieve all members represented by this user
+
+> Code samples
+
+`GET /me/members`
+
+Retrieve members with optional filters defined in MeMemberPartialQuery.
+
+<h3 id="retrieve-all-members-represented-by-this-user-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filters|query|[MeMemberPartialQuery](#schemamememberpartialquery)|false|Pagination and filter options for members|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 42,
+      "name": "Jean Dupont",
+      "member_type": 1,
+      "status": 1,
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    },
+    {
+      "id": 43,
+      "name": "SPRL Immobilière",
+      "member_type": 2,
+      "status": 1,
+      "community": {
+        "id": 2,
+        "name": "Solar Community"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 2
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="retrieve-all-members-represented-by-this-user-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of members represented by the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="retrieve-all-members-represented-by-this-user-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Retrieve a specific member by ID
+
+> Code samples
+
+`GET /me/members/{id}`
+
+<h3 id="retrieve-a-specific-member-by-id-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|ID of the member|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": {
+    "id": 42,
+    "name": "Jean Dupont",
+    "member_type": 1,
+    "status": 1,
+    "iban": "BE12345678901234",
+    "NRN": "80010112345",
+    "first_name": "Jean",
+    "email": "jean.dupont@example.com",
+    "phone_number": "+32470123456",
+    "social_rate": false,
+    "home_address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": "A",
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    },
+    "billing_address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": "A",
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    },
+    "community": {
+      "id": 1,
+      "name": "Coopérative Energie"
+    }
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="retrieve-a-specific-member-by-id-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful member details for the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="retrieve-a-specific-member-by-id-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Retrieve all meters owned by this user
+
+> Code samples
+
+`GET /me/meters`
+
+Retrieve meters with optional filters defined in MeMetersPartialQuery.
+
+<h3 id="retrieve-all-meters-owned-by-this-user-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filters|query|[MeMetersPartialQuery](#schemamemeterspartialquery)|false|Pagination and filter options for meters|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": [
+    {
+      "EAN": "541448820000000001",
+      "meter_number": "MTR-001",
+      "address": {
+        "street": "Rue de la Gare",
+        "number": "10",
+        "box": null,
+        "city": "Brussels",
+        "zip_code": "1000",
+        "country": "Belgium"
+      },
+      "holder": {
+        "id": 42,
+        "name": "Jean Dupont",
+        "member_type": 1,
+        "status": 1
+      },
+      "status": 1,
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="retrieve-all-meters-owned-by-this-user-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of meters owned by the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="retrieve-all-meters-owned-by-this-user-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Retrieve a specific meter by EAN
+
+> Code samples
+
+`GET /me/meters/{id}`
+
+<h3 id="retrieve-a-specific-meter-by-ean-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|string|true|EAN code of the meter|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": {
+    "EAN": "541448820000000001",
+    "meter_number": "MTR-001",
+    "address": {
+      "street": "Rue de la Gare",
+      "number": "10",
+      "box": null,
+      "city": "Brussels",
+      "zip_code": "1000",
+      "country": "Belgium"
+    },
+    "holder": {
+      "id": 42,
+      "name": "Jean Dupont",
+      "member_type": 1,
+      "status": 1
+    },
+    "tarif_group": 1,
+    "phases_number": 3,
+    "reading_frequency": 1,
+    "meter_data": {
+      "id": 10,
+      "description": "Standard residential",
+      "sampling_power": 0,
+      "status": 1,
+      "amperage": 25,
+      "rate": 1,
+      "client_type": 1,
+      "start_date": "2023-01-01T00:00:00.000Z",
+      "end_date": null,
+      "injection_status": 0,
+      "production_chain": 0,
+      "totalGenerating_capacity": 0,
+      "grd": "Sibelga"
+    },
+    "meter_data_history": [],
+    "futur_meter_data": [],
+    "community": {
+      "id": 1,
+      "name": "Coopérative Energie"
+    }
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="retrieve-a-specific-meter-by-ean-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful meter detail for the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="retrieve-a-specific-meter-by-ean-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Get all own member pending invitations
+
+> Code samples
+
+`GET /me/invitations`
+
+<h3 id="get-all-own-member-pending-invitations-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filters|query|[UserMemberInvitationQuery](#schemausermemberinvitationquery)|false|Pagination and filter options for member invitations|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 5,
+      "member_id": 42,
+      "member_name": "Jean Dupont",
+      "user_email": "jean.dupont@example.com",
+      "created_at": "2024-03-01T08:00:00.000Z",
+      "to_be_encoded": false,
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="get-all-own-member-pending-invitations-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of pending member invitations for the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="get-all-own-member-pending-invitations-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Get member linked to a pending invitation by ID
+
+> Code samples
+
+`GET /me/invitations/member/{id}`
+
+<h3 id="get-member-linked-to-a-pending-invitation-by-id-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|integer|true|ID of the document|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": {
+    "id": 5,
+    "member_id": 42,
+    "member_name": "Jean Dupont",
+    "user_email": "jean.dupont@example.com",
+    "created_at": "2024-03-01T08:00:00.000Z",
+    "to_be_encoded": false,
+    "community": {
+      "id": 1,
+      "name": "Coopérative Energie"
+    }
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="get-member-linked-to-a-pending-invitation-by-id-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful member invitation details linked to the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="get-member-linked-to-a-pending-invitation-by-id-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Get all own managers pending invitations
+
+> Code samples
+
+`GET /me/invitations/managers`
+
+<h3 id="get-all-own-managers-pending-invitations-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|filters|query|[UserManagerInvitationQuery](#schemausermanagerinvitationquery)|false|Pagination and filter options for manager invitations|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "error_code": 0,
+  "data": [
+    {
+      "id": 3,
+      "user_email": "manager@example.com",
+      "created_at": "2024-03-10T09:00:00.000Z",
+      "community": {
+        "id": 1,
+        "name": "Coopérative Energie"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 15,
+    "total": 1
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="get-all-own-managers-pending-invitations-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Successful list of pending manager invitations for the authenticated user|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="get-all-own-managers-pending-invitations-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Accept an invitation member
+
+> Code samples
+
+`POST /me/invitations/accept`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invitation_id": {
+      "type": "number",
+      "description": "ID of the invitation to accept."
+    }
+  },
+  "required": [
+    "invitation_id"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for accepting an invitation."
+}
+```
+
+<h3 id="accept-an-invitation-member-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[AcceptInvitationDTO](#schemaacceptinvitationdto)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="accept-an-invitation-member-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="accept-an-invitation-member-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Accept an invitation with encoded member
+
+> Code samples
+
+`POST /me/invitations/accept/encoded`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invitation_id": {
+      "type": "number",
+      "description": "ID of the invitation to accept."
+    },
+    "member": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the member (Full name or Company name)."
+        },
+        "member_type": {
+          "type": "number",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "status": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "iban": {
+          "type": "string",
+          "description": "IBAN of the member."
+        },
+        "home_address": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "number": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            },
+            "postcode": {
+              "type": "string"
+            },
+            "supplement": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "street",
+            "number",
+            "city",
+            "postcode"
+          ],
+          "additionalProperties": false,
+          "description": "DTO for creating a new address."
+        },
+        "billing_address": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "number": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            },
+            "postcode": {
+              "type": "string"
+            },
+            "supplement": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "street",
+            "number",
+            "city",
+            "postcode"
+          ],
+          "additionalProperties": false,
+          "description": "DTO for creating a new address."
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name (Individual only)."
+        },
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number (Individual only)."
+        },
+        "email": {
+          "type": "string",
+          "description": "Contact email (Individual only)."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number (Individual only)."
+        },
+        "social_rate": {
+          "type": "boolean",
+          "description": "Social rate eligibility (Individual only)."
+        },
+        "vat_number": {
+          "type": "string",
+          "description": "VAT number (Company only)."
+        },
+        "manager": {
+          "type": "object",
+          "properties": {
+            "NRN": {
+              "type": "string",
+              "description": "National Registry Number of the manager."
+            },
+            "name": {
+              "type": "string",
+              "description": "First name of the manager."
+            },
+            "surname": {
+              "type": "string",
+              "description": "Surname of the manager."
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the manager."
+            },
+            "phone_number": {
+              "type": "string",
+              "description": "Phone number of the manager."
+            }
+          },
+          "required": [
+            "NRN",
+            "name",
+            "surname",
+            "email"
+          ],
+          "additionalProperties": false,
+          "description": "DTO representing a manager associated with a member."
+        }
+      },
+      "required": [
+        "name",
+        "member_type",
+        "status",
+        "iban",
+        "home_address",
+        "billing_address",
+        "first_name",
+        "NRN",
+        "email",
+        "social_rate",
+        "vat_number"
+      ],
+      "additionalProperties": false,
+      "description": "DTO for creating a new member. Contains common fields and type-specific fields (Individual vs Company). Uses conditional validation based on `member_type`."
+    }
+  },
+  "required": [
+    "invitation_id",
+    "member"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for accepting an invitation with additional member details. Used when the member needs to be encoded/created during acceptance."
+}
+```
+
+<h3 id="accept-an-invitation-with-encoded-member-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[AcceptInvitationWEncodedDTO](#schemaacceptinvitationwencodeddto)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="accept-an-invitation-with-encoded-member-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="accept-an-invitation-with-encoded-member-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Accept an invitation for manager
+
+> Code samples
+
+`POST /me/invitations/accept/manager`
+
+> Body parameter
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invitation_id": {
+      "type": "number",
+      "description": "ID of the invitation to accept."
+    }
+  },
+  "required": [
+    "invitation_id"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for accepting an invitation."
+}
+```
+
+<h3 id="accept-an-invitation-for-manager-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[AcceptInvitationDTO](#schemaacceptinvitationdto)|true|none|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="accept-an-invitation-for-manager-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="accept-an-invitation-for-manager-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Refuse a member own invitation
+
+> Code samples
+
+`DELETE /me/invitations/{id_invitation}/member`
+
+<h3 id="refuse-a-member-own-invitation-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id_invitation|path|integer|true|ID of the invitation|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="refuse-a-member-own-invitation-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="refuse-a-member-own-invitation-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+UserIdChecker
+</aside>
+
+## Refuse a manager own invitation
+
+> Code samples
+
+`DELETE /me/invitations/{id_invitation}/manager`
+
+<h3 id="refuse-a-manager-own-invitation-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id_invitation|path|integer|true|ID of the invitation|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "data": "success"
+}
+```
+
+> 400 Response
+
+```json
+{
+  "error": "UNAUTHENTICATED",
+  "statusCode": 400
+}
+```
+
+<h3 id="refuse-a-manager-own-invitation-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Invitation action completed successfully|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Bad Request - Authentication or Community Context missing|Inline|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Unauthorized - Role context missing|Inline|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Forbidden - Insufficient Role permissions|Inline|
+
+<h3 id="refuse-a-manager-own-invitation-responseschema">Response Schema</h3>
+
+Status Code **400**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **401**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» error|string|false|none|none|
+|» statusCode|integer|false|none|none|
+
+Status Code **403**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |» error|string|false|none|none|
 |» statusCode|integer|false|none|none|
 
@@ -4965,17 +7152,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "url": {
-      "type": "string"
+      "type": "string",
+      "description": "Public URL or internal path to the file"
     },
     "file_type": {
-      "type": "string"
+      "type": "string",
+      "description": "MIME type of the file"
     }
   },
   "required": [
     "url",
     "file_type"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing an uploaded document's metadata."
 }
 
 ```
@@ -4988,10 +7178,13 @@ UserIdChecker
 |properties|object|false|none|none|
 |» url|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» file_type|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_Sort">Sort</h2>
 <!-- backwards compatibility -->
@@ -5030,17 +7223,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     }
   },
   "required": [
     "page",
     "limit"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Standard query parameters for pagination."
 }
 
 ```
@@ -5053,10 +7249,13 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateAddressDTO">CreateAddressDTO</h2>
 <!-- backwards compatibility -->
@@ -5091,7 +7290,8 @@ UserIdChecker
     "city",
     "postcode"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new address."
 }
 
 ```
@@ -5114,6 +7314,7 @@ UserIdChecker
 |»» type|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UpdateAddressDTO">UpdateAddressDTO</h2>
 <!-- backwards compatibility -->
@@ -5142,7 +7343,8 @@ UserIdChecker
       "type": "string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating an existing address. All fields are optional."
 }
 
 ```
@@ -5164,6 +7366,7 @@ UserIdChecker
 |» supplement|object|false|none|none|
 |»» type|string|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_AddressDTO">AddressDTO</h2>
 <!-- backwards compatibility -->
@@ -5202,7 +7405,8 @@ UserIdChecker
     "postcode",
     "city"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a full address."
 }
 
 ```
@@ -5227,6 +7431,7 @@ UserIdChecker
 |»» type|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UserDTO">UserDTO</h2>
 <!-- backwards compatibility -->
@@ -5246,34 +7451,40 @@ UserIdChecker
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "First name of the user."
     },
     "last_name": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "Last name of the user."
     },
     "nrn": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "National Register Number (or equivalent ID)."
     },
     "phone_number": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "Contact phone number."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email address (unique identifier)."
     },
     "iban": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "International Bank Account Number."
     },
     "home_address": {
       "type": "object",
@@ -5304,7 +7515,8 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "billing_address": {
       "type": "object",
@@ -5335,14 +7547,16 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     }
   },
   "required": [
     "id",
     "email"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a user's profile and contact information."
 }
 
 ```
@@ -5357,20 +7571,27 @@ UserIdChecker
 |»» type|string|false|none|none|
 |» first_name|object|false|none|none|
 |»» type|[string]|false|none|none|
+|»» description|string|false|none|none|
 |» last_name|object|false|none|none|
 |»» type|[string]|false|none|none|
+|»» description|string|false|none|none|
 |» nrn|object|false|none|none|
 |»» type|[string]|false|none|none|
+|»» description|string|false|none|none|
 |» phone_number|object|false|none|none|
 |»» type|[string]|false|none|none|
+|»» description|string|false|none|none|
 |» email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» iban|object|false|none|none|
 |»» type|[string]|false|none|none|
+|»» description|string|false|none|none|
 |» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UpdateUserDTO">UpdateUserDTO</h2>
 <!-- backwards compatibility -->
@@ -5423,7 +7644,8 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "billing_address": {
       "type": "object",
@@ -5450,10 +7672,12 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating user information. All fields are optional; only provided fields will be updated."
 }
 
 ```
@@ -5477,6 +7701,7 @@ UserIdChecker
 |» home_address|[CreateAddressDTO](#schemacreateaddressdto)|false|none|none|
 |» billing_address|[CreateAddressDTO](#schemacreateaddressdto)|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_AreIterationsSumOneConstraint">AreIterationsSumOneConstraint</h2>
 <!-- backwards compatibility -->
@@ -5512,7 +7737,8 @@ UserIdChecker
 ```json
 {
   "type": "object",
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Custom validators must implement this interface to provide custom validation logic."
 }
 
 ```
@@ -5523,6 +7749,7 @@ UserIdChecker
 |---|---|---|---|---|
 |type|string|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_AreConsumersSumOneConstraint">AreConsumersSumOneConstraint</h2>
 <!-- backwards compatibility -->
@@ -5560,16 +7787,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by description."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by name."
     },
     "sort_name": {
       "type": "string",
@@ -5583,7 +7814,8 @@ UserIdChecker
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "DTO for querying keys with pagination and filtering."
 }
 
 ```
@@ -5596,15 +7828,20 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sort_name|[Sort](#schemasort)|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_KeyPartialDTO">KeyPartialDTO</h2>
 <!-- backwards compatibility -->
@@ -5618,13 +7855,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the key."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the key."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description of the key."
     }
   },
   "required": [
@@ -5632,7 +7872,8 @@ UserIdChecker
     "name",
     "description"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Partial DTO representing a key (summary view)."
 }
 
 ```
@@ -5645,12 +7886,16 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_ConsumerDTO">ConsumerDTO</h2>
 <!-- backwards compatibility -->
@@ -5664,13 +7909,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the consumer."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the consumer."
     },
     "energy_allocated_percentage": {
-      "type": "number"
+      "type": "number",
+      "description": "Energy allocated to this consumer (percentage or value)."
     }
   },
   "required": [
@@ -5678,7 +7926,8 @@ UserIdChecker
     "name",
     "energy_allocated_percentage"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a consumer within an iteration."
 }
 
 ```
@@ -5691,12 +7940,16 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» energy_allocated_percentage|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_IterationDTO">IterationDTO</h2>
 <!-- backwards compatibility -->
@@ -5710,13 +7963,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the iteration."
     },
     "number": {
-      "type": "number"
+      "type": "number",
+      "description": "Iteration number (sequence)."
     },
     "energy_allocated_percentage": {
-      "type": "number"
+      "type": "number",
+      "description": "Total energy allocated in this iteration."
     },
     "consumers": {
       "type": "array",
@@ -5724,13 +7980,16 @@ UserIdChecker
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "description": "Unique ID of the consumer."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the consumer."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Energy allocated to this consumer (percentage or value)."
           }
         },
         "required": [
@@ -5738,8 +7997,10 @@ UserIdChecker
           "name",
           "energy_allocated_percentage"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO representing a consumer within an iteration."
+      },
+      "description": "List of consumers in this iteration."
     }
   },
   "required": [
@@ -5748,7 +8009,8 @@ UserIdChecker
     "energy_allocated_percentage",
     "consumers"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing an iteration of the key distribution."
 }
 
 ```
@@ -5761,15 +8023,20 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» energy_allocated_percentage|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» consumers|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[ConsumerDTO](#schemaconsumerdto)|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_KeyDTO">KeyDTO</h2>
 <!-- backwards compatibility -->
@@ -5783,13 +8050,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the key."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the key."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description of the key."
     },
     "iterations": {
       "type": "array",
@@ -5797,13 +8067,16 @@ UserIdChecker
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "description": "Unique ID of the iteration."
           },
           "number": {
-            "type": "number"
+            "type": "number",
+            "description": "Iteration number (sequence)."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Total energy allocated in this iteration."
           },
           "consumers": {
             "type": "array",
@@ -5811,13 +8084,16 @@ UserIdChecker
               "type": "object",
               "properties": {
                 "id": {
-                  "type": "number"
+                  "type": "number",
+                  "description": "Unique ID of the consumer."
                 },
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Name of the consumer."
                 },
                 "energy_allocated_percentage": {
-                  "type": "number"
+                  "type": "number",
+                  "description": "Energy allocated to this consumer (percentage or value)."
                 }
               },
               "required": [
@@ -5825,8 +8101,10 @@ UserIdChecker
                 "name",
                 "energy_allocated_percentage"
               ],
-              "additionalProperties": false
-            }
+              "additionalProperties": false,
+              "description": "DTO representing a consumer within an iteration."
+            },
+            "description": "List of consumers in this iteration."
           }
         },
         "required": [
@@ -5835,8 +8113,10 @@ UserIdChecker
           "energy_allocated_percentage",
           "consumers"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO representing an iteration of the key distribution."
+      },
+      "description": "List of iterations defined for this key."
     }
   },
   "required": [
@@ -5845,7 +8125,8 @@ UserIdChecker
     "iterations",
     "name"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Full DTO representing a key, including its iterations."
 }
 
 ```
@@ -5858,15 +8139,20 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» iterations|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[IterationDTO](#schemaiterationdto)|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateConsumerDTO">CreateConsumerDTO</h2>
 <!-- backwards compatibility -->
@@ -5880,17 +8166,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the consumer."
     },
     "energy_allocated_percentage": {
-      "type": "number"
+      "type": "number",
+      "description": "Energy allocated. Range: -1 (PRORATA) to 1 (100%)."
     }
   },
   "required": [
     "name",
     "energy_allocated_percentage"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new consumer."
 }
 
 ```
@@ -5903,10 +8192,13 @@ UserIdChecker
 |properties|object|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» energy_allocated_percentage|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateIterationDTO">CreateIterationDTO</h2>
 <!-- backwards compatibility -->
@@ -5920,10 +8212,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "number": {
-      "type": "number"
+      "type": "number",
+      "description": "Iteration number (0, 1, or 2)."
     },
     "energy_allocated_percentage": {
-      "type": "number"
+      "type": "number",
+      "description": "Total energy percentage for this iteration."
     },
     "consumers": {
       "type": "array",
@@ -5931,18 +8225,22 @@ UserIdChecker
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the consumer."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Energy allocated. Range: -1 (PRORATA) to 1 (100%)."
           }
         },
         "required": [
           "name",
           "energy_allocated_percentage"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO for creating a new consumer."
+      },
+      "description": "List of consumers. Must adhere to sum constraints."
     }
   },
   "required": [
@@ -5950,7 +8248,8 @@ UserIdChecker
     "energy_allocated_percentage",
     "consumers"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new iteration."
 }
 
 ```
@@ -5963,13 +8262,17 @@ UserIdChecker
 |properties|object|false|none|none|
 |» number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» energy_allocated_percentage|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» consumers|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[CreateConsumerDTO](#schemacreateconsumerdto)|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateKeyDTO">CreateKeyDTO</h2>
 <!-- backwards compatibility -->
@@ -5983,10 +8286,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the key."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description of the key."
     },
     "iterations": {
       "type": "array",
@@ -5994,10 +8299,12 @@ UserIdChecker
         "type": "object",
         "properties": {
           "number": {
-            "type": "number"
+            "type": "number",
+            "description": "Iteration number (0, 1, or 2)."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Total energy percentage for this iteration."
           },
           "consumers": {
             "type": "array",
@@ -6005,18 +8312,22 @@ UserIdChecker
               "type": "object",
               "properties": {
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Name of the consumer."
                 },
                 "energy_allocated_percentage": {
-                  "type": "number"
+                  "type": "number",
+                  "description": "Energy allocated. Range: -1 (PRORATA) to 1 (100%)."
                 }
               },
               "required": [
                 "name",
                 "energy_allocated_percentage"
               ],
-              "additionalProperties": false
-            }
+              "additionalProperties": false,
+              "description": "DTO for creating a new consumer."
+            },
+            "description": "List of consumers. Must adhere to sum constraints."
           }
         },
         "required": [
@@ -6024,8 +8335,10 @@ UserIdChecker
           "energy_allocated_percentage",
           "consumers"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO for creating a new iteration."
+      },
+      "description": "Iterations for the key. Must sum up correctly."
     }
   },
   "required": [
@@ -6033,7 +8346,8 @@ UserIdChecker
     "description",
     "iterations"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new key."
 }
 
 ```
@@ -6046,13 +8360,17 @@ UserIdChecker
 |properties|object|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» iterations|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[CreateIterationDTO](#schemacreateiterationdto)|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UpdateKeyDTO">UpdateKeyDTO</h2>
 <!-- backwards compatibility -->
@@ -6066,13 +8384,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the key to update."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "New name."
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "New description."
     },
     "iterations": {
       "type": "array",
@@ -6080,10 +8401,12 @@ UserIdChecker
         "type": "object",
         "properties": {
           "number": {
-            "type": "number"
+            "type": "number",
+            "description": "Iteration number (0, 1, or 2)."
           },
           "energy_allocated_percentage": {
-            "type": "number"
+            "type": "number",
+            "description": "Total energy percentage for this iteration."
           },
           "consumers": {
             "type": "array",
@@ -6091,18 +8414,22 @@ UserIdChecker
               "type": "object",
               "properties": {
                 "name": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Name of the consumer."
                 },
                 "energy_allocated_percentage": {
-                  "type": "number"
+                  "type": "number",
+                  "description": "Energy allocated. Range: -1 (PRORATA) to 1 (100%)."
                 }
               },
               "required": [
                 "name",
                 "energy_allocated_percentage"
               ],
-              "additionalProperties": false
-            }
+              "additionalProperties": false,
+              "description": "DTO for creating a new consumer."
+            },
+            "description": "List of consumers. Must adhere to sum constraints."
           }
         },
         "required": [
@@ -6110,8 +8437,10 @@ UserIdChecker
           "energy_allocated_percentage",
           "consumers"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO for creating a new iteration."
+      },
+      "description": "New iterations configuration."
     }
   },
   "required": [
@@ -6120,7 +8449,8 @@ UserIdChecker
     "description",
     "iterations"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating an existing key."
 }
 
 ```
@@ -6133,15 +8463,20 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» iterations|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[CreateIterationDTO](#schemacreateiterationdto)|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_SharingOperationPartialQuery">SharingOperationPartialQuery</h2>
 <!-- backwards compatibility -->
@@ -6155,16 +8490,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by name."
     },
     "type": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by type of sharing operation."
     },
     "sort_name": {
       "type": "string",
@@ -6185,7 +8524,8 @@ UserIdChecker
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "Query parameters for filtering and paginating a list of sharing operations."
 }
 
 ```
@@ -6198,16 +8538,194 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» type|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sort_name|[Sort](#schemasort)|false|none|none|
 |» sort_type|[Sort](#schemasort)|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_SharingOperationMetersQueryType">SharingOperationMetersQueryType</h2>
+<!-- backwards compatibility -->
+<a id="schemasharingoperationmetersquerytype"></a>
+<a id="schema_SharingOperationMetersQueryType"></a>
+<a id="tocSsharingoperationmetersquerytype"></a>
+<a id="tocssharingoperationmetersquerytype"></a>
+
+```json
+{
+  "type": "number",
+  "enum": [
+    1,
+    2,
+    3
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|enum|[number]|false|none|none|
+
+<h2 id="tocS_SharingOperationMetersQuery">SharingOperationMetersQuery</h2>
+<!-- backwards compatibility -->
+<a id="schemasharingoperationmetersquery"></a>
+<a id="schema_SharingOperationMetersQuery"></a>
+<a id="tocSsharingoperationmetersquery"></a>
+<a id="tocssharingoperationmetersquery"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "page": {
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
+    },
+    "street": {
+      "type": "string",
+      "description": "Filter by street name."
+    },
+    "postcode": {
+      "type": "number",
+      "description": "Filter by postcode."
+    },
+    "address_number": {
+      "type": "number",
+      "description": "Filter by address number."
+    },
+    "city": {
+      "type": "string",
+      "description": "Filter by city name."
+    },
+    "supplement": {
+      "type": "string",
+      "description": "Filter by address supplement (box, etc.)."
+    },
+    "EAN": {
+      "type": "string",
+      "description": "Filter by EAN code."
+    },
+    "meter_number": {
+      "type": "string",
+      "description": "Filter by meter number."
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "holder_id": {
+      "type": "number",
+      "description": "Filter by generic member ID holder."
+    },
+    "type": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "required": [
+    "limit",
+    "page",
+    "type"
+  ],
+  "additionalProperties": false
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» page|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» limit|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» street|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» postcode|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» address_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» city|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» supplement|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» EAN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» meter_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
+|» holder_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» type|[SharingOperationMetersQueryType](#schemasharingoperationmetersquerytype)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+
+<h2 id="tocS_MeterDataStatus">MeterDataStatus</h2>
+<!-- backwards compatibility -->
+<a id="schemameterdatastatus"></a>
+<a id="schema_MeterDataStatus"></a>
+<a id="tocSmeterdatastatus"></a>
+<a id="tocsmeterdatastatus"></a>
+
+```json
+{
+  "type": "number",
+  "enum": [
+    1,
+    2,
+    3,
+    4
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|enum|[number]|false|none|none|
 
 <h2 id="tocS_SharingOperationConsumptionQuery">SharingOperationConsumptionQuery</h2>
 <!-- backwards compatibility -->
@@ -6222,14 +8740,17 @@ UserIdChecker
   "properties": {
     "date_start": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Start date for the data range."
     },
     "date_end": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "End date for the data range."
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Query parameters for retrieving sharing operation consumption data."
 }
 
 ```
@@ -6243,10 +8764,13 @@ UserIdChecker
 |» date_start|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» date_end|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_SharingOperationPartialDTO">SharingOperationPartialDTO</h2>
 <!-- backwards compatibility -->
@@ -6260,10 +8784,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique identifier."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the sharing operation."
     },
     "type": {
       "type": "number",
@@ -6279,7 +8805,8 @@ UserIdChecker
     "name",
     "type"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
 }
 
 ```
@@ -6292,11 +8819,14 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» type|[SharingOperationType](#schemasharingoperationtype)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_SharingOperationType">SharingOperationType</h2>
 <!-- backwards compatibility -->
@@ -6342,13 +8872,16 @@ UserIdChecker
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique ID of the key."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the key."
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Description of the key."
         }
       },
       "required": [
@@ -6356,7 +8889,8 @@ UserIdChecker
         "name",
         "description"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Partial DTO representing a key (summary view)."
     },
     "start_date": {
       "type": "string",
@@ -6379,10 +8913,10 @@ UserIdChecker
     "id",
     "key",
     "start_date",
-    "end_date",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a key associated with a sharing operation."
 }
 
 ```
@@ -6405,6 +8939,7 @@ UserIdChecker
 |» status|[SharingKeyStatus](#schemasharingkeystatus)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_SharingKeyStatus">SharingKeyStatus</h2>
 <!-- backwards compatibility -->
@@ -6444,10 +8979,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique identifier."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the sharing operation."
     },
     "type": {
       "type": "number",
@@ -6467,13 +9004,16 @@ UserIdChecker
           "type": "object",
           "properties": {
             "id": {
-              "type": "number"
+              "type": "number",
+              "description": "Unique ID of the key."
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Name of the key."
             },
             "description": {
-              "type": "string"
+              "type": "string",
+              "description": "Description of the key."
             }
           },
           "required": [
@@ -6481,7 +9021,8 @@ UserIdChecker
             "name",
             "description"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Partial DTO representing a key (summary view)."
         },
         "start_date": {
           "type": "string",
@@ -6504,65 +9045,10 @@ UserIdChecker
         "id",
         "key",
         "start_date",
-        "end_date",
         "status"
       ],
-      "additionalProperties": false
-    },
-    "history_keys": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "key": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "description"
-            ],
-            "additionalProperties": false
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "end_date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "status": {
-            "type": "number",
-            "enum": [
-              1,
-              2,
-              3
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "key",
-          "start_date",
-          "end_date",
-          "status"
-        ],
-        "additionalProperties": false
-      }
+      "additionalProperties": false,
+      "description": "DTO representing a key associated with a sharing operation."
     },
     "key_waiting_approval": {
       "type": "object",
@@ -6574,13 +9060,16 @@ UserIdChecker
           "type": "object",
           "properties": {
             "id": {
-              "type": "number"
+              "type": "number",
+              "description": "Unique ID of the key."
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Name of the key."
             },
             "description": {
-              "type": "string"
+              "type": "string",
+              "description": "Description of the key."
             }
           },
           "required": [
@@ -6588,7 +9077,8 @@ UserIdChecker
             "name",
             "description"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Partial DTO representing a key (summary view)."
         },
         "start_date": {
           "type": "string",
@@ -6611,21 +9101,21 @@ UserIdChecker
         "id",
         "key",
         "start_date",
-        "end_date",
         "status"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a key associated with a sharing operation."
     }
   },
   "required": [
-    "history_keys",
     "id",
     "key",
     "key_waiting_approval",
     "name",
     "type"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Full DTO including keys and history for a sharing operation."
 }
 
 ```
@@ -6638,16 +9128,16 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» type|[SharingOperationType](#schemasharingoperationtype)|false|none|none|
 |» key|[SharingOperationKeyDTO](#schemasharingoperationkeydto)|false|none|none|
-|» history_keys|object|false|none|none|
-|»» type|string|false|none|none|
-|»» items|[SharingOperationKeyDTO](#schemasharingoperationkeydto)|false|none|none|
 |» key_waiting_approval|[SharingOperationKeyDTO](#schemasharingoperationkeydto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_SharingOpConsumptionDTO">SharingOpConsumptionDTO</h2>
 <!-- backwards compatibility -->
@@ -6716,7 +9206,8 @@ UserIdChecker
     "inj_net",
     "inj_shared"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO containing time-series consumption/injection data for a sharing operation."
 }
 
 ```
@@ -6759,6 +9250,7 @@ UserIdChecker
 |»»» type|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateSharingOperationDTO">CreateSharingOperationDTO</h2>
 <!-- backwards compatibility -->
@@ -6787,7 +9279,8 @@ UserIdChecker
     "name",
     "type"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new sharing operation."
 }
 
 ```
@@ -6803,6 +9296,7 @@ UserIdChecker
 |» type|[SharingOperationType](#schemasharingoperationtype)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_AddKeyToSharingOperationDTO">AddKeyToSharingOperationDTO</h2>
 <!-- backwards compatibility -->
@@ -6826,7 +9320,8 @@ UserIdChecker
     "id_key",
     "id_sharing"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for associating a key with a sharing operation."
 }
 
 ```
@@ -6843,6 +9338,7 @@ UserIdChecker
 |»» type|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_AddMeterToSharingOperationDTO">AddMeterToSharingOperationDTO</h2>
 <!-- backwards compatibility -->
@@ -6874,7 +9370,8 @@ UserIdChecker
     "date",
     "ean_list"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for adding meters to a sharing operation."
 }
 
 ```
@@ -6896,6 +9393,7 @@ UserIdChecker
 |»»» type|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_AddConsumptionDataDTO">AddConsumptionDataDTO</h2>
 <!-- backwards compatibility -->
@@ -6915,69 +9413,87 @@ UserIdChecker
       "type": "object",
       "properties": {
         "fieldname": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the form field associated with this file."
         },
         "originalname": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the file on the uploader's computer."
         },
         "encoding": {
-          "type": "string"
+          "type": "string",
+          "description": "Value of the `Content-Transfer-Encoding` header for this file.",
+          "deprecated": "since July 2015"
         },
         "mimetype": {
-          "type": "string"
+          "type": "string",
+          "description": "Value of the `Content-Type` header for this file."
         },
         "size": {
-          "type": "number"
+          "type": "number",
+          "description": "Size of the file in bytes."
         },
         "stream": {
           "type": "object",
           "properties": {
             "readable": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Is `true` if it is safe to call  {@link  read } , which means the stream has not been destroyed or emitted `'error'` or `'end'`."
             },
             "readableAborted": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Returns whether the stream was destroyed or errored before emitting `'end'`."
             },
             "readableDidRead": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Returns whether `'data'` has been emitted."
             },
             "readableEncoding": {
               "anyOf": [
                 {
                   "type": "null"
                 }
-              ]
+              ],
+              "description": "Getter for the property `encoding` of a given `Readable` stream. The `encoding` property can be set using the  {@link  setEncoding }  method."
             },
             "readableEnded": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Becomes `true` when [`'end'`](https://nodejs.org/docs/latest-v25.x/api/stream.html#event-end) event is emitted."
             },
             "readableFlowing": {
               "type": [
                 "boolean",
                 "null"
-              ]
+              ],
+              "description": "This property reflects the current state of a `Readable` stream as described in the [Three states](https://nodejs.org/docs/latest-v25.x/api/stream.html#three-states) section."
             },
             "readableHighWaterMark": {
-              "type": "number"
+              "type": "number",
+              "description": "Returns the value of `highWaterMark` passed when creating this `Readable`."
             },
             "readableLength": {
-              "type": "number"
+              "type": "number",
+              "description": "This property contains the number of bytes (or objects) in the queue ready to be read. The value provides introspection data regarding the status of the `highWaterMark`."
             },
             "readableObjectMode": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Getter for the property `objectMode` of a given `Readable` stream."
             },
             "destroyed": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Is `true` after `readable.destroy()` has been called."
             },
             "closed": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Is `true` after `'close'` has been emitted."
             },
             "errored": {
               "anyOf": [
                 {
                   "type": "null"
                 }
-              ]
+              ],
+              "description": "Returns error if the stream has been destroyed with an error."
             }
           },
           "required": [
@@ -6997,13 +9513,16 @@ UserIdChecker
           "additionalProperties": false
         },
         "destination": {
-          "type": "string"
+          "type": "string",
+          "description": "`DiskStorage` only: Directory to which this file has been uploaded."
         },
         "filename": {
-          "type": "string"
+          "type": "string",
+          "description": "`DiskStorage` only: Name of this file within `destination`."
         },
         "path": {
-          "type": "string"
+          "type": "string",
+          "description": "`DiskStorage` only: Full path to the uploaded file."
         },
         "buffer": {
           "type": "object",
@@ -7057,14 +9576,16 @@ UserIdChecker
         "path",
         "buffer"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Object containing file metadata and access information."
     }
   },
   "required": [
     "id_sharing_operation",
     "file"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for uploading consumption data (file upload)."
 }
 
 ```
@@ -7080,6 +9601,7 @@ UserIdChecker
 |» file|[global.Express.Multer.File](#schemaglobal.express.multer.file)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_global.Express.Multer.File">global.Express.Multer.File</h2>
 <!-- backwards compatibility -->
@@ -7093,69 +9615,87 @@ UserIdChecker
   "type": "object",
   "properties": {
     "fieldname": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the form field associated with this file."
     },
     "originalname": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the file on the uploader's computer."
     },
     "encoding": {
-      "type": "string"
+      "type": "string",
+      "description": "Value of the `Content-Transfer-Encoding` header for this file.",
+      "deprecated": "since July 2015"
     },
     "mimetype": {
-      "type": "string"
+      "type": "string",
+      "description": "Value of the `Content-Type` header for this file."
     },
     "size": {
-      "type": "number"
+      "type": "number",
+      "description": "Size of the file in bytes."
     },
     "stream": {
       "type": "object",
       "properties": {
         "readable": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Is `true` if it is safe to call  {@link  read } , which means the stream has not been destroyed or emitted `'error'` or `'end'`."
         },
         "readableAborted": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Returns whether the stream was destroyed or errored before emitting `'end'`."
         },
         "readableDidRead": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Returns whether `'data'` has been emitted."
         },
         "readableEncoding": {
           "anyOf": [
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Getter for the property `encoding` of a given `Readable` stream. The `encoding` property can be set using the  {@link  setEncoding }  method."
         },
         "readableEnded": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Becomes `true` when [`'end'`](https://nodejs.org/docs/latest-v25.x/api/stream.html#event-end) event is emitted."
         },
         "readableFlowing": {
           "type": [
             "boolean",
             "null"
-          ]
+          ],
+          "description": "This property reflects the current state of a `Readable` stream as described in the [Three states](https://nodejs.org/docs/latest-v25.x/api/stream.html#three-states) section."
         },
         "readableHighWaterMark": {
-          "type": "number"
+          "type": "number",
+          "description": "Returns the value of `highWaterMark` passed when creating this `Readable`."
         },
         "readableLength": {
-          "type": "number"
+          "type": "number",
+          "description": "This property contains the number of bytes (or objects) in the queue ready to be read. The value provides introspection data regarding the status of the `highWaterMark`."
         },
         "readableObjectMode": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Getter for the property `objectMode` of a given `Readable` stream."
         },
         "destroyed": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Is `true` after `readable.destroy()` has been called."
         },
         "closed": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Is `true` after `'close'` has been emitted."
         },
         "errored": {
           "anyOf": [
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Returns error if the stream has been destroyed with an error."
         }
       },
       "required": [
@@ -7175,13 +9715,16 @@ UserIdChecker
       "additionalProperties": false
     },
     "destination": {
-      "type": "string"
+      "type": "string",
+      "description": "`DiskStorage` only: Directory to which this file has been uploaded."
     },
     "filename": {
-      "type": "string"
+      "type": "string",
+      "description": "`DiskStorage` only: Name of this file within `destination`."
     },
     "path": {
-      "type": "string"
+      "type": "string",
+      "description": "`DiskStorage` only: Full path to the uploaded file."
     },
     "buffer": {
       "type": "object",
@@ -7235,7 +9778,8 @@ UserIdChecker
     "path",
     "buffer"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Object containing file metadata and access information."
 }
 
 ```
@@ -7248,24 +9792,34 @@ UserIdChecker
 |properties|object|false|none|none|
 |» fieldname|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» originalname|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» encoding|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|»» deprecated|string|false|none|none|
 |» mimetype|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» size|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» stream|[Stream.Readable](#schemastream.readable)|false|none|none|
 |» destination|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» filename|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» path|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» buffer|[global.Buffer](#schemaglobal.buffer)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_Stream.Readable">Stream.Readable</h2>
 <!-- backwards compatibility -->
@@ -7279,51 +9833,63 @@ UserIdChecker
   "type": "object",
   "properties": {
     "readable": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Is `true` if it is safe to call  {@link  read } , which means the stream has not been destroyed or emitted `'error'` or `'end'`."
     },
     "readableAborted": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Returns whether the stream was destroyed or errored before emitting `'end'`."
     },
     "readableDidRead": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Returns whether `'data'` has been emitted."
     },
     "readableEncoding": {
       "anyOf": [
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "Getter for the property `encoding` of a given `Readable` stream. The `encoding` property can be set using the  {@link  setEncoding }  method."
     },
     "readableEnded": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Becomes `true` when [`'end'`](https://nodejs.org/docs/latest-v25.x/api/stream.html#event-end) event is emitted."
     },
     "readableFlowing": {
       "type": [
         "boolean",
         "null"
-      ]
+      ],
+      "description": "This property reflects the current state of a `Readable` stream as described in the [Three states](https://nodejs.org/docs/latest-v25.x/api/stream.html#three-states) section."
     },
     "readableHighWaterMark": {
-      "type": "number"
+      "type": "number",
+      "description": "Returns the value of `highWaterMark` passed when creating this `Readable`."
     },
     "readableLength": {
-      "type": "number"
+      "type": "number",
+      "description": "This property contains the number of bytes (or objects) in the queue ready to be read. The value provides introspection data regarding the status of the `highWaterMark`."
     },
     "readableObjectMode": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Getter for the property `objectMode` of a given `Readable` stream."
     },
     "destroyed": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Is `true` after `readable.destroy()` has been called."
     },
     "closed": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Is `true` after `'close'` has been emitted."
     },
     "errored": {
       "anyOf": [
         {
           "type": "null"
         }
-      ]
+      ],
+      "description": "Returns error if the stream has been destroyed with an error."
     }
   },
   "required": [
@@ -7353,30 +9919,42 @@ UserIdChecker
 |properties|object|false|none|none|
 |» readable|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableAborted|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableDidRead|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableEncoding|object|false|none|none|
 |»» anyOf|[object]|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableEnded|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableFlowing|object|false|none|none|
 |»» type|[string]|false|none|none|
+|»» description|string|false|none|none|
 |» readableHighWaterMark|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableLength|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» readableObjectMode|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» destroyed|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» closed|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» errored|object|false|none|none|
 |»» anyOf|[object]|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
 
@@ -7582,7 +10160,8 @@ UserIdChecker
     "status",
     "date"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating the status of a key in a sharing operation."
 }
 
 ```
@@ -7603,6 +10182,7 @@ UserIdChecker
 |»» format|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_PatchMeterToSharingOperationDTO">PatchMeterToSharingOperationDTO</h2>
 <!-- backwards compatibility -->
@@ -7641,7 +10221,8 @@ UserIdChecker
     "status",
     "date"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating the status of a meter within a sharing operation."
 }
 
 ```
@@ -7662,33 +10243,7 @@ UserIdChecker
 |»» format|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_MeterDataStatus">MeterDataStatus</h2>
-<!-- backwards compatibility -->
-<a id="schemameterdatastatus"></a>
-<a id="schema_MeterDataStatus"></a>
-<a id="tocSmeterdatastatus"></a>
-<a id="tocsmeterdatastatus"></a>
-
-```json
-{
-  "type": "number",
-  "enum": [
-    1,
-    2,
-    3,
-    4
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|enum|[number]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_RemoveMeterFromSharingOperationDTO">RemoveMeterFromSharingOperationDTO</h2>
 <!-- backwards compatibility -->
@@ -7717,7 +10272,8 @@ UserIdChecker
     "id_sharing",
     "date"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for removing a meter from a sharing operation."
 }
 
 ```
@@ -7737,6 +10293,7 @@ UserIdChecker
 |»» format|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MemberPartialQuery">MemberPartialQuery</h2>
 <!-- backwards compatibility -->
@@ -7750,13 +10307,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by member name."
     },
     "member_type": {
       "type": "number",
@@ -7785,7 +10345,8 @@ UserIdChecker
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "DTO for querying members with pagination, filtering, and sorting."
 }
 
 ```
@@ -7798,15 +10359,19 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» member_type|[MemberType](#schemamembertype)|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
 |» sort_name|[Sort](#schemasort)|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MemberType">MemberType</h2>
 <!-- backwards compatibility -->
@@ -7859,236 +10424,22 @@ UserIdChecker
 |type|string|false|none|none|
 |enum|[number]|false|none|none|
 
-<h2 id="tocS_MembersPartialDTO">MembersPartialDTO</h2>
+<h2 id="tocS_MemberLinkQueryDTO">MemberLinkQueryDTO</h2>
 <!-- backwards compatibility -->
-<a id="schemamemberspartialdto"></a>
-<a id="schema_MembersPartialDTO"></a>
-<a id="tocSmemberspartialdto"></a>
-<a id="tocsmemberspartialdto"></a>
+<a id="schemamemberlinkquerydto"></a>
+<a id="schema_MemberLinkQueryDTO"></a>
+<a id="tocSmemberlinkquerydto"></a>
+<a id="tocsmemberlinkquerydto"></a>
 
 ```json
 {
   "type": "object",
   "properties": {
-    "id": {
-      "type": "number"
-    },
-    "name": {
-      "type": "string"
-    },
-    "member_type": {
-      "type": "number",
-      "enum": [
-        1,
-        2
-      ]
-    },
-    "status": {
-      "type": "number",
-      "enum": [
-        1,
-        2,
-        3
-      ]
-    }
-  },
-  "required": [
-    "id",
-    "name",
-    "member_type",
-    "status"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» id|object|false|none|none|
-|»» type|string|false|none|none|
-|» name|object|false|none|none|
-|»» type|string|false|none|none|
-|» member_type|[MemberType](#schemamembertype)|false|none|none|
-|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_MemberDTO">MemberDTO</h2>
-<!-- backwards compatibility -->
-<a id="schemamemberdto"></a>
-<a id="schema_MemberDTO"></a>
-<a id="tocSmemberdto"></a>
-<a id="tocsmemberdto"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "number"
-    },
-    "name": {
-      "type": "string"
-    },
-    "member_type": {
-      "type": "number",
-      "enum": [
-        1,
-        2
-      ]
-    },
-    "status": {
-      "type": "number",
-      "enum": [
-        1,
-        2,
-        3
-      ]
-    },
-    "iban": {
-      "type": "string"
-    },
-    "home_address": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "street": {
-          "type": "string"
-        },
-        "number": {
-          "type": "number"
-        },
-        "postcode": {
-          "type": "string"
-        },
-        "supplement": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "street",
-        "number",
-        "postcode",
-        "city"
-      ],
-      "additionalProperties": false
-    },
-    "billing_address": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "street": {
-          "type": "string"
-        },
-        "number": {
-          "type": "number"
-        },
-        "postcode": {
-          "type": "string"
-        },
-        "supplement": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "street",
-        "number",
-        "postcode",
-        "city"
-      ],
-      "additionalProperties": false
-    },
-    "user_link_email": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "billing_address",
-    "home_address",
-    "iban",
-    "id",
-    "member_type",
-    "name",
-    "status"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» id|object|false|none|none|
-|»» type|string|false|none|none|
-|» name|object|false|none|none|
-|»» type|string|false|none|none|
-|» member_type|[MemberType](#schemamembertype)|false|none|none|
-|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
-|» iban|object|false|none|none|
-|»» type|string|false|none|none|
-|» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
-|» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
-|» user_link_email|object|false|none|none|
-|»» type|string|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_ManagerDTO">ManagerDTO</h2>
-<!-- backwards compatibility -->
-<a id="schemamanagerdto"></a>
-<a id="schema_ManagerDTO"></a>
-<a id="tocSmanagerdto"></a>
-<a id="tocsmanagerdto"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "number"
-    },
-    "NRN": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
-    "surname": {
-      "type": "string"
-    },
     "email": {
       "type": "string"
-    },
-    "phone_number": {
-      "type": "string"
     }
   },
   "required": [
-    "id",
-    "NRN",
-    "name",
-    "surname",
     "email"
   ],
   "additionalProperties": false
@@ -8102,37 +10453,94 @@ UserIdChecker
 |---|---|---|---|---|
 |type|string|false|none|none|
 |properties|object|false|none|none|
-|» id|object|false|none|none|
-|»» type|string|false|none|none|
-|» NRN|object|false|none|none|
-|»» type|string|false|none|none|
-|» name|object|false|none|none|
-|»» type|string|false|none|none|
-|» surname|object|false|none|none|
-|»» type|string|false|none|none|
 |» email|object|false|none|none|
-|»» type|string|false|none|none|
-|» phone_number|object|false|none|none|
 |»» type|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
 
-<h2 id="tocS_IndividualDTO">IndividualDTO</h2>
+<h2 id="tocS_MembersPartialDTO">MembersPartialDTO</h2>
 <!-- backwards compatibility -->
-<a id="schemaindividualdto"></a>
-<a id="schema_IndividualDTO"></a>
-<a id="tocSindividualdto"></a>
-<a id="tocsindividualdto"></a>
+<a id="schemamemberspartialdto"></a>
+<a id="schema_MembersPartialDTO"></a>
+<a id="tocSmemberspartialdto"></a>
+<a id="tocsmemberspartialdto"></a>
 
 ```json
 {
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the member."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the member."
+    },
+    "member_type": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "member_type",
+    "status"
+  ],
+  "additionalProperties": false,
+  "description": "Partial DTO representing a member (summary view)."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_type|[MemberType](#schemamembertype)|false|none|none|
+|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_MemberDTO">MemberDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamemberdto"></a>
+<a id="schema_MemberDTO"></a>
+<a id="tocSmemberdto"></a>
+<a id="tocsmemberdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique ID of the member."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the member."
     },
     "member_type": {
       "type": "number",
@@ -8150,7 +10558,8 @@ UserIdChecker
       ]
     },
     "iban": {
-      "type": "string"
+      "type": "string",
+      "description": "IBAN of the member."
     },
     "home_address": {
       "type": "object",
@@ -8181,7 +10590,8 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "billing_address": {
       "type": "object",
@@ -8212,46 +10622,353 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "user_link_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Linked user email, if associated with a user account."
+    }
+  },
+  "required": [
+    "billing_address",
+    "home_address",
+    "iban",
+    "id",
+    "member_type",
+    "name",
+    "status"
+  ],
+  "additionalProperties": false,
+  "description": "Full DTO representing a member, including address definitions."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_type|[MemberType](#schemamembertype)|false|none|none|
+|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|» iban|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» user_link_email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_ManagerDTO">ManagerDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamanagerdto"></a>
+<a id="schema_ManagerDTO"></a>
+<a id="tocSmanagerdto"></a>
+<a id="tocsmanagerdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique ID of the manager."
     },
     "NRN": {
-      "type": "string"
+      "type": "string",
+      "description": "National Registry Number of the manager."
     },
-    "first_name": {
-      "type": "string"
+    "name": {
+      "type": "string",
+      "description": "First name of the manager."
+    },
+    "surname": {
+      "type": "string",
+      "description": "Surname of the manager."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email address of the manager."
     },
     "phone_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Phone number of the manager."
+    }
+  },
+  "required": [
+    "id",
+    "NRN",
+    "name",
+    "surname",
+    "email"
+  ],
+  "additionalProperties": false,
+  "description": "DTO representing a manager associated with a member."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» NRN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» surname|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» phone_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_CreateManagerDTO">CreateManagerDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemacreatemanagerdto"></a>
+<a id="schema_CreateManagerDTO"></a>
+<a id="tocScreatemanagerdto"></a>
+<a id="tocscreatemanagerdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "NRN": {
+      "type": "string",
+      "description": "National Registry Number of the manager."
     },
-    "social_rate": {
-      "type": "boolean"
+    "name": {
+      "type": "string",
+      "description": "First name of the manager."
     },
-    "manager": {
+    "surname": {
+      "type": "string",
+      "description": "Surname of the manager."
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address of the manager."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Phone number of the manager."
+    }
+  },
+  "required": [
+    "NRN",
+    "name",
+    "surname",
+    "email"
+  ],
+  "additionalProperties": false,
+  "description": "DTO representing a manager associated with a member."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» NRN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» surname|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» phone_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_IndividualDTO">IndividualDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemaindividualdto"></a>
+<a id="schema_IndividualDTO"></a>
+<a id="tocSindividualdto"></a>
+<a id="tocsindividualdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique ID of the member."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the member."
+    },
+    "member_type": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    },
+    "iban": {
+      "type": "string",
+      "description": "IBAN of the member."
+    },
+    "home_address": {
       "type": "object",
       "properties": {
         "id": {
           "type": "number"
         },
-        "NRN": {
+        "street": {
           "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "billing_address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "user_link_email": {
+      "type": "string",
+      "description": "Linked user email, if associated with a user account."
+    },
+    "NRN": {
+      "type": "string",
+      "description": "National Registry Number."
+    },
+    "first_name": {
+      "type": "string",
+      "description": "First name."
+    },
+    "email": {
+      "type": "string",
+      "description": "Contact email."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Phone number."
+    },
+    "social_rate": {
+      "type": "boolean",
+      "description": "Whether the social rate applies."
+    },
+    "manager": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique ID of the manager."
+        },
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "First name of the manager."
         },
         "surname": {
-          "type": "string"
+          "type": "string",
+          "description": "Surname of the manager."
         },
         "email": {
-          "type": "string"
+          "type": "string",
+          "description": "Email address of the manager."
         },
         "phone_number": {
-          "type": "string"
+          "type": "string",
+          "description": "Phone number of the manager."
         }
       },
       "required": [
@@ -8261,7 +10978,8 @@ UserIdChecker
         "surname",
         "email"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
     }
   },
   "required": [
@@ -8278,7 +10996,8 @@ UserIdChecker
     "social_rate",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Data Transfer Object for individual members Extends MembersDTO with individual-specific information"
 }
 
 ```
@@ -8291,29 +11010,39 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» member_type|[MemberType](#schemamembertype)|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
 |» iban|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |» user_link_email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» NRN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» first_name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» phone_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» social_rate|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» manager|[ManagerDTO](#schemamanagerdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CompanyDTO">CompanyDTO</h2>
 <!-- backwards compatibility -->
@@ -8327,10 +11056,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the member."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the member."
     },
     "member_type": {
       "type": "number",
@@ -8348,7 +11079,8 @@ UserIdChecker
       ]
     },
     "iban": {
-      "type": "string"
+      "type": "string",
+      "description": "IBAN of the member."
     },
     "home_address": {
       "type": "object",
@@ -8379,7 +11111,8 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "billing_address": {
       "type": "object",
@@ -8410,34 +11143,43 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "user_link_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Linked user email, if associated with a user account."
     },
     "vat_number": {
-      "type": "string"
+      "type": "string",
+      "description": "VAT number of the company."
     },
     "manager": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique ID of the manager."
         },
         "NRN": {
-          "type": "string"
+          "type": "string",
+          "description": "National Registry Number of the manager."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "First name of the manager."
         },
         "surname": {
-          "type": "string"
+          "type": "string",
+          "description": "Surname of the manager."
         },
         "email": {
-          "type": "string"
+          "type": "string",
+          "description": "Email address of the manager."
         },
         "phone_number": {
-          "type": "string"
+          "type": "string",
+          "description": "Phone number of the manager."
         }
       },
       "required": [
@@ -8447,7 +11189,8 @@ UserIdChecker
         "surname",
         "email"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
     }
   },
   "required": [
@@ -8461,7 +11204,8 @@ UserIdChecker
     "status",
     "vat_number"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Data Transfer Object for legal entity members Extends MembersDTO with legal entity-specific information"
 }
 
 ```
@@ -8474,21 +11218,27 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» member_type|[MemberType](#schemamembertype)|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
 |» iban|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |» user_link_email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» vat_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» manager|[ManagerDTO](#schemamanagerdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateMemberDTO">CreateMemberDTO</h2>
 <!-- backwards compatibility -->
@@ -8502,7 +11252,8 @@ UserIdChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the member (Full name or Company name)."
     },
     "member_type": {
       "type": "number",
@@ -8520,7 +11271,8 @@ UserIdChecker
       ]
     },
     "iban": {
-      "type": "string"
+      "type": "string",
+      "description": "IBAN of the member."
     },
     "home_address": {
       "type": "object",
@@ -8547,7 +11299,8 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "billing_address": {
       "type": "object",
@@ -8574,28 +11327,65 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "first_name": {
-      "type": "string"
+      "type": "string",
+      "description": "First name (Individual only)."
     },
     "NRN": {
-      "type": "string"
+      "type": "string",
+      "description": "National Registry Number (Individual only)."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Contact email (Individual only)."
     },
     "phone_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Phone number (Individual only)."
     },
     "social_rate": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Social rate eligibility (Individual only)."
     },
     "vat_number": {
-      "type": "string"
+      "type": "string",
+      "description": "VAT number (Company only)."
     },
-    "manager_id": {
-      "type": "number"
+    "manager": {
+      "type": "object",
+      "properties": {
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
+        },
+        "name": {
+          "type": "string",
+          "description": "First name of the manager."
+        },
+        "surname": {
+          "type": "string",
+          "description": "Surname of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the manager."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number of the manager."
+        }
+      },
+      "required": [
+        "NRN",
+        "name",
+        "surname",
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
     }
   },
   "required": [
@@ -8611,7 +11401,8 @@ UserIdChecker
     "social_rate",
     "vat_number"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating a new member. Contains common fields and type-specific fields (Individual vs Company). Uses conditional validation based on `member_type`."
 }
 
 ```
@@ -8624,28 +11415,36 @@ UserIdChecker
 |properties|object|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» member_type|[MemberType](#schemamembertype)|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
 |» iban|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» home_address|[CreateAddressDTO](#schemacreateaddressdto)|false|none|none|
 |» billing_address|[CreateAddressDTO](#schemacreateaddressdto)|false|none|none|
 |» first_name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» NRN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» phone_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» social_rate|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» vat_number|object|false|none|none|
 |»» type|string|false|none|none|
-|» manager_id|object|false|none|none|
-|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» manager|[CreateManagerDTO](#schemacreatemanagerdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UpdateMemberDTO">UpdateMemberDTO</h2>
 <!-- backwards compatibility -->
@@ -8659,10 +11458,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member to update."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "New name."
     },
     "status": {
       "type": "number",
@@ -8673,7 +11474,8 @@ UserIdChecker
       ]
     },
     "iban": {
-      "type": "string"
+      "type": "string",
+      "description": "New IBAN."
     },
     "home_address": {
       "type": "object",
@@ -8694,7 +11496,8 @@ UserIdChecker
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for updating an existing address. All fields are optional."
     },
     "billing_address": {
       "type": "object",
@@ -8715,34 +11518,72 @@ UserIdChecker
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for updating an existing address. All fields are optional."
     },
     "first_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Update first name."
     },
     "NRN": {
-      "type": "string"
+      "type": "string",
+      "description": "Update NRN."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Update email."
     },
     "phone_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Update phone number."
     },
     "social_rate": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Update social rate."
     },
     "vat_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Update VAT number."
     },
-    "manager_id": {
-      "type": "number"
+    "manager": {
+      "type": "object",
+      "properties": {
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
+        },
+        "name": {
+          "type": "string",
+          "description": "First name of the manager."
+        },
+        "surname": {
+          "type": "string",
+          "description": "Surname of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the manager."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number of the manager."
+        }
+      },
+      "required": [
+        "NRN",
+        "name",
+        "surname",
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
     }
   },
   "required": [
     "id"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for updating an existing member. Most fields are optional to allow partial updates."
 }
 
 ```
@@ -8755,29 +11596,38 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
 |» iban|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» home_address|[UpdateAddressDTO](#schemaupdateaddressdto)|false|none|none|
 |» billing_address|[UpdateAddressDTO](#schemaupdateaddressdto)|false|none|none|
 |» first_name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» NRN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» phone_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» social_rate|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» vat_number|object|false|none|none|
 |»» type|string|false|none|none|
-|» manager_id|object|false|none|none|
-|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» manager|[CreateManagerDTO](#schemacreatemanagerdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_PatchMemberStatusDTO">PatchMemberStatusDTO</h2>
 <!-- backwards compatibility -->
@@ -8791,7 +11641,8 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id_member": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member."
     },
     "status": {
       "type": "number",
@@ -8806,7 +11657,8 @@ UserIdChecker
     "id_member",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for patching member status only."
 }
 
 ```
@@ -8819,9 +11671,11 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id_member|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_PatchMemberInviteUserDTO">PatchMemberInviteUserDTO</h2>
 <!-- backwards compatibility -->
@@ -8835,17 +11689,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id_member": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member."
     },
     "user_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email of the user to invite."
     }
   },
   "required": [
     "id_member",
     "user_email"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for inviting a user to link to a member account."
 }
 
 ```
@@ -8858,10 +11715,13 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id_member|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» user_email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MemberLinkDTO">MemberLinkDTO</h2>
 <!-- backwards compatibility -->
@@ -8875,10 +11735,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "user_email": {
-      "type": "string"
+      "type": "string",
+      "description": "Email of the linked user (or invited email)."
     },
     "user_id": {
-      "type": "number"
+      "type": "number",
+      "description": "User ID if linked."
     },
     "status": {
       "type": "number",
@@ -8887,9 +11749,14 @@ UserIdChecker
         2,
         3
       ]
+    },
+    "id": {
+      "type": "number",
+      "description": "Id either of the member link or of the member invitation"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing the link status between a member and a user account."
 }
 
 ```
@@ -8902,10 +11769,16 @@ UserIdChecker
 |properties|object|false|none|none|
 |» user_email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» user_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MeterPartialQuery">MeterPartialQuery</h2>
 <!-- backwards compatibility -->
@@ -8919,31 +11792,40 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "street": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by street name."
     },
     "postcode": {
-      "type": "number"
+      "type": "number",
+      "description": "Filter by postcode."
     },
     "address_number": {
-      "type": "number"
+      "type": "number",
+      "description": "Filter by address number."
     },
     "city": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by city name."
     },
     "supplement": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by address supplement (box, etc.)."
     },
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by EAN code."
     },
     "meter_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter by meter number."
     },
     "status": {
       "type": "number",
@@ -8955,20 +11837,24 @@ UserIdChecker
       ]
     },
     "sharing_operation_id": {
-      "type": "number"
+      "type": "number",
+      "description": "Filter by active sharing operation ID."
     },
     "not_sharing_operation_id": {
-      "type": "number"
+      "type": "number",
+      "description": "Filter by explicitly NOT being in a specific sharing operation ID."
     },
     "holder_id": {
-      "type": "number"
+      "type": "number",
+      "description": "Filter by generic member ID holder."
     }
   },
   "additionalProperties": false,
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "Query parameters for filtering and paginating a list of meters."
 }
 
 ```
@@ -8981,31 +11867,44 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» street|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» postcode|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» address_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» city|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» supplement|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» EAN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» meter_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
 |» sharing_operation_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» not_sharing_operation_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» holder_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MeterConsumptionQuery">MeterConsumptionQuery</h2>
 <!-- backwards compatibility -->
@@ -9020,14 +11919,17 @@ UserIdChecker
   "properties": {
     "date_start": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Start date for the data range."
     },
     "date_end": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "End date for the data range."
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Query parameters for retrieving meter consumption data."
 }
 
 ```
@@ -9041,10 +11943,13 @@ UserIdChecker
 |» date_start|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» date_end|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_PartialMeterDTO">PartialMeterDTO</h2>
 <!-- backwards compatibility -->
@@ -9058,10 +11963,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "EAN code of the meter."
     },
     "meter_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Physical meter number."
     },
     "address": {
       "type": "object",
@@ -9092,16 +11999,19 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "holder": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique ID of the member."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the member."
         },
         "member_type": {
           "type": "number",
@@ -9125,7 +12035,8 @@ UserIdChecker
         "member_type",
         "status"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Partial DTO representing a member (summary view)."
     },
     "status": {
       "type": "number",
@@ -9140,10 +12051,12 @@ UserIdChecker
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique identifier."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the sharing operation."
         },
         "type": {
           "type": "number",
@@ -9159,7 +12072,8 @@ UserIdChecker
         "name",
         "type"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
     }
   },
   "required": [
@@ -9168,7 +12082,8 @@ UserIdChecker
     "address",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Simplified DTO for a meter (partial view), typically used in lists."
 }
 
 ```
@@ -9181,14 +12096,17 @@ UserIdChecker
 |properties|object|false|none|none|
 |» EAN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» meter_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» address|[AddressDTO](#schemaaddressdto)|false|none|none|
 |» holder|[MembersPartialDTO](#schemamemberspartialdto)|false|none|none|
 |» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
 |» sharing_operation|[SharingOperationPartialDTO](#schemasharingoperationpartialdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MetersDataDTO">MetersDataDTO</h2>
 <!-- backwards compatibility -->
@@ -9274,10 +12192,12 @@ UserIdChecker
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique ID of the member."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the member."
         },
         "member_type": {
           "type": "number",
@@ -9301,7 +12221,8 @@ UserIdChecker
         "member_type",
         "status"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Partial DTO representing a member (summary view)."
     },
     "grd": {
       "type": "string"
@@ -9310,10 +12231,12 @@ UserIdChecker
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique identifier."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the sharing operation."
         },
         "type": {
           "type": "number",
@@ -9329,7 +12252,8 @@ UserIdChecker
         "name",
         "type"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
     }
   },
   "required": [
@@ -9347,7 +12271,8 @@ UserIdChecker
     "totalGenerating_capacity",
     "grd"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
 }
 
 ```
@@ -9385,6 +12310,7 @@ UserIdChecker
 |» sharing_operation|[SharingOperationPartialDTO](#schemasharingoperationpartialdto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MeterRate">MeterRate</h2>
 <!-- backwards compatibility -->
@@ -9541,16 +12467,19 @@ UserIdChecker
         "postcode",
         "city"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
     },
     "holder": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "number"
+          "type": "number",
+          "description": "Unique ID of the member."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the member."
         },
         "member_type": {
           "type": "number",
@@ -9574,7 +12503,8 @@ UserIdChecker
         "member_type",
         "status"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Partial DTO representing a member (summary view)."
     },
     "tarif_group": {
       "type": "number",
@@ -9669,10 +12599,12 @@ UserIdChecker
           "type": "object",
           "properties": {
             "id": {
-              "type": "number"
+              "type": "number",
+              "description": "Unique ID of the member."
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Name of the member."
             },
             "member_type": {
               "type": "number",
@@ -9696,7 +12628,8 @@ UserIdChecker
             "member_type",
             "status"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Partial DTO representing a member (summary view)."
         },
         "grd": {
           "type": "string"
@@ -9705,10 +12638,12 @@ UserIdChecker
           "type": "object",
           "properties": {
             "id": {
-              "type": "number"
+              "type": "number",
+              "description": "Unique identifier."
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Name of the sharing operation."
             },
             "type": {
               "type": "number",
@@ -9724,7 +12659,8 @@ UserIdChecker
             "name",
             "type"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
         }
       },
       "required": [
@@ -9742,7 +12678,8 @@ UserIdChecker
         "totalGenerating_capacity",
         "grd"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
     },
     "meter_data_history": {
       "type": "array",
@@ -9822,10 +12759,12 @@ UserIdChecker
             "type": "object",
             "properties": {
               "id": {
-                "type": "number"
+                "type": "number",
+                "description": "Unique ID of the member."
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the member."
               },
               "member_type": {
                 "type": "number",
@@ -9849,7 +12788,8 @@ UserIdChecker
               "member_type",
               "status"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "Partial DTO representing a member (summary view)."
           },
           "grd": {
             "type": "string"
@@ -9858,10 +12798,12 @@ UserIdChecker
             "type": "object",
             "properties": {
               "id": {
-                "type": "number"
+                "type": "number",
+                "description": "Unique identifier."
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the sharing operation."
               },
               "type": {
                 "type": "number",
@@ -9877,7 +12819,8 @@ UserIdChecker
               "name",
               "type"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
           }
         },
         "required": [
@@ -9895,8 +12838,10 @@ UserIdChecker
           "totalGenerating_capacity",
           "grd"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
+      },
+      "description": "Historical meter data configurations."
     },
     "futur_meter_data": {
       "type": "array",
@@ -9976,10 +12921,12 @@ UserIdChecker
             "type": "object",
             "properties": {
               "id": {
-                "type": "number"
+                "type": "number",
+                "description": "Unique ID of the member."
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the member."
               },
               "member_type": {
                 "type": "number",
@@ -10003,7 +12950,8 @@ UserIdChecker
               "member_type",
               "status"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "Partial DTO representing a member (summary view)."
           },
           "grd": {
             "type": "string"
@@ -10012,10 +12960,12 @@ UserIdChecker
             "type": "object",
             "properties": {
               "id": {
-                "type": "number"
+                "type": "number",
+                "description": "Unique identifier."
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the sharing operation."
               },
               "type": {
                 "type": "number",
@@ -10031,7 +12981,8 @@ UserIdChecker
               "name",
               "type"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
           }
         },
         "required": [
@@ -10049,8 +13000,10 @@ UserIdChecker
           "totalGenerating_capacity",
           "grd"
         ],
-        "additionalProperties": false
-      }
+        "additionalProperties": false,
+        "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
+      },
+      "description": "Future scheduled meter data configurations."
     }
   },
   "required": [
@@ -10061,7 +13014,8 @@ UserIdChecker
     "phases_number",
     "reading_frequency"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "Full DTO including physical properties and timeline of data configurations."
 }
 
 ```
@@ -10086,11 +13040,14 @@ UserIdChecker
 |» meter_data_history|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[MetersDataDTO](#schemametersdatadto)|false|none|none|
+|»» description|string|false|none|none|
 |» futur_meter_data|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|[MetersDataDTO](#schemametersdatadto)|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_TarifGroup">TarifGroup</h2>
 <!-- backwards compatibility -->
@@ -10154,49 +13111,57 @@ UserIdChecker
   "type": "object",
   "properties": {
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "EAN code."
     },
     "timestamps": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Array of timestamps."
     },
     "gross": {
       "type": "array",
       "items": {
         "type": "number"
-      }
+      },
+      "description": "Gross consumption values."
     },
     "net": {
       "type": "array",
       "items": {
         "type": "number"
-      }
+      },
+      "description": "Net consumption values."
     },
     "shared": {
       "type": "array",
       "items": {
         "type": "number"
-      }
+      },
+      "description": "Shared consumption values."
     },
     "inj_gross": {
       "type": "array",
       "items": {
         "type": "number"
-      }
+      },
+      "description": "Gross injection values."
     },
     "inj_net": {
       "type": "array",
       "items": {
         "type": "number"
-      }
+      },
+      "description": "Net injection values."
     },
     "inj_shared": {
       "type": "array",
       "items": {
         "type": "number"
-      }
+      },
+      "description": "Shared injection values."
     }
   },
   "required": [
@@ -10209,7 +13174,8 @@ UserIdChecker
     "inj_net",
     "inj_shared"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO containing time-series consumption/injection data."
 }
 
 ```
@@ -10222,36 +13188,45 @@ UserIdChecker
 |properties|object|false|none|none|
 |» EAN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» timestamps|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» gross|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» net|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» shared|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» inj_gross|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» inj_net|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» inj_shared|object|false|none|none|
 |»» type|string|false|none|none|
 |»» items|object|false|none|none|
 |»»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateMeterDataDTO">CreateMeterDataDTO</h2>
 <!-- backwards compatibility -->
@@ -10266,11 +13241,13 @@ UserIdChecker
   "properties": {
     "start_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Start date of validity for this configuration."
     },
     "end_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "End date of validity (optional)."
     },
     "status": {
       "type": "number",
@@ -10298,16 +13275,20 @@ UserIdChecker
       ]
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description or label."
     },
     "sampling_power": {
-      "type": "number"
+      "type": "number",
+      "description": "Sampling power."
     },
     "amperage": {
-      "type": "number"
+      "type": "number",
+      "description": "Amperage."
     },
     "grd": {
-      "type": "string"
+      "type": "string",
+      "description": "GRD (DSO) identifier."
     },
     "injection_status": {
       "type": "number",
@@ -10331,13 +13312,16 @@ UserIdChecker
       ]
     },
     "total_generating_capacity": {
-      "type": "number"
+      "type": "number",
+      "description": "Total generating capacity."
     },
     "member_id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the associated member (holder)."
     },
     "sharing_operation_id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the associated sharing operation."
     }
   },
   "required": [
@@ -10346,7 +13330,8 @@ UserIdChecker
     "rate",
     "client_type"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating or updating a MeterData configuration period."
 }
 
 ```
@@ -10360,30 +13345,40 @@ UserIdChecker
 |» start_date|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» end_date|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
 |» rate|[MeterRate](#schemameterrate)|false|none|none|
 |» client_type|[ClientType](#schemaclienttype)|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sampling_power|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» amperage|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» grd|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» injection_status|[InjectionStatus](#schemainjectionstatus)|false|none|none|
 |» production_chain|[ProductionChain](#schemaproductionchain)|false|none|none|
 |» total_generating_capacity|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» member_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sharing_operation_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateMeterDTO">CreateMeterDTO</h2>
 <!-- backwards compatibility -->
@@ -10397,10 +13392,12 @@ UserIdChecker
   "type": "object",
   "properties": {
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "EAN Code (Unique Identifier)."
     },
     "meter_number": {
-      "type": "string"
+      "type": "string",
+      "description": "Physical Meter Number."
     },
     "address": {
       "type": "object",
@@ -10427,7 +13424,8 @@ UserIdChecker
         "city",
         "postcode"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
     },
     "tarif_group": {
       "type": "number",
@@ -10437,7 +13435,8 @@ UserIdChecker
       ]
     },
     "phases_number": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of phases (min 1)."
     },
     "reading_frequency": {
       "type": "number",
@@ -10451,11 +13450,13 @@ UserIdChecker
       "properties": {
         "start_date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "Start date of validity for this configuration."
         },
         "end_date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "End date of validity (optional)."
         },
         "status": {
           "type": "number",
@@ -10483,16 +13484,20 @@ UserIdChecker
           ]
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Description or label."
         },
         "sampling_power": {
-          "type": "number"
+          "type": "number",
+          "description": "Sampling power."
         },
         "amperage": {
-          "type": "number"
+          "type": "number",
+          "description": "Amperage."
         },
         "grd": {
-          "type": "string"
+          "type": "string",
+          "description": "GRD (DSO) identifier."
         },
         "injection_status": {
           "type": "number",
@@ -10516,13 +13521,16 @@ UserIdChecker
           ]
         },
         "total_generating_capacity": {
-          "type": "number"
+          "type": "number",
+          "description": "Total generating capacity."
         },
         "member_id": {
-          "type": "number"
+          "type": "number",
+          "description": "ID of the associated member (holder)."
         },
         "sharing_operation_id": {
-          "type": "number"
+          "type": "number",
+          "description": "ID of the associated sharing operation."
         }
       },
       "required": [
@@ -10531,7 +13539,8 @@ UserIdChecker
         "rate",
         "client_type"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "DTO for creating or updating a MeterData configuration period."
     }
   },
   "required": [
@@ -10542,6 +13551,109 @@ UserIdChecker
     "phases_number",
     "reading_frequency",
     "initial_data"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for creating a new physical meter and its initial configuration."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» EAN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» meter_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» address|[CreateAddressDTO](#schemacreateaddressdto)|false|none|none|
+|» tarif_group|[TarifGroup](#schematarifgroup)|false|none|none|
+|» phases_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» reading_frequency|[ReadingFrequency](#schemareadingfrequency)|false|none|none|
+|» initial_data|[CreateMeterDataDTO](#schemacreatemeterdatadto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_UpdateMeterDTO">UpdateMeterDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemaupdatemeterdto"></a>
+<a id="schema_UpdateMeterDTO"></a>
+<a id="tocSupdatemeterdto"></a>
+<a id="tocsupdatemeterdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "EAN": {
+      "type": "string",
+      "description": "EAN Code (Unique Identifier)."
+    },
+    "meter_number": {
+      "type": "string",
+      "description": "Physical Meter Number."
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "city": {
+          "type": "string"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "street",
+        "number",
+        "city",
+        "postcode"
+      ],
+      "additionalProperties": false,
+      "description": "DTO for creating a new address."
+    },
+    "tarif_group": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "phases_number": {
+      "type": "number",
+      "description": "Number of phases (min 1)."
+    },
+    "reading_frequency": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    }
+  },
+  "required": [
+    "EAN",
+    "meter_number",
+    "address",
+    "tarif_group",
+    "phases_number",
+    "reading_frequency"
   ],
   "additionalProperties": false
 }
@@ -10556,14 +13668,16 @@ UserIdChecker
 |properties|object|false|none|none|
 |» EAN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» meter_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» address|[CreateAddressDTO](#schemacreateaddressdto)|false|none|none|
 |» tarif_group|[TarifGroup](#schematarifgroup)|false|none|none|
 |» phases_number|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» reading_frequency|[ReadingFrequency](#schemareadingfrequency)|false|none|none|
-|» initial_data|[CreateMeterDataDTO](#schemacreatemeterdatadto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
 
@@ -10580,11 +13694,13 @@ UserIdChecker
   "properties": {
     "start_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Start date of validity for this configuration."
     },
     "end_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "End date of validity (optional)."
     },
     "status": {
       "type": "number",
@@ -10612,16 +13728,20 @@ UserIdChecker
       ]
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "description": "Description or label."
     },
     "sampling_power": {
-      "type": "number"
+      "type": "number",
+      "description": "Sampling power."
     },
     "amperage": {
-      "type": "number"
+      "type": "number",
+      "description": "Amperage."
     },
     "grd": {
-      "type": "string"
+      "type": "string",
+      "description": "GRD (DSO) identifier."
     },
     "injection_status": {
       "type": "number",
@@ -10645,16 +13765,20 @@ UserIdChecker
       ]
     },
     "total_generating_capacity": {
-      "type": "number"
+      "type": "number",
+      "description": "Total generating capacity."
     },
     "member_id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the associated member (holder)."
     },
     "sharing_operation_id": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the associated sharing operation."
     },
     "EAN": {
-      "type": "string"
+      "type": "string",
+      "description": "EAN Code of the meter to update."
     }
   },
   "required": [
@@ -10664,7 +13788,8 @@ UserIdChecker
     "start_date",
     "status"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for patching meter data configuration. Requires EAN to identify the meter to update."
 }
 
 ```
@@ -10678,32 +13803,88 @@ UserIdChecker
 |» start_date|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» end_date|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
 |» rate|[MeterRate](#schemameterrate)|false|none|none|
 |» client_type|[ClientType](#schemaclienttype)|false|none|none|
 |» description|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sampling_power|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» amperage|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» grd|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» injection_status|[InjectionStatus](#schemainjectionstatus)|false|none|none|
 |» production_chain|[ProductionChain](#schemaproductionchain)|false|none|none|
 |» total_generating_capacity|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» member_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sharing_operation_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» EAN|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_DeleteFutureMeterDataDTO">DeleteFutureMeterDataDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemadeletefuturemeterdatadto"></a>
+<a id="schema_DeleteFutureMeterDataDTO"></a>
+<a id="tocSdeletefuturemeterdatadto"></a>
+<a id="tocsdeletefuturemeterdatadto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id_meter_data": {
+      "type": "number",
+      "description": "ID meter data to delete"
+    },
+    "active_previous_meter_data": {
+      "type": "boolean",
+      "description": "If true, take the previous meter data and reactive it"
+    }
+  },
+  "required": [
+    "id_meter_data"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for deleting future meter data Require ID Meter data to identify the entry to remove"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id_meter_data|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» active_previous_meter_data|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CommunityQueryDTO">CommunityQueryDTO</h2>
 <!-- backwards compatibility -->
@@ -10717,13 +13898,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter communities by name (partial match). Must be a string if provided."
     },
     "sort_name": {
       "type": "string",
@@ -10744,7 +13928,8 @@ UserIdChecker
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "DTO for querying communities with pagination and filtering."
 }
 
 ```
@@ -10757,14 +13942,18 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sort_name|[Sort](#schemasort)|false|none|none|
 |» sort_id|[Sort](#schemasort)|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CommunityUsersQueryDTO">CommunityUsersQueryDTO</h2>
 <!-- backwards compatibility -->
@@ -10778,13 +13967,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter users by email (exact or partial match depending on implementation). Must be a valid email string if provided."
     },
     "role": {
       "type": "string",
@@ -10792,7 +13984,8 @@ UserIdChecker
         "MEMBER",
         "MANAGER",
         "ADMIN"
-      ]
+      ],
+      "description": "Enum representing user roles in the system with increasing privilege levels"
     },
     "sort_email": {
       "type": "string",
@@ -10820,7 +14013,8 @@ UserIdChecker
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "DTO for querying users within a community with pagination and filtering."
 }
 
 ```
@@ -10833,16 +14027,20 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» role|[Role](#schemarole)|false|none|none|
 |» sort_email|[Sort](#schemasort)|false|none|none|
 |» sort_id|[Sort](#schemasort)|false|none|none|
 |» sort_role|[Sort](#schemasort)|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_Role">Role</h2>
 <!-- backwards compatibility -->
@@ -10858,7 +14056,8 @@ UserIdChecker
     "MEMBER",
     "MANAGER",
     "ADMIN"
-  ]
+  ],
+  "description": "Enum representing user roles in the system with increasing privilege levels"
 }
 
 ```
@@ -10869,6 +14068,7 @@ UserIdChecker
 |---|---|---|---|---|
 |type|string|false|none|none|
 |enum|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CommunityDTO">CommunityDTO</h2>
 <!-- backwards compatibility -->
@@ -10882,17 +14082,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "The unique identifier of the community (internal DB ID)."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "The name of the community."
     }
   },
   "required": [
     "id",
     "name"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a simple view of a community."
 }
 
 ```
@@ -10905,10 +14108,13 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_MyCommunityDTO">MyCommunityDTO</h2>
 <!-- backwards compatibility -->
@@ -10922,13 +14128,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "The unique identifier of the community (internal DB ID)."
     },
     "auth_community_id": {
-      "type": "string"
+      "type": "string",
+      "description": "The unique identifier of the community in the IAM system."
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "The name of the community."
     },
     "role": {
       "type": "string",
@@ -10936,7 +14145,8 @@ UserIdChecker
         "MEMBER",
         "MANAGER",
         "ADMIN"
-      ]
+      ],
+      "description": "Enum representing user roles in the system with increasing privilege levels"
     }
   },
   "required": [
@@ -10945,7 +14155,8 @@ UserIdChecker
     "name",
     "role"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a community from the perspective of the current user. Includes the user's role in that community."
 }
 
 ```
@@ -10958,13 +14169,17 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» auth_community_id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» role|[Role](#schemarole)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UsersCommunityDTO">UsersCommunityDTO</h2>
 <!-- backwards compatibility -->
@@ -10978,13 +14193,16 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id_user": {
-      "type": "number"
+      "type": "number",
+      "description": "The unique identifier of the user (internal DB ID)."
     },
     "id_community": {
-      "type": "number"
+      "type": "number",
+      "description": "The unique identifier of the community (internal DB ID)."
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "The email address of the user."
     },
     "role": {
       "type": "string",
@@ -10992,6 +14210,25 @@ UserIdChecker
         "MEMBER",
         "MANAGER",
         "ADMIN"
+      ],
+      "description": "Enum representing user roles in the system with increasing privilege levels"
+    },
+    "first_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phone": {
+      "type": [
+        "string",
+        "null"
       ]
     }
   },
@@ -11001,7 +14238,8 @@ UserIdChecker
     "email",
     "role"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a user's membership in a community."
 }
 
 ```
@@ -11014,13 +14252,23 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id_user|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» id_community|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» email|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» role|[Role](#schemarole)|false|none|none|
+|» first_name|object|false|none|none|
+|»» type|[string]|false|none|none|
+|» last_name|object|false|none|none|
+|»» type|[string]|false|none|none|
+|» phone|object|false|none|none|
+|»» type|[string]|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_CreateCommunityDTO">CreateCommunityDTO</h2>
 <!-- backwards compatibility -->
@@ -11034,13 +14282,15 @@ UserIdChecker
   "type": "object",
   "properties": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "The name of the community. Must be a non-empty string."
     }
   },
   "required": [
     "name"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for creating or updating a community."
 }
 
 ```
@@ -11053,8 +14303,10 @@ UserIdChecker
 |properties|object|false|none|none|
 |» name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_PatchRoleUserDTO">PatchRoleUserDTO</h2>
 <!-- backwards compatibility -->
@@ -11068,7 +14320,8 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id_user": {
-      "type": "number"
+      "type": "number",
+      "description": "The ID of the user whose role is being updated. Must be an integer."
     },
     "new_role": {
       "type": "string",
@@ -11076,14 +14329,16 @@ UserIdChecker
         "MEMBER",
         "MANAGER",
         "ADMIN"
-      ]
+      ],
+      "description": "Enum representing user roles in the system with increasing privilege levels"
     }
   },
   "required": [
     "id_user",
     "new_role"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for patching (updating) a user's role within a community."
 }
 
 ```
@@ -11096,503 +14351,11 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id_user|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» new_role|[Role](#schemarole)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_UserMemberInvitationQuery">UserMemberInvitationQuery</h2>
-<!-- backwards compatibility -->
-<a id="schemausermemberinvitationquery"></a>
-<a id="schema_UserMemberInvitationQuery"></a>
-<a id="tocSusermemberinvitationquery"></a>
-<a id="tocsusermemberinvitationquery"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "page": {
-      "type": "number"
-    },
-    "limit": {
-      "type": "number"
-    },
-    "name": {
-      "type": "string"
-    },
-    "to_be_encoded": {
-      "type": "boolean"
-    },
-    "sort_name": {
-      "type": "string",
-      "enum": [
-        "ASC",
-        "DESC"
-      ]
-    },
-    "sort_date": {
-      "type": "string",
-      "enum": [
-        "ASC",
-        "DESC"
-      ]
-    }
-  },
-  "additionalProperties": false,
-  "required": [
-    "limit",
-    "page"
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» page|object|false|none|none|
-|»» type|string|false|none|none|
-|» limit|object|false|none|none|
-|»» type|string|false|none|none|
-|» name|object|false|none|none|
-|»» type|string|false|none|none|
-|» to_be_encoded|object|false|none|none|
-|»» type|string|false|none|none|
-|» sort_name|[Sort](#schemasort)|false|none|none|
-|» sort_date|[Sort](#schemasort)|false|none|none|
-|additionalProperties|boolean|false|none|none|
-|required|[string]|false|none|none|
-
-<h2 id="tocS_UserMemberInvitationDTO">UserMemberInvitationDTO</h2>
-<!-- backwards compatibility -->
-<a id="schemausermemberinvitationdto"></a>
-<a id="schema_UserMemberInvitationDTO"></a>
-<a id="tocSusermemberinvitationdto"></a>
-<a id="tocsusermemberinvitationdto"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "number"
-    },
-    "member_id": {
-      "type": "number"
-    },
-    "member_name": {
-      "type": "string"
-    },
-    "user_email": {
-      "type": "string"
-    },
-    "created_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "to_be_encoded": {
-      "type": "boolean"
-    },
-    "community": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ],
-      "additionalProperties": false
-    }
-  },
-  "required": [
-    "id",
-    "user_email",
-    "created_at",
-    "to_be_encoded",
-    "community"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» id|object|false|none|none|
-|»» type|string|false|none|none|
-|» member_id|object|false|none|none|
-|»» type|string|false|none|none|
-|» member_name|object|false|none|none|
-|»» type|string|false|none|none|
-|» user_email|object|false|none|none|
-|»» type|string|false|none|none|
-|» created_at|object|false|none|none|
-|»» type|string|false|none|none|
-|»» format|string|false|none|none|
-|» to_be_encoded|object|false|none|none|
-|»» type|string|false|none|none|
-|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_UserManagerInvitationQuery">UserManagerInvitationQuery</h2>
-<!-- backwards compatibility -->
-<a id="schemausermanagerinvitationquery"></a>
-<a id="schema_UserManagerInvitationQuery"></a>
-<a id="tocSusermanagerinvitationquery"></a>
-<a id="tocsusermanagerinvitationquery"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "page": {
-      "type": "number"
-    },
-    "limit": {
-      "type": "number"
-    },
-    "name": {
-      "type": "string"
-    },
-    "sort_name": {
-      "type": "string",
-      "enum": [
-        "ASC",
-        "DESC"
-      ]
-    },
-    "sort_date": {
-      "type": "string",
-      "enum": [
-        "ASC",
-        "DESC"
-      ]
-    }
-  },
-  "additionalProperties": false,
-  "required": [
-    "limit",
-    "page"
-  ]
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» page|object|false|none|none|
-|»» type|string|false|none|none|
-|» limit|object|false|none|none|
-|»» type|string|false|none|none|
-|» name|object|false|none|none|
-|»» type|string|false|none|none|
-|» sort_name|[Sort](#schemasort)|false|none|none|
-|» sort_date|[Sort](#schemasort)|false|none|none|
-|additionalProperties|boolean|false|none|none|
-|required|[string]|false|none|none|
-
-<h2 id="tocS_UserManagerInvitationDTO">UserManagerInvitationDTO</h2>
-<!-- backwards compatibility -->
-<a id="schemausermanagerinvitationdto"></a>
-<a id="schema_UserManagerInvitationDTO"></a>
-<a id="tocSusermanagerinvitationdto"></a>
-<a id="tocsusermanagerinvitationdto"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "number"
-    },
-    "user_email": {
-      "type": "string"
-    },
-    "community": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ],
-      "additionalProperties": false
-    },
-    "created_at": {
-      "type": "string",
-      "format": "date-time"
-    }
-  },
-  "required": [
-    "id",
-    "user_email",
-    "community",
-    "created_at"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» id|object|false|none|none|
-|»» type|string|false|none|none|
-|» user_email|object|false|none|none|
-|»» type|string|false|none|none|
-|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
-|» created_at|object|false|none|none|
-|»» type|string|false|none|none|
-|»» format|string|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_InviteUser">InviteUser</h2>
-<!-- backwards compatibility -->
-<a id="schemainviteuser"></a>
-<a id="schema_InviteUser"></a>
-<a id="tocSinviteuser"></a>
-<a id="tocsinviteuser"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "user_email": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "user_email"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» user_email|object|false|none|none|
-|»» type|string|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_AcceptInvitationDTO">AcceptInvitationDTO</h2>
-<!-- backwards compatibility -->
-<a id="schemaacceptinvitationdto"></a>
-<a id="schema_AcceptInvitationDTO"></a>
-<a id="tocSacceptinvitationdto"></a>
-<a id="tocsacceptinvitationdto"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invitation_id": {
-      "type": "number"
-    }
-  },
-  "required": [
-    "invitation_id"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» invitation_id|object|false|none|none|
-|»» type|string|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
-
-<h2 id="tocS_AcceptInvitationWEncodedDTO">AcceptInvitationWEncodedDTO</h2>
-<!-- backwards compatibility -->
-<a id="schemaacceptinvitationwencodeddto"></a>
-<a id="schema_AcceptInvitationWEncodedDTO"></a>
-<a id="tocSacceptinvitationwencodeddto"></a>
-<a id="tocsacceptinvitationwencodeddto"></a>
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invitation_id": {
-      "type": "number"
-    },
-    "member": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "member_type": {
-          "type": "number",
-          "enum": [
-            1,
-            2
-          ]
-        },
-        "status": {
-          "type": "number",
-          "enum": [
-            1,
-            2,
-            3
-          ]
-        },
-        "iban": {
-          "type": "string"
-        },
-        "home_address": {
-          "type": "object",
-          "properties": {
-            "street": {
-              "type": "string"
-            },
-            "number": {
-              "type": "number"
-            },
-            "city": {
-              "type": "string"
-            },
-            "postcode": {
-              "type": "string"
-            },
-            "supplement": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "street",
-            "number",
-            "city",
-            "postcode"
-          ],
-          "additionalProperties": false
-        },
-        "billing_address": {
-          "type": "object",
-          "properties": {
-            "street": {
-              "type": "string"
-            },
-            "number": {
-              "type": "number"
-            },
-            "city": {
-              "type": "string"
-            },
-            "postcode": {
-              "type": "string"
-            },
-            "supplement": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "street",
-            "number",
-            "city",
-            "postcode"
-          ],
-          "additionalProperties": false
-        },
-        "first_name": {
-          "type": "string"
-        },
-        "NRN": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "phone_number": {
-          "type": "string"
-        },
-        "social_rate": {
-          "type": "boolean"
-        },
-        "vat_number": {
-          "type": "string"
-        },
-        "manager_id": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "name",
-        "member_type",
-        "status",
-        "iban",
-        "home_address",
-        "billing_address",
-        "first_name",
-        "NRN",
-        "email",
-        "social_rate",
-        "vat_number"
-      ],
-      "additionalProperties": false
-    }
-  },
-  "required": [
-    "invitation_id",
-    "member"
-  ],
-  "additionalProperties": false
-}
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|type|string|false|none|none|
-|properties|object|false|none|none|
-|» invitation_id|object|false|none|none|
-|»» type|string|false|none|none|
-|» member|[CreateMemberDTO](#schemacreatememberdto)|false|none|none|
-|required|[string]|false|none|none|
-|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_DocumentQueryDTO">DocumentQueryDTO</h2>
 <!-- backwards compatibility -->
@@ -11606,16 +14369,20 @@ UserIdChecker
   "type": "object",
   "properties": {
     "page": {
-      "type": "number"
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
     },
     "limit": {
-      "type": "number"
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
     },
     "file_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter documents by file name."
     },
     "file_type": {
-      "type": "string"
+      "type": "string",
+      "description": "Filter documents by file type (MIME type)."
     },
     "sort_upload_date": {
       "type": "string",
@@ -11636,7 +14403,8 @@ UserIdChecker
   "required": [
     "limit",
     "page"
-  ]
+  ],
+  "description": "DTO for querying and filtering documents."
 }
 
 ```
@@ -11649,16 +14417,21 @@ UserIdChecker
 |properties|object|false|none|none|
 |» page|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» limit|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» file_name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» file_type|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» sort_upload_date|[Sort](#schemasort)|false|none|none|
 |» sort_file_size|[Sort](#schemasort)|false|none|none|
 |additionalProperties|boolean|false|none|none|
 |required|[string]|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_UploadDocumentDTO">UploadDocumentDTO</h2>
 <!-- backwards compatibility -->
@@ -11672,75 +14445,94 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id_member": {
-      "type": "number"
+      "type": "number",
+      "description": "ID of the member who owns the document."
     },
     "file": {
       "type": "object",
       "properties": {
         "fieldname": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the form field associated with this file."
         },
         "originalname": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the file on the uploader's computer."
         },
         "encoding": {
-          "type": "string"
+          "type": "string",
+          "description": "Value of the `Content-Transfer-Encoding` header for this file.",
+          "deprecated": "since July 2015"
         },
         "mimetype": {
-          "type": "string"
+          "type": "string",
+          "description": "Value of the `Content-Type` header for this file."
         },
         "size": {
-          "type": "number"
+          "type": "number",
+          "description": "Size of the file in bytes."
         },
         "stream": {
           "type": "object",
           "properties": {
             "readable": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Is `true` if it is safe to call  {@link  read } , which means the stream has not been destroyed or emitted `'error'` or `'end'`."
             },
             "readableAborted": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Returns whether the stream was destroyed or errored before emitting `'end'`."
             },
             "readableDidRead": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Returns whether `'data'` has been emitted."
             },
             "readableEncoding": {
               "anyOf": [
                 {
                   "type": "null"
                 }
-              ]
+              ],
+              "description": "Getter for the property `encoding` of a given `Readable` stream. The `encoding` property can be set using the  {@link  setEncoding }  method."
             },
             "readableEnded": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Becomes `true` when [`'end'`](https://nodejs.org/docs/latest-v25.x/api/stream.html#event-end) event is emitted."
             },
             "readableFlowing": {
               "type": [
                 "boolean",
                 "null"
-              ]
+              ],
+              "description": "This property reflects the current state of a `Readable` stream as described in the [Three states](https://nodejs.org/docs/latest-v25.x/api/stream.html#three-states) section."
             },
             "readableHighWaterMark": {
-              "type": "number"
+              "type": "number",
+              "description": "Returns the value of `highWaterMark` passed when creating this `Readable`."
             },
             "readableLength": {
-              "type": "number"
+              "type": "number",
+              "description": "This property contains the number of bytes (or objects) in the queue ready to be read. The value provides introspection data regarding the status of the `highWaterMark`."
             },
             "readableObjectMode": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Getter for the property `objectMode` of a given `Readable` stream."
             },
             "destroyed": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Is `true` after `readable.destroy()` has been called."
             },
             "closed": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Is `true` after `'close'` has been emitted."
             },
             "errored": {
               "anyOf": [
                 {
                   "type": "null"
                 }
-              ]
+              ],
+              "description": "Returns error if the stream has been destroyed with an error."
             }
           },
           "required": [
@@ -11760,13 +14552,16 @@ UserIdChecker
           "additionalProperties": false
         },
         "destination": {
-          "type": "string"
+          "type": "string",
+          "description": "`DiskStorage` only: Directory to which this file has been uploaded."
         },
         "filename": {
-          "type": "string"
+          "type": "string",
+          "description": "`DiskStorage` only: Name of this file within `destination`."
         },
         "path": {
-          "type": "string"
+          "type": "string",
+          "description": "`DiskStorage` only: Full path to the uploaded file."
         },
         "buffer": {
           "type": "object",
@@ -11820,14 +14615,16 @@ UserIdChecker
         "path",
         "buffer"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Object containing file metadata and access information."
     }
   },
   "required": [
     "id_member",
     "file"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO for uploading a new document."
 }
 
 ```
@@ -11840,9 +14637,11 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id_member|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» file|[global.Express.Multer.File](#schemaglobal.express.multer.file)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_DownloadDocument">DownloadDocument</h2>
 <!-- backwards compatibility -->
@@ -11895,10 +14694,12 @@ UserIdChecker
       ]
     },
     "fileName": {
-      "type": "string"
+      "type": "string",
+      "description": "The name of the file."
     },
     "fileType": {
-      "type": "string"
+      "type": "string",
+      "description": "The MIME type of the file."
     }
   },
   "required": [
@@ -11906,7 +14707,8 @@ UserIdChecker
     "fileName",
     "fileType"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "description": "DTO representing a downloaded document."
 }
 
 ```
@@ -11920,10 +14722,13 @@ UserIdChecker
 |» document|[global.Buffer](#schemaglobal.buffer)|false|none|none|
 |» fileName|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» fileType|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 
 <h2 id="tocS_DocumentExposedDTO">DocumentExposedDTO</h2>
 <!-- backwards compatibility -->
@@ -11937,20 +14742,25 @@ UserIdChecker
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique identifier of the document."
     },
     "file_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the file."
     },
     "file_size": {
-      "type": "number"
+      "type": "number",
+      "description": "Size of the file in bytes."
     },
     "upload_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Date when the document was uploaded."
     },
     "file_type": {
-      "type": "string"
+      "type": "string",
+      "description": "MIME type of the file."
     }
   },
   "required": [
@@ -11959,6 +14769,471 @@ UserIdChecker
     "file_size",
     "upload_date",
     "file_type"
+  ],
+  "additionalProperties": false,
+  "description": "DTO exposed to the API clients representing a document."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_size|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» upload_date|object|false|none|none|
+|»» type|string|false|none|none|
+|»» format|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_type|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_DocumentDTO">DocumentDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemadocumentdto"></a>
+<a id="schema_DocumentDTO"></a>
+<a id="tocSdocumentdto"></a>
+<a id="tocsdocumentdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique identifier of the document."
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Name of the file."
+    },
+    "file_size": {
+      "type": "number",
+      "description": "Size of the file in bytes."
+    },
+    "upload_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date when the document was uploaded."
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type of the file."
+    },
+    "member_id": {
+      "type": "number",
+      "description": "ID of the member who owns the document."
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the file in the storage service."
+    }
+  },
+  "required": [
+    "file_name",
+    "file_size",
+    "file_type",
+    "file_url",
+    "id",
+    "member_id",
+    "upload_date"
+  ],
+  "additionalProperties": false,
+  "description": "Internal DTO representing a document, including sensitive or internal fields. Extends DocumentExposedDTO."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_size|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» upload_date|object|false|none|none|
+|»» type|string|false|none|none|
+|»» format|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_type|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_url|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_MeMemberPartialQuery">MeMemberPartialQuery</h2>
+<!-- backwards compatibility -->
+<a id="schemamememberpartialquery"></a>
+<a id="schema_MeMemberPartialQuery"></a>
+<a id="tocSmememberpartialquery"></a>
+<a id="tocsmememberpartialquery"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "page": {
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
+    },
+    "name": {
+      "type": "string",
+      "description": "Filter by member name."
+    },
+    "member_type": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    },
+    "sort_name": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    },
+    "community_name": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "limit",
+    "page"
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» page|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» limit|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_type|[MemberType](#schemamembertype)|false|none|none|
+|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|» sort_name|[Sort](#schemasort)|false|none|none|
+|» community_name|object|false|none|none|
+|»» type|string|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|required|[string]|false|none|none|
+
+<h2 id="tocS_MeMetersPartialQuery">MeMetersPartialQuery</h2>
+<!-- backwards compatibility -->
+<a id="schemamemeterspartialquery"></a>
+<a id="schema_MeMetersPartialQuery"></a>
+<a id="tocSmemeterspartialquery"></a>
+<a id="tocsmemeterspartialquery"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "page": {
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
+    },
+    "street": {
+      "type": "string",
+      "description": "Filter by street name."
+    },
+    "postcode": {
+      "type": "number",
+      "description": "Filter by postcode."
+    },
+    "address_number": {
+      "type": "number",
+      "description": "Filter by address number."
+    },
+    "city": {
+      "type": "string",
+      "description": "Filter by city name."
+    },
+    "supplement": {
+      "type": "string",
+      "description": "Filter by address supplement (box, etc.)."
+    },
+    "EAN": {
+      "type": "string",
+      "description": "Filter by EAN code."
+    },
+    "meter_number": {
+      "type": "string",
+      "description": "Filter by meter number."
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "sharing_operation_id": {
+      "type": "number",
+      "description": "Filter by active sharing operation ID."
+    },
+    "not_sharing_operation_id": {
+      "type": "number",
+      "description": "Filter by explicitly NOT being in a specific sharing operation ID."
+    },
+    "holder_id": {
+      "type": "number",
+      "description": "Filter by generic member ID holder."
+    },
+    "community_name": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "limit",
+    "page"
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» page|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» limit|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» street|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» postcode|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» address_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» city|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» supplement|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» EAN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» meter_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
+|» sharing_operation_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» not_sharing_operation_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» holder_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» community_name|object|false|none|none|
+|»» type|string|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|required|[string]|false|none|none|
+
+<h2 id="tocS_MeDocumentPartialQuery">MeDocumentPartialQuery</h2>
+<!-- backwards compatibility -->
+<a id="schemamedocumentpartialquery"></a>
+<a id="schema_MeDocumentPartialQuery"></a>
+<a id="tocSmedocumentpartialquery"></a>
+<a id="tocsmedocumentpartialquery"></a>
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "page": {
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Filter documents by file name."
+    },
+    "file_type": {
+      "type": "string",
+      "description": "Filter documents by file type (MIME type)."
+    },
+    "sort_upload_date": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    },
+    "sort_file_size": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    }
+  },
+  "required": [
+    "limit",
+    "page"
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|properties|object|false|none|none|
+|» page|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» limit|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» file_type|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» sort_upload_date|[Sort](#schemasort)|false|none|none|
+|» sort_file_size|[Sort](#schemasort)|false|none|none|
+|required|[string]|false|none|none|
+
+<h2 id="tocS_MeMembersPartialDTO">MeMembersPartialDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamememberspartialdto"></a>
+<a id="schema_MeMembersPartialDTO"></a>
+<a id="tocSmememberspartialdto"></a>
+<a id="tocsmememberspartialdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique ID of the member."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the member."
+    },
+    "member_type": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    }
+  },
+  "required": [
+    "community",
+    "id",
+    "member_type",
+    "name",
+    "status"
   ],
   "additionalProperties": false
 }
@@ -11973,59 +15248,1358 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
-|» file_name|object|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
 |»» type|string|false|none|none|
-|» file_size|object|false|none|none|
-|»» type|string|false|none|none|
-|» upload_date|object|false|none|none|
-|»» type|string|false|none|none|
-|»» format|string|false|none|none|
-|» file_type|object|false|none|none|
-|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_type|[MemberType](#schemamembertype)|false|none|none|
+|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
 
-<h2 id="tocS_DocumentDTO">DocumentDTO</h2>
+<h2 id="tocS_MeIndividualDTO">MeIndividualDTO</h2>
 <!-- backwards compatibility -->
-<a id="schemadocumentdto"></a>
-<a id="schema_DocumentDTO"></a>
-<a id="tocSdocumentdto"></a>
-<a id="tocsdocumentdto"></a>
+<a id="schemameindividualdto"></a>
+<a id="schema_MeIndividualDTO"></a>
+<a id="tocSmeindividualdto"></a>
+<a id="tocsmeindividualdto"></a>
 
 ```json
 {
   "type": "object",
   "properties": {
     "id": {
-      "type": "number"
+      "type": "number",
+      "description": "Unique ID of the member."
     },
-    "file_name": {
-      "type": "string"
-    },
-    "file_size": {
-      "type": "number"
-    },
-    "upload_date": {
+    "name": {
       "type": "string",
-      "format": "date-time"
+      "description": "Name of the member."
     },
-    "file_type": {
-      "type": "string"
+    "member_type": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
     },
-    "member_id": {
-      "type": "number"
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
     },
-    "file_url": {
-      "type": "string"
+    "iban": {
+      "type": "string",
+      "description": "IBAN of the member."
+    },
+    "home_address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "billing_address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "user_link_email": {
+      "type": "string",
+      "description": "Linked user email, if associated with a user account."
+    },
+    "NRN": {
+      "type": "string",
+      "description": "National Registry Number."
+    },
+    "first_name": {
+      "type": "string",
+      "description": "First name."
+    },
+    "email": {
+      "type": "string",
+      "description": "Contact email."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Phone number."
+    },
+    "social_rate": {
+      "type": "boolean",
+      "description": "Whether the social rate applies."
+    },
+    "manager": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique ID of the manager."
+        },
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
+        },
+        "name": {
+          "type": "string",
+          "description": "First name of the manager."
+        },
+        "surname": {
+          "type": "string",
+          "description": "Surname of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the manager."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number of the manager."
+        }
+      },
+      "required": [
+        "id",
+        "NRN",
+        "name",
+        "surname",
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
     }
   },
   "required": [
+    "NRN",
+    "billing_address",
+    "community",
+    "email",
+    "first_name",
+    "home_address",
+    "iban",
+    "id",
+    "member_type",
+    "name",
+    "phone_number",
+    "social_rate",
+    "status"
+  ],
+  "additionalProperties": false
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_type|[MemberType](#schemamembertype)|false|none|none|
+|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|» iban|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» user_link_email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» NRN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» first_name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» phone_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» social_rate|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» manager|[ManagerDTO](#schemamanagerdto)|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+
+<h2 id="tocS_MeCompanyDTO">MeCompanyDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamecompanydto"></a>
+<a id="schema_MeCompanyDTO"></a>
+<a id="tocSmecompanydto"></a>
+<a id="tocsmecompanydto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique ID of the member."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the member."
+    },
+    "member_type": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ]
+    },
+    "iban": {
+      "type": "string",
+      "description": "IBAN of the member."
+    },
+    "home_address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "billing_address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "user_link_email": {
+      "type": "string",
+      "description": "Linked user email, if associated with a user account."
+    },
+    "vat_number": {
+      "type": "string",
+      "description": "VAT number of the company."
+    },
+    "manager": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique ID of the manager."
+        },
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number of the manager."
+        },
+        "name": {
+          "type": "string",
+          "description": "First name of the manager."
+        },
+        "surname": {
+          "type": "string",
+          "description": "Surname of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the manager."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number of the manager."
+        }
+      },
+      "required": [
+        "id",
+        "NRN",
+        "name",
+        "surname",
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a manager associated with a member."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    }
+  },
+  "required": [
+    "billing_address",
+    "community",
+    "home_address",
+    "iban",
+    "id",
+    "manager",
+    "member_type",
+    "name",
+    "status",
+    "vat_number"
+  ],
+  "additionalProperties": false
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_type|[MemberType](#schemamembertype)|false|none|none|
+|» status|[MemberStatus](#schemamemberstatus)|false|none|none|
+|» iban|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» home_address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» billing_address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» user_link_email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» vat_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» manager|[ManagerDTO](#schemamanagerdto)|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+
+<h2 id="tocS_MePartialMeterDTO">MePartialMeterDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamepartialmeterdto"></a>
+<a id="schema_MePartialMeterDTO"></a>
+<a id="tocSmepartialmeterdto"></a>
+<a id="tocsmepartialmeterdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "EAN": {
+      "type": "string",
+      "description": "EAN code of the meter."
+    },
+    "meter_number": {
+      "type": "string",
+      "description": "Physical meter number."
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "holder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique ID of the member."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the member."
+        },
+        "member_type": {
+          "type": "number",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "status": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "member_type",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "Partial DTO representing a member (summary view)."
+    },
+    "status": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "sharing_operation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique identifier."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the sharing operation."
+        },
+        "type": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type"
+      ],
+      "additionalProperties": false,
+      "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    }
+  },
+  "required": [
+    "EAN",
+    "address",
+    "community",
+    "meter_number",
+    "status"
+  ],
+  "additionalProperties": false
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» EAN|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» meter_number|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» holder|[MembersPartialDTO](#schemamemberspartialdto)|false|none|none|
+|» status|[MeterDataStatus](#schemameterdatastatus)|false|none|none|
+|» sharing_operation|[SharingOperationPartialDTO](#schemasharingoperationpartialdto)|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+
+<h2 id="tocS_MeMeterDTO">MeMeterDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamemeterdto"></a>
+<a id="schema_MeMeterDTO"></a>
+<a id="tocSmemeterdto"></a>
+<a id="tocsmemeterdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "EAN": {
+      "type": "string"
+    },
+    "meter_number": {
+      "type": "string"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "street": {
+          "type": "string"
+        },
+        "number": {
+          "type": "number"
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "supplement": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "street",
+        "number",
+        "postcode",
+        "city"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a full address."
+    },
+    "holder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique ID of the member."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the member."
+        },
+        "member_type": {
+          "type": "number",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "status": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "member_type",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "Partial DTO representing a member (summary view)."
+    },
+    "tarif_group": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "phases_number": {
+      "type": "number"
+    },
+    "reading_frequency": {
+      "type": "number",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "meter_data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        },
+        "sampling_power": {
+          "type": "number"
+        },
+        "status": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "amperage": {
+          "type": "number"
+        },
+        "rate": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "client_type": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "injection_status": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "production_chain": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        "totalGenerating_capacity": {
+          "type": "number"
+        },
+        "member": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Unique ID of the member."
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the member."
+            },
+            "member_type": {
+              "type": "number",
+              "enum": [
+                1,
+                2
+              ]
+            },
+            "status": {
+              "type": "number",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "member_type",
+            "status"
+          ],
+          "additionalProperties": false,
+          "description": "Partial DTO representing a member (summary view)."
+        },
+        "grd": {
+          "type": "string"
+        },
+        "sharing_operation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Unique identifier."
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the sharing operation."
+            },
+            "type": {
+              "type": "number",
+              "enum": [
+                1,
+                2,
+                3
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "type"
+          ],
+          "additionalProperties": false,
+          "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "sampling_power",
+        "status",
+        "amperage",
+        "rate",
+        "client_type",
+        "start_date",
+        "end_date",
+        "injection_status",
+        "production_chain",
+        "totalGenerating_capacity",
+        "grd"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
+    },
+    "meter_data_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "sampling_power": {
+            "type": "number"
+          },
+          "status": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "amperage": {
+            "type": "number"
+          },
+          "rate": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          },
+          "client_type": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "injection_status": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "production_chain": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ]
+          },
+          "totalGenerating_capacity": {
+            "type": "number"
+          },
+          "member": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Unique ID of the member."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the member."
+              },
+              "member_type": {
+                "type": "number",
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "status": {
+                "type": "number",
+                "enum": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "member_type",
+              "status"
+            ],
+            "additionalProperties": false,
+            "description": "Partial DTO representing a member (summary view)."
+          },
+          "grd": {
+            "type": "string"
+          },
+          "sharing_operation": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Unique identifier."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the sharing operation."
+              },
+              "type": {
+                "type": "number",
+                "enum": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type"
+            ],
+            "additionalProperties": false,
+            "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "sampling_power",
+          "status",
+          "amperage",
+          "rate",
+          "client_type",
+          "start_date",
+          "end_date",
+          "injection_status",
+          "production_chain",
+          "totalGenerating_capacity",
+          "grd"
+        ],
+        "additionalProperties": false,
+        "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
+      },
+      "description": "Historical meter data configurations."
+    },
+    "futur_meter_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "sampling_power": {
+            "type": "number"
+          },
+          "status": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "amperage": {
+            "type": "number"
+          },
+          "rate": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          },
+          "client_type": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "injection_status": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "production_chain": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ]
+          },
+          "totalGenerating_capacity": {
+            "type": "number"
+          },
+          "member": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Unique ID of the member."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the member."
+              },
+              "member_type": {
+                "type": "number",
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "status": {
+                "type": "number",
+                "enum": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "member_type",
+              "status"
+            ],
+            "additionalProperties": false,
+            "description": "Partial DTO representing a member (summary view)."
+          },
+          "grd": {
+            "type": "string"
+          },
+          "sharing_operation": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Unique identifier."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the sharing operation."
+              },
+              "type": {
+                "type": "number",
+                "enum": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type"
+            ],
+            "additionalProperties": false,
+            "description": "Simplified DTO for a sharing operation (partial view), typically used in lists."
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "sampling_power",
+          "status",
+          "amperage",
+          "rate",
+          "client_type",
+          "start_date",
+          "end_date",
+          "injection_status",
+          "production_chain",
+          "totalGenerating_capacity",
+          "grd"
+        ],
+        "additionalProperties": false,
+        "description": "DTO representing detailed meter configuration and status for a specific period (history/current/future)."
+      },
+      "description": "Future scheduled meter data configurations."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    }
+  },
+  "required": [
+    "EAN",
+    "address",
+    "community",
+    "meter_number",
+    "phases_number",
+    "reading_frequency",
+    "tarif_group"
+  ],
+  "additionalProperties": false
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» EAN|object|false|none|none|
+|»» type|string|false|none|none|
+|» meter_number|object|false|none|none|
+|»» type|string|false|none|none|
+|» address|[AddressDTO](#schemaaddressdto)|false|none|none|
+|» holder|[MembersPartialDTO](#schemamemberspartialdto)|false|none|none|
+|» tarif_group|[TarifGroup](#schematarifgroup)|false|none|none|
+|» phases_number|object|false|none|none|
+|»» type|string|false|none|none|
+|» reading_frequency|[ReadingFrequency](#schemareadingfrequency)|false|none|none|
+|» meter_data|[MetersDataDTO](#schemametersdatadto)|false|none|none|
+|» meter_data_history|object|false|none|none|
+|»» type|string|false|none|none|
+|»» items|[MetersDataDTO](#schemametersdatadto)|false|none|none|
+|»» description|string|false|none|none|
+|» futur_meter_data|object|false|none|none|
+|»» type|string|false|none|none|
+|»» items|[MetersDataDTO](#schemametersdatadto)|false|none|none|
+|»» description|string|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+
+<h2 id="tocS_MeDocumentDTO">MeDocumentDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemamedocumentdto"></a>
+<a id="schema_MeDocumentDTO"></a>
+<a id="tocSmedocumentdto"></a>
+<a id="tocsmedocumentdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique identifier of the document."
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Name of the file."
+    },
+    "file_size": {
+      "type": "number",
+      "description": "Size of the file in bytes."
+    },
+    "upload_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date when the document was uploaded."
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type of the file."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    }
+  },
+  "required": [
+    "community",
     "file_name",
     "file_size",
     "file_type",
-    "file_url",
     "id",
-    "member_id",
     "upload_date"
   ],
   "additionalProperties": false
@@ -12041,19 +16615,614 @@ UserIdChecker
 |properties|object|false|none|none|
 |» id|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» file_name|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» file_size|object|false|none|none|
 |»» type|string|false|none|none|
+|»» description|string|false|none|none|
 |» upload_date|object|false|none|none|
 |»» type|string|false|none|none|
 |»» format|string|false|none|none|
+|»» description|string|false|none|none|
 |» file_type|object|false|none|none|
 |»» type|string|false|none|none|
-|» member_id|object|false|none|none|
-|»» type|string|false|none|none|
-|» file_url|object|false|none|none|
-|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
 |required|[string]|false|none|none|
 |additionalProperties|boolean|false|none|none|
+
+<h2 id="tocS_UserMemberInvitationQuery">UserMemberInvitationQuery</h2>
+<!-- backwards compatibility -->
+<a id="schemausermemberinvitationquery"></a>
+<a id="schema_UserMemberInvitationQuery"></a>
+<a id="tocSusermemberinvitationquery"></a>
+<a id="tocsusermemberinvitationquery"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "page": {
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
+    },
+    "name": {
+      "type": "string",
+      "description": "Filter by member name."
+    },
+    "to_be_encoded": {
+      "type": "boolean",
+      "description": "Filter by encoding status (to be encoded or not)."
+    },
+    "sort_name": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    },
+    "sort_date": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "limit",
+    "page"
+  ],
+  "description": "DTO for querying member invitations for specific users. Supports pagination and filtering."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» page|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» limit|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» to_be_encoded|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» sort_name|[Sort](#schemasort)|false|none|none|
+|» sort_date|[Sort](#schemasort)|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|required|[string]|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_UserMemberInvitationDTO">UserMemberInvitationDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemausermemberinvitationdto"></a>
+<a id="schema_UserMemberInvitationDTO"></a>
+<a id="tocSusermemberinvitationdto"></a>
+<a id="tocsusermemberinvitationdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique ID of the invitation."
+    },
+    "member_id": {
+      "type": "number",
+      "description": "ID of the member (if linked/existing)."
+    },
+    "member_name": {
+      "type": "string",
+      "description": "Name of the member."
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user invited."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date of invitation creation."
+    },
+    "to_be_encoded": {
+      "type": "boolean",
+      "description": "Whether the member needs to be encoded (details filled)."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    }
+  },
+  "required": [
+    "id",
+    "user_email",
+    "created_at",
+    "to_be_encoded",
+    "community"
+  ],
+  "additionalProperties": false,
+  "description": "DTO representing an invitation for a user to become a member."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member_name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» user_email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» created_at|object|false|none|none|
+|»» type|string|false|none|none|
+|»» format|string|false|none|none|
+|»» description|string|false|none|none|
+|» to_be_encoded|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_UserManagerInvitationQuery">UserManagerInvitationQuery</h2>
+<!-- backwards compatibility -->
+<a id="schemausermanagerinvitationquery"></a>
+<a id="schema_UserManagerInvitationQuery"></a>
+<a id="tocSusermanagerinvitationquery"></a>
+<a id="tocsusermanagerinvitationquery"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "page": {
+      "type": "number",
+      "description": "Page number to retrieve (1-based index). Defaults to 1."
+    },
+    "limit": {
+      "type": "number",
+      "description": "Number of items per page. Defaults to system configuration."
+    },
+    "name": {
+      "type": "string",
+      "description": "Filter by name."
+    },
+    "sort_name": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    },
+    "sort_date": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "limit",
+    "page"
+  ],
+  "description": "DTO for querying manager invitations."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» page|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» limit|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» name|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» sort_name|[Sort](#schemasort)|false|none|none|
+|» sort_date|[Sort](#schemasort)|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|required|[string]|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_UserManagerInvitationDTO">UserManagerInvitationDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemausermanagerinvitationdto"></a>
+<a id="schema_UserManagerInvitationDTO"></a>
+<a id="tocSusermanagerinvitationdto"></a>
+<a id="tocsusermanagerinvitationdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Invitation ID."
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user."
+    },
+    "community": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The unique identifier of the community (internal DB ID)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the community."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "description": "DTO representing a simple view of a community."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation date."
+    }
+  },
+  "required": [
+    "id",
+    "user_email",
+    "community",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "description": "DTO representing an invitation for a user to become a manager."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» user_email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» community|[CommunityDTO](#schemacommunitydto)|false|none|none|
+|» created_at|object|false|none|none|
+|»» type|string|false|none|none|
+|»» format|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_InviteUser">InviteUser</h2>
+<!-- backwards compatibility -->
+<a id="schemainviteuser"></a>
+<a id="schema_InviteUser"></a>
+<a id="tocSinviteuser"></a>
+<a id="tocsinviteuser"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user to invite."
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for sending an invitation."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» user_email|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_AcceptInvitationDTO">AcceptInvitationDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemaacceptinvitationdto"></a>
+<a id="schema_AcceptInvitationDTO"></a>
+<a id="tocSacceptinvitationdto"></a>
+<a id="tocsacceptinvitationdto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invitation_id": {
+      "type": "number",
+      "description": "ID of the invitation to accept."
+    }
+  },
+  "required": [
+    "invitation_id"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for accepting an invitation."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» invitation_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
+
+<h2 id="tocS_AcceptInvitationWEncodedDTO">AcceptInvitationWEncodedDTO</h2>
+<!-- backwards compatibility -->
+<a id="schemaacceptinvitationwencodeddto"></a>
+<a id="schema_AcceptInvitationWEncodedDTO"></a>
+<a id="tocSacceptinvitationwencodeddto"></a>
+<a id="tocsacceptinvitationwencodeddto"></a>
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invitation_id": {
+      "type": "number",
+      "description": "ID of the invitation to accept."
+    },
+    "member": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the member (Full name or Company name)."
+        },
+        "member_type": {
+          "type": "number",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "status": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        },
+        "iban": {
+          "type": "string",
+          "description": "IBAN of the member."
+        },
+        "home_address": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "number": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            },
+            "postcode": {
+              "type": "string"
+            },
+            "supplement": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "street",
+            "number",
+            "city",
+            "postcode"
+          ],
+          "additionalProperties": false,
+          "description": "DTO for creating a new address."
+        },
+        "billing_address": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "number": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            },
+            "postcode": {
+              "type": "string"
+            },
+            "supplement": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "street",
+            "number",
+            "city",
+            "postcode"
+          ],
+          "additionalProperties": false,
+          "description": "DTO for creating a new address."
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name (Individual only)."
+        },
+        "NRN": {
+          "type": "string",
+          "description": "National Registry Number (Individual only)."
+        },
+        "email": {
+          "type": "string",
+          "description": "Contact email (Individual only)."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number (Individual only)."
+        },
+        "social_rate": {
+          "type": "boolean",
+          "description": "Social rate eligibility (Individual only)."
+        },
+        "vat_number": {
+          "type": "string",
+          "description": "VAT number (Company only)."
+        },
+        "manager": {
+          "type": "object",
+          "properties": {
+            "NRN": {
+              "type": "string",
+              "description": "National Registry Number of the manager."
+            },
+            "name": {
+              "type": "string",
+              "description": "First name of the manager."
+            },
+            "surname": {
+              "type": "string",
+              "description": "Surname of the manager."
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the manager."
+            },
+            "phone_number": {
+              "type": "string",
+              "description": "Phone number of the manager."
+            }
+          },
+          "required": [
+            "NRN",
+            "name",
+            "surname",
+            "email"
+          ],
+          "additionalProperties": false,
+          "description": "DTO representing a manager associated with a member."
+        }
+      },
+      "required": [
+        "name",
+        "member_type",
+        "status",
+        "iban",
+        "home_address",
+        "billing_address",
+        "first_name",
+        "NRN",
+        "email",
+        "social_rate",
+        "vat_number"
+      ],
+      "additionalProperties": false,
+      "description": "DTO for creating a new member. Contains common fields and type-specific fields (Individual vs Company). Uses conditional validation based on `member_type`."
+    }
+  },
+  "required": [
+    "invitation_id",
+    "member"
+  ],
+  "additionalProperties": false,
+  "description": "DTO for accepting an invitation with additional member details. Used when the member needs to be encoded/created during acceptance."
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|type|string|false|none|none|
+|properties|object|false|none|none|
+|» invitation_id|object|false|none|none|
+|»» type|string|false|none|none|
+|»» description|string|false|none|none|
+|» member|[CreateMemberDTO](#schemacreatememberdto)|false|none|none|
+|required|[string]|false|none|none|
+|additionalProperties|boolean|false|none|none|
+|description|string|false|none|none|
 

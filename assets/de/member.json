@@ -6,24 +6,24 @@
     "database_delete": "Beim Löschen des Mitglieds aus der Datenbank ist ein Fehler aufgetreten"
   },
   "delete_member_link": {
-    "database_delete": "Beim Löschen der Verknüpfung zwischen Benutzer und Mitglied aus der Datenbank ist ein Fehler aufgetreten"
+    "database_delete": "Beim Löschen der Verknüpfung zwischen dem Benutzer und dem Mitglied in der Datenbank ist ein Fehler aufgetreten"
   },
   "get_member": {
-    "member_not_found": "Mitglied nicht gefunden"
+    "member_not_found": "Das Mitglied konnte nicht gefunden werden"
   },
   "patch_member_status": {
-    "member_not_found": "Mitglied nicht gefunden",
+    "member_not_found": "Das Mitglied konnte nicht gefunden werden",
     "database_update": "Beim Aktualisieren der Datenbank ist ein Fehler aufgetreten"
   },
   "patch_member_link": {
-    "member_not_found": "Mitglied nicht gefunden",
+    "member_not_found": "Das Mitglied konnte nicht gefunden werden",
     "database_add": "Beim Hinzufügen der Einladung zur Datenbank ist ein Fehler aufgetreten"
   },
   "update_member": {
-    "member_not_found": "Mitglied nicht gefunden",
+    "member_not_found": "Das Mitglied konnte nicht gefunden werden",
     "database_save_address": "Beim Hinzufügen/Abrufen der Adresse in der Datenbank ist ein Fehler aufgetreten",
     "database_save_member": "Beim Aktualisieren des Mitglieds in der Datenbank ist ein Fehler aufgetreten",
-    "database_save_individual": "Beim Aktualisieren der Einzelperson in der Datenbank ist ein Fehler aufgetreten",
+    "database_save_individual": "Beim Aktualisieren der Person in der Datenbank ist ein Fehler aufgetreten",
     "database_save_company": "Beim Aktualisieren des Unternehmens in der Datenbank ist ein Fehler aufgetreten"
   },
   "validation": {

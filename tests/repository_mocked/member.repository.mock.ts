@@ -3,6 +3,7 @@ import type { IMemberRepository } from "../../src/modules/members/domain/i-membe
 
 export function createMockMemberRepository(): jest.Mocked<IMemberRepository> {
   return {
+    saveManager: jest.fn(),
     addInvitationToMember: jest.fn(),
     deleteMember: jest.fn(),
     deleteMemberLink: jest.fn(),

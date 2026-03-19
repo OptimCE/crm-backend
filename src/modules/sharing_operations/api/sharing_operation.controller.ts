@@ -25,6 +25,8 @@ import {
 } from "./sharing_operation.dtos.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
+import { Cache, InvalidateCache } from "../../../shared/cache/decorator/cache.decorators.js";
+import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 
 const sharing_operationControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 @injectable()
@@ -38,6 +40,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationList", { url: "/sharing_operations/", method: "get" })
+  @Cache(cacheKey("sharing-op:list", "community", (req) => JSON.stringify(req.query)), 60)
   async getSharingOperationList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(SharingOperationPartialQuery, req.query);
     const [result, pagination]: [SharingOperationPartialDTO[], Pagination] = await this.sharing_operationService.getSharingOperationList(queryObject);
@@ -52,6 +55,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperation", { url: "/sharing_operations/:id", method: "get" })
+  @Cache(cacheKey("sharing-op:detail", "community", (req) => req.params.id), 60)
   async getSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: SharingOperationDTO = await this.sharing_operationService.getSharingOperation(+req.params.id);
     logger.info("Sharing operation successfully retrieved");
@@ -65,6 +69,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationMetersList", { url: "/sharing_operations/:id/meters", method: "get" })
+  @Cache(cacheKey("sharing-op:meters", "community", (req) => req.params.id + ":" + JSON.stringify(req.query)), 60)
   async getSharingOperationMetersList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(SharingOperationMetersQuery, req.query);
     const [result, pagination]: [PartialMeterDTO[], Pagination] = await this.sharing_operationService.getSharingOperationMetersList(
@@ -82,6 +87,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationKeysList", { url: "/sharing_operations/:id/keys", method: "get" })
+  @Cache(cacheKey("sharing-op:keys", "community", (req) => req.params.id + ":" + JSON.stringify(req.query)), 60)
   async getSharingOperationKeysList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(KeyPartialQuery, req.query);
     const [result, pagination]: [SharingOperationKeyDTO[], Pagination] = await this.sharing_operationService.getSharingOperationKeysList(
@@ -102,6 +108,7 @@ export class SharingOperationController {
     url: "/sharing_operations/:id/consumptions",
     method: "get",
   })
+  @Cache(cacheKey("sharing-op:consumptions", "community", (req) => req.params.id + ":" + JSON.stringify(req.query)), 60)
   async getSharingOperationConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(SharingOperationConsumptionQuery, req.query);
     const result: SharingOpConsumptionDTO = await this.sharing_operationService.getSharingOperationConsumption(+req.params.id, query_consumptions);
@@ -135,6 +142,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("createSharingOperation", { url: "/sharing_operations/", method: "post" })
+  @InvalidateCache([cachePattern("sharing-op:list", "community")])
   async createSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_sharing_operations = await validateDto(CreateSharingOperationDTO, req.body);
     await this.sharing_operationService.createSharingOperation(new_sharing_operations);
@@ -149,6 +157,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("addKeyToSharing", { url: "/sharing_operations/key", method: "post" })
+  @InvalidateCache([cachePattern("sharing-op:keys", "community"), cachePattern("sharing-op:detail", "community")])
   async addKeyToSharing(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_key_to_operation = await validateDto(AddKeyToSharingOperationDTO, req.body);
     await this.sharing_operationService.addKeyToSharing(new_key_to_operation);
@@ -163,6 +172,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("addMeterToSharing", { url: "/sharing_operations/meter", method: "post" })
+  @InvalidateCache([cachePattern("sharing-op:meters", "community"), cachePattern("sharing-op:detail", "community")])
   async addMeterToSharing(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_meters_to_operation = await validateDto(AddMeterToSharingOperationDTO, req.body);
     await this.sharing_operationService.addMeterToSharing(new_meters_to_operation);
@@ -177,6 +187,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("addConsumptionDataToSharing", { url: "/sharing_operations/consumptions", method: "post" })
+  @InvalidateCache([cachePattern("sharing-op:consumptions", "community")])
   async addConsumptionDataToSharing(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const payload = {
       ...req.body,
@@ -195,6 +206,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("patchKeyStatus", { url: "/sharing_operations/key", method: "patch" })
+  @InvalidateCache([cachePattern("sharing-op:keys", "community"), cachePattern("sharing-op:detail", "community")])
   async patchKeyStatus(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_key_status = await validateDto(PatchKeyToSharingOperationDTO, req.body);
     await this.sharing_operationService.patchKeyStatus(patched_key_status);
@@ -209,6 +221,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("patchMeterStatus", { url: "/sharing_operations/meter", method: "patch" })
+  @InvalidateCache([cachePattern("sharing-op:meters", "community"), cachePattern("sharing-op:detail", "community")])
   async patchMeterStatus(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_meter_status = await validateDto(PatchMeterToSharingOperationDTO, req.body);
     await this.sharing_operationService.patchMeterStatus(patched_meter_status);
@@ -223,6 +236,13 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("deleteSharingOperation", { url: "/sharing_operations/:id", method: "delete" })
+  @InvalidateCache([
+    cachePattern("sharing-op:list", "community"),
+    cachePattern("sharing-op:detail", "community"),
+    cachePattern("sharing-op:meters", "community"),
+    cachePattern("sharing-op:keys", "community"),
+    cachePattern("sharing-op:consumptions", "community"),
+  ])
   async deleteSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.sharing_operationService.deleteSharingOperation(+req.params.id);
     logger.info("Sharing operation deleted");
@@ -236,6 +256,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("deleteMeterFromSharingOperation", { url: "/sharing_operations/:id/meter", method: "delete" })
+  @InvalidateCache([cachePattern("sharing-op:meters", "community"), cachePattern("sharing-op:detail", "community")])
   async deleteMeterFromSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const removed_meter_status = await validateDto(RemoveMeterFromSharingOperationDTO, req.body);
     await this.sharing_operationService.deleteMeterFromSharingOperation(removed_meter_status);
