@@ -24,7 +24,7 @@ function initLogger(serviceName: string): pino.Logger {
         resourceAttributes: {
           "service.name": serviceName,
         },
-        endpoint: config.get("remote_logging.opentelemetry.exporter_endpoint"),
+        endpoint: config.get("remote_logging.opentelemetry.exporterEndpoint"),
         includeTraceContext: true,
       },
     });
