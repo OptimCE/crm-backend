@@ -4,6 +4,10 @@ import config from "config";
 import { call } from "../../../shared/services/api_call.js";
 import type { HealthCheckResult, HealthReport, IHealthService } from "../domain/i-health.service.js";
 
+interface StatusCheckResponse {
+  status: number;
+}
+
 /**
  * Health Service - Provides health check functionality for the application.
  * Used by Kubernetes liveness/readiness probes and load balancers.
@@ -36,7 +40,7 @@ export class HealthService implements IHealthService {
   async checkDocuments(): Promise<HealthCheckResult> {
     const start = Date.now();
     try {
-      const response = await call(config.get<string>("services.documents.url") + "/health");
+      const response = await call<StatusCheckResponse>({ url: config.get<string>("services.documents.url") + "/health" });
       if (response.status === 200) {
         return { status: "ok", latencyMs: Date.now() - start };
       } else {
@@ -55,7 +59,7 @@ export class HealthService implements IHealthService {
     const start = Date.now();
     try {
       const keycloakUrl = config.get<string>("iam_service.settings.baseUrl");
-      const response = await call(keycloakUrl + "/health");
+      const response = await call<StatusCheckResponse>({ url: keycloakUrl + "/health" });
       if (response.status === 200) {
         return { status: "ok", latencyMs: Date.now() - start };
       } else {
