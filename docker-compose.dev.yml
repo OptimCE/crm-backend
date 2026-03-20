@@ -34,10 +34,10 @@ services:
       # Logging Behavior
       - logging=false
       # IAM Configuration
-      - IAM_SERVICE_NAME=KEYCLOACK
+      - IAM_SERVICE_NAME=KEYCLOAK
       - IAM_REALM=optimce-realm
       - IAM_REALM_NAME=optimce-realm
-      - IAM_CLIENT_ID=optimce-backend
+      - IAM_BASE_URL=http://keycloak:8080
       - IAM_GRANT_TYPE=client_credentials
       - IAM_CLIENT_SECRET=changeme_keycloak_admin_password
       - IAM_BASE_URL=http://keycloak:8080

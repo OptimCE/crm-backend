@@ -40,7 +40,25 @@ const config = {
       testMatch: ['**/tests/functionals/**/*.test.ts'],
       setupFiles: ['reflect-metadata'],
       maxWorkers: 1,
+      globalSetup: "./tests/utils/global.setup.ts",
+      globalTeardown: "./tests/utils/global.teardown.ts",
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+      },
 
+      transform: {
+        '^.+\\.ts$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }]
+      },
+    },
+    {
+      displayName: 'cache',
+      preset: 'ts-jest/presets/default-esm',
+      testEnvironment: 'node',
+      testMatch: ['**/tests/functionals/**/*.cache.test.ts'],
+      setupFiles: ['reflect-metadata'],
+      maxWorkers: 1,
+      globalSetup: "./tests/utils/global.setup.ts",
+      globalTeardown: "./tests/utils/global.teardown.ts",
       moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
       },

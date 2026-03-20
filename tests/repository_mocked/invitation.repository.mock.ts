@@ -5,17 +5,9 @@ export function createMockInvitationRepository(): jest.Mocked<IInvitationReposit
   return {
     cancelManagerInvitation: jest.fn(),
     cancelMemberInvitation: jest.fn(),
-    getInvitationManagerById: jest.fn(),
-    getInvitationMemberById: jest.fn(),
     getManagersPendingInvitation: jest.fn(),
     getMembersPendingInvitation: jest.fn(),
-    getOwnManagersPendingInvitation: jest.fn(),
-    getOwnMembersPendingInvitation: jest.fn(),
     inviteUserToBecomeManager: jest.fn(),
     inviteUserToBecomeMember: jest.fn(),
-    refuseManagerInvitation: jest.fn(),
-    refuseMemberInvitation: jest.fn(),
-    saveUserMemberLink: jest.fn(),
-    getOwnMembersPendingInvitationById: jest.fn(),
   };
 }

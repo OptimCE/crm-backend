@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Functional Tests (1)" type="JavaScriptTestRunnerJest">
+  <configuration default="false" name="Functional Tests" type="JavaScriptTestRunnerJest">
     <node-interpreter value="project" />
     <node-options value="--experimental-vm-modules" />
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />

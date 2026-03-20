@@ -49,13 +49,7 @@ export class UserRepository implements IUserRepository {
       where: { userEmail: user.email },
     });
     if (manager_invitation && manager_invitation.length > 0) {
-      const affected_update_manager = await manager.update(
-        GestionnaireInvitation,
-        {
-          where: { userEmail: user.email },
-        },
-        { user: user },
-      );
+      const affected_update_manager = await manager.update(GestionnaireInvitation, { userEmail: user.email }, { user: user });
       if (!affected_update_manager || affected_update_manager.affected !== manager_invitation.length) {
         logger.error({ operation: "updateInvitations" }, "The invitations links to manager weren' update properly");
         throw new AppError(USER_ERRORS.UPDATE_INVITATION.INVITATION_NOT_UPDATED, 400);
@@ -65,13 +59,7 @@ export class UserRepository implements IUserRepository {
       where: { userEmail: user.email },
     });
     if (member_invitation && member_invitation.length > 0) {
-      const affected_update_member = await manager.update(
-        UserMemberInvitation,
-        {
-          where: { userEmail: user.email },
-        },
-        { user: user },
-      );
+      const affected_update_member = await manager.update(UserMemberInvitation, { userEmail: user.email }, { user: user });
       if (!affected_update_member || affected_update_member.affected !== member_invitation.length) {
         logger.error({ operation: "updateInvitations" }, "The invitations links to member weren' update properly");
         throw new AppError(USER_ERRORS.UPDATE_INVITATION.INVITATION_NOT_UPDATED, 400);

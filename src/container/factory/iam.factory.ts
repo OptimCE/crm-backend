@@ -1,6 +1,6 @@
 import config from "config";
 import { container } from "../di-container.js";
-import { KeycloakIamService } from "../../shared/iam/implementations/keycloack.iam.service.js";
+import { KeycloakIamService } from "../../shared/iam/implementations/keycloak.iam.service.js";
 import type { IIamService } from "../../shared/iam/i-iam.service.js";
 
 /**
@@ -15,7 +15,7 @@ export function intializeIAMService(): void {
     throw new Error("Missing iam_service.name");
   }
   switch (iam_service.toUpperCase()) {
-    case "KEYCLOACK": {
+    case "KEYCLOAK": {
       const settings: {
         realm: string;
         realmName: string;

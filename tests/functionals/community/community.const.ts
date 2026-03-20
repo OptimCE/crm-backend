@@ -123,7 +123,7 @@ export const testCasesPatchRole = [
     expected_data: "success",
     external_mocks: {
       iamService: {
-        updateUserorgs: jest.fn(() => Promise.resolve()),
+        updateUserRole: jest.fn(() => Promise.resolve()),
       },
     },
   },
@@ -135,7 +135,7 @@ export const testCasesPatchRole = [
     expected_error_code: COMMUNITY_ERRORS.PATCH_ROLE_USER.COMMUNITY_USER_NOT_FOUND.errorCode,
     external_mocks: {
       iamService: {
-        updateUserorgs: jest.fn(() => Promise.resolve()),
+        updateUserRole: jest.fn(() => Promise.resolve()),
       },
     },
   },

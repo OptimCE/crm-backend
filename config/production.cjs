@@ -33,7 +33,7 @@ module.exports = {
         }
     },
     remote_logging: {
-        status: process.env.REMOTE_LOGGING || "false",
+        status: process.env.REMOTE_LOGGING,
         opentelemetry: {
             exporterEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
             exporterProtocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL

@@ -12,6 +12,7 @@ import { KeyParameters, KeyResponses } from "../modules/keys/api/key.swagger.js"
 import { MeterParameters, MeterResponses } from "../modules/meters/api/meter.swagger.js";
 import { SharingOperationParameters, SharingOperationResponses } from "../modules/sharing_operations/api/sharing_operation.swagger.js";
 import { UserParameters, UserResponses } from "../modules/users/api/user.swagger.js";
+import { MeParameters, MeResponses } from "../modules/me/api/me.swagger.js";
 interface TsSchemas {
   definitions: Record<string, unknown>;
 }
@@ -89,6 +90,7 @@ const doc = {
       ...MeterParameters,
       ...SharingOperationParameters,
       ...UserParameters,
+      ...MeParameters,
     },
 
     // 3. MERGE RESPONSES
@@ -102,6 +104,7 @@ const doc = {
       ...MeterResponses,
       ...SharingOperationResponses,
       ...UserResponses,
+      ...MeResponses,
       // ...GenericGlobalResponses
     },
 

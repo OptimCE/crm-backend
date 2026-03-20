@@ -7,6 +7,8 @@ import { validateDto } from "../../../shared/utils/dto.validator.js";
 import logger from "../../../shared/monitor/logger.js";
 import { ApiResponse, ApiResponsePaginated, Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { SUCCESS } from "../../../shared/errors/errors.js";
+import { Cache, InvalidateCache } from "../../../shared/cache/decorator/cache.decorators.js";
+import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 import {
   CreateMeterDTO,
   DeleteFutureMeterDataDTO,
@@ -31,6 +33,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("getMetersList", { url: "/meters/", method: "get" })
+  @Cache(cacheKey("meters:list", "community", (req) => JSON.stringify(req.query)), 60)
   async getMetersList(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(MeterPartialQuery, req.query);
     const [result, pagination]: [PartialMeterDTO[], Pagination] = await this.meterService.getMetersList(queryObject);
@@ -45,6 +48,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("getMeter", { url: "/meters/:id", method: "get" })
+  @Cache(cacheKey("meters:detail", "community", (req) => req.params.id), 60)
   async getMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: MetersDTO = await this.meterService.getMeter(req.params.id);
     logger.info("Meter successfully retrieved");
@@ -58,6 +62,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("getMeterConsumptions", { url: "/meters/:id/consumptions", method: "get" })
+  @Cache(cacheKey("meters:consumptions", "community", (req) => req.params.id + ":" + JSON.stringify(req.query)), 60)
   async getMeterConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const result: MeterConsumptionDTO = await this.meterService.getMeterConsumptions(req.params.id, query_consumptions);
@@ -76,7 +81,8 @@ export class MeterController {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const buffer: Buffer = await this.meterService.downloadMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully download");
-    res.setHeader("Content-Disposition", `attachment; filename=consommations-${req.query.id}.xlsx`);
+    const filenameBase = req.t("download_meter_consumptions.download_name", { ns: "meter" }) + ".xlsx";
+    res.setHeader("Content-Disposition", `attachment; filename=${filenameBase}`);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.send(buffer);
   }
@@ -88,6 +94,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("addMeter", { url: "/meters/", method: "post" })
+  @InvalidateCache([cachePattern("meters:list", "community")])
   async addMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_meter = await validateDto(CreateMeterDTO, req.body);
     await this.meterService.addMeter(new_meter);
@@ -102,6 +109,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("updateMeter", { url: "/meters/", method: "put" })
+  @InvalidateCache([cachePattern("meters:list", "community"), cachePattern("meters:detail", "community")])
   async updateMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_meter = await validateDto(UpdateMeterDTO, req.body);
     await this.meterService.updateMeter(updated_meter);
@@ -116,6 +124,11 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("patchMeterData", { url: "/meters/data", method: "patch" })
+  @InvalidateCache([
+    cachePattern("meters:list", "community"),
+    cachePattern("meters:detail", "community"),
+    cachePattern("meters:consumptions", "community"),
+  ])
   async patchMeterData(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_meter_data = await validateDto(PatchMeterDataDTO, req.body);
     await this.meterService.patchMeterData(patched_meter_data);
@@ -130,6 +143,11 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("deleteLatestMeterData", { url: "/meters/data/delete", method: "patch" })
+  @InvalidateCache([
+    cachePattern("meters:list", "community"),
+    cachePattern("meters:detail", "community"),
+    cachePattern("meters:consumptions", "community"),
+  ])
   async deleteLatestMeterData(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const deleted_meter_data = await validateDto(DeleteFutureMeterDataDTO, req.body);
     await this.meterService.deleteLatestMeterData(deleted_meter_data);
@@ -144,6 +162,11 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("patchMeterData", { url: "/meters/:id", method: "delete" })
+  @InvalidateCache([
+    cachePattern("meters:list", "community"),
+    cachePattern("meters:detail", "community"),
+    cachePattern("meters:consumptions", "community"),
+  ])
   async deleteMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.meterService.deleteMeter(req.params.id);
     logger.info("Meter deleted");

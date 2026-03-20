@@ -4,12 +4,10 @@ import type { IInvitationRepository } from "../domain/i-invitation.repository.js
 import { DeleteResult, type QueryRunner } from "typeorm";
 import { GestionnaireInvitation, UserMemberInvitation } from "../domain/invitation.models.js";
 import { UserManagerInvitationQuery, UserMemberInvitationQuery } from "../api/invitation.dtos.js";
-import { User, UserMemberLink } from "../../users/domain/user.models.js";
+import { User } from "../../users/domain/user.models.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
-import { withUserScope } from "../../../shared/database/withUser.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
-import { Member } from "../../members/domain/member.models.js";
 
 @injectable()
 export class InvitationRepository implements IInvitationRepository {
@@ -83,47 +81,6 @@ export class InvitationRepository implements IInvitationRepository {
       .execute();
   }
 
-  async refuseManagerInvitation(id_invitation: number, query_runner?: QueryRunner): Promise<DeleteResult> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const internal_user_id = await this.authContext.getInternalUserId(query_runner);
-    return await manager
-      .createQueryBuilder()
-      .delete()
-      .from(GestionnaireInvitation)
-      .where("id = :id", { id: id_invitation })
-      .andWhere("user = :user_id", { user_id: internal_user_id })
-      .execute();
-  }
-
-  async refuseMemberInvitation(id_invitation: number, query_runner?: QueryRunner): Promise<DeleteResult> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const internal_user_id = await this.authContext.getInternalUserId(query_runner);
-    return await manager
-      .createQueryBuilder()
-      .delete()
-      .from(UserMemberInvitation)
-      .where("id = :id", { id: id_invitation })
-      .andWhere("user = :user_id", { user_id: internal_user_id })
-      .execute();
-  }
-
-  async getInvitationManagerById(invitation_id: number, query_runner?: QueryRunner): Promise<GestionnaireInvitation | null> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-
-    return manager.findOne(GestionnaireInvitation, {
-      where: { id: invitation_id },
-      relations: ["user", "community"],
-    });
-  }
-
-  async getInvitationMemberById(invitation_id: number, query_runner?: QueryRunner): Promise<UserMemberInvitation | null> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    return manager.findOne(UserMemberInvitation, {
-      where: { id: invitation_id },
-      relations: ["user", "community", "member"],
-    });
-  }
-
   async getManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
@@ -177,90 +134,6 @@ export class InvitationRepository implements IInvitationRepository {
     return qb.skip(skip).take(take).getManyAndCount();
   }
 
-  async getOwnManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-
-    let qb = manager.createQueryBuilder(GestionnaireInvitation, "invitation");
-    // Security Scope
-    withUserScope(qb, "invitation");
-    // Joins required for filtering/sorting and data display
-    qb.leftJoinAndSelect("invitation.community", "community");
-    qb.leftJoinAndSelect("invitation.user", "user");
-
-    // Apply Logic
-    qb = applyFilters(this.managerInvitationFilters, qb, query);
-    qb = applySorts(this.managerInvitationSorts, qb, query);
-
-    // Pagination
-    const take = query.limit;
-    const skip = (query.page - 1) * take;
-
-    // Default sort if none provided (prevents random order on pagination)
-    if (!query.sort_name && !query.sort_date) {
-      qb.addOrderBy("invitation.created_at", "DESC");
-    }
-
-    return qb.skip(skip).take(take).getManyAndCount();
-  }
-
-  async getOwnMembersPendingInvitation(query: UserMemberInvitationQuery, query_runner?: QueryRunner): Promise<[UserMemberInvitation[], number]> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-
-    let qb = manager.createQueryBuilder(UserMemberInvitation, "invitation");
-    // Security Scope
-    withUserScope(qb, "invitation");
-    // Joins required for filtering/sorting and data display
-    qb.leftJoinAndSelect("invitation.community", "community");
-    qb.leftJoinAndSelect("invitation.user", "user");
-    qb.leftJoinAndSelect("invitation.member", "member");
-
-    // Apply Logic
-    qb = applyFilters(this.memberInvitationFilters, qb, query);
-    qb = applySorts(this.memberInvitationSorts, qb, query);
-
-    // Pagination
-    const take = query.limit;
-    const skip = (query.page - 1) * take;
-
-    // Default sort if none provided (prevents random order on pagination)
-    if (!query.sort_name && !query.sort_date) {
-      qb.addOrderBy("invitation.created_at", "DESC");
-    }
-
-    return qb.skip(skip).take(take).getManyAndCount();
-  }
-
-  async getOwnMembersPendingInvitationById(id: number, query_runner?: QueryRunner): Promise<Member | null> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-
-    const qb = manager.createQueryBuilder(UserMemberInvitation, "invitation");
-
-    // Security Scope
-    withUserScope(qb, "invitation");
-
-    // 1. Join Invitation Relations
-    qb.leftJoinAndSelect("invitation.community", "inv_community") // Renamed alias to avoid collision
-      .leftJoinAndSelect("invitation.user", "user")
-      .leftJoinAndSelect("invitation.member", "member");
-
-    // 2. Join Member Deep Relations (anchored to the 'member' alias)
-    qb.leftJoinAndSelect("member.home_address", "home_address")
-      .leftJoinAndSelect("member.billing_address", "billing_address")
-      .leftJoinAndSelect("member.community", "member_community") // Distinct alias for member's community
-      .leftJoinAndSelect("member.individual_details", "individual")
-      .leftJoinAndSelect("individual.manager", "ind_manager")
-      .leftJoinAndSelect("member.company_details", "company")
-      .leftJoinAndSelect("company.manager", "comp_manager");
-
-    qb.where("invitation.id = :id", { id });
-
-    // 3. Execute and Extract
-    const invitation = await qb.getOne();
-
-    // Return the nested member object, or null if invitation/member doesn't exist
-    return invitation?.member || null;
-  }
-
   async inviteUserToBecomeManager(user_email: string, user?: User | null, query_runner?: QueryRunner): Promise<GestionnaireInvitation> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
@@ -282,14 +155,5 @@ export class InvitationRepository implements IInvitationRepository {
       community: { id: internal_community_id },
     });
     return await manager.save(new_member_invitation);
-  }
-
-  async saveUserMemberLink(internal_user_id: number, id_member: number, query_runner?: QueryRunner): Promise<UserMemberLink> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const new_user_member_link: UserMemberLink = manager.create(UserMemberLink, {
-      user: { id: internal_user_id },
-      member: { id: id_member },
-    });
-    return await manager.save(new_user_member_link);
   }
 }

@@ -7,40 +7,40 @@
     "invalid_date_format": "Ein Datum in der Datei hat ein ungültiges Format"
   },
   "add_key_to_sharing": {
-    "sharing_operation_not_found": "Sharing-Vorgang nicht gefunden",
-    "allocation_key_not_found": "Verteilschlüssel nicht gefunden",
-    "database_add": "Beim Hinzufügen des Verteilschlüssels zum Sharing-Vorgang in der Datenbank ist ein Fehler aufgetreten"
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "allocation_key_not_found": "Der Verteilungsschlüssel konnte nicht gefunden werden",
+    "database_add": "Beim Hinzufügen des Verteilungsschlüssels zur Teilungsoperation in der Datenbank ist ein Fehler aufgetreten"
   },
   "add_meter_to_sharing": {
-    "sharing_operation_not_found": "Sharing-Vorgang nicht gefunden",
-    "meters_invalid": "Ein oder mehrere Zähler gehören nicht zur Community",
-    "database_add": "Beim Hinzufügen des Zählers zum Sharing-Vorgang in der Datenbank ist ein Fehler aufgetreten"
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "meters_invalid": "Ein oder mehrere Zähler gehören nicht zur Gemeinschaft",
+    "database_add": "Beim Hinzufügen des Zählers zur Teilungsoperation in der Datenbank ist ein Fehler aufgetreten"
   },
   "create_sharing_operation": {
-    "database_add": "Beim Hinzufügen des Sharing-Vorgangs zur Datenbank ist ein Fehler aufgetreten"
+    "database_add": "Beim Hinzufügen der Teilungsoperation zur Datenbank ist ein Fehler aufgetreten"
   },
   "get_sharing_operation": {
-    "sharing_operation_not_found": "Sharing-Vorgang nicht gefunden"
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden"
   },
   "patch_key_status": {
-    "sharing_operation_not_found": "Sharing-Vorgang nicht gefunden",
-    "database_update": "Beim Aktualisieren des dem Sharing-Vorgang zugeordneten Status in der Datenbank ist ein Fehler aufgetreten"
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "database_update": "Beim Aktualisieren des mit der Teilungsoperation verknüpften Status in der Datenbank ist ein Fehler aufgetreten"
   },
   "patch_meter_status": {
-    "sharing_operation_not_found": "Sharing-Vorgang nicht gefunden",
-    "meter_not_in_community": "Ein oder mehrere Zähler gehören nicht zur Community",
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "meter_not_in_community": "Ein oder mehrere Zähler gehören nicht zur Gemeinschaft",
     "latest_meter_data_not_found": "Keine gültigen Zählerinformationen gefunden",
-    "meter_not_part_of_sharing": "Der Zähler gehört derzeit nicht zum Sharing-Vorgang",
+    "meter_not_part_of_sharing": "Der Zähler ist derzeit nicht Teil der Teilungsoperation",
     "database_add": "Beim Aktualisieren der Zählerinformationen in der Datenbank ist ein Fehler aufgetreten"
   },
   "delete_sharing_operation": {
-    "database_delete": "Beim Löschen des Sharing-Vorgangs aus der Datenbank ist ein Fehler aufgetreten"
+    "database_delete": "Beim Löschen der Teilungsoperation aus der Datenbank ist ein Fehler aufgetreten"
   },
   "delete_meter_from_sharing": {
-    "sharing_operation_not_found": "Sharing-Vorgang nicht gefunden",
-    "meter_not_in_community": "Ein oder mehrere Zähler gehören nicht zur Community",
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "meter_not_in_community": "Ein oder mehrere Zähler gehören nicht zur Gemeinschaft",
     "latest_meter_data_not_found": "Keine gültigen Zählerinformationen gefunden",
-    "meter_not_part_of_sharing": "Der Zähler gehört derzeit nicht zum Sharing-Vorgang",
+    "meter_not_part_of_sharing": "Der Zähler ist derzeit nicht Teil der Teilungsoperation",
     "database_add": "Beim Aktualisieren der Zählerinformationen in der Datenbank ist ein Fehler aufgetreten"
   },
   "get_sharing_operation_consumption": {
@@ -53,11 +53,11 @@
       "meter_data_status": "Das Feld '{{field}}' muss vom Typ 'MeterDataStatus' sein"
     },
     "add_consumption_data": {
-      "file_too_big": "Die Datei ist zu groß (maximal 5Mb)",
+      "file_too_big": "Die Datei ist zu groß (maximal 5 MB)",
       "has_mime_type": "Die Datei muss eine CSV- oder Excel-Datei sein"
     },
     "patch_meter_to_sharing_operation": {
-      "status_out_of_range": "Der Wert des Feldes '{{field}}' muss zwischen 1, 3 und 4 liegen"
+      "status_out_of_range": "Der Wert des Feldes '{{field}}' muss 1, 3 oder 4 sein"
     }
   }
 }

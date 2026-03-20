@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - workflow-test   # add your test branch
     paths-ignore:
       - docs/**
 jobs:
@@ -26,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -44,6 +43,9 @@ jobs:
           npm run swagger
           npm run swagger:doc:md
           npm run swagger:doc:html
+
+      - name: Move and rename swagger file
+        run: mv docs/openapi/swagger.yaml docs/swagger.yml
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
