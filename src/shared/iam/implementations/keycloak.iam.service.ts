@@ -35,50 +35,74 @@ export class KeycloakIamService implements IIamService {
     });
   }
 
-  async createCommunity(new_community: CreateCommunityDTO): Promise<string> {
-    // 1. Create the Root Group (Community)
-    const groupRep = await this.kcAdminClient.groups.create({
-      realm: this.realm,
-      name: new_community.name,
-    });
-
-    if (!groupRep.id) {
-      logger.error({ operation: "createCommunity" }, "Fail to create community on keycloak service");
-      throw new Error(`Failed to create community: ${new_community.name}`);
+  private async ensureAuth(): Promise<void> {
+    if (this.kcAdminClient.accessToken) {
+      return;
     }
+    try {
+      await this.authenticate();
+    } catch (error) {
+      logger.error({ operation: "ensureAuth" }, "Re-authentication failed");
+      throw error;
+    }
+  }
 
-    const communityId = groupRep.id;
+  private async withReauth<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (isHttpError(error) && error.response?.status === 401) {
+        logger.info({ operation: "withReauth" }, "Got 401, re-authenticating...");
+        await this.authenticate();
+        return await operation();
+      }
+      throw error;
+    }
+  }
 
-    // 2. Create Sub-Groups for each Role
-    const roles = Object.values(Role);
+  async createCommunity(new_community: CreateCommunityDTO): Promise<string> {
+    return this.withReauth(async () => {
+      const groupRep = await this.kcAdminClient.groups.create({
+        realm: this.realm,
+        name: new_community.name,
+      });
 
-    for (const roleName of roles) {
-      try {
-        // FIXED: Using createChildGroup per your definition
-        await this.kcAdminClient.groups.createChildGroup(
-          { id: communityId, realm: this.realm }, // Parent ID in query
-          { name: roleName.toString() }, // Payload
-        );
-      } catch (error) {
-        // Ignore 409 Conflict (group already exists), rethrow others
-        logger.error({ operation: "createCommunity", error: error }, "Error while trying to add child group into keycloak");
-        if (!isHttpError(error) || error.response.status !== 409) {
-          throw error;
+      if (!groupRep.id) {
+        logger.error({ operation: "createCommunity" }, "Fail to create community on keycloak service");
+        throw new Error(`Failed to create community: ${new_community.name}`);
+      }
+
+      const communityId = groupRep.id;
+
+      const roles = Object.values(Role);
+
+      for (const roleName of roles) {
+        try {
+          await this.kcAdminClient.groups.createChildGroup(
+            { id: communityId, realm: this.realm },
+            { name: roleName.toString() },
+          );
+        } catch (error) {
+          logger.error({ operation: "createCommunity", error: error }, "Error while trying to add child group into keycloak");
+          if (!isHttpError(error) || error.response.status !== 409) {
+            throw error;
+          }
         }
       }
-    }
 
-    return communityId;
+      return communityId;
+    });
   }
 
   async addUserToCommunity(user_id: string, community_id: string, role: Role): Promise<void> {
-    // TODO: Check, if the user is already within the community, check if the present role is higher or not than the new one
-    const roleGroupId = await this.getRoleGroupId(community_id, role);
+    return this.withReauth(async () => {
+      const roleGroupId = await this.getRoleGroupId(community_id, role);
 
-    await this.kcAdminClient.users.addToGroup({
-      id: user_id,
-      groupId: roleGroupId,
-      realm: this.realm,
+      await this.kcAdminClient.users.addToGroup({
+        id: user_id,
+        groupId: roleGroupId,
+        realm: this.realm,
+      });
     });
   }
 
@@ -138,48 +162,53 @@ export class KeycloakIamService implements IIamService {
   }
 
   async updateCommunity(community_id: string, new_name: string): Promise<void> {
-    try {
-      await this.kcAdminClient.groups.update(
-        {
-          id: community_id,
-          realm: this.realm,
-        },
-        {
-          name: new_name,
-        },
-      );
-    } catch (error) {
-      logger.error({ operation: "updateCommunity" }, "Update community Keycloak IAM service fail");
-      // Handle cases like "Name already taken" (409) or "Group not found" (404)
-      throw error;
-    }
+    return this.withReauth(async () => {
+      try {
+        await this.kcAdminClient.groups.update(
+          {
+            id: community_id,
+            realm: this.realm,
+          },
+          {
+            name: new_name,
+          },
+        );
+      } catch (error) {
+        logger.error({ operation: "updateCommunity" }, "Update community Keycloak IAM service fail");
+        throw error;
+      }
+    });
   }
 
   async deleteCommunity(community_id: string): Promise<void> {
-    try {
-      await this.kcAdminClient.groups.del({
-        id: community_id,
-        realm: this.realm,
-      });
-    } catch (error) {
-      logger.error({ operation: "deleteCommunity", error: error }, "An error happen while deleting a community to Keycloak");
-      if (isHttpError(error) && error.response.status === 404) {
-        return;
+    return this.withReauth(async () => {
+      try {
+        await this.kcAdminClient.groups.del({
+          id: community_id,
+          realm: this.realm,
+        });
+      } catch (error) {
+        logger.error({ operation: "deleteCommunity", error: error }, "An error happen while deleting a community to Keycloak");
+        if (isHttpError(error) && error.response.status === 404) {
+          return;
+        }
+        throw error;
       }
-      throw error;
-    }
+    });
   }
 
   async getUserEmail(user_id: string): Promise<string> {
-    const user = await this.kcAdminClient.users.findOne({
-      id: user_id,
-      realm: this.realm,
+    return this.withReauth(async () => {
+      const user = await this.kcAdminClient.users.findOne({
+        id: user_id,
+        realm: this.realm,
+      });
+
+      if (!user) {
+        throw new Error(`User with ID ${user_id} not found in IAM.`);
+      }
+
+      return user.email || "";
     });
-
-    if (!user) {
-      throw new Error(`User with ID ${user_id} not found in IAM.`);
-    }
-
-    return user.email || "";
   }
 }
