@@ -4,15 +4,20 @@ import { getContext } from "../../middlewares/context.js";
 
 type Scope = "community" | "user" | "both" | "none";
 
+export function toString(value: string | string[] | undefined): string {
+  if (value === undefined) return "";
+  return Array.isArray(value) ? value.join(",") : value;
+}
+
 /**
  * Builds a tenant-aware cache key.
  *
  * Usage:
  *   cacheKey("keys:list", "community", (req) => JSON.stringify(req.query))
- *   cacheKey("keys:detail", "both", (req) => req.params.id)
+ *   cacheKey("keys:detail", "both", (req) => toString(req.params.id))
  *   cacheKey("user:profile", "user")
  */
-export function cacheKey(prefix: string, scope: Scope, suffix?: (req: Request) => string): (req: Request) => string {
+export function cacheKey(prefix: string, scope: Scope, suffix?: (req: Request) => string | string[]): (req: Request) => string {
   return (req: Request) => {
     const { community_id, user_id } = getContext();
     const parts = [prefix];
@@ -25,7 +30,7 @@ export function cacheKey(prefix: string, scope: Scope, suffix?: (req: Request) =
     }
 
     if (suffix) {
-      parts.push(suffix(req));
+      parts.push(toString(suffix(req)));
     }
 
     return parts.join(":");

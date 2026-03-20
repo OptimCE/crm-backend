@@ -47,7 +47,7 @@ export class MeController {
   }
 
   @userControllerTraceDecorator.traceSpan("downloadDocument", { url: "/me/documents/:id", method: "get" })
-  async downloadDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async downloadDocument(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
     const result: DownloadDocument = await this.meService.downloadDocument(+req.params.id);
     logger.info("Document successfully retrieved");
     res.set({
@@ -69,7 +69,7 @@ export class MeController {
 
   @userControllerTraceDecorator.traceSpan("getMemberById", { url: "/me/members/:id", method: "get" })
   @Cache(cacheKey("me-members:id", "user", (req) => req.params.id), 60)
-  async getMemberById(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async getMemberById(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
     const result: MeIndividualDTO | MeCompanyDTO = await this.meService.getMemberById(+req.params.id);
     logger.info("Own member successfully retrieved");
     res.status(200).json(new ApiResponse<MeIndividualDTO | MeCompanyDTO>(result, SUCCESS));
@@ -86,7 +86,7 @@ export class MeController {
 
   @userControllerTraceDecorator.traceSpan("getMeterById", { url: "/me/meters/:id", method: "get" })
   @Cache(cacheKey("me-meters:id", "user", (req) => req.params.id), 60)
-  async getMeterById(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async getMeterById(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
     const result: MeMeterDTO = await this.meService.getMeterById(req.params.id);
     logger.info("Own meter successfully retrieved");
     res.status(200).json(new ApiResponse<MeMeterDTO>(result, SUCCESS));
@@ -103,7 +103,7 @@ export class MeController {
 
   @userControllerTraceDecorator.traceSpan("getOwnMemberPendingInvitationById", { url: "/me/invitations/member/:id", method: "get" })
   @Cache(cacheKey("me-invitations:member", "user", (req) => req.params.id), 60)
-  async getOwnMemberPendingInvitationById(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async getOwnMemberPendingInvitationById(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.meService.getOwnMemberPendingInvitationById(+req.params.id);
     logger.info("Members pending invitations successfully retrieved");
     res.status(200).json(new ApiResponse<IndividualDTO | CompanyDTO>(result, SUCCESS));
@@ -159,7 +159,7 @@ export class MeController {
 
   @userControllerTraceDecorator.traceSpan("refuseMemberInvitation", { url: "/me/invitations/:id_invitation/member", method: "delete" })
   @InvalidateCache([cachePattern("me-invitations:member-list", "user"), cachePattern("me-invitations:member", "user")])
-  async refuseMemberInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async refuseMemberInvitation(req: Request<{ id_invitation: string }>, res: Response, _next: NextFunction): Promise<void> {
     await this.meService.refuseMemberInvitation(+req.params.id_invitation);
     logger.info("Invitation successfully refused");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
@@ -167,7 +167,7 @@ export class MeController {
 
   @userControllerTraceDecorator.traceSpan("refuseManagerInvitation", { url: "/me/invitations/:id_invitation/manager", method: "delete" })
   @InvalidateCache([cachePattern("me-invitations:manager-list", "user"), cachePattern("me-invitations:manager", "user")])
-  async refuseManagerInvitation(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async refuseManagerInvitation(req: Request<{ id_invitation: string }>, res: Response, _next: NextFunction): Promise<void> {
     await this.meService.refuseManagerInvitation(+req.params.id_invitation);
     logger.info("Invitation successfully refused");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));

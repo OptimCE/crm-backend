@@ -1,6 +1,10 @@
 /**
  * Dependency Injection bindings.
- * Registers all repositories, services, controllers, and external adapters with the Inversify container.
+ * Registers repositories, services, controllers, and external adapters in the Inversify container.
+ *
+ * Notes:
+ * - Infrastructure adapters are skipped during tests to avoid network/database side effects.
+ * - Several bindings are guarded with `isBound` to keep this module safe for repeated imports.
  */
 
 import { container } from "./di-container.js";
@@ -56,19 +60,25 @@ import { intializeIAMService } from "./factory/iam.factory.js";
 import { initializeStorageService } from "./factory/storage.factory.js";
 import type { IAuthContextRepository } from "../shared/context/i-authcontext.repository.js";
 import { AuthContextRepository } from "../shared/context/authcontext.repository.js";
+import type { IHealthService } from "../modules/health/domain/i-health.service.js";
+import { HealthService } from "../modules/health/infra/health.service.js";
+import { HealthController } from "../modules/health/api/health.controller.js";
 import { initializeCacheService } from "./factory/cache.factory.js";
 
 if (process.env.NODE_ENV !== "test") {
+  // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
   container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
-  // IAM service
+  // Register IAM adapter.
   intializeIAMService();
 
-  // Storage service
+  // Register storage adapter.
   initializeStorageService();
 
   // Cache Service
   initializeCacheService();
 }
+
+// Repository and shared-context bindings are idempotent to avoid duplicate binding errors.
 if (!container.isBound("AuthContext")) {
   container.bind<IAuthContextRepository>("AuthContext").to(AuthContextRepository);
 }
@@ -102,8 +112,11 @@ if (!container.isBound("SharingOperationRepository")) {
 if (!container.isBound("UserRepository")) {
   container.bind<IUserRepository>("UserRepository").to(UserRepository);
 }
+if (!container.isBound("HealthService")) {
+  container.bind<IHealthService>("HealthService").to(HealthService);
+}
 
-// Register services
+// Domain service bindings.
 container.bind<ICommunityService>("CommunityService").to(CommunityService);
 container.bind<IDocumentService>("DocumentService").to(DocumentService);
 container.bind<IInvitationService>("InvitationService").to(InvitationService);
@@ -114,6 +127,7 @@ container.bind<IMeterService>("MeterService").to(MeterService);
 container.bind<ISharingOperationService>("SharingOperationService").to(SharingOperationService);
 container.bind<IUserService>("UserService").to(UserService);
 
+// API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
 container.bind<DocumentController>(DocumentController).toSelf();
 container.bind<InvitationController>(InvitationController).toSelf();
@@ -123,3 +137,7 @@ container.bind<MemberController>(MemberController).toSelf();
 container.bind<MeterController>(MeterController).toSelf();
 container.bind<SharingOperationController>(SharingOperationController).toSelf();
 container.bind<UserController>(UserController).toSelf();
+
+// Health module bindings.
+container.bind<IHealthService>(HealthService).to(HealthService);
+container.bind<HealthController>(HealthController).toSelf();
