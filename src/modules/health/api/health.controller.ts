@@ -23,4 +23,10 @@ export class HealthController {
     const statusCode = result.status === "ok" ? 200 : 503;
     res.status(statusCode).json(result);
   }
+
+  async getKeycloakHealth(req: Request, res: Response): Promise<void> {
+    const result = await this.healthService.checkKeycloak();
+    const statusCode = result.status === "ok" ? 200 : 503;
+    res.status(statusCode).json(result);
+  }
 }

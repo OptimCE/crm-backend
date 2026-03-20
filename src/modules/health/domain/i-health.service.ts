@@ -1,6 +1,7 @@
 export interface HealthCheckResult {
   status: "ok" | "unhealthy";
   latencyMs?: number;
+  error?: string;
 }
 
 export interface HealthReport {
