@@ -49,7 +49,7 @@ export class MeterController {
    */
   @meterControllerTraceDecorator.traceSpan("getMeter", { url: "/meters/:id", method: "get" })
   @Cache(cacheKey("meters:detail", "community", (req) => req.params.id), 60)
-  async getMeter(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
+  async getMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: MetersDTO = await this.meterService.getMeter(req.params.id);
     logger.info("Meter successfully retrieved");
     res.status(200).json(new ApiResponse<MetersDTO>(result, SUCCESS));
@@ -63,7 +63,7 @@ export class MeterController {
    */
   @meterControllerTraceDecorator.traceSpan("getMeterConsumptions", { url: "/meters/:id/consumptions", method: "get" })
   @Cache(cacheKey("meters:consumptions", "community", (req) => req.params.id + ":" + JSON.stringify(req.query)), 60)
-  async getMeterConsumptions(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
+  async getMeterConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const result: MeterConsumptionDTO = await this.meterService.getMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Meter consumptions successfully retrieved");
@@ -77,7 +77,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("downloadMeterConsumptions", { url: "/meters/:id/consumptions/download", method: "get" })
-  async downloadMeterConsumptions(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
+  async downloadMeterConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
     const buffer: Buffer = await this.meterService.downloadMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully download");
@@ -167,7 +167,7 @@ export class MeterController {
     cachePattern("meters:detail", "community"),
     cachePattern("meters:consumptions", "community"),
   ])
-  async deleteMeter(req: Request<{ id: string }>, res: Response, _next: NextFunction): Promise<void> {
+  async deleteMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.meterService.deleteMeter(req.params.id);
     logger.info("Meter deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
