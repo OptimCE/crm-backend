@@ -20,7 +20,7 @@
     "trace": "cross-env REMOTE_LOGGING=true OTEL_LOGS_EXPORTER=otlp npm run start",
     "swagger": "npx tsx src/swagger/generate-openfile.autogen.ts",
     "swagger:doc:md": "npx tsx src/swagger/generate-openfile.autogen.ts && npx widdershins docs/openapi/swagger.yaml -o docs/openapi/api-docs.md --language_tabs NodeJS:Typescript --summary --search false",
-    "swagger:doc:html": "npx tsx src/swagger/generate-openfile.autogen.ts && npx redoc/cli bundle docs/openapi/swagger.yaml -o docs/index.html --title \"OptimCE CRM API\"",
+    "swagger:doc:html": "npx tsx src/swagger/generate-openfile.autogen.ts && npx @redocly/cli build-docs docs/openapi/swagger.yaml -o docs/index.html --title \"OptimCE CRM API\"",
     "typedoc:md": "typedoc src --out docs/typedoc/markdown --entryPointStrategy expand --name \"OptimCE CRM Backend\" --plugin typedoc-plugin-markdown",
     "typedoc:html": "typedoc src --out docs/typedoc/html --entryPointStrategy expand --name \"OptimCE CRM Backend\"",
     "format": "prettier --write \"**/*.ts\"",
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@redocly/cli": "^2.14.5",
+    "@redocly/cli": "^2.25.1",
     "@types/config": "^3.3.5",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -86,6 +86,7 @@
     "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "redoc": "^2.5.2",
     "rimraf": "^6.1.2",
     "shins": "^2.6.0",
     "supertest": "^7.1.4",
@@ -94,7 +95,6 @@
     "tsx": "^4.21.0",
     "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^4.9.0",
-    "redoc": "^2.5.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
     "widdershins": "^4.0.1"
