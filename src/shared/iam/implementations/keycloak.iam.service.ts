@@ -35,8 +35,22 @@ export class KeycloakIamService implements IIamService {
     });
   }
 
+  private isTokenExpired(): boolean {
+    const token = this.kcAdminClient.accessToken;
+    if (!token) return true;
+    try {
+      // JWT payload is base64 encoded, second part contains exp claim
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      // If we can't parse token, consider it expired
+      return true;
+    }
+  }
+
+  // Proactively checks if token is valid, re-authenticates if expired
   private async ensureAuth(): Promise<void> {
-    if (this.kcAdminClient.accessToken) {
+    if (this.kcAdminClient.accessToken && !this.isTokenExpired()) {
       return;
     }
     try {
@@ -47,12 +61,20 @@ export class KeycloakIamService implements IIamService {
     }
   }
 
+  // Wrapper that ensures valid token before operation and handles token expiration errors
+  // The @keycloak/keycloak-admin-client doesn't auto-refresh client_credentials tokens
+  // See: https://github.com/keycloak/keycloak/issues/44818
   private async withReauth<T>(operation: () => Promise<T>): Promise<T> {
+    await this.ensureAuth();
     try {
       return await operation();
     } catch (error) {
-      if (isHttpError(error) && error.response?.status === 401) {
-        logger.info({ operation: "withReauth" }, "Got 401, re-authenticating...");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const is401 = isHttpError(error) && error.response?.status === 401;
+      const isTokenRefreshError = errorMessage.includes("Cannot refresh token");
+
+      if (is401 || isTokenRefreshError) {
+        logger.info({ operation: "withReauth" }, "Token expired or refresh failed, re-authenticating...");
         await this.authenticate();
         return await operation();
       }
