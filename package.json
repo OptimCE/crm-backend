@@ -20,7 +20,7 @@
     "trace": "cross-env REMOTE_LOGGING=true OTEL_LOGS_EXPORTER=otlp npm run start",
     "swagger": "npx tsx src/swagger/generate-openfile.autogen.ts",
     "swagger:doc:md": "npx tsx src/swagger/generate-openfile.autogen.ts && npx widdershins docs/openapi/swagger.yaml -o docs/openapi/api-docs.md --language_tabs NodeJS:Typescript --summary --search false",
-    "swagger:doc:html": "npx tsx src/swagger/generate-openfile.autogen.ts && npx redoc-cli bundle docs/openapi/swagger.yaml -o docs/index.html --title \"OptimCE CRM API\"",
+    "swagger:doc:html": "npx tsx src/swagger/generate-openfile.autogen.ts && npx redoc/cli bundle docs/openapi/swagger.yaml -o docs/index.html --title \"OptimCE CRM API\"",
     "typedoc:md": "typedoc src --out docs/typedoc/markdown --entryPointStrategy expand --name \"OptimCE CRM Backend\" --plugin typedoc-plugin-markdown",
     "typedoc:html": "typedoc src --out docs/typedoc/html --entryPointStrategy expand --name \"OptimCE CRM Backend\"",
     "format": "prettier --write \"**/*.ts\"",
@@ -52,6 +52,7 @@
     "i18next-fs-backend": "^2.6.1",
     "i18next-http-middleware": "^3.9.2",
     "inversify": "^7.11.0",
+    "ioredis": "^5.3.2",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
     "pino": "^10.1.0",
@@ -63,8 +64,7 @@
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.28",
     "xlsx": "^0.18.5",
-    "xss": "^1.0.15",
-    "ioredis": "^5.3.2"
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -72,12 +72,12 @@
     "@types/config": "^3.3.5",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/express-serve-static-core": "5.1.0",
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
     "@types/node": "^25.3.2",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
-    "@types/express-serve-static-core": "5.1.0",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
@@ -94,6 +94,7 @@
     "tsx": "^4.21.0",
     "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^4.9.0",
+    "redoc": "^2.5.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
     "widdershins": "^4.0.1"

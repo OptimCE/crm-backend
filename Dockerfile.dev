@@ -1,20 +1,15 @@
 # Development stage (optional, can be used for debugging and as a devcontainer)
 FROM node:25-alpine AS development
 #Setup Alpine packages for development
-RUN apk add --no-cache git openssh-client
-#Setup NodeJS for development
-
+RUN apk add --no-cache git
 # Create /app and set ownership to node to avoid permission issues when running npm install and copying files
-RUN mkdir -p /app && chown node:node /app
+RUN mkdir -p /app
 # Switch to the node user to avoid creating root permissions files
 WORKDIR /app
-USER node
 ENV NODE_ENV=development
-COPY --chown=node:node package*.json ./
+COPY package*.json ./
 RUN npm install
-
 # Copy the rest of the files
-COPY --chown=node:node . .
-
+COPY . .
 # Sleep for infinite time to keep the container running for debugging purposes
 CMD ["sleep", "infinity"]

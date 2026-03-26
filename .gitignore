@@ -279,3 +279,4 @@ Custom ignores by developers
 config/default.json
 config/test.cjs
 .env.production
+docs
