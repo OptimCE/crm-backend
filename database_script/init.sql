@@ -10,8 +10,12 @@ END;
 $$ language 'plpgsql';
 
 CREATE TABLE IF NOT EXISTS COMMUNITY(
-                                        id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                        name VARCHAR(255) NOT NULL UNIQUE,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    website_url VARCHAR(255) NULL,
+    logo_url VARCHAR(255) NULL,
+    description TEXT NULL,
+    headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -33,6 +37,8 @@ CREATE TABLE IF NOT EXISTS ADDRESS(
     id_community INT NULL REFERENCES COMMUNITY(id) ON DELETE SET NULL
     );
 CREATE INDEX idx_address_community ON ADDRESS(id_community);
+
+ALTER TABLE COMMUNITY ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (headquarters_address_id) REFERENCES ADDRESS(id);
 
 CREATE TRIGGER update_address_modtime
     BEFORE UPDATE ON ADDRESS
@@ -192,9 +198,10 @@ CREATE TRIGGER update_meters_modtime
     EXECUTE FUNCTION update_changetimestamp_column();
 
 CREATE TABLE IF NOT EXISTS SHARING_OPERATION(
-                                                id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                name VARCHAR(255) NOT NULL,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     type INT NOT NULL CHECK (type IN (1, 2, 3)), -- 1: Local 2: CER 3: CEC
+    is_public BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
