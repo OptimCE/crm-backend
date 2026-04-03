@@ -26,17 +26,15 @@ CREATE TRIGGER update_community_modtime
     EXECUTE FUNCTION update_changetimestamp_column();
 
 CREATE TABLE IF NOT EXISTS ADDRESS(
-                                      id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                      street VARCHAR(255) NOT NULL,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    street VARCHAR(255) NOT NULL,
     number INT NOT NULL,
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NULL REFERENCES COMMUNITY(id) ON DELETE SET NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-CREATE INDEX idx_address_community ON ADDRESS(id_community);
 
 ALTER TABLE COMMUNITY ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (headquarters_address_id) REFERENCES ADDRESS(id);
 

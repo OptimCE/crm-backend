@@ -18,6 +18,7 @@ export function toCommunityDTO(community: Community): CommunityDTO {
   return {
     id: community.id,
     name: community.name,
+    logo_url: community.logo_url,
   };
 }
 
@@ -25,6 +26,7 @@ export function toCommunityPartial(community: Community): CommunityDTO {
   return {
     id: community.id,
     name: community.name,
+    logo_url: community.logo_url,
   };
 }
 

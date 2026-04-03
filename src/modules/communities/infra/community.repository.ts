@@ -129,7 +129,9 @@ export class CommunityRepository implements ICommunityRepository {
 
   async getAllCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    let qb = manager.createQueryBuilder(Community, "community");
+    let qb = manager
+      .createQueryBuilder(Community, "community")
+      .innerJoin("sharing_operation", "so", "so.id_community = community.id AND so.is_public = :isPublic", { isPublic: true });
 
     qb = applyFilters(this.communityFilters, qb, query);
     qb = applySorts(this.communitySorts, qb, query);

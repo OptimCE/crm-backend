@@ -85,16 +85,14 @@ export class CommunityUsersQueryDTO extends PaginationQuery {
  * DTO representing a simple view of a community.
  */
 export class CommunityDTO {
-  /**
-   * The unique identifier of the community (internal DB ID).
-   */
   @Expose()
   id!: number;
-  /**
-   * The name of the community.
-   */
+
   @Expose()
   name!: string;
+
+  @Expose()
+  logo_url!: string | null;
 }
 
 /**
