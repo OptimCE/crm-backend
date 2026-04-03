@@ -10,8 +10,12 @@ END;
 $$ language 'plpgsql';
 
 CREATE TABLE IF NOT EXISTS COMMUNITY(
-                                        id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                        name VARCHAR(255) NOT NULL UNIQUE,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    website_url VARCHAR(255) NULL,
+    logo_url VARCHAR(255) NULL,
+    description TEXT NULL,
+    headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -22,17 +26,17 @@ CREATE TRIGGER update_community_modtime
     EXECUTE FUNCTION update_changetimestamp_column();
 
 CREATE TABLE IF NOT EXISTS ADDRESS(
-                                      id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                      street VARCHAR(255) NOT NULL,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    street VARCHAR(255) NOT NULL,
     number INT NOT NULL,
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NULL REFERENCES COMMUNITY(id) ON DELETE SET NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-CREATE INDEX idx_address_community ON ADDRESS(id_community);
+
+ALTER TABLE COMMUNITY ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (headquarters_address_id) REFERENCES ADDRESS(id);
 
 CREATE TRIGGER update_address_modtime
     BEFORE UPDATE ON ADDRESS
@@ -192,9 +196,10 @@ CREATE TRIGGER update_meters_modtime
     EXECUTE FUNCTION update_changetimestamp_column();
 
 CREATE TABLE IF NOT EXISTS SHARING_OPERATION(
-                                                id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                name VARCHAR(255) NOT NULL,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     type INT NOT NULL CHECK (type IN (1, 2, 3)), -- 1: Local 2: CER 3: CEC
+    is_public BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
@@ -390,27 +395,43 @@ CREATE TRIGGER update_gestionnaire_invitation_modtime
 -- --- MOCK DATA ---
 
 -- 1. Communities
-INSERT INTO COMMUNITY (name, auth_community_id) VALUES ('Test Community', '1');
-INSERT INTO COMMUNITY (name, auth_community_id) VALUES ('Other Community', '2');
+INSERT INTO COMMUNITY (name, website_url, logo_url, description, auth_community_id) VALUES ('Test Community', 'https://test-community.example.com', 'https://test-community.example.com/logo.png', 'A test community', 'aaaa');
+INSERT INTO COMMUNITY (name, website_url, logo_url, description, auth_community_id) VALUES ('Other Community', 'https://other-community.example.com', NULL, 'Another community without public sharing', 'bbbb');
+INSERT INTO COMMUNITY (name, logo_url, auth_community_id) VALUES ('Empty Community', 'https://empty-community.example.com/logo.png', 'cccc');
 
 -- 2. Addresses
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Main St', 1, '1000', 'Brussels', 1);
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Second St', 2, '2000', 'Antwerp', 1);
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Third St', 3, '3000', 'Leuven', 2);
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Fourth St', 4, '4000', 'Liege', 1);
+INSERT INTO ADDRESS (street, number, postcode, city) VALUES ( 'Main St', 1, '1000', 'Brussels');
+INSERT INTO ADDRESS (street, number, postcode, city) VALUES ( 'Second St', 2, '2000', 'Antwerp');
+INSERT INTO ADDRESS (street, number, postcode, city) VALUES ( 'Third St', 3, '3000', 'Leuven');
+INSERT INTO ADDRESS (street, number, postcode, city) VALUES ( 'Fourth St', 4, '4000', 'Liege');
+
+-- Link community headquarters to addresses
+UPDATE COMMUNITY SET headquarters_address_id = 1 WHERE id = 1;
+UPDATE COMMUNITY SET headquarters_address_id = 3 WHERE id = 2;
 
 -- 3. Users
+-- Demo user from keycloak/dev-config.json (username: demo, password: demo)
 INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
-VALUES ('admin@test.com', 'Admin', 'User', 'auth0|admin', 1, 1);
+VALUES ('demo@example.com', 'Demo', 'User', 'demo', 1, 1);
+-- Test users used by functional/unit tests
 INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
-VALUES ('manager@test.com', 'Manager', 'User', 'auth0|manager', 2, 2);
+VALUES ('admin@test.com', 'Admin', 'User', 'auth0|admin', 2, 2);
 INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
-VALUES ('member@test.com', 'Member', 'User', 'auth0|member', 1, 1);
+VALUES ('manager@test.com', 'Manager', 'User', 'auth0|manager', 3, 3);
+INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
+VALUES ('member@test.com', 'Member', 'User', 'auth0|member', 4, 4);
 
 -- 4. Community Users (Roles)
+-- Demo user (ID 1) is ADMIN of Test Community (ID 1)
 INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 1, 'ADMIN');
-INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 2, 'MANAGER');
-INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 3, 'MEMBER');
+-- Test users
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 2, 'ADMIN');
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 3, 'MANAGER');
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 4, 'MEMBER');
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (2, 2, 'ADMIN');
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (2, 3, 'MANAGER');
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (2, 4, 'MEMBER');
+INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (3, 2, 'ADMIN');
 
 -- 5. Members (Base)
 INSERT INTO MEMBER (name, id_home_address, id_billing_address, IBAN, STATUS, member_type, id_community)
@@ -447,14 +468,20 @@ INSERT INTO METER (EAN, meter_number, id_address, tarif_group, phases_number, re
 VALUES ('987654321098765432', 'M2', 2, 1, 3, 1, 1);
 
 -- 11. Sharing Operations
-INSERT INTO SHARING_OPERATION (name, type, id_community) VALUES ('Op 1', 1, 1);
-INSERT INTO SHARING_OPERATION ( name, type, id_community) VALUES ('Op 2', 2, 1);
+-- Community 1 (Test Community): has public sharing operations -> will appear in GET /communities
+INSERT INTO SHARING_OPERATION (name, type, is_public, id_community) VALUES ('Public Solar Sharing', 1, true, 1);
+INSERT INTO SHARING_OPERATION (name, type, is_public, id_community) VALUES ('Public Wind Sharing', 2, true, 1);
+-- Community 2 (Other Community): only private sharing operations -> will NOT appear in GET /communities
+INSERT INTO SHARING_OPERATION (name, type, is_public, id_community) VALUES ('Private Local Sharing', 1, false, 2);
+-- Community 3 (Empty Community): no sharing operations -> will NOT appear in GET /communities
 
 -- 12. Sharing Operation Key Links
 INSERT INTO SHARING_OPERATION_KEY (id_sharing_operation, id_key, start_date, status, id_community)
 VALUES (1, 1, '2024-01-01', 1, 1); -- Active
 INSERT INTO SHARING_OPERATION_KEY (id_sharing_operation, id_key, start_date, status, id_community)
-VALUES (2, 2, '2024-01-01', 2, 1); -- Pending
+VALUES (2, 2, '2024-01-01', 1, 1); -- Active
+INSERT INTO SHARING_OPERATION_KEY (id_sharing_operation, id_key, start_date, status, id_community)
+VALUES (3, 1, '2024-01-01', 1, 2); -- Active
 
 -- 13. Meter Data (Configuration)
 INSERT INTO METER_DATA (ean, status, rate, client_type, start_date, id_sharing_operation, id_community, id_member, injection_status, production_chain, total_generating_capacity)
@@ -468,7 +495,7 @@ INSERT INTO DOCUMENT (id_member, file_name, file_url, file_size, file_type, uplo
 VALUES (1, 'doc.pdf', 'http://url', 100, 'application/pdf', '2024-01-01', 1);
 
 -- 15. User Member Links
-INSERT INTO User_Member_Link (id_user, id_member, created_at) VALUES (3, 1, '2024-01-01');
+INSERT INTO User_Member_Link (id_user, id_member, created_at) VALUES (4, 1, '2024-01-01');
 
 -- 16. User Member Invitations
 INSERT INTO User_Member_Invitation (member_id, member_name, user_email, to_be_encoded, id_community)
