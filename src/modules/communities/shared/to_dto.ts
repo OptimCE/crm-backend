@@ -1,5 +1,6 @@
-import type { CommunityDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
+import type { CommunityDTO, CommunityDetailDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
 import type { Community, CommunityUser } from "../domain/community.models.js";
+import type { Role } from "../../../shared/dtos/role.js";
 
 export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommunityDTO {
   return {
@@ -13,10 +14,29 @@ export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommuni
   };
 }
 
+export function toCommunityDTO(community: Community): CommunityDTO {
+  return {
+    id: community.id,
+    name: community.name,
+  };
+}
+
 export function toCommunityPartial(community: Community): CommunityDTO {
   return {
     id: community.id,
     name: community.name,
+  };
+}
+
+export function toCommunityDetailDTO(community: Community, member_count: number, user_role?: Role): CommunityDetailDTO {
+  return {
+    id: community.id,
+    name: community.name,
+    auth_community_id: community.auth_community_id,
+    created_at: community.created_at,
+    updated_at: community.updated_at,
+    member_count,
+    user_role,
   };
 }
 

@@ -3,6 +3,8 @@ import type { ICommunityService } from "../domain/i-community.service.js";
 import type { ICommunityRepository } from "../domain/i-community.repository.js";
 import { inject, injectable } from "inversify";
 import {
+  CommunityDTO,
+  CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
   CreateCommunityDTO,
@@ -17,7 +19,7 @@ import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Role } from "../../../shared/dtos/role.js";
-import { toMyCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
+import { toCommunityDTO, toCommunityDetailDTO, toMyCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
 import type { IIamService } from "../../../shared/iam/i-iam.service.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
@@ -36,6 +38,32 @@ export class CommunityService implements ICommunityService {
     @inject("AuthContext") private authContext: IAuthContextRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
   ) {}
+
+  async getAllCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]> {
+    const [values, total] = await this.community_repository.getAllCommunities(query);
+    const return_values = values.map((value) => toCommunityDTO(value));
+    const total_pages = Math.ceil(total / query.limit);
+    return [return_values, { page: query.page, limit: query.limit, total, total_pages }];
+  }
+
+  async getCommunityById(id: number): Promise<CommunityDetailDTO> {
+    const result = await this.community_repository.getCommunityById(id);
+    if (!result) {
+      throw new AppError(COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND, 404);
+    }
+
+    let user_role: Role | undefined;
+    try {
+      const internal_user_id = await this.authContext.getInternalUserId();
+      if (internal_user_id) {
+        user_role = (await this.community_repository.getUserRoleInCommunity(internal_user_id, id)) ?? undefined;
+      }
+    } catch {
+      user_role = undefined;
+    }
+
+    return toCommunityDetailDTO(result.community, result.member_count, user_role);
+  }
 
   /**
    * Adds a new community.

@@ -9,7 +9,24 @@ import { communityIdChecker } from "../../../shared/middlewares/community.check.
 export const community_routes = express.Router();
 const community_controller = container.get<CommunityController>(CommunityController);
 
-// Get (/) : Get my communities
+// Get (/) : Get all communities (paginated, minimal info)
+community_routes.get(
+  "/",
+  /* #swagger.summary = 'Get all communities (paginated, minimal info)'
+       #swagger.tags = ['Communities']
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/CommunityQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunitiesListSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  community_controller.getAllCommunities.bind(community_controller),
+);
+// Get (/my-communities) : Get my communities
 community_routes.get(
   "/my-communities",
   /* #swagger.summary = 'Get my communities'
@@ -205,4 +222,42 @@ community_routes.delete(
   communityIdChecker(),
   roleChecker(Role.ADMIN),
   community_controller.deleteCommunity.bind(community_controller),
+);
+// Get (/:id) : Get detailed community info
+community_routes.get(
+  "/:id",
+  /* #swagger.summary = 'Get detailed community info'
+       #swagger.tags = ['Communities']
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunityDetailSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.responses[404] = { $ref: '#/components/responses/NotFound' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  community_controller.getCommunityById.bind(community_controller),
+);
+// Get (/:id/sharing_operations) : Get sharing operations for a community (paginated)
+community_routes.get(
+  "/:id/sharing_operations",
+  /* #swagger.summary = 'Get sharing operations for a community (paginated)'
+       #swagger.tags = ['Communities']
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationPartialQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunitySharingOperationsSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  community_controller.getCommunitySharingOperations.bind(community_controller),
 );

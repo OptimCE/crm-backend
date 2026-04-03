@@ -160,6 +160,32 @@ export class UsersCommunityDTO {
 }
 
 /**
+ * DTO representing a detailed view of a community.
+ */
+export class CommunityDetailDTO {
+  @Expose()
+  id!: number;
+
+  @Expose()
+  name!: string;
+
+  @Expose()
+  auth_community_id!: string;
+
+  @Expose()
+  created_at!: Date;
+
+  @Expose()
+  updated_at!: Date;
+
+  @Expose()
+  member_count!: number;
+
+  @Expose()
+  user_role?: Role;
+}
+
+/**
  * DTO for creating or updating a community.
  */
 export class CreateCommunityDTO {
