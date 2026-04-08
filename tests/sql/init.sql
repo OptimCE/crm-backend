@@ -449,7 +449,7 @@ INSERT INTO community (
     'https://test-community.example.com',
     'https://test-community.example.com/logo.png',
     'A test community',
-    'aaaa'
+    '1'
 );
 INSERT INTO community (
     name, website_url, logo_url, description, auth_community_id
@@ -458,10 +458,10 @@ INSERT INTO community (
     'https://other-community.example.com',
     NULL,
     'Another community without public sharing',
-    'bbbb'
+    '2'
 );
 INSERT INTO community (name, logo_url, auth_community_id) VALUES (
-    'Empty Community', 'https://empty-community.example.com/logo.png', 'cccc'
+    'Empty Community', 'https://empty-community.example.com/logo.png', '3'
 );
 
 -- 2. Addresses
