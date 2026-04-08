@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS address (
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
+    id_community INT REFERENCES community (id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT current_timestamp,
     updated_at TIMESTAMP DEFAULT current_timestamp
 );
@@ -342,7 +343,7 @@ BEFORE UPDATE ON sharing_op_consumption
 FOR EACH ROW
 EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS app_user (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     first_name TEXT NULL,
@@ -358,16 +359,16 @@ CREATE TABLE IF NOT EXISTS user (
     updated_at TIMESTAMP DEFAULT current_timestamp,
     auth_user_id VARCHAR(255) UNIQUE -- External Auth provider link
 );
-CREATE INDEX idx_home_addr_user ON user (id_home_address);
-CREATE INDEX idx_billing_addr_user ON user (id_billing_address);
+CREATE INDEX idx_home_addr_user ON app_user (id_home_address);
+CREATE INDEX idx_billing_addr_user ON app_user (id_billing_address);
 CREATE TRIGGER update_user_modtime
-BEFORE UPDATE ON user
+BEFORE UPDATE ON app_user
 FOR EACH ROW
 EXECUTE FUNCTION update_changetimestamp_column();
 
 CREATE TABLE IF NOT EXISTS community_user (
     id_community INTEGER REFERENCES community (id) ON DELETE CASCADE,
-    id_user INTEGER REFERENCES user (id) ON DELETE CASCADE,
+    id_user INTEGER REFERENCES app_user (id) ON DELETE CASCADE,
     -- (String matches IAM role name)
     role VARCHAR(50) CHECK (role IN ('ADMIN', 'MANAGER', 'MEMBER')),
 
@@ -380,7 +381,7 @@ CREATE INDEX idx_community_user_user ON community_user (id_user);
 CREATE TABLE IF NOT EXISTS user_member_link (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     -- references User.id
-    id_user INT NOT NULL REFERENCES user (id) ON DELETE CASCADE,
+    id_user INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
     id_member INT NOT NULL REFERENCES member (id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT current_timestamp,
     updated_at TIMESTAMP DEFAULT current_timestamp
@@ -397,7 +398,7 @@ CREATE TABLE IF NOT EXISTS user_member_invitation (
     member_id INT REFERENCES member (id) ON DELETE CASCADE,
     member_name TEXT,
     user_email TEXT,       -- The invitee's email
-    id_user INT NULL REFERENCES user (id) ON DELETE CASCADE,
+    id_user INT NULL REFERENCES app_user (id) ON DELETE CASCADE,
     to_be_encoded BOOLEAN NOT NULL DEFAULT FALSE, -- True if invitation, false if member added and invitation automatically created
     id_community INT REFERENCES community (id) ON DELETE CASCADE NOT NULL,
     created_at TIMESTAMP DEFAULT current_timestamp,
@@ -420,7 +421,7 @@ EXECUTE FUNCTION update_changetimestamp_column();
 CREATE TABLE IF NOT EXISTS gestionnaire_invitation (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_email TEXT NOT NULL,
-    id_user INT REFERENCES user (id),
+    id_user INT REFERENCES app_user (id),
     id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT current_timestamp,
     updated_at TIMESTAMP DEFAULT current_timestamp
