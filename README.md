@@ -1,178 +1,165 @@
 # OptimCE CRM - Backend
 
-> Backend du module CRM d'OptimCE (TypeScript / Node.js). Découlant du projet Locomotrice.
+> Backend for the OptimCE CRM module (TypeScript / Node.js). Derived from the Locomotrice project.
 
+## Overview
 
+This repository contains the backend API written in TypeScript. It uses Express, TypeORM, OpenTelemetry, and several development tools (TSX, Jest, ESLint, Prettier). Environment-specific configuration is located in the `config/` folder.
 
-## Vue d'ensemble
+## Prerequisites
 
-Ce dépôt contient l'API backend écrite en TypeScript. Il utilise Express, TypeORM, OpenTelemetry et plusieurs outils de développement (TSX, Jest, ESLint, Prettier). La configuration par environnement se trouve dans le dossier `config/`.
+- Node.js 20.x (recommended) or 18+
+- npm (or `pnpm`/`yarn` if you prefer)
+- Docker & Docker Compose (if running via containers)
 
-## Prérequis
-
-- Node.js 20.x (recommandé) ou 18+
-- npm (ou `pnpm`/`yarn` si vous préférez)
-- Docker & Docker Compose (si vous lancez l'environnement via containers)
-
-Il est recommandé d'utiliser un gestionnaire de versions pour Node (par ex. `fnm` ou `nvm`). Exemples d'installation :
+It is recommended to use a Node version manager (e.g., `fnm` or `nvm`). Installation examples:
 
 ```bash
-# installer nvm (si nécessaire) /!\ Windows vérifier directement https://fnm.vercel.app pour l'intallation
+# install nvm (if needed) /!\ Windows check https://fnm.vercel.app for installation
 curl -fsSL https://fnm.vercel.app/install | bash
-# ou utiliser nvm
-# puis installer Node 20
+# or use nvm
+# then install Node 20
 nvm install 20
 nvm use 20
 ```
 
-## Installation locale
+## Local Installation
 
-1. Cloner le dépôt et se placer à la racine :
+1. Clone the repository and navigate to the root:
 
 ```bash
 git clone <repo-url>
 cd crm-backend
 ```
 
-2. Installer les dépendances :
+2. Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Copier/adapter la configuration d'environnement si nécessaire.
-Les fichiers de configuration par environnement sont dans `config/` : `development.cjs`, `production.cjs`, `test.cjs`.
-Vous pouvez définir les variables d'environnement globales (ex. `NODE_ENV`, `DATABASE_URL`, etc.) avant de lancer l'application. Vérifiez les fichiers `config/*.cjs` pour la liste exacte des variables attendues.
+3. Copy/adapt environment configuration if needed.
+   Environment-specific configuration files are in `config/`: `development.cjs`, `production.cjs`, `test.cjs`.
+   You can set global environment variables (e.g., `NODE_ENV`, `DATABASE_URL`, etc.) before running the application. Check the `config/*.cjs` files for the exact list of expected variables.
 
-## Commandes utiles
+## Useful Commands
 
-- Démarrer en mode développement (live reload via `tsx watch`) :
+- Start in development mode (live reload via `tsx watch`):
 
 ```bash
 npm run dev
 ```
 
-- Compiler et copier les assets :
+- Build and copy assets:
 
 ```bash
 npm run build
 ```
 
-- Démarrer la version buildée :
+- Start the built version:
 
 ```bash
 npm run start
 ```
 
-- Exécuter les tests :
+- Run tests:
 
 ```bash
 npm run test
-# tests unitaires
+# unit tests
 npm run test:unit
-# tests fonctionnels
+# functional tests
 npm run test:functional
 ```
 
-- Linter et format :
+- Lint and format:
 
 ```bash
 npm run lint
 npm run format
 ```
 
-- Générer la documentation Swagger (markdown ou HTML) :
+- Generate Swagger documentation (markdown or HTML):
 
 ```bash
 npm run swagger:doc:md
 npm run swagger:doc:html
 ```
 
-- Générer la documentation TypeDoc :
+- Generate TypeDoc documentation:
 
 ```bash
 npm run typedoc:md
 npm run typedoc:html
 ```
 
-## Exécution via Docker / Docker Compose
-### Installation
-Suivre la documentation officielle selon votre plateforme.
-- Linux (Natif) -> https://docs.docker.com/engine/install/
-- Mac/Windows (Machine Virtuelle)-> https://docs.docker.com/get-started/get-docker/
-### Utilisation
-Le projet contient `Dockerfile`, `Dockerfile.dev`, `docker-compose.yml` et `docker-compose.dev.yml` pour faciliter le démarrage.
-
-Exemple (mode développement) :
-
-```bash
-docker compose -f docker-compose.dev.yml up --build
-```
-
-Pour production (ou déploiement local) :
-
-```bash
-docker compose up --build -d
-```
-
-Vérifiez les services définis dans les fichiers Compose si vous avez besoin d'une base de données locale, d'un service Keycloak, etc.
+## Running via Docker
 
 ### Devcontainer
-Si un de ces IDE vous pouvez utiliser un devcontainer pour avoir une architecture déployée plus rapidement :
+
+If you use one of these IDEs you can use a devcontainer to have a deployed architecture faster:
+
 - Visual Studio Code -> https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
 - WebStorm -> https://www.jetbrains.com/help/webstorm/connect-to-devcontainer.html
 
-Le fichier [.devcontainer/.devcontainer.json](.devcontainer.json) contient une configuration permettant à votre IDE de développer directement depuis le container.
+The [.devcontainer/.devcontainer.json](.devcontainer.json) file contains configuration that allows your IDE to develop directly from the container.
 
-### Environnement "production" 
-Ce fichier permet de simuler un environnement de production pour valider les tests d’intégration, mais il ne couvre pas les aspects de scalabilité ou de haute disponibilité.
+### Simulated "Production" Environment
 
-Pour un déploiement complet, veuillez vous référer au dépôt dédié au déploiement.
+For integration testing and a complete simulated environment, please refer to the parent monorepo stack. It validates integration tests but does not cover scalability or high availability aspects. And build on the fly docker images.
 
-## Base de données
+## Database
 
-Le script d'initialisation SQL se trouve dans `sql/init.sql` et `database_script/init.sql`.
-Si vous utilisez Docker Compose, la DB peut être initialisée automatiquement selon la configuration du compose ; sinon importez manuellement :
+The SQL initialization script is located in `sql/init.sql` and `database_script/init.sql`.
+If using Docker Compose, the DB can be initialized automatically according to the compose configuration; otherwise import manually:
 
 ```bash
-# exemple pour psql
+# example for psql
 psql <database-connection-string> -f sql/init.sql
 ```
 
-## Internationalisation
+### SQL Linting
 
-Les fichiers de traduction sont dans `assets/` (`en/`, `fr/`, `de/`, `nl/`).
+Use `sqlfluff` to lint SQL files:
+- `sqlfluff fix database_script/init.sql --dialect postgres` - Fix SQL linting violations in the init.sql file
+- `sqlfluff fix tests/sql/init.sql --dialect postgres` - Fix SQL linting violations in the test init.sql file
 
-## Observabilité
 
-OpenTelemetry est configuré dans le projet (voir dépendances `@opentelemetry/*`). Des variables comme `OTEL_EXPORTER_OTLP_ENDPOINT` ou `OTEL_LOGS_EXPORTER` peuvent être utilisées selon vos besoins.
+## Internationalization
 
-## Structure du projet (sélection)
+Translation files are in `assets/` (`en/`, `fr/`, `de/`, `nl/`).
 
-- `src/` : code source TypeScript
+## Observability
+
+OpenTelemetry is configured in the project (see `@opentelemetry/*` dependencies). Variables like `OTEL_EXPORTER_OTLP_ENDPOINT` or `OTEL_LOGS_EXPORTER` can be used as needed.
+
+## Project Structure (selection)
+
+- `src/` : TypeScript source code
 - `assets/` : i18n
-- `config/` : fichiers de configuration par environnement
-- `sql/` & `database_script/` : scripts d'initialisation DB
-- `tests/` : suites de tests
+- `config/` : environment-specific configuration files
+- `sql/` & `database_script/` : DB initialization scripts
+- `tests/` : test suites
 
-## Débogage et traces
+## Debugging and Tracing
 
-Vous pouvez lancer l'app avec des variables pour activer le tracing/logging :
+You can launch the app with variables to enable tracing/logging:
 
 ```bash
 npm run trace
 ```
 
-## Contribuer
+## Contributing
 
-- Respectez les hooks `husky` et `lint-staged` avant les commits (formatage automatique via Prettier).
-- Ouvrez des branches feature/bugfix et créez des PRs claires.
-- Les forks et PRs sont acceptés.
+- Respect the `husky` and `lint-staged` hooks before commits (automatic formatting via Prettier).
+- Ensure SQL files are properly linted using `sqlfluff` (see [SQL Linting](#sql-linting)).
+- Create feature/bugfix branches and clear PRs.
+- Forks and PRs are accepted.
 
-## Ressources utiles dans le dépôt
+## Useful Resources in the Repository
 
-- Fichiers de configuration : [config/](config)
-- Docker compose (dev) : [docker-compose.dev.yml](docker-compose.dev.yml)
-- SQL d'initialisation : [sql/init.sql](sql/init.sql) et [database_script/init.sql](database_script/init.sql)
-- Scripts npm importants : `dev`, `build`, `start`, `test`, `lint`, `format` (voir `package.json`)
-- Test unitaire et fonctionnel dans [tests](tests/) et de fichier mock pour les databases dans [tests/sql](tests/sql)
+- Configuration files: [config/](config)
+- Docker compose (dev): [docker-compose.dev.yml](docker-compose.dev.yml)
+- SQL initialization: [sql/init.sql](sql/init.sql) and [database_script/init.sql](database_script/init.sql)
+- Important npm scripts: `dev`, `build`, `start`, `test`, `lint`, `format` (see `package.json`)
+- Unit and functional tests in [tests](tests/) and database mock files in [tests/sql](tests/sql)
