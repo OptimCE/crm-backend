@@ -302,7 +302,7 @@ export class MeRepository implements IMeRepository {
       `EXISTS (
             SELECT 1 FROM meter_data sub_md
             INNER JOIN user_member_link sub_uml ON sub_uml.id_member = sub_md.id_member
-            INNER JOIN "user" sub_u ON sub_u.id = sub_uml.id_user
+            INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
             WHERE sub_md.ean = meter.EAN
             AND sub_u.auth_user_id = :contextAuthId
         )`,
