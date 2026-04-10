@@ -40,7 +40,7 @@ export class CommunityController {
   ) {}
 
   @communityControllerTraceDecorator.traceSpan("getAllCommunities", { url: "/communities", method: "get" })
-  @Cache(cacheKey("communities:all-list", "none", () => ""), 60)
+  // @Cache(cacheKey("communities:all-list", "none", () => ""), 60)
   async getAllCommunities(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(CommunityQueryDTO, req.query);
     const [result, pagination] = await this.communityService.getAllCommunities(queryObject);
@@ -49,7 +49,7 @@ export class CommunityController {
   }
 
   @communityControllerTraceDecorator.traceSpan("getCommunityById", { url: "/communities/:id", method: "get" })
-  @Cache(cacheKey("communities:detail", "none", (req) => req.params.id), 60)
+  // @Cache(cacheKey("communities:detail", "none", (req) => req.params.id), 60)
   async getCommunityById(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result = await this.communityService.getCommunityById(+req.params.id);
     logger.info("Community detail successfully retrieved");

@@ -180,7 +180,7 @@ export class CommunityDetailDTO {
   member_count!: number;
 
   @Expose()
-  user_role?: Role;
+  description?: string | null;
 }
 
 /**

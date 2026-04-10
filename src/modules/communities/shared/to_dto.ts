@@ -1,6 +1,5 @@
 import type { CommunityDTO, CommunityDetailDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
 import type { Community, CommunityUser } from "../domain/community.models.js";
-import type { Role } from "../../../shared/dtos/role.js";
 
 export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommunityDTO {
   return {
@@ -30,7 +29,7 @@ export function toCommunityPartial(community: Community): CommunityDTO {
   };
 }
 
-export function toCommunityDetailDTO(community: Community, member_count: number, user_role?: Role): CommunityDetailDTO {
+export function toCommunityDetailDTO(community: Community, member_count: number): CommunityDetailDTO {
   return {
     id: community.id,
     name: community.name,
@@ -38,7 +37,7 @@ export function toCommunityDetailDTO(community: Community, member_count: number,
     created_at: community.created_at,
     updated_at: community.updated_at,
     member_count,
-    user_role,
+    description: community.description,
   };
 }
 

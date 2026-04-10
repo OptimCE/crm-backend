@@ -155,14 +155,6 @@ export class CommunityRepository implements ICommunityRepository {
     return { community, member_count };
   }
 
-  async getUserRoleInCommunity(user_id: number, community_id: number, query_runner?: QueryRunner): Promise<Role | null> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const membership = await manager.findOne(CommunityUser, {
-      where: { id_user: user_id, id_community: community_id },
-    });
-    return membership ? membership.role : null;
-  }
-
   async getAdmins(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 

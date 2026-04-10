@@ -52,17 +52,7 @@ export class CommunityService implements ICommunityService {
       throw new AppError(COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND, 404);
     }
 
-    let user_role: Role | undefined;
-    try {
-      const internal_user_id = await this.authContext.getInternalUserId();
-      if (internal_user_id) {
-        user_role = (await this.community_repository.getUserRoleInCommunity(internal_user_id, id)) ?? undefined;
-      }
-    } catch {
-      user_role = undefined;
-    }
-
-    return toCommunityDetailDTO(result.community, result.member_count, user_role);
+    return toCommunityDetailDTO(result.community, result.member_count);
   }
 
   /**
