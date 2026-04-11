@@ -12,12 +12,13 @@ import type { UserMemberInvitationDTO, UserManagerInvitationDTO } from "../../..
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 import { ClientType, MeterDataStatus, MeterRate, ReadingFrequency, TarifGroup } from "../../../src/modules/meters/shared/meter.types.js";
 import { toMemberPartialDTO, toMemberDTO, toDocumentExposed, toMeterDTO, toMeterPartialDTO } from "../../../src/modules/me/shared/to_dto.js";
+import {toMemberDTO as toMemberMemberDTO} from "../../../src/modules/members/shared/to_dto.js"
 import { ME_ERRORS } from "../../../src/modules/me/shared/me.errors.js";
 import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors.js";
 import { DOCUMENT_ERRORS } from "../../../src/modules/documents/shared/document.errors.js";
 import { METER_ERRORS } from "../../../src/modules/meters/shared/meter.errors.js";
 import { type HttpMethod, ORGS_MEMBER } from "../../utils/shared.consts.js";
-import { mockIndividualEntity as mockMemberIndividualEntity, mockMemberDTOJSON } from "../member/member.const.js";
+import { mockIndividualEntity as mockMemberIndividualEntity } from "../member/member.const.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
@@ -60,8 +61,10 @@ export const mockIndividualEntity: Member = {
 };
 
 export const mockMemberPartialDTO = toMemberPartialDTO(mockIndividualEntity);
-export const mockMemberDTO = toMemberDTO(mockIndividualEntity);
+export const mockMeMemberDTO = toMemberDTO(mockIndividualEntity);
 export const mockMemberPartialDTOJSON = JSON.parse(JSON.stringify(mockMemberPartialDTO));
+export const mockMeMemberDTOJSON = JSON.parse(JSON.stringify(mockMeMemberDTO));
+export const mockMemberDTO = toMemberMemberDTO(mockIndividualEntity);
 export const mockMemberDTOJSON = JSON.parse(JSON.stringify(mockMemberDTO));
 
 // --- Document Mock ---
@@ -243,7 +246,7 @@ export const testCasesGetMemberById = [
     status_code: 200,
     orgs: ORGS_MEMBER,
     expected_error_code: SUCCESS,
-    expected_data: mockMemberDTOJSON,
+    expected_data: mockMeMemberDTOJSON,
     mocks: {
       meRepo: {
         getMemberById: jest.fn(() => Promise.resolve(mockIndividualEntity)),
@@ -406,7 +409,7 @@ export const testCaseGetInvitationById = [
     id_invitation: 1,
     status_code: 200,
     expected_error_code: SUCCESS,
-    expected_data: mockMemberDTOJSON,
+    expected_data: mockMemberDTO,
     translation_field: undefined,
     mocks: {
       meRepo: {

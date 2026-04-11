@@ -6,7 +6,7 @@ import { ORGS_ADMIN, ORGS_GESTIONNAIRE } from "../../utils/shared.consts.js";
 export const existingKeyId = 1;
 export const existingKeyId2 = 2; // For delete/update tests without affecting the first one if needed
 export const notExistingKeyId2 = 99; // For delete/update tests without affecting the first one if needed
-export const AUTH_COMMUNITY_1 = "1";
+export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 // --- Test Cases ---
 

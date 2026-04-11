@@ -6,7 +6,7 @@ import type { ICacheService } from "../../../src/shared/cache/i-cache.service.js
 import { ORGS_GESTIONNAIRE } from "../../utils/shared.consts.js";
 
 const AUTH_USER = "auth0|admin";
-const AUTH_COMMUNITY_1 = "1";
+const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 const MEMBER_ID = "1";
 
 /** Filter cache keys to only document-prefixed entries */

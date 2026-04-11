@@ -46,6 +46,10 @@ export const SHARING_OPERATION_ERRORS = {
     METER_NOT_PART_OF_SHARING: new LocalError(70021, "sharing_operation:delete_meter_from_sharing.meter_not_part_of_sharing"),
     DATABASE_ADD: new LocalError(70022, "sharing_operation:delete_meter_from_sharing.database_add"),
   },
+  PATCH_VISIBILITY: {
+    SHARING_OPERATION_NOT_FOUND: new LocalError(70024, "sharing_operation:patch_visibility.sharing_operation_not_found"),
+    DATABASE_UPDATE: new LocalError(70025, "sharing_operation:patch_visibility.database_update"),
+  },
   GET_SHARING_OPERATION_CONSUMPTION: {
     NO_CONSUMPTION_FOUND: new LocalError(70023, "sharing_operation:get_sharing_operation_consumption.no_consumption_found"),
   },

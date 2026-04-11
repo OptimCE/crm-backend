@@ -148,6 +148,10 @@ export class CommunityService implements ICommunityService {
    */
   async getMyCommunities(query: CommunityQueryDTO): Promise<[MyCommunityDTO[], Pagination]> {
     const [values, total] = await this.community_repository.getMyCommunities(query);
+    console.log("VALUES : ");
+    console.log(values)
+    console.log(total)
+
     const return_values = values.map((value) => toMyCommunityDTO(value));
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];

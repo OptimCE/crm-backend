@@ -8,7 +8,7 @@ export const existingUserEmail = "admin@test.com";
 export const newUserAuthId = "auth0|newuser";
 export const newUserEmail = "newuser@test.com";
 
-export const AUTH_COMMUNITY_1 = "1";
+export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 // --- Test Cases ---
 

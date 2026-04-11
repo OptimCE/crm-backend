@@ -449,7 +449,7 @@ INSERT INTO community (
     'https://test-community.example.com',
     'https://test-community.example.com/logo.png',
     'A test community',
-    '1'
+    '2c8a0ea5-d597-49d6-ae12-4dceb9e9a018'
 );
 INSERT INTO community (
     name, website_url, logo_url, description, auth_community_id
