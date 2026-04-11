@@ -4,7 +4,7 @@ import { useFunctionalTestDb } from "../../utils/test.functional.wrapper.js";
 import { expectWithLog, mockStorageServiceModule } from "../../utils/helper.js";
 import { testCasesDelete, testCasesDownload, testCasesGetDocuments, testCasesUpload } from "./document.const.js";
 
-const AUTH_COMMUNITY_1 = "1";
+const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 describe("(Functional) Document Module", () => {
   useFunctionalTestDb();

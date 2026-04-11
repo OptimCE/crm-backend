@@ -12,6 +12,7 @@ import {
 } from "typeorm";
 import { Role } from "../../../shared/dtos/role.js";
 import { User } from "../../users/domain/user.models.js";
+import { Address } from "../../../shared/address/address.models.js";
 
 /**
  * Entity representing a Community.
@@ -38,6 +39,22 @@ export class Community {
    */
   @Column({ name: "auth_community_id", type: "varchar", length: 255, unique: true, nullable: false })
   auth_community_id!: string;
+
+  @Column({ name: "website_url", type: "varchar", length: 255, nullable: true })
+  website_url!: string | null;
+
+  @Column({ name: "logo_url", type: "varchar", length: 255, nullable: true })
+  logo_url!: string | null;
+
+  @Column({ type: "text", nullable: true })
+  description!: string | null;
+
+  @Column({ name: "headquarters_address_id", type: "int", nullable: true })
+  headquarters_address_id!: number | null;
+
+  @ManyToOne(() => Address, { nullable: true })
+  @JoinColumn({ name: "headquarters_address_id" })
+  headquarters_address!: Address | null;
 
   @CreateDateColumn({ name: "created_at" })
   created_at!: Date;

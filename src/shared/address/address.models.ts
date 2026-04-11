@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Community } from "../../modules/communities/domain/community.models.js";
+type CommunityType = Community;
 /**
  * Entity representing a physical address.
  */
@@ -21,6 +23,10 @@ export class Address {
 
   @Column({ type: "varchar", length: 255 })
   city!: string;
+
+  @ManyToOne(() => Community, { onDelete: "SET NULL", nullable: true })
+  @JoinColumn({ name: "id_community" })
+  community!: CommunityType | null;
 
   @CreateDateColumn({ name: "created_at" })
   created_at!: Date;

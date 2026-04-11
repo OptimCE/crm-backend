@@ -12,7 +12,7 @@ export const existingKeyId2 = 2; // "Key 2" linked to Op 2
 export const existingEAN = "123456789012345678"; // Linked to Op 1
 
 export const newSharingOpName = "Functional Op";
-export const AUTH_COMMUNITY_1 = "1";
+export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 // --- Test Cases ---
 
@@ -30,12 +30,12 @@ export const testCasesGetList = [
   },
   {
     description: "Success - Filter by Name",
-    query: { name: "Op 1" },
+    query: { name: "Public" },
     orgs: ORGS_GESTIONNAIRE,
     status_code: 200,
     expected_error_code: SUCCESS,
     check_data: (data: unknown[]): boolean => {
-      return data.length === 1 && (data[0] as { id: number }).id === existingSharingOpId1;
+      return data.length === 2 && (data[0] as { id: number }).id === existingSharingOpId1;
     },
   },
 ];
@@ -143,7 +143,43 @@ export const testCasesPatchMeter = [
   },
 ];
 
-// 8. Delete Op
+// 8. Patch Visibility
+export const testCasesPatchVisibility = [
+  {
+    description: "Success - Set to private",
+    body: {
+      id_sharing: existingSharingOpId1,
+      is_public: false,
+    },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Set to public",
+    body: {
+      id_sharing: existingSharingOpId1,
+      is_public: true,
+    },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Fail - Sharing operation not found",
+    body: {
+      id_sharing: 999,
+      is_public: true,
+    },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.SHARING_OPERATION_NOT_FOUND.errorCode,
+  },
+];
+
+// 9. Delete Op
 export const testCasesDelete = [
   {
     description: "Success - Delete Operation",

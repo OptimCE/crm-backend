@@ -324,6 +324,34 @@ sharing_operation_routes.patch(
   roleChecker(Role.GESTIONNAIRE),
   sharing_operation_controller.patchMeterStatus.bind(sharing_operation_controller),
 );
+// Patch (/visibility): Toggle the visibility (is_public) of a sharing operation
+sharing_operation_routes.patch(
+  "/visibility",
+  /* #swagger.summary = 'Toggle the visibility (is_public) of a sharing operation'
+       #swagger.tags = ['SharingOperations']
+       #swagger.requestBody = {
+           required: true,
+           content: {
+               "application/json": {
+                   schema: { $ref: "#/components/schemas/PatchSharingOperationVisibilityDTO" }
+               }
+           }
+       }
+       #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationPatchVisibilitySuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.patchVisibility.bind(sharing_operation_controller),
+);
 // DELETE (/:id) : Delete a sharing operation
 sharing_operation_routes.delete(
   "/:id",

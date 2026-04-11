@@ -9,6 +9,7 @@ import {
   CreateSharingOperationDTO,
   PatchKeyToSharingOperationDTO,
   PatchMeterToSharingOperationDTO,
+  PatchSharingOperationVisibilityDTO,
   RemoveMeterFromSharingOperationDTO,
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
@@ -609,6 +610,29 @@ export class SharingOperationService implements ISharingOperationService {
       }
       logger.error({ operation: "patchMeterStatus", error: err }, "Failed to patch meter status");
       throw new AppError(SHARING_OPERATION_ERRORS.PATCH_METER_STATUS.DATABASE_ADD, 400);
+    }
+  }
+
+  /**
+   * Toggles the visibility (is_public) of a sharing operation.
+   * @param dto - DTO with sharing operation ID and new visibility.
+   * @param query_runner - Optional query runner.
+   */
+  @Transactional()
+  async patchVisibility(dto: PatchSharingOperationVisibilityDTO, query_runner?: QueryRunner): Promise<void> {
+    const { id_sharing, is_public } = dto;
+
+    const sharingOp = await this.sharing_operationRepository.getSharingOperationById(id_sharing, query_runner);
+    if (!sharingOp) {
+      logger.error({ operation: "patchVisibility" }, `Sharing Operation with Id (${id_sharing}) was not found`);
+      throw new AppError(SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+
+    try {
+      await this.sharing_operationRepository.patchVisibility(id_sharing, is_public, query_runner);
+    } catch (err) {
+      logger.error({ operation: "patchVisibility", error: err }, "Failed to update sharing operation visibility");
+      throw new AppError(SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.DATABASE_UPDATE, 400);
     }
   }
 

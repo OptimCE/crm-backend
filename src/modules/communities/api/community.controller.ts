@@ -2,19 +2,23 @@ import TraceDecorator from "../../../shared/monitor/traceDecorator.js";
 import config from "config";
 import { inject, injectable } from "inversify";
 import type { ICommunityService } from "../domain/i-community.service.js";
+import type { ISharingOperationService } from "../../sharing_operations/domain/i-sharing_operation.service.js";
 import type { NextFunction, Request, Response } from "express";
 import { validateDto } from "../../../shared/utils/dto.validator.js";
 import logger from "../../../shared/monitor/logger.js";
 import { ApiResponse, ApiResponsePaginated } from "../../../shared/dtos/ApiResponses.js";
 import { SUCCESS } from "../../../shared/errors/errors.js";
 import {
-  CreateCommunityDTO,
+  CommunityDetailDTO,
+  CommunityDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
+  CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
   UsersCommunityDTO,
 } from "./community.dtos.js";
+import { SharingOperationPartialDTO, SharingOperationPartialQuery } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 import { InvalidateCache, Cache } from "../../../shared/cache/decorator/cache.decorators.js";
 
@@ -30,7 +34,36 @@ export class CommunityController {
    * Creates a new CommunityController instance
    * @param communityService - Service for community operations
    */
-  constructor(@inject("CommunityService") private readonly communityService: ICommunityService) {}
+  constructor(
+    @inject("CommunityService") private readonly communityService: ICommunityService,
+    @inject("SharingOperationService") private readonly sharingOperationService: ISharingOperationService,
+  ) {}
+
+  @communityControllerTraceDecorator.traceSpan("getAllCommunities", { url: "/communities", method: "get" })
+  // @Cache(cacheKey("communities:all-list", "none", () => ""), 60)
+  async getAllCommunities(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(CommunityQueryDTO, req.query);
+    const [result, pagination] = await this.communityService.getAllCommunities(queryObject);
+    logger.info("All communities list successfully retrieved");
+    res.status(200).json(new ApiResponsePaginated<CommunityDTO[]>(result, pagination, SUCCESS));
+  }
+
+  @communityControllerTraceDecorator.traceSpan("getCommunityById", { url: "/communities/:id", method: "get" })
+  // @Cache(cacheKey("communities:detail", "none", (req) => req.params.id), 60)
+  async getCommunityById(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const result = await this.communityService.getCommunityById(+req.params.id);
+    logger.info("Community detail successfully retrieved");
+    res.status(200).json(new ApiResponse<CommunityDetailDTO>(result, SUCCESS));
+  }
+
+  @communityControllerTraceDecorator.traceSpan("getCommunitySharingOperations", { url: "/communities/:id/sharing_operations", method: "get" })
+  @Cache(cacheKey("communities:sharing-operations", "community", (req) => JSON.stringify(req.query)), 60)
+  async getCommunitySharingOperations(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(SharingOperationPartialQuery, req.query);
+    const [result, pagination] = await this.sharingOperationService.getSharingOperationList(queryObject);
+    logger.info("Community sharing operations list successfully retrieved");
+    res.status(200).json(new ApiResponsePaginated<SharingOperationPartialDTO[]>(result, pagination, SUCCESS));
+  }
 
   /**
    * Retrieves the communities where the current user is a member.
@@ -85,7 +118,7 @@ export class CommunityController {
    * @param _next - Express next middleware function.
    */
   @communityControllerTraceDecorator.traceSpan("createCommunity", { url: "/communities/", method: "post" })
-  @InvalidateCache([cachePattern("communities:user-list", "user")])
+  @InvalidateCache([cachePattern("communities:user-list", "user"), cachePattern("communities:all-list", "none")])
   async createCommunity(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_community = await validateDto(CreateCommunityDTO, req.body);
     await this.communityService.addCommunity(new_community);
@@ -103,6 +136,9 @@ export class CommunityController {
     cachePattern("communities:users", "community"),
     cachePattern("communities:admins", "community"),
     cachePattern("communities:user-list", "user"),
+    cachePattern("communities:all-list", "none"),
+    cachePattern("communities:detail", "none"),
+    cachePattern("communities:sharing-operations", "community"),
   ])
   async updateCommunity(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_community = await validateDto(CreateCommunityDTO, req.body);
@@ -137,6 +173,7 @@ export class CommunityController {
     cachePattern("communities:user-list", "user"),
     cachePattern("communities:users", "community"),
     cachePattern("communities:admins", "community"),
+    cachePattern("communities:detail", "none"),
   ])
   async leave(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.communityService.leave(+req.params.id_community);

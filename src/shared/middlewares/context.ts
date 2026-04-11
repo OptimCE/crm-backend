@@ -23,15 +23,14 @@ function parseUserOrgs(user_orgs: string): OrgToken[] {
   const orgToken: OrgToken[] = [];
   if (matches && matches.length > 0) {
     for (const match of matches) {
-      const splitted = match.split(" ");
-      let roles = splitted[2].split(":")[1];
-      // Parse role that contain an array
-      roles = roles.substring(1, roles.length - 1);
-      const roleList = roles.split(",");
+      console.log(match);
+      const fieldMatch = match.match(/^orgId:(\S+)\s+orgPath:(.*?)\s+roles:\[([^\]]*)\]/);
+      if (!fieldMatch) continue;
+      const roleList = fieldMatch[3].split(",");
       const higherRole = resolveHighestRole(roleList);
       orgToken.push({
-        orgId: splitted[0].split(":")[1],
-        orgPath: splitted[1].split(":")[1],
+        orgId: fieldMatch[1],
+        orgPath: fieldMatch[2],
         role: higherRole!,
       });
     }

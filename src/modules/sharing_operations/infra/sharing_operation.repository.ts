@@ -262,6 +262,19 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       .execute();
   }
 
+  async patchVisibility(id_sharing: number, is_public: boolean, query_runner?: QueryRunner): Promise<void> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+
+    await manager
+      .createQueryBuilder()
+      .update(SharingOperation)
+      .set({ is_public })
+      .where("id = :id_sharing", { id_sharing })
+      .andWhere("community = :community_id", { community_id: internal_community_id })
+      .execute();
+  }
+
   async deleteSharingOperation(id_sharing: number, query_runner?: QueryRunner): Promise<DeleteResult> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);

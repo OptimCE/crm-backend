@@ -6,6 +6,7 @@ import {
   testCasesCreateCommunity,
   testCasesDeleteCommunity,
   testCasesGetAdmins,
+  testCasesGetAllCommunities,
   testCasesGetMyCommunities,
   testCasesGetUsers,
   testCasesKickUser,
@@ -14,10 +15,35 @@ import {
   testCasesUpdateCommunity,
 } from "./community.const.js";
 
-const AUTH_COMMUNITY_1 = "1";
+const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 describe("(Functional) Community Module", () => {
   useFunctionalTestDb();
+
+  // --- GET ALL COMMUNITIES (PUBLIC LIST) ---
+  describe("(Functional) Get All Communities", () => {
+    it.each(testCasesGetAllCommunities)(
+      "GET /communities/ : $description",
+      async ({ query, orgs, status_code, expected_error_code, check_data }) => {
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const response = await request(app)
+          .get("/communities/")
+          .query(query)
+          .set("x-user-id", "auth0|admin")
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (check_data) {
+            expect(check_data(response.body.data)).toBe(true);
+          }
+        });
+      },
+    );
+  });
 
   // --- GET MY COMMUNITIES ---
   describe("(Functional) Get My Communities", () => {
@@ -36,6 +62,7 @@ describe("(Functional) Community Module", () => {
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
+          console.log(response.body.data)
           expect(response.body.error_code).toBe(expected_error_code);
           if (check_data) {
             expect(check_data(response.body.data)).toBe(true);

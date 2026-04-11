@@ -1,7 +1,7 @@
 import { Expose, Type } from "class-transformer";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
-import { IsArray, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
 import { KeyPartialDTO } from "../../keys/api/key.dtos.js";
 import { HasMimeType, IsFile, MaxFileSize } from "../../../shared/dtos/file.validators.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
@@ -192,6 +192,11 @@ export class SharingOperationKeyDTO {
  */
 export class SharingOperationDTO extends SharingOperationPartialDTO {
   /**
+   * Whether the sharing operation is publicly visible.
+   */
+  @Expose()
+  is_public!: boolean;
+  /**
    * Current active key.
    */
   @Expose()
@@ -355,6 +360,23 @@ export class PatchMeterToSharingOperationDTO {
   @IsDate(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   date!: Date;
+}
+
+/**
+ * DTO for toggling the visibility (is_public) of a sharing operation.
+ */
+export class PatchSharingOperationVisibilityDTO {
+  @Expose()
+  @Type(() => Number)
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  id_sharing!: number;
+
+  @Expose()
+  @Type(() => Boolean)
+  @IsBoolean(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.BOOLEAN))
+  @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  is_public!: boolean;
 }
 
 /**

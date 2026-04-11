@@ -666,7 +666,65 @@ describe("(Cache Integration) Sharing Operation Module", () => {
   });
 
   // ────────────────────────────────────────────────────────────────────────────
-  // Scenario 14 — TTL expiration
+  // Scenario 14 — Cache invalidation on patchVisibility (list + detail)
+  //
+  // patchVisibility uses:
+  //   cachePattern("sharing-op:list", "community")
+  //   cachePattern("sharing-op:detail", "community")
+  // ────────────────────────────────────────────────────────────────────────────
+  describe("Cache Invalidation — PatchVisibility (list + detail)", () => {
+    it("should invalidate list and detail cache on patchVisibility, leaving keys untouched", async () => {
+      const cache = await getCacheService();
+      const { default: app } = await import("../../../src/app.js");
+
+      // Populate list, detail, and keys caches
+      await request(app)
+        .get("/sharing_operations/")
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+
+      await request(app)
+        .get(`/sharing_operations/${existingSharingOpId1}`)
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+
+      await request(app)
+        .get(`/sharing_operations/${existingSharingOpId1}/keys`)
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+
+      expect(sharingOpKeys(cache.keys() as string[]).length).toBe(3);
+
+      // Patch visibility (set to private)
+      const patchRes = await request(app)
+        .patch("/sharing_operations/visibility")
+        .send({
+          id_sharing: existingSharingOpId1,
+          is_public: false,
+        })
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(patchRes.status).toBe(200);
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      const keysAfter = sharingOpKeys(cache.keys() as string[]);
+      const listKeys = keysAfter.filter((k) => k.includes("sharing-op:list"));
+      const detailKeys = keysAfter.filter((k) => k.includes("sharing-op:detail"));
+      const keyKeys = keysAfter.filter((k) => k.includes("sharing-op:keys"));
+
+      expect(listKeys).toHaveLength(0); // list cleared
+      expect(detailKeys).toHaveLength(0); // detail cleared
+      expect(keyKeys).toHaveLength(1); // keys untouched
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Scenario 15 — TTL expiration
   // InMemoryCacheService checks expiresAt < Date.now() on get().
   // We manually set expiresAt to a past timestamp to simulate expiry.
   // ────────────────────────────────────────────────────────────────────────────

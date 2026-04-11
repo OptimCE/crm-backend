@@ -6,7 +6,7 @@ export const existingMemberInvitationId = 1; // invitee@test.com
 export const notExistingMemberInvitationId = 99; // invitee@test.com
 export const existingManagerInvitationId = 1; // future_admin@test.com
 
-export const AUTH_COMMUNITY_1 = "1";
+export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 // --- Test Cases ---
 

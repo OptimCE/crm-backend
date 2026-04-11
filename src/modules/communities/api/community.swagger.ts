@@ -18,7 +18,7 @@ export const CommunityParameters = {
   CommunityQuery: {
     name: "filters",
     in: "query",
-    description: "Pagination and sort options for my communities",
+    description: "Pagination and sort options for communities",
     required: false,
     schema: { $ref: "#/components/schemas/CommunityQueryDTO" },
     style: "form",
@@ -44,9 +44,110 @@ export const CommunityParameters = {
       sort_email: "ASC",
     },
   },
+  SharingOperationPartialQuery: {
+    name: "filters",
+    in: "query",
+    description: "Pagination and sort options for sharing operations",
+    required: false,
+    schema: { $ref: "#/components/schemas/SharingOperationPartialQuery" },
+    style: "form",
+    explode: true,
+    example: {
+      page: 1,
+      limit: 10,
+    },
+  },
 };
 
 export const CommunityResponses = {
+  CommunitiesListSuccess: {
+    description: "Successful list of all communities with public sharing operations",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: {
+            type: "array",
+            items: { $ref: "#/components/schemas/CommunityDTO" },
+          },
+          pagination: { $ref: "#/components/schemas/Pagination" },
+        },
+        example: {
+          error_code: 0,
+          data: [
+            {
+              id: 1,
+              name: "Test Community",
+              logo_url: "https://example.com/logo.png",
+            },
+          ],
+          pagination: {
+            page: 1,
+            limit: 10,
+            total: 1,
+            total_pages: 1,
+          },
+        },
+      },
+    },
+  },
+  CommunityDetailSuccess: {
+    description: "Successful community detail response",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/CommunityDetailDTO" },
+        },
+        example: {
+          error_code: 0,
+          data: {
+            id: 1,
+            name: "Test Community",
+            auth_community_id: "aaaa",
+            created_at: "2024-01-01T00:00:00.000Z",
+            updated_at: "2024-01-01T00:00:00.000Z",
+            member_count: 4,
+            description: "A test community description",
+          },
+        },
+      },
+    },
+  },
+  CommunitySharingOperationsSuccess: {
+    description: "Successful list of sharing operations for a community",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: {
+            type: "array",
+            items: { $ref: "#/components/schemas/SharingOperationPartialDTO" },
+          },
+          pagination: { $ref: "#/components/schemas/Pagination" },
+        },
+        example: {
+          error_code: 0,
+          data: [
+            {
+              id: 1,
+              name: "Public Solar Sharing",
+              type: 1,
+              is_public: true,
+              created_at: "2024-01-01T00:00:00.000Z",
+              updated_at: "2024-01-01T00:00:00.000Z",
+            },
+          ],
+          pagination: {
+            page: 1,
+            limit: 10,
+            total: 1,
+            total_pages: 1,
+          },
+        },
+      },
+    },
+  },
   MyCommunitiesGetSuccess: {
     description: "Successful list of my communities",
     content: {

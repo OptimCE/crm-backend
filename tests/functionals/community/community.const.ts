@@ -10,6 +10,36 @@ interface UserResponse {
 }
 // --- Test Cases ---
 
+// 0. Get All Communities (public list)
+export const testCasesGetAllCommunities = [
+  {
+    description: "Success - Returns only communities with public sharing ops",
+    query: {},
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => {
+      return data.length === 1 && (data[0] as { id: number }).id === existingCommunityId;
+    },
+  },
+  {
+    description: "Success - Filter by name (matching)",
+    query: { name: "Test" },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => data.length === 1,
+  },
+  {
+    description: "Success - Filter by name (no match)",
+    query: { name: "NonExistent" },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => data.length === 0,
+  },
+];
+
 // 1. Get My Communities
 export const testCasesGetMyCommunities = [
   {
@@ -19,7 +49,7 @@ export const testCasesGetMyCommunities = [
     status_code: 200,
     expected_error_code: SUCCESS,
     check_data: (data: unknown[]): boolean => {
-      return data.length === 1 && (data[0] as { id: number }).id === existingCommunityId;
+      return data.length === 3 && (data[0] as { id: number }).id === existingCommunityId;
     },
   },
   // Functional: Test Filter

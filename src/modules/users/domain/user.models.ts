@@ -10,7 +10,7 @@ type AddressType = Address;
  * Entity representing a system user.
  * Authenticated via external IAM.
  */
-@Entity("user") // Quoted in SQL because 'user' is reserved
+@Entity("app_user") // Renamed from 'user' to avoid PostgreSQL reserved keyword
 @Index("idx_home_addr_user", ["homeAddress"])
 @Index("idx_billing_addr_user", ["billingAddress"])
 export class User {

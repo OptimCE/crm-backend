@@ -103,7 +103,57 @@ export class CommunityRepository implements ICommunityRepository {
       key: "sort_role",
       apply: (qb, direction) => qb.addOrderBy("community_user.role", direction),
     },
+    {
+      key: "sort_id",
+      apply: (qb, direction) => qb.addOrderBy("community.id", direction),
+    },
   ];
+
+  communityFilters: FilterDef<Community>[] = [
+    {
+      key: "name",
+      apply: (qb, val) => qb.andWhere("community.name LIKE :name", { name: `%${val}%` }),
+    },
+  ];
+
+  communitySorts: SortDef<Community>[] = [
+    {
+      key: "sort_name",
+      apply: (qb, direction) => qb.addOrderBy("community.name", direction),
+    },
+    {
+      key: "sort_id",
+      apply: (qb, direction) => qb.addOrderBy("community.id", direction),
+    },
+  ];
+
+  async getAllCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    let qb = manager
+      .createQueryBuilder(Community, "community")
+      .innerJoin("sharing_operation", "so", "so.id_community = community.id AND so.is_public = :isPublic", { isPublic: true });
+
+    qb = applyFilters(this.communityFilters, qb, query);
+    qb = applySorts(this.communitySorts, qb, query);
+
+    const take = query.limit;
+    const skip = (query.page - 1) * take;
+
+    return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  async getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    const community = await manager.findOne(Community, { where: { id } });
+    if (!community) {
+      return null;
+    }
+
+    const member_count = await manager.count(CommunityUser, { where: { id_community: id } });
+
+    return { community, member_count };
+  }
 
   async getAdmins(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;

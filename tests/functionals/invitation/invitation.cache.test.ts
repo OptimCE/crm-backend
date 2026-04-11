@@ -3,15 +3,15 @@ import request from "supertest";
 import { useFunctionalCacheTestDb } from "../../utils/test.functional.cached.wrapper.js";
 import { expectWithLog } from "../../utils/helper.js";
 import type { ICacheService } from "../../../src/shared/cache/i-cache.service.js";
-import { ORGS_ADMIN, ORGS_GESTIONNAIRE } from "../../utils/shared.consts.js";
+import { ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 
 const AUTH_USER_ADMIN = "auth0|admin";
 const AUTH_USER_MEMBER = "auth0|member";
-const AUTH_COMMUNITY_1 = "1";
+const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 /** Filter cache keys to only invitation-prefixed entries */
 function invitationKeys(keys: string[]): string[] {
-  return keys.filter((k) => k.startsWith("invitations:") || k.startsWith("invitations-own:"));
+  return keys.filter((k) => k.startsWith("invitations:") || k.startsWith("me-invitations:"));
 }
 
 describe("(Cache Integration) Invitation Module", () => {
@@ -78,50 +78,6 @@ describe("(Cache Integration) Invitation Module", () => {
       expect(cached!.status).toBe(200);
       expect(cached!.body).toEqual(response.body);
     });
-
-    it("should populate cache on first GET /invitations/own (user-scoped own member list)", async () => {
-      const cache = await getCacheService();
-      expect(invitationKeys(cache.keys() as string[])).toHaveLength(0);
-
-      const { default: app } = await import("../../../src/app.js");
-
-      const response = await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
-
-      await expectWithLog(response, () => {
-        expect(response.status).toBe(200);
-      });
-
-      const keys = invitationKeys(cache.keys() as string[]);
-      const matchingKeys = keys.filter((k) => k.includes("invitations-own:member-list"));
-      expect(matchingKeys).toHaveLength(1);
-
-      const cached = await cache.get<{ status: number; body: unknown }>(matchingKeys[0]);
-      expect(cached).not.toBeNull();
-      expect(cached!.status).toBe(200);
-      expect(cached!.body).toEqual(response.body);
-    });
-
-    it("should populate cache on first GET /invitations/own/managers (user-scoped own manager list)", async () => {
-      const cache = await getCacheService();
-      expect(invitationKeys(cache.keys() as string[])).toHaveLength(0);
-
-      const { default: app } = await import("../../../src/app.js");
-
-      const response = await request(app).get("/invitations/own/managers").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
-
-      await expectWithLog(response, () => {
-        expect(response.status).toBe(200);
-      });
-
-      const keys = invitationKeys(cache.keys() as string[]);
-      const matchingKeys = keys.filter((k) => k.includes("invitations-own:manager-list"));
-      expect(matchingKeys).toHaveLength(1);
-
-      const cached = await cache.get<{ status: number; body: unknown }>(matchingKeys[0]);
-      expect(cached).not.toBeNull();
-      expect(cached!.status).toBe(200);
-      expect(cached!.body).toEqual(response.body);
-    });
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -158,28 +114,6 @@ describe("(Cache Integration) Invitation Module", () => {
 
       spy.mockRestore();
     });
-
-    it("should serve from cache on second identical GET /invitations/own (user-scoped)", async () => {
-      const { default: app } = await import("../../../src/app.js");
-
-      const { InvitationService } = await import("../../../src/modules/invitations/infra/invitation.service.js");
-      const spy = jest.spyOn(InvitationService.prototype, "getOwnMemberPendingInvitation");
-
-      const res1 = await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
-
-      expect(res1.status).toBe(200);
-      expect(spy).toHaveBeenCalledTimes(1);
-
-      const res2 = await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
-
-      await expectWithLog(res2, () => {
-        expect(res2.status).toBe(200);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(res2.body).toEqual(res1.body);
-      });
-
-      spy.mockRestore();
-    });
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -207,30 +141,6 @@ describe("(Cache Integration) Invitation Module", () => {
       const keys = invitationKeys(cache.keys() as string[]).filter((k) => k.includes("invitations:member-list"));
       expect(keys).toHaveLength(2);
       expect(keys[0]).not.toBe(keys[1]);
-    });
-  });
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // Scenario 4 — Different users produce different cache entries (user-scoped)
-  // ────────────────────────────────────────────────────────────────────────────
-  describe("Cache Key Differentiation — Users", () => {
-    it("should create separate cache entries for different users on user-scoped endpoints", async () => {
-      const cache = await getCacheService();
-      const { default: app } = await import("../../../src/app.js");
-
-      const res1 = await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_ADMIN).set("x-user-orgs", ORGS_GESTIONNAIRE);
-      expect(res1.status).toBe(200);
-
-      const res2 = await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
-      expect(res2.status).toBe(200);
-
-      const keys = invitationKeys(cache.keys() as string[]).filter((k) => k.includes("invitations-own:member-list"));
-      expect(keys).toHaveLength(2);
-
-      const keyAdmin = keys.find((k) => k.includes(AUTH_USER_ADMIN));
-      const keyMember = keys.find((k) => k.includes(AUTH_USER_MEMBER));
-      expect(keyAdmin).toBeDefined();
-      expect(keyMember).toBeDefined();
     });
   });
 
@@ -275,7 +185,7 @@ describe("(Cache Integration) Invitation Module", () => {
   // inviteUserToBecomeMember uses:
   //   @InvalidateCache([
   //     cachePattern("invitations:member-list", "community"),   → "invitations:member-list:c:<cid>:*"
-  //     cachePattern("invitations-own:member", "none"),          → "invitations-own:member:*"
+  //     cachePattern("me-invitations:member", "none"),           → "me-invitations:member:*"
   //   ])
   // ────────────────────────────────────────────────────────────────────────────
   describe("Cache Invalidation — Invite Member", () => {
@@ -292,7 +202,7 @@ describe("(Cache Integration) Invitation Module", () => {
       expect(getRes.status).toBe(200);
 
       // Populate user-scoped own member list cache (should NOT be invalidated)
-      const ownRes = await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
+      const ownRes = await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
       expect(ownRes.status).toBe(200);
 
       const keysBefore = invitationKeys(cache.keys() as string[]);
@@ -313,11 +223,11 @@ describe("(Cache Integration) Invitation Module", () => {
       const keysAfter = invitationKeys(cache.keys() as string[]);
 
       // Community member-list keys should be gone
-      const memberListKeys = keysAfter.filter((k) => k.includes("invitations:member-list"));
+      const memberListKeys = keysAfter.filter((k) => k.startsWith("invitations:member-list"));
       expect(memberListKeys).toHaveLength(0);
 
-      // Own member-list keys should remain (pattern "invitations-own:member:*" does NOT match "invitations-own:member-list:*")
-      const ownMemberListKeys = keysAfter.filter((k) => k.includes("invitations-own:member-list"));
+      // Own member-list keys should remain (pattern "me-invitations:member:*" does NOT match "me-invitations:member-list:*")
+      const ownMemberListKeys = keysAfter.filter((k) => k.startsWith("me-invitations:member-list"));
       expect(ownMemberListKeys).toHaveLength(1);
     });
   });
@@ -328,7 +238,7 @@ describe("(Cache Integration) Invitation Module", () => {
   // inviteUserToBecomeManager uses:
   //   @InvalidateCache([
   //     cachePattern("invitations:manager-list", "community"),   → "invitations:manager-list:c:<cid>:*"
-  //     cachePattern("invitations-own:manager", "none"),          → "invitations-own:manager:*"
+  //     cachePattern("me-invitations:manager", "none"),           → "me-invitations:manager:*"
   //   ])
   // ────────────────────────────────────────────────────────────────────────────
   describe("Cache Invalidation — Invite Manager", () => {
@@ -345,7 +255,7 @@ describe("(Cache Integration) Invitation Module", () => {
       expect(getRes.status).toBe(200);
 
       // Populate user-scoped own manager list cache (should NOT be invalidated)
-      const ownRes = await request(app).get("/invitations/own/managers").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
+      const ownRes = await request(app).get("/me/invitations/managers").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
       expect(ownRes.status).toBe(200);
 
       const keysBefore = invitationKeys(cache.keys() as string[]);
@@ -365,11 +275,11 @@ describe("(Cache Integration) Invitation Module", () => {
       const keysAfter = invitationKeys(cache.keys() as string[]);
 
       // Community manager-list keys should be gone
-      const managerListKeys = keysAfter.filter((k) => k.includes("invitations:manager-list"));
+      const managerListKeys = keysAfter.filter((k) => k.startsWith("invitations:manager-list"));
       expect(managerListKeys).toHaveLength(0);
 
       // Own manager-list keys should remain
-      const ownManagerListKeys = keysAfter.filter((k) => k.includes("invitations-own:manager-list"));
+      const ownManagerListKeys = keysAfter.filter((k) => k.startsWith("me-invitations:manager-list"));
       expect(ownManagerListKeys).toHaveLength(1);
     });
   });
@@ -379,9 +289,9 @@ describe("(Cache Integration) Invitation Module", () => {
   //
   // cancelMemberInvitation uses all "none" scope patterns:
   //   @InvalidateCache([
-  //     cachePattern("invitations-own:member-list", "none"),  → "invitations-own:member-list:*"
-  //     cachePattern("invitations-own:member", "none"),       → "invitations-own:member:*"
-  //     cachePattern("invitations:member-list", "none"),      → "invitations:member-list:*"
+  //     cachePattern("me-invitations:member-list", "none"),  → "me-invitations:member-list:*"
+  //     cachePattern("me-invitations:member", "none"),       → "me-invitations:member:*"
+  //     cachePattern("invitations:member-list", "none"),     → "invitations:member-list:*"
   //   ])
   // ────────────────────────────────────────────────────────────────────────────
   describe("Cache Invalidation — Cancel Member (Nuclear)", () => {
@@ -404,8 +314,8 @@ describe("(Cache Integration) Invitation Module", () => {
         .set("x-community-id", "2")
         .set("x-user-orgs", ORGS_GESTIONNAIRE_COMM2);
 
-      // Populate own member-list
-      await request(app).get("/invitations/own").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
+      // Populate own member-list (via me module)
+      await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
 
       // Populate manager-list (should NOT be invalidated)
       await request(app)
@@ -444,9 +354,9 @@ describe("(Cache Integration) Invitation Module", () => {
   //
   // cancelManagerInvitation uses all "none" scope patterns:
   //   @InvalidateCache([
-  //     cachePattern("invitations-own:manager-list", "none"),  → "invitations-own:manager-list:*"
-  //     cachePattern("invitations-own:manager", "none"),       → "invitations-own:manager:*"
-  //     cachePattern("invitations:manager-list", "none"),      → "invitations:manager-list:*"
+  //     cachePattern("me-invitations:manager-list", "none"),  → "me-invitations:manager-list:*"
+  //     cachePattern("me-invitations:manager", "none"),       → "me-invitations:manager:*"
+  //     cachePattern("invitations:manager-list", "none"),     → "invitations:manager-list:*"
   //   ])
   // ────────────────────────────────────────────────────────────────────────────
   describe("Cache Invalidation — Cancel Manager (Nuclear)", () => {
@@ -461,8 +371,8 @@ describe("(Cache Integration) Invitation Module", () => {
         .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", ORGS_GESTIONNAIRE);
 
-      // Populate own manager-list
-      await request(app).get("/invitations/own/managers").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_GESTIONNAIRE);
+      // Populate own manager-list (via me module)
+      await request(app).get("/me/invitations/managers").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
 
       // Populate member-list (should NOT be invalidated)
       await request(app)

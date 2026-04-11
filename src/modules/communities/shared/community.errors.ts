@@ -30,4 +30,7 @@ export const COMMUNITY_ERRORS = {
     DATABASE_DELETE_EXCEPTION: new LocalError(10014, "community:delete_community.database_delete_exception"),
     IAM_DELETE_COMMUNITY: new LocalError(10015, "community:delete_community.iam_delete_community"),
   },
+  GET_COMMUNITY: {
+    COMMUNITY_NOT_FOUND: new LocalError(10016, "community:get_community.community_not_found"),
+  },
 };

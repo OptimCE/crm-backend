@@ -1,4 +1,6 @@
 import type {
+  CommunityDTO,
+  CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
   CreateCommunityDTO,
@@ -13,6 +15,18 @@ import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
  * Defines the contract for managing communities regarding business logic.
  */
 export interface ICommunityService {
+  /**
+   * Retrieves a paginated list of all communities in the system.
+   * @param query - Query parameters for filtering and pagination.
+   * @returns A tuple containing the list of CommunityDTO and pagination info.
+   */
+  getAllCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]>;
+  /**
+   * Retrieves detailed information about a specific community.
+   * @param id - The community ID.
+   * @returns A CommunityDetailDTO with member count and optional user role.
+   */
+  getCommunityById(id: number): Promise<CommunityDetailDTO>;
   /**
    * Retrieves a paginated list of communities where the current user is a member.
    * @param query - Query parameters for filtering and pagination.

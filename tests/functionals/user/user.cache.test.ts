@@ -7,7 +7,7 @@ import { ORGS_ADMIN, ORGS_MEMBER } from "../../utils/shared.consts.js";
 
 const AUTH_USER_ADMIN = "auth0|admin";
 const AUTH_USER_MEMBER = "auth0|member";
-const AUTH_COMMUNITY_1 = "1";
+const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 /** Filter cache keys to only users-prefixed entries */
 function userKeys(keys: string[]): string[] {

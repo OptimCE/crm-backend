@@ -32,6 +32,7 @@ export interface ISharingOperationRepository {
     status: SharingKeyStatus,
     query_runner?: QueryRunner,
   ): Promise<SharingOperationKey>;
+  patchVisibility(id_sharing: number, is_public: boolean, query_runner?: QueryRunner): Promise<void>;
   deleteSharingOperation(id_sharing: number, query_runner?: QueryRunner): Promise<DeleteResult>;
   getSharingOperationMetersList(id_sharing: number, query: SharingOperationMetersQuery, query_runner?: QueryRunner): Promise<[Meter[], number]>;
   getSharingOperationKeysList(id_sharing: number, query: KeyPartialQuery, query_runner?: QueryRunner): Promise<[SharingOperationKey[], number]>;

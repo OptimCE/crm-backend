@@ -36,6 +36,7 @@ export function toMemberPartialDTO(member: Member): MeMembersPartialDTO {
     community: {
       id: member.community.id,
       name: member.community.name,
+      logo_url: member.community.logo_url,
     },
   };
 }
@@ -92,6 +93,7 @@ export function toDocumentExposed(document: Document): MeDocumentDTO {
     community: {
       id: document.community.id,
       name: document.community.name,
+      logo_url: document.community.logo_url,
     },
   };
 }
@@ -127,6 +129,7 @@ export function toMeterDTO(meter: Meter): MeMeterDTO {
   dto.community = {
     id: meter.community.id,
     name: meter.community.name,
+    logo_url: meter.community.logo_url,
   };
   dto.meter_number = meter.meter_number;
 
@@ -208,6 +211,7 @@ export function toMeterPartialDTO(meter: Meter): MePartialMeterDTO {
     community: {
       id: meter.community.id,
       name: meter.community.name,
+      logo_url: meter.community.logo_url,
     },
   };
 }

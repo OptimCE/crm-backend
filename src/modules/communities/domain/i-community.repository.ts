@@ -5,6 +5,8 @@ import type { Role } from "../../../shared/dtos/role.js";
 
 export interface ICommunityRepository {
   addCommunity(new_community: CreateCommunityDTO, org_id: string, query_runner?: QueryRunner): Promise<Community>;
+  getAllCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]>;
+  getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null>;
   getAdmins(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;
   getMyCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;
   getUsers(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;

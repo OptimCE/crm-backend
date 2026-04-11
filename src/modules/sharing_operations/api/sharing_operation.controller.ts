@@ -14,6 +14,7 @@ import {
   CreateSharingOperationDTO,
   PatchKeyToSharingOperationDTO,
   PatchMeterToSharingOperationDTO,
+  PatchSharingOperationVisibilityDTO,
   RemoveMeterFromSharingOperationDTO,
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
@@ -226,6 +227,21 @@ export class SharingOperationController {
     const patched_meter_status = await validateDto(PatchMeterToSharingOperationDTO, req.body);
     await this.sharing_operationService.patchMeterStatus(patched_meter_status);
     logger.info("Meter linked to sharing operation patched");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Toggles the visibility (is_public) of a sharing operation.
+   * @param req - Express request object. Body: PatchSharingOperationVisibilityDTO.
+   * @param res - Express response object. Returns success message.
+   * @param _next - Express next middleware.
+   */
+  @sharing_operationControllerTraceDecorator.traceSpan("patchVisibility", { url: "/sharing_operations/visibility", method: "patch" })
+  @InvalidateCache([cachePattern("sharing-op:list", "community"), cachePattern("sharing-op:detail", "community")])
+  async patchVisibility(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const dto = await validateDto(PatchSharingOperationVisibilityDTO, req.body);
+    await this.sharing_operationService.patchVisibility(dto);
+    logger.info("Sharing operation visibility patched");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 

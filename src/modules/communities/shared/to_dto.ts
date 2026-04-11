@@ -1,4 +1,4 @@
-import type { CommunityDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
+import type { CommunityDTO, CommunityDetailDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
 import type { Community, CommunityUser } from "../domain/community.models.js";
 
 export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommunityDTO {
@@ -13,10 +13,31 @@ export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommuni
   };
 }
 
+export function toCommunityDTO(community: Community): CommunityDTO {
+  return {
+    id: community.id,
+    name: community.name,
+    logo_url: community.logo_url,
+  };
+}
+
 export function toCommunityPartial(community: Community): CommunityDTO {
   return {
     id: community.id,
     name: community.name,
+    logo_url: community.logo_url,
+  };
+}
+
+export function toCommunityDetailDTO(community: Community, member_count: number): CommunityDetailDTO {
+  return {
+    id: community.id,
+    name: community.name,
+    auth_community_id: community.auth_community_id,
+    created_at: community.created_at,
+    updated_at: community.updated_at,
+    member_count,
+    description: community.description,
   };
 }
 

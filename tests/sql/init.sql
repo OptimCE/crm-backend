@@ -2,264 +2,295 @@ DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
 CREATE OR REPLACE FUNCTION update_changetimestamp_column()
-    RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = now();
 RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql;
 
-CREATE TABLE IF NOT EXISTS COMMUNITY(
-                                        id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                        name VARCHAR(255) NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS community (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    website_url VARCHAR(255) NULL,
+    logo_url VARCHAR(255) NULL,
+    description TEXT NULL,
+    headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp
+);
 CREATE TRIGGER update_community_modtime
-    BEFORE UPDATE ON COMMUNITY
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON community
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS ADDRESS(
-                                      id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                      street VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS address (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    street VARCHAR(255) NOT NULL,
     number INT NOT NULL,
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NULL REFERENCES COMMUNITY(id) ON DELETE SET NULL
-    );
-CREATE INDEX idx_address_community ON ADDRESS(id_community);
+    id_community INT REFERENCES community (id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp
+);
+
+ALTER TABLE community ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (
+    headquarters_address_id
+) REFERENCES address (id);
 
 CREATE TRIGGER update_address_modtime
-    BEFORE UPDATE ON ADDRESS
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON address
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS ALLOCATION_KEY
+CREATE TABLE IF NOT EXISTS allocation_key
 (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_key_community ON ALLOCATION_KEY(id_community);
+    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    updated_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_key_community ON allocation_key (id_community);
 
 CREATE TRIGGER update_key_modtime
-    BEFORE UPDATE ON ALLOCATION_KEY
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON allocation_key
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS ITERATION
+CREATE TABLE IF NOT EXISTS iteration
 (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    number int NOT NULL,
-    energy_allocated_percentage float NOT NULL,
-    id_key int NOT NULL REFERENCES ALLOCATION_KEY(id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_iteration_key ON ITERATION(id_key);
-CREATE INDEX idx_iteration_community ON ITERATION(id_community);
+    number INT NOT NULL,
+    energy_allocated_percentage FLOAT NOT NULL,
+    id_key INT NOT NULL REFERENCES allocation_key (id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    updated_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_iteration_key ON iteration (id_key);
+CREATE INDEX idx_iteration_community ON iteration (id_community);
 
 CREATE TRIGGER update_iteration_modtime
-    BEFORE UPDATE ON ITERATION
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON iteration
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
 
-CREATE TABLE IF NOT EXISTS CONSUMER(
-   id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-   name varchar(255) NOT NULL,
-    energy_allocated_percentage float NOT NULL,
-    id_iteration int NOT NULL REFERENCES ITERATION(id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_consumer_iteration ON Consumer(id_iteration);
-CREATE INDEX idx_consumer_community ON CONSUMER(id_community);
+CREATE TABLE IF NOT EXISTS consumer (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    energy_allocated_percentage FLOAT NOT NULL,
+    id_iteration INT NOT NULL REFERENCES iteration (id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    updated_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_consumer_iteration ON consumer (id_iteration);
+CREATE INDEX idx_consumer_community ON consumer (id_community);
 
 CREATE TRIGGER update_consumer_modtime
-    BEFORE UPDATE ON CONSUMER
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON consumer
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS MEMBER(
-                                     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY UNIQUE,
-                                     name VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS member (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY UNIQUE,
+    name VARCHAR(255) NOT NULL,
     id_home_address INT NOT NULL,
-    FOREIGN KEY (id_home_address) REFERENCES ADDRESS(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_home_address) REFERENCES address (id) ON DELETE CASCADE,
     id_billing_address INT NOT NULL,
-    FOREIGN KEY (id_billing_address) REFERENCES ADDRESS(id) ON DELETE CASCADE,
-    IBAN VARCHAR(255) NOT NULL,
-    STATUS INT NOT NULL CHECK (STATUS IN (1, 2, 3)), -- 1: Active; 2: Inactive; 3: Pending
-    member_type INT NOT NULL CHECK (member_type IN (1, 2)), -- 1: Individuals; 2: Company
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_member_home_addr ON MEMBER(id_home_address);
-CREATE INDEX idx_member_billing_addr on MEMBER(id_billing_address);
-CREATE INDEX idx_member_community ON MEMBER(id_community);
+    FOREIGN KEY (id_billing_address) REFERENCES address (id) ON DELETE CASCADE,
+    iban VARCHAR(255) NOT NULL,
+    -- 1: Active; 2: Inactive; 3: Pending
+    status INT NOT NULL CHECK (status IN (1, 2, 3)),
+    -- 1: Individuals; 2: Company
+    member_type INT NOT NULL CHECK (member_type IN (1, 2)),
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_member_home_addr ON member (id_home_address);
+CREATE INDEX idx_member_billing_addr ON member (id_billing_address);
+CREATE INDEX idx_member_community ON member (id_community);
 
 CREATE TRIGGER update_members_modtime
-    BEFORE UPDATE ON MEMBER
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON member
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS MANAGER(
-                                      id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY UNIQUE,
-                                      NRN VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS manager (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY UNIQUE,
+    nrn VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     surname VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_manager_community ON MANAGER(id_community);
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_manager_community ON manager (id_community);
 
 CREATE TRIGGER update_managers_modtime
-    BEFORE UPDATE ON MANAGER
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON manager
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS INDIVIDUAL(
-                                         id INT PRIMARY KEY REFERENCES MEMBER(id) ON DELETE CASCADE, -- Same ID as MEMBER
+CREATE TABLE IF NOT EXISTS individual (
+    -- Same ID as MEMBER
+    id INT PRIMARY KEY REFERENCES member (id) ON DELETE CASCADE,
     first_name VARCHAR(255) NOT NULL,
-    NRN VARCHAR(255) NOT NULL,
+    nrn VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255),
-    social_rate boolean NOT NULL DEFAULT FALSE,
-    id_manager INT NULL REFERENCES MANAGER(ID)
-    );
+    social_rate BOOLEAN NOT NULL DEFAULT FALSE,
+    id_manager INT NULL REFERENCES manager (id)
+);
 
-CREATE INDEX idx_individual_manager ON INDIVIDUAL(id_manager);
+CREATE INDEX idx_individual_manager ON individual (id_manager);
 
-CREATE TABLE IF NOT EXISTS COMPANY(
-                                      id INT PRIMARY KEY REFERENCES MEMBER(id) ON DELETE CASCADE, -- Same ID as MEMBER
+CREATE TABLE IF NOT EXISTS company (
+    -- Same ID as MEMBER
+    id INT PRIMARY KEY REFERENCES member (id) ON DELETE CASCADE,
     vat_number VARCHAR(255) NOT NULL,
-    id_manager INT NOT NULL REFERENCES MANAGER(ID)
-    );
-CREATE INDEX idx_companies_manager ON COMPANY(id_manager);
+    id_manager INT NOT NULL REFERENCES manager (id)
+);
+CREATE INDEX idx_companies_manager ON company (id_manager);
 
 
-CREATE TABLE IF NOT EXISTS DOCUMENT(
-                                       id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                       id_member INT NOT NULL REFERENCES MEMBER(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS document (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_member INT NOT NULL REFERENCES member (id) ON DELETE CASCADE,
     file_name VARCHAR(255) NOT NULL,
     file_url VARCHAR(255) NOT NULL,
     file_size INT NOT NULL,
     file_type VARCHAR(255) NOT NULL,
     upload_date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX document_member ON DOCUMENT(id_member);
-CREATE INDEX idx_document_community ON DOCUMENT(id_community);
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX document_member ON document (id_member);
+CREATE INDEX idx_document_community ON document (id_community);
 
 CREATE TRIGGER update_document_modtime
-    BEFORE UPDATE ON DOCUMENT
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON document
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS METER(
-                                    EAN VARCHAR PRIMARY KEY,
-                                    meter_number VARCHAR(255) NOT NULL,
-    id_address INT NOT NULL REFERENCES ADDRESS(id),
-    tarif_group INT NOT NULL CHECK (tarif_group IN (1, 2)), -- 1: Low tension ; 2: High tension
+CREATE TABLE IF NOT EXISTS meter (
+    ean VARCHAR PRIMARY KEY,
+    meter_number VARCHAR(255) NOT NULL,
+    id_address INT NOT NULL REFERENCES address (id),
+    -- 1: Low tension ; 2: High tension
+    tarif_group INT NOT NULL CHECK (tarif_group IN (1, 2)),
     phases_number INT NOT NULL,
-    reading_frequency INT NOT NULL CHECK (reading_frequency IN (1 ,2)), -- 1 : Monthly, 2 : Yearly
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_meter_community ON METER(id_community);
+    -- 1 : Monthly, 2 : Yearly
+    reading_frequency INT NOT NULL CHECK (reading_frequency IN (1, 2)),
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_meter_community ON meter (id_community);
 
-CREATE INDEX idx_meters_address ON METER(id_address);
+CREATE INDEX idx_meters_address ON meter (id_address);
 CREATE TRIGGER update_meters_modtime
-    BEFORE UPDATE ON METER
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON meter
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS SHARING_OPERATION(
-                                                id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                name VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS sharing_operation (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     type INT NOT NULL CHECK (type IN (1, 2, 3)), -- 1: Local 2: CER 3: CEC
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_sharing_operation_community ON SHARING_OPERATION(id_community);
+    is_public BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_sharing_operation_community ON sharing_operation (
+    id_community
+);
 
 CREATE TRIGGER update_sharing_operation_modtime
-    BEFORE UPDATE ON SHARING_OPERATION
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON sharing_operation
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS SHARING_OPERATION_KEY(
-                                                    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                    id_sharing_operation INT NOT NULL REFERENCES SHARING_OPERATION(id) ON DELETE CASCADE,
-    id_key INT NOT NULL REFERENCES ALLOCATION_KEY(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS sharing_operation_key (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_sharing_operation INT NOT NULL REFERENCES sharing_operation (
+        id
+    ) ON DELETE CASCADE,
+    id_key INT NOT NULL REFERENCES allocation_key (id) ON DELETE CASCADE,
     start_date DATE NOT NULL,
     end_date DATE,
-    status INT NOT NULL CHECK (status IN (1, 2, 3)), -- 1: Approved; 2: Pending; 3: Rejected
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_sharing_operation_key_sharing_op ON SHARING_OPERATION_KEY(id_sharing_operation);
-CREATE INDEX idx_sharing_operation_key_key ON SHARING_OPERATION_KEY(id_key);
-CREATE INDEX idx_sharing_operation_key_community ON SHARING_OPERATION_KEY(id_community);
+    -- 1: Approved; 2: Pending; 3: Rejected
+    status INT NOT NULL CHECK (status IN (1, 2, 3)),
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_sharing_operation_key_sharing_op ON sharing_operation_key (
+    id_sharing_operation
+);
+CREATE INDEX idx_sharing_operation_key_key ON sharing_operation_key (id_key);
+CREATE INDEX idx_sharing_operation_key_community ON sharing_operation_key (
+    id_community
+);
 CREATE TRIGGER update_sharing_operation_key_modtime
-    BEFORE UPDATE ON SHARING_OPERATION_KEY
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON sharing_operation_key
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS METER_DATA(
-                                         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                         description TEXT,
-                                         ean VARCHAR(255) NOT NULL references METER(EAN) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS meter_data (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    description TEXT,
+    ean VARCHAR(255) NOT NULL REFERENCES meter (ean) ON DELETE CASCADE,
     status INT NOT NULL CHECK (status IN (1, 2, 3, 4)), -- 1: Active; 2: Inactive; 3: Waiting confirmation from GRD, 4: Waiting confirmation from manager
     sampling_power FLOAT,
     amperage FLOAT,
-    rate int NOT NULL CHECK (rate IN (1, 2, 3)), -- 1: Simple ; 2: Bi-horaire; 3: Exclusif nuit
-    client_type INT NOT NULL CHECK (client_type IN (1, 2, 3)), -- 1: Résidentiel; 2: Professionnel; 3: Industriel
-    id_member INT REFERENCES MEMBER(id) ON DELETE SET NULL, -- TODO: Is that the right way ?
+    -- 1: Simple ; 2: Bi-horaire; 3: Exclusif nuit
+    rate INT NOT NULL CHECK (rate IN (1, 2, 3)),
+    -- 1: Résidentiel; 2: Professionnel; 3: Industriel
+    client_type INT NOT NULL CHECK (client_type IN (1, 2, 3)),
+    -- TODO: Is that the right way ?
+    id_member INT REFERENCES member (id) ON DELETE SET NULL,
     start_date DATE NOT NULL,
     end_date DATE,
     injection_status INT CHECK (injection_status IN (1, 2, 3, 4)), -- 1: Autoproducteur propriétaire; 2: Autorpoducteur droit de jouissance; 3: Injection pure propriétaire; 4: Injection pure droit de jouissance
-    production_chain INT CHECK (production_chain IN (1, 2, 3 ,4 ,5 ,6, 7)), -- 1: Photovoltaique; 2: éolien; 3: hydroélectrique; 4: biomasse solide ; 5 : biogaz; 6: cogénération fossile; 7: autre
+    production_chain INT CHECK (production_chain IN (1, 2, 3, 4, 5, 6, 7)), -- 1: Photovoltaique; 2: éolien; 3: hydroélectrique; 4: biomasse solide ; 5 : biogaz; 6: cogénération fossile; 7: autre
     total_generating_capacity FLOAT,
     grd VARCHAR(255),
-    id_sharing_operation INT REFERENCES SHARING_OPERATION(id)  ON DELETE SET NULL, -- TODO: Is that the right way ?
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_meter_data_meter ON METER_DATA(ean);
-CREATE INDEX idx_meter_data_sharing_operation ON METER_DATA(id_sharing_operation);
-CREATE INDEX idx_meter_data_member ON METER_DATA(id_member);
-CREATE INDEX idx_meter_data_community ON METER_DATA(id_community);
+    -- TODO: Is that the right way ?
+    id_sharing_operation INT REFERENCES sharing_operation (
+        id
+    ) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_meter_data_meter ON meter_data (ean);
+CREATE INDEX idx_meter_data_sharing_operation ON meter_data (
+    id_sharing_operation
+);
+CREATE INDEX idx_meter_data_member ON meter_data (id_member);
+CREATE INDEX idx_meter_data_community ON meter_data (id_community);
 
 CREATE TRIGGER update_meter_data_modtime
-    BEFORE UPDATE ON METER_DATA
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON meter_data
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS METER_CONSUMPTION (
-                                                 id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                 ean VARCHAR(255) NOT NULL references METER(EAN) ON DELETE CASCADE,
-    id_sharing_operation INTEGER references SHARING_OPERATION(id),
+CREATE TABLE IF NOT EXISTS meter_consumption (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ean VARCHAR(255) NOT NULL REFERENCES meter (ean) ON DELETE CASCADE,
+    id_sharing_operation INTEGER REFERENCES sharing_operation (id),
     timestamp TIMESTAMPTZ NOT NULL,
     gross FLOAT,
     net FLOAT,
@@ -267,22 +298,28 @@ CREATE TABLE IF NOT EXISTS METER_CONSUMPTION (
     inj_gross FLOAT,
     inj_shared FLOAT,
     inj_net FLOAT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_meter_consumption_meter ON METER_CONSUMPTION(ean);
-CREATE INDEX idx_meter_consumption_sharing_operation ON METER_CONSUMPTION(id_sharing_operation);
-CREATE INDEX idx_meter_consumption_community ON METER_CONSUMPTION(id_community);
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_meter_consumption_meter ON meter_consumption (ean);
+CREATE INDEX idx_meter_consumption_sharing_operation ON meter_consumption (
+    id_sharing_operation
+);
+CREATE INDEX idx_meter_consumption_community ON meter_consumption (
+    id_community
+);
 
 CREATE TRIGGER update_meter_consumption_modtime
-    BEFORE UPDATE ON METER_CONSUMPTION
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON meter_consumption
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS SHARING_OP_CONSUMPTION (
-                                                      id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                      id_sharing_operation INTEGER NOT NULL REFERENCES SHARING_OPERATION(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS sharing_op_consumption (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_sharing_operation INTEGER NOT NULL REFERENCES sharing_operation (
+        id
+    ) ON DELETE CASCADE,
     timestamp TIMESTAMPTZ NOT NULL,
     gross FLOAT,
     net FLOAT,
@@ -290,207 +327,423 @@ CREATE TABLE IF NOT EXISTS SHARING_OP_CONSUMPTION (
     inj_gross FLOAT,
     inj_shared FLOAT,
     inj_net FLOAT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_community INT NOT NULL REFERENCES COMMUNITY(id) ON DELETE CASCADE
-    );
-CREATE INDEX idx_sharing_op_consumption_sharing_op ON SHARING_OP_CONSUMPTION(id_sharing_operation);
-CREATE INDEX idx_sharing_op_consumption_community ON SHARING_OP_CONSUMPTION(id_community);
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_sharing_op_consumption_sharing_op ON sharing_op_consumption (
+    id_sharing_operation
+);
+CREATE INDEX idx_sharing_op_consumption_community ON sharing_op_consumption (
+    id_community
+);
 
 CREATE TRIGGER update_sharing_op_consumption_modtime
-    BEFORE UPDATE ON SHARING_OP_CONSUMPTION
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON sharing_op_consumption
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS "user"(
-                                     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                     email TEXT UNIQUE NOT NULL,
-                                     first_name TEXT NULL,
-                                     last_name TEXT NULL,
-                                     NRN TEXT NULL,
-                                     phone_number TEXT NULL,
-                                     iban TEXT NULL,
-                                     id_home_address INT,
-                                     FOREIGN KEY (id_home_address) REFERENCES ADDRESS(id),
+CREATE TABLE IF NOT EXISTS app_user (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    first_name TEXT NULL,
+    last_name TEXT NULL,
+    nrn TEXT NULL,
+    phone_number TEXT NULL,
+    iban TEXT NULL,
+    id_home_address INT,
+    FOREIGN KEY (id_home_address) REFERENCES address (id),
     id_billing_address INT,
-    FOREIGN KEY (id_billing_address) REFERENCES ADDRESS(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_billing_address) REFERENCES address (id),
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp,
     auth_user_id VARCHAR(255) UNIQUE -- External Auth provider link
-    );
-CREATE INDEX idx_home_addr_user ON "user"(id_home_address);
-CREATE INDEX idx_billing_addr_user on "user"(id_billing_address);
+);
+CREATE INDEX idx_home_addr_user ON app_user (id_home_address);
+CREATE INDEX idx_billing_addr_user ON app_user (id_billing_address);
 CREATE TRIGGER update_user_modtime
-    BEFORE UPDATE ON "user"
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON app_user
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS COMMUNITY_USER(
-                                             id_community INTEGER REFERENCES COMMUNITY(id) ON DELETE CASCADE,
-    id_user INTEGER REFERENCES "user" (id) ON DELETE CASCADE,
-    role VARCHAR(50) CHECK (role in ('ADMIN', 'MANAGER', 'MEMBER')), -- (String matches IAM role name)
+CREATE TABLE IF NOT EXISTS community_user (
+    id_community INTEGER REFERENCES community (id) ON DELETE CASCADE,
+    id_user INTEGER REFERENCES app_user (id) ON DELETE CASCADE,
+    -- (String matches IAM role name)
+    role VARCHAR(50) CHECK (role IN ('ADMIN', 'MANAGER', 'MEMBER')),
 
     PRIMARY KEY (id_community, id_user)
-    );
-CREATE INDEX idx_community_user_community ON COMMUNITY_USER(id_community);
-CREATE INDEX idx_community_user_user ON COMMUNITY_USER(id_user);
+);
+CREATE INDEX idx_community_user_community ON community_user (id_community);
+CREATE INDEX idx_community_user_user ON community_user (id_user);
 
 
-CREATE TABLE IF NOT EXISTS User_Member_Link (
-                                                id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                id_user INT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,        -- references User.id
-    id_member INT NOT NULL REFERENCES MEMBER(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-CREATE INDEX idx_user_member_link_user ON User_Member_Link(id_user);
-CREATE INDEX idx_user_member_link_member on User_Member_Link(id_member);
+CREATE TABLE IF NOT EXISTS user_member_link (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    -- references User.id
+    id_user INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    id_member INT NOT NULL REFERENCES member (id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp
+);
+CREATE INDEX idx_user_member_link_user ON user_member_link (id_user);
+CREATE INDEX idx_user_member_link_member ON user_member_link (id_member);
 CREATE TRIGGER update_user_member_link_modtime
-    BEFORE UPDATE ON User_Member_Link
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON user_member_link
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS User_Member_Invitation(
-                                                     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                     member_id INT REFERENCES MEMBER(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS user_member_invitation (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    member_id INT REFERENCES member (id) ON DELETE CASCADE,
     member_name TEXT,
     user_email TEXT,       -- The invitee's email
-    id_user INT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-    to_be_encoded boolean NOT NULL DEFAULT FALSE, -- True if invitation, false if member added and invitation automatically created
-    id_community INT REFERENCES COMMUNITY(id) ON DELETE CASCADE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-CREATE INDEX idx_user_member_invitation_community ON User_Member_Invitation(id_community);
-CREATE INDEX idx_user_member_invitation_user ON User_Member_Invitation(id_user);
-CREATE INDEX idx_user_member_invitation_member ON User_Member_Invitation(member_id);
+    id_user INT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    to_be_encoded BOOLEAN NOT NULL DEFAULT FALSE, -- True if invitation, false if member added and invitation automatically created
+    id_community INT REFERENCES community (id) ON DELETE CASCADE NOT NULL,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp
+);
+CREATE INDEX idx_user_member_invitation_community ON user_member_invitation (
+    id_community
+);
+CREATE INDEX idx_user_member_invitation_user ON user_member_invitation (
+    id_user
+);
+CREATE INDEX idx_user_member_invitation_member ON user_member_invitation (
+    member_id
+);
 CREATE TRIGGER update_user_member_invitation_modtime
-    BEFORE UPDATE ON User_Member_Invitation
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
+BEFORE UPDATE ON user_member_invitation
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
-CREATE TABLE IF NOT EXISTS Gestionnaire_Invitation(
-                                                      id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                                                      user_email TEXT NOT NULL,
-                                                      id_user INT REFERENCES "user"(ID),
-    id_community INT NOT NULL REFERENCES community(id)  ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+CREATE TABLE IF NOT EXISTS gestionnaire_invitation (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_email TEXT NOT NULL,
+    id_user INT REFERENCES app_user (id),
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp
+);
 
-CREATE INDEX idx_gestionnaire_invitation_user ON Gestionnaire_Invitation(id_user);
-CREATE INDEX idx_gestionnaire_invitation_community ON Gestionnaire_Invitation(id_community);
+CREATE INDEX idx_gestionnaire_invitation_user ON gestionnaire_invitation (
+    id_user
+);
+CREATE INDEX idx_gestionnaire_invitation_community ON gestionnaire_invitation (
+    id_community
+);
 CREATE TRIGGER update_gestionnaire_invitation_modtime
-    BEFORE UPDATE ON Gestionnaire_Invitation
-    FOR EACH ROW
-    EXECUTE FUNCTION update_changetimestamp_column();
-
+BEFORE UPDATE ON gestionnaire_invitation
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
 
 
 -- --- MOCK DATA ---
 
 -- 1. Communities
-INSERT INTO COMMUNITY (name, auth_community_id) VALUES ('Test Community', '1');
-INSERT INTO COMMUNITY (name, auth_community_id) VALUES ('Other Community', '2');
+INSERT INTO community (
+    name, website_url, logo_url, description, auth_community_id
+) VALUES (
+    'Test Community',
+    'https://test-community.example.com',
+    'https://test-community.example.com/logo.png',
+    'A test community',
+    '2c8a0ea5-d597-49d6-ae12-4dceb9e9a018'
+);
+INSERT INTO community (
+    name, website_url, logo_url, description, auth_community_id
+) VALUES (
+    'Other Community',
+    'https://other-community.example.com',
+    NULL,
+    'Another community without public sharing',
+    '2'
+);
+INSERT INTO community (name, logo_url, auth_community_id) VALUES (
+    'Empty Community', 'https://empty-community.example.com/logo.png', '3'
+);
 
 -- 2. Addresses
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Main St', 1, '1000', 'Brussels', 1);
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Second St', 2, '2000', 'Antwerp', 1);
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Third St', 3, '3000', 'Leuven', 2);
-INSERT INTO ADDRESS (street, number, postcode, city, id_community) VALUES ( 'Fourth St', 4, '4000', 'Liege', 1);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Main St', 1, '1000', 'Brussels'
+);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Second St', 2, '2000', 'Antwerp'
+);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Third St', 3, '3000', 'Leuven'
+);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Fourth St', 4, '4000', 'Liege'
+);
+
+-- Link community headquarters to addresses
+UPDATE community SET headquarters_address_id = 1
+WHERE id = 1;
+UPDATE community SET headquarters_address_id = 3
+WHERE id = 2;
 
 -- 3. Users
-INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
-VALUES ('admin@test.com', 'Admin', 'User', 'auth0|admin', 1, 1);
-INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
-VALUES ('manager@test.com', 'Manager', 'User', 'auth0|manager', 2, 2);
-INSERT INTO "user" (email, first_name, last_name, auth_user_id, id_home_address, id_billing_address)
-VALUES ('member@test.com', 'Member', 'User', 'auth0|member', 1, 1);
+-- Demo user from keycloak/dev-config.json (username: demo, password: demo, user_id: f298d22b-4e19-4150-a4d4-f852c60163b3)
+INSERT INTO app_user (
+    email,
+    first_name,
+    last_name,
+    auth_user_id,
+    id_home_address,
+    id_billing_address
+)
+VALUES (
+    'demo@example.com',
+    'Demo',
+    'User',
+    'f298d22b-4e19-4150-a4d4-f852c60163b3',
+    1,
+    1
+);
+-- Test users used by functional/unit tests
+INSERT INTO app_user (
+    email,
+    first_name,
+    last_name,
+    auth_user_id,
+    id_home_address,
+    id_billing_address
+)
+VALUES ('admin@test.com', 'Admin', 'User', 'auth0|admin', 2, 2);
+INSERT INTO app_user (
+    email,
+    first_name,
+    last_name,
+    auth_user_id,
+    id_home_address,
+    id_billing_address
+)
+VALUES ('manager@test.com', 'Manager', 'User', 'auth0|manager', 3, 3);
+INSERT INTO app_user (
+    email,
+    first_name,
+    last_name,
+    auth_user_id,
+    id_home_address,
+    id_billing_address
+)
+VALUES ('member@test.com', 'Member', 'User', 'auth0|member', 4, 4);
 
 -- 4. Community Users (Roles)
-INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 1, 'ADMIN');
-INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 2, 'MANAGER');
-INSERT INTO COMMUNITY_USER (id_community, id_user, role) VALUES (1, 3, 'MEMBER');
+-- Demo user (ID 1) is ADMIN of Test Community (ID 1)
+INSERT INTO community_user (id_community, id_user, role) VALUES (1, 1, 'ADMIN');
+-- Test users
+INSERT INTO community_user (id_community, id_user, role) VALUES (1, 2, 'ADMIN');
+INSERT INTO community_user (id_community, id_user, role) VALUES (
+    1, 3, 'MANAGER'
+);
+INSERT INTO community_user (id_community, id_user, role) VALUES (
+    1, 4, 'MEMBER'
+);
+INSERT INTO community_user (id_community, id_user, role) VALUES (2, 2, 'ADMIN');
+INSERT INTO community_user (id_community, id_user, role) VALUES (
+    2, 3, 'MANAGER'
+);
+INSERT INTO community_user (id_community, id_user, role) VALUES (
+    2, 4, 'MEMBER'
+);
+INSERT INTO community_user (id_community, id_user, role) VALUES (3, 2, 'ADMIN');
 
 -- 5. Members (Base)
-INSERT INTO MEMBER (name, id_home_address, id_billing_address, IBAN, STATUS, member_type, id_community)
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
 VALUES ('Member One', 1, 1, 'BE1234567890', 1, 1, 1); -- Individual
-INSERT INTO MEMBER (name, id_home_address, id_billing_address, IBAN, STATUS, member_type, id_community)
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
 VALUES ('Member Two', 2, 2, 'BE0987654321', 1, 2, 1); -- Company
-INSERT INTO MEMBER (name, id_home_address, id_billing_address, IBAN, STATUS, member_type, id_community)
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
 VALUES ('Member Three', 3, 3, 'BE1122334455', 1, 1, 2); -- Other community
 
 -- 6. Managers (for Entities)
-INSERT INTO MANAGER (NRN, name, surname, email, phone_number, id_community)
+INSERT INTO manager (nrn, name, surname, email, phone_number, id_community)
 VALUES ('123456789', 'Manager', 'One', 'mgr1@test.com', '0470000000', 1);
 
 -- 7. Individual / Company Details
-INSERT INTO INDIVIDUAL (id, first_name, NRN, email, phone_number, social_rate, id_manager)
-VALUES (1, 'John', '111111111', 'john@test.com', '0471111111', false, 1);
+INSERT INTO individual (
+    id, first_name, nrn, email, phone_number, social_rate, id_manager
+)
+VALUES (1, 'John', '111111111', 'john@test.com', '0471111111', FALSE, 1);
 
-INSERT INTO COMPANY (id, vat_number, id_manager)
+INSERT INTO company (id, vat_number, id_manager)
 VALUES (2, 'BE0000000000', 1);
 
 -- 8. Allocation Keys
-INSERT INTO ALLOCATION_KEY (name, description, id_community) VALUES ('Key 1', 'Desc 1', 1);
-INSERT INTO ALLOCATION_KEY (name, description, id_community) VALUES ('Key 2', 'Desc 2', 1);
+INSERT INTO allocation_key (name, description, id_community) VALUES (
+    'Key 1', 'Desc 1', 1
+);
+INSERT INTO allocation_key (name, description, id_community) VALUES (
+    'Key 2', 'Desc 2', 1
+);
 
 -- 9. Iterations & Consumers
-INSERT INTO ITERATION (number, energy_allocated_percentage, id_key, id_community) VALUES (1, 1.0, 1, 1);
-INSERT INTO CONSUMER (name, energy_allocated_percentage, id_iteration, id_community) VALUES ('Consumer 1', 0.5, 1, 1);
-INSERT INTO CONSUMER (name, energy_allocated_percentage, id_iteration, id_community) VALUES ('Consumer 2', 0.5, 1, 1);
+INSERT INTO iteration (
+    number, energy_allocated_percentage, id_key, id_community
+) VALUES (1, 1.0, 1, 1);
+INSERT INTO consumer (
+    name, energy_allocated_percentage, id_iteration, id_community
+) VALUES ('Consumer 1', 0.5, 1, 1);
+INSERT INTO consumer (
+    name, energy_allocated_percentage, id_iteration, id_community
+) VALUES ('Consumer 2', 0.5, 1, 1);
 
 -- 10. Meters
-INSERT INTO METER (EAN, meter_number, id_address, tarif_group, phases_number, reading_frequency, id_community)
+INSERT INTO meter (
+    ean,
+    meter_number,
+    id_address,
+    tarif_group,
+    phases_number,
+    reading_frequency,
+    id_community
+)
 VALUES ('123456789012345678', 'M1', 1, 1, 1, 1, 1);
-INSERT INTO METER (EAN, meter_number, id_address, tarif_group, phases_number, reading_frequency, id_community)
+INSERT INTO meter (
+    ean,
+    meter_number,
+    id_address,
+    tarif_group,
+    phases_number,
+    reading_frequency,
+    id_community
+)
 VALUES ('987654321098765432', 'M2', 2, 1, 3, 1, 1);
 
 -- 11. Sharing Operations
-INSERT INTO SHARING_OPERATION (name, type, id_community) VALUES ('Op 1', 1, 1);
-INSERT INTO SHARING_OPERATION ( name, type, id_community) VALUES ('Op 2', 2, 1);
+-- Community 1 (Test Community): has public sharing operations -> will appear in GET /communities
+INSERT INTO sharing_operation (name, type, is_public, id_community) VALUES (
+    'Public Solar Sharing', 1, TRUE, 1
+);
+INSERT INTO sharing_operation (name, type, is_public, id_community) VALUES (
+    'Public Wind Sharing', 2, TRUE, 1
+);
+-- Community 2 (Other Community): only private sharing operations -> will NOT appear in GET /communities
+INSERT INTO sharing_operation (name, type, is_public, id_community) VALUES (
+    'Private Local Sharing', 1, FALSE, 2
+);
+-- Community 3 (Empty Community): no sharing operations -> will NOT appear in GET /communities
 
 -- 12. Sharing Operation Key Links
-INSERT INTO SHARING_OPERATION_KEY (id_sharing_operation, id_key, start_date, status, id_community)
+INSERT INTO sharing_operation_key (
+    id_sharing_operation, id_key, start_date, status, id_community
+)
 VALUES (1, 1, '2024-01-01', 1, 1); -- Active
-INSERT INTO SHARING_OPERATION_KEY (id_sharing_operation, id_key, start_date, status, id_community)
-VALUES (2, 2, '2024-01-01', 2, 1); -- Pending
+INSERT INTO sharing_operation_key (
+    id_sharing_operation, id_key, start_date, status, id_community
+)
+VALUES (2, 2, '2024-01-01', 1, 1); -- Active
+INSERT INTO sharing_operation_key (
+    id_sharing_operation, id_key, start_date, status, id_community
+)
+VALUES (3, 1, '2024-01-01', 1, 2); -- Active
 
 -- 13. Meter Data (Configuration)
-INSERT INTO METER_DATA (ean, status, rate, client_type, start_date, id_sharing_operation, id_community, id_member, injection_status, production_chain, total_generating_capacity)
-VALUES ('123456789012345678', 1, 1, 1, '2024-01-01', 1, 1, 1, 1, 1, 5.0); -- Active, Simple, Res, Op1, Member1, Prod Owner, PV, 5kVA
+INSERT INTO meter_data (
+    ean,
+    status,
+    rate,
+    client_type,
+    start_date,
+    id_sharing_operation,
+    id_community,
+    id_member,
+    injection_status,
+    production_chain,
+    total_generating_capacity
+)
+-- Active, Simple, Res, Op1, Member1, Prod Owner, PV, 5kVA
+VALUES ('123456789012345678', 1, 1, 1, '2024-01-01', 1, 1, 1, 1, 1, 5.0);
 
-INSERT INTO METER_DATA (ean, status, rate, client_type, start_date, id_sharing_operation, id_community, id_member, injection_status, production_chain, total_generating_capacity)
-VALUES ('987654321098765432', 3, 2, 2, '2024-01-01', 2, 1, 2, null, null, null); -- Waiting GRD, Bi-horaire, Pro, Op2, Member2
+INSERT INTO meter_data (
+    ean,
+    status,
+    rate,
+    client_type,
+    start_date,
+    id_sharing_operation,
+    id_community,
+    id_member,
+    injection_status,
+    production_chain,
+    total_generating_capacity
+)
+-- Waiting GRD, Bi-horaire, Pro, Op2, Member2
+VALUES ('987654321098765432', 3, 2, 2, '2024-01-01', 2, 1, 2, NULL, NULL, NULL);
 
 -- 14. Documents
-INSERT INTO DOCUMENT (id_member, file_name, file_url, file_size, file_type, upload_date, id_community)
+INSERT INTO document (
+    id_member,
+    file_name,
+    file_url,
+    file_size,
+    file_type,
+    upload_date,
+    id_community
+)
 VALUES (1, 'doc.pdf', 'http://url', 100, 'application/pdf', '2024-01-01', 1);
 
 -- 15. User Member Links
-INSERT INTO User_Member_Link (id_user, id_member, created_at) VALUES (3, 1, '2024-01-01');
+INSERT INTO user_member_link (id_user, id_member, created_at) VALUES (
+    4, 1, '2024-01-01'
+);
 
 -- 16. User Member Invitations
-INSERT INTO User_Member_Invitation (member_id, member_name, user_email, to_be_encoded, id_community)
-VALUES (2, 'Member Two', 'invitee@test.com', false, 1);
+INSERT INTO user_member_invitation (
+    member_id, member_name, user_email, to_be_encoded, id_community
+)
+VALUES (2, 'Member Two', 'invitee@test.com', FALSE, 1);
 
 -- 17. Gestionnaire Invitations
-INSERT INTO Gestionnaire_Invitation (user_email, id_community) VALUES ('future_admin@test.com', 1);
+INSERT INTO gestionnaire_invitation (user_email, id_community) VALUES (
+    'future_admin@test.com', 1
+);
 
 -- 18. Meter Local Consumption (15min data)
-INSERT INTO METER_CONSUMPTION (ean, id_sharing_operation, timestamp, gross, net, shared, id_community)
+INSERT INTO meter_consumption (
+    ean, id_sharing_operation, timestamp, gross, net, shared, id_community
+)
 VALUES ('123456789012345678', 1, '2024-01-01 12:00:00+00', 1.0, 0.8, 0.2, 1);
 
 -- 19. Sharing Op Aggregated Consumption
-INSERT INTO SHARING_OP_CONSUMPTION (id_sharing_operation, timestamp, gross, net, shared, id_community)
+INSERT INTO sharing_op_consumption (
+    id_sharing_operation, timestamp, gross, net, shared, id_community
+)
 VALUES (1, '2024-01-01 12:00:00+00', 10.0, 8.0, 2.0, 1);
 
 -- Reset Sequences to avoid collisions with hardcoded IDs
-ALTER TABLE COMMUNITY ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE ADDRESS ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE "user" ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE MEMBER ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE ALLOCATION_KEY ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE SHARING_OPERATION ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE ITERATION ALTER COLUMN id RESTART WITH 10;
-ALTER TABLE CONSUMER ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE community ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE address ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE app_user ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE member ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE allocation_key ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE sharing_operation ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE iteration ALTER COLUMN id RESTART WITH 10;
+ALTER TABLE consumer ALTER COLUMN id RESTART WITH 10;

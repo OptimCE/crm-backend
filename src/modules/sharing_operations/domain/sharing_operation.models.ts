@@ -24,6 +24,9 @@ export class SharingOperation {
   @Column({ type: "int", enum: SharingOperationType })
   type!: SharingOperationType;
 
+  @Column({ name: "is_public", type: "boolean", default: false })
+  is_public!: boolean;
+
   @CreateDateColumn({ name: "created_at" })
   created_at!: Date;
 

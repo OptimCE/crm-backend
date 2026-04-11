@@ -37,6 +37,7 @@ export function toSharingOperation(value: SharingOperation): SharingOperationDTO
   dto.id = value.id;
   dto.name = value.name;
   dto.type = value.type;
+  dto.is_public = value.is_public;
 
   // Safety check if keys are not loaded
   const keys = value.keys || [];

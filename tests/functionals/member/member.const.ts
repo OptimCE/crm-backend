@@ -9,7 +9,7 @@ export const existingCompanyId = 2;
 export const existingCommunityId = 1;
 export const existingMemberOtherCommunityId = 3;
 
-export const AUTH_COMMUNITY_1 = "1";
+export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 // --- Test Cases ---
 

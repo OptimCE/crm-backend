@@ -5,6 +5,7 @@ import type {
   CreateSharingOperationDTO,
   PatchKeyToSharingOperationDTO,
   PatchMeterToSharingOperationDTO,
+  PatchSharingOperationVisibilityDTO,
   RemoveMeterFromSharingOperationDTO,
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
@@ -88,6 +89,12 @@ export interface ISharingOperationService {
    * @param patched_meter_status - DTO with meter status updates.
    */
   patchMeterStatus(patched_meter_status: PatchMeterToSharingOperationDTO): Promise<void>;
+
+  /**
+   * Toggles the visibility (is_public) of a sharing operation.
+   * @param dto - DTO with sharing operation ID and new visibility.
+   */
+  patchVisibility(dto: PatchSharingOperationVisibilityDTO): Promise<void>;
 
   /**
    * Deletes a sharing operation.
