@@ -449,7 +449,7 @@ describe("(Cache Integration) Me Module", () => {
   describe("Uncached Endpoint", () => {
     it("should NOT cache GET /me/documents/:id (download)", async () => {
       await mockStorageServiceModule({
-        getDocument: jest.fn<() => Promise<Buffer>>().mockResolvedValue(Buffer.from("fake-pdf-content")),
+        getDocumentUrl: jest.fn<() => Promise<string>>().mockResolvedValue("https://minio.local/crm-files/documents/fake-doc?presigned=1"),
       });
       const cache = await getCacheService();
       const { default: app } = await import("../../../src/app.js");

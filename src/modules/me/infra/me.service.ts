@@ -68,10 +68,10 @@ export class MeService implements IMeService {
       logger.error({ operation: "downloadDocument" }, `Document ${id} not found`);
       throw new AppError(DOCUMENT_ERRORS.DOWNLOAD_DOCUMENT.DOCUMENT_NOT_FOUND, 400);
     }
-    // Download documents from storage service
-    const result = await this.storageService.getDocument(document.file_url);
+    // Generate presigned URL for direct download
+    const url = await this.storageService.getDocumentUrl(document.file_url);
     return {
-      document: result,
+      url,
       fileName: document.file_name,
       fileType: document.file_type,
     };

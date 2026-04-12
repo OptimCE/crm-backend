@@ -4,7 +4,7 @@ import type { IStorageService } from "../../src/shared/storage/i-storage.service
 export function createMockStorageService(): jest.Mocked<IStorageService> {
   return {
     deleteDocument: jest.fn(),
-    getDocument: jest.fn(),
+    getDocumentUrl: jest.fn(),
     uploadDocument: jest.fn(),
   };
 }

@@ -58,10 +58,9 @@ export const testCasesDownload = [
 
     orgs: ORGS_ADMIN,
     status_code: 200,
-    is_binary: true,
     mocks: {
       storageService: {
-        getDocument: jest.fn(() => Promise.resolve(Buffer.from("mock-file-content"))),
+        getDocumentUrl: jest.fn(() => Promise.resolve("https://minio.local/crm-files/documents/mock?presigned=1")),
       },
     },
   },
@@ -74,7 +73,7 @@ export const testCasesDownload = [
     expected_error_code: DOCUMENT_ERRORS.DOWNLOAD_DOCUMENT.DOCUMENT_NOT_FOUND.errorCode,
     mocks: {
       storageService: {
-        getDocument: jest.fn(() => Promise.resolve(Buffer.from(""))),
+        getDocumentUrl: jest.fn(() => Promise.resolve("https://minio.local/crm-files/documents/mock?presigned=1")),
       },
     },
   },

@@ -13,6 +13,7 @@ import {
   testCasesPatchMemberStatus,
   testCasesUpdateMember,
 } from "./member.const.js";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
 
 describe("(Unit) Member Module", () => {
   // --- GET MEMBERS LIST ---
@@ -27,7 +28,7 @@ describe("(Unit) Member Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/members/").query(query).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get("/members/").query(query).set("x-user-id", AUTH_COMMUNITY_1).set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -53,7 +54,7 @@ describe("(Unit) Member Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).get(`/members/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).get(`/members/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -82,7 +83,7 @@ describe("(Unit) Member Module", () => {
         const response = await request(app)
           .get(`/members/${id}/link`)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs)
           .query(query);
 
@@ -119,7 +120,7 @@ describe("(Unit) Member Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).post("/members/").send(body).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).post("/members/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -149,7 +150,7 @@ describe("(Unit) Member Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).put("/members/").send(body).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).put("/members/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -179,7 +180,7 @@ describe("(Unit) Member Module", () => {
           .patch("/members/status")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -211,7 +212,7 @@ describe("(Unit) Member Module", () => {
           .patch("/members/invite")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -239,7 +240,7 @@ describe("(Unit) Member Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).delete(`/members/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).delete(`/members/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -266,7 +267,7 @@ describe("(Unit) Member Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).delete(`/members/${id}/link`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).delete(`/members/${id}/link`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);

@@ -27,9 +27,12 @@ module.exports = {
     storage_service: {
         name: process.env.STORAGE_SERVICE_NAME,
         settings: {
-            target: process.env.STORAGE_TARGET,
-            db_name: process.env.STORAGE_DB_NAME,
-            token: process.env.STORAGE_TOKEN
+            endpoint: process.env.STORAGE_ENDPOINT,
+            public_endpoint: process.env.STORAGE_PUBLIC_ENDPOINT,
+            region: process.env.STORAGE_REGION,
+            bucket: process.env.STORAGE_BUCKET,
+            access_key: process.env.STORAGE_ACCESS_KEY,
+            secret_key: process.env.STORAGE_SECRET_KEY
         }
     },
     remote_logging: {

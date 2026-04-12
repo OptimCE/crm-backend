@@ -231,7 +231,7 @@ describe("(Cache Integration) Key Module", () => {
       const keys = keysCacheKeys(cache.keys() as string[]).filter((k) => k.includes("keys:list"));
       expect(keys).toHaveLength(2);
 
-      const keyComm1 = keys.find((k) => k.includes("c:1"));
+      const keyComm1 = keys.find((k) => k.includes(`c:${AUTH_COMMUNITY_1}`));
       const keyComm2 = keys.find((k) => k.includes("c:2"));
       expect(keyComm1).toBeDefined();
       expect(keyComm2).toBeDefined();
@@ -433,7 +433,7 @@ describe("(Cache Integration) Key Module", () => {
 
       const remainingKey = keysAfter[0];
       expect(remainingKey).toContain("c:2");
-      expect(remainingKey).not.toContain("c:1:");
+      expect(remainingKey).not.toContain(`c:${AUTH_COMMUNITY_1}`);
     });
   });
 

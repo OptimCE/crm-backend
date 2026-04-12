@@ -50,12 +50,7 @@ export class MeController {
   async downloadDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: DownloadDocument = await this.meService.downloadDocument(+req.params.id);
     logger.info("Document successfully retrieved");
-    res.set({
-      "Content-Type": result.fileType,
-      "Content-Disposition": "attachment; filename=" + result.fileName,
-      "Content-Length": result.document.length,
-    });
-    res.send(result.document);
+    res.status(200).json(new ApiResponse<DownloadDocument>(result, SUCCESS));
   }
 
   @userControllerTraceDecorator.traceSpan("getMembers", { url: "/me/members", method: "get" })

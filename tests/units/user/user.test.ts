@@ -19,7 +19,7 @@ describe("(Unit) User Module", () => {
       const response = await request(app)
         .get("/users/")
         .set("x-user-id", id_user) // Simulating auth user
-        .set("x-community-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
@@ -43,7 +43,7 @@ describe("(Unit) User Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).put("/users/").send(body).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).put("/users/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);

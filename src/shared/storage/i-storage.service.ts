@@ -6,11 +6,11 @@ import type { UploadedDocument } from "./storage.dtos.js";
  */
 export interface IStorageService {
   /**
-   * Retrieves a document's content as a buffer.
-   * @param url - The URL/path of the document.
-   * @returns Buffer containing the file data.
+   * Generates a presigned URL to download a document.
+   * @param key - The storage key/path of the document.
+   * @returns A presigned URL string for direct client download.
    */
-  getDocument(url: string): Promise<Buffer>;
+  getDocumentUrl(key: string): Promise<string>;
 
   /**
    * Uploads a file to the storage provider.
@@ -21,7 +21,7 @@ export interface IStorageService {
 
   /**
    * Deletes a document from storage.
-   * @param url - The URL/path of the document to delete.
+   * @param key - The storage key/path of the document to delete.
    */
-  deleteDocument(url: string): Promise<void>;
+  deleteDocument(key: string): Promise<void>;
 }

@@ -4,6 +4,7 @@ import { DocumentController } from "./document.controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
+import { preserveContext } from "../../../shared/middlewares/context.js";
 import { Role } from "../../../shared/dtos/role.js";
 import multer from "multer";
 
@@ -89,7 +90,7 @@ document_router.post(
   idChecker(),
   communityIdChecker(),
   roleChecker(Role.GESTIONNAIRE),
-  upload.single("file"),
+  preserveContext(upload.single("file")),
   document_controller.uploadDocument.bind(document_controller),
 );
 // DELETE (/:document_id) : Delete a specific document

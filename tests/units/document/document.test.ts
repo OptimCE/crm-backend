@@ -1,7 +1,7 @@
 import { expect, it } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
-import { mockDocumentBuffer, testCasesDelete, testCasesDownload, testCasesGetDocuments, testCasesUpload } from "./document.const.js";
+import { testCasesDelete, testCasesDownload, testCasesGetDocuments, testCasesUpload } from "./document.const.js";
 import { expectWithLog, mockDocumentRepositoryModule, mockStorageServiceModule } from "../../utils/helper.js";
 
 describe("(Unit) Document Module", () => {
@@ -51,9 +51,8 @@ describe("(Unit) Document Module", () => {
         orgs,
         document_id,
         status_code,
-        is_binary,
         expected_error_code,
-        expected_data, // Ensure we pick this up for error cases
+        expected_data,
         mocks,
       }) => {
         if (mocks?.documentRepo) await mockDocumentRepositoryModule(mocks.documentRepo);
@@ -72,10 +71,10 @@ describe("(Unit) Document Module", () => {
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
-          if (is_binary) {
-            expect(response.body).toBeInstanceOf(Buffer);
-            expect(response.body).toEqual(mockDocumentBuffer);
-            expect(response.headers["content-type"]).toBeDefined();
+          if (status_code === 200) {
+            expect(response.body.data).toHaveProperty("url");
+            expect(response.body.data).toHaveProperty("fileName");
+            expect(response.body.data).toHaveProperty("fileType");
           } else {
             // Error case
             expect(response.body.error_code).toBe(expected_error_code);
