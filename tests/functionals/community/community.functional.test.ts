@@ -6,7 +6,7 @@ import {
   testCasesCreateCommunity,
   testCasesDeleteCommunity,
   testCasesGetAdmins,
-  testCasesGetAllCommunities,
+  testCasesGetAllPublicCommunities,
   testCasesGetMyCommunities,
   testCasesGetUsers,
   testCasesKickUser,
@@ -22,7 +22,7 @@ describe("(Functional) Community Module", () => {
 
   // --- GET ALL COMMUNITIES (PUBLIC LIST) ---
   describe("(Functional) Get All Communities", () => {
-    it.each(testCasesGetAllCommunities)(
+    it.each(testCasesGetAllPublicCommunities)(
       "GET /communities/ : $description",
       async ({ query, orgs, status_code, expected_error_code, check_data }) => {
         const appModule = await import("../../../src/app.js");

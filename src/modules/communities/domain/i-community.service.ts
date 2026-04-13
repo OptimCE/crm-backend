@@ -20,7 +20,7 @@ export interface ICommunityService {
    * @param query - Query parameters for filtering and pagination.
    * @returns A tuple containing the list of CommunityDTO and pagination info.
    */
-  getAllCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]>;
+  getAllPublicCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]>;
   /**
    * Retrieves detailed information about a specific community.
    * @param id - The community ID.

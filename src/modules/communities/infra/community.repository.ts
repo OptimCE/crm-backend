@@ -127,7 +127,7 @@ export class CommunityRepository implements ICommunityRepository {
     },
   ];
 
-  async getAllCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]> {
+  async getAllPublicCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     let qb = manager
       .createQueryBuilder(Community, "community")

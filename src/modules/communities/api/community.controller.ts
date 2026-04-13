@@ -39,11 +39,11 @@ export class CommunityController {
     @inject("SharingOperationService") private readonly sharingOperationService: ISharingOperationService,
   ) {}
 
-  @communityControllerTraceDecorator.traceSpan("getAllCommunities", { url: "/communities", method: "get" })
+  @communityControllerTraceDecorator.traceSpan("getAllPublicCommunities", { url: "/communities", method: "get" })
   // @Cache(cacheKey("communities:all-list", "none", () => ""), 60)
-  async getAllCommunities(req: Request, res: Response, _next: NextFunction): Promise<void> {
+  async getAllPublicCommunities(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const queryObject = await validateDto(CommunityQueryDTO, req.query);
-    const [result, pagination] = await this.communityService.getAllCommunities(queryObject);
+    const [result, pagination] = await this.communityService.getAllPublicCommunities(queryObject);
     logger.info("All communities list successfully retrieved");
     res.status(200).json(new ApiResponsePaginated<CommunityDTO[]>(result, pagination, SUCCESS));
   }
