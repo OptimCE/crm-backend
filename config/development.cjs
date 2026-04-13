@@ -25,11 +25,14 @@ module.exports = {
         }
     },
     storage_service: {
-        name: process.env.STORAGE_SERVICE_NAME || 'OPENFILES',
+        name: process.env.STORAGE_SERVICE_NAME || 'S3',
         settings: {
-            target: process.env.STORAGE_TARGET || "http://localhost:8001/",
-            db_name: process.env.STORAGE_DB_NAME || "test",
-            token: process.env.STORAGE_TOKEN || "3bv0rtgyeayftqjtt2kpq2popojybq"
+            endpoint: process.env.STORAGE_ENDPOINT || "http://localhost:9000",
+            public_endpoint: process.env.STORAGE_PUBLIC_ENDPOINT || "http://localhost:9000",
+            region: process.env.STORAGE_REGION || "us-east-1",
+            bucket: process.env.STORAGE_BUCKET || "crm-files",
+            access_key: process.env.STORAGE_ACCESS_KEY || "minioadmin",
+            secret_key: process.env.STORAGE_SECRET_KEY || "minioadmin"
         }
     },
     remote_logging: {

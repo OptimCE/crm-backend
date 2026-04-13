@@ -12,7 +12,6 @@ import {
   mockAddressRepositoryModule,
 } from "../../utils/helper.js";
 import {
-  mockDocumentBuffer,
   testCasesGetDocuments,
   testCasesDownloadDocument,
   testCasesGetMembers,
@@ -28,6 +27,7 @@ import {
   testCasesRefuseMember,
   testCasesRefuseManager,
 } from "./me.const.js";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
 
 describe("(Unit) Me Module", () => {
   // --- GET DOCUMENTS ---
@@ -46,7 +46,7 @@ describe("(Unit) Me Module", () => {
           .get("/me/documents")
           .query(query)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -71,21 +71,21 @@ describe("(Unit) Me Module", () => {
 
     it.each(testCasesDownloadDocument)(
       "GET /me/documents/:id : $description",
-      async ({ id, status_code, is_binary, expected_error_code, expected_data, mocks, orgs }) => {
+      async ({ id, status_code, expected_error_code, expected_data, mocks, orgs }) => {
         if (mocks?.meRepo) await mockMeRepositoryModule(mocks.meRepo);
         if (mocks?.storageService) await mockStorageServiceModule(mocks.storageService);
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/me/documents/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get(`/me/documents/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
-          if (is_binary) {
-            expect(response.body).toBeInstanceOf(Buffer);
-            expect(response.body).toEqual(mockDocumentBuffer);
-            expect(response.headers["content-type"]).toBeDefined();
+          if (status_code === 200) {
+            expect(response.body.data).toHaveProperty("url");
+            expect(response.body.data).toHaveProperty("fileName");
+            expect(response.body.data).toHaveProperty("fileType");
           } else {
             expect(response.body.error_code).toBe(expected_error_code);
             let result = expected_data;
@@ -111,7 +111,7 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/me/members").query(query).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get("/me/members").query(query).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -141,7 +141,7 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/me/members/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get(`/me/members/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -168,7 +168,7 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/me/meters").query(query).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get("/me/meters").query(query).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -198,7 +198,7 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/me/meters/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get(`/me/meters/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);

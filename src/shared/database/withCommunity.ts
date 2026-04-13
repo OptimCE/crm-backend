@@ -8,7 +8,7 @@ import { getContext } from "../middlewares/context.js";
  */
 export function withCommunityScope<T extends ObjectLiteral>(qb: SelectQueryBuilder<T>, alias: string): SelectQueryBuilder<T> {
   const { community_id } = getContext(); // This is the Auth0/Keycloak String ID
-
+  console.log("COMMUNITY ID : ", community_id);
   if (community_id) {
     // We must JOIN the community table to check the auth_community_id
     // We use innerJoin because an AllocationKey MUST belong to a community

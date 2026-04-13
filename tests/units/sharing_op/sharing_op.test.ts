@@ -18,6 +18,7 @@ import {
   testCasesPatchKey,
   testCasesPatchMeter,
 } from "./sharing_op.const.js";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
 
 describe("(Unit) Sharing Operation Module", () => {
   useUnitTestDb();
@@ -36,7 +37,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .get("/sharing_operations/")
           .query(query)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -66,7 +67,7 @@ describe("(Unit) Sharing Operation Module", () => {
         const response = await request(app)
           .get(`/sharing_operations/${id}`)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -96,7 +97,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .get(`/sharing_operations/${id}/consumptions`)
           .query(query)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -126,7 +127,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .get(`/sharing_operations/${id}/consumptions/download`)
           .query(query)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -160,7 +161,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .post("/sharing_operations/")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -191,7 +192,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .post("/sharing_operations/key")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -222,7 +223,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .post("/sharing_operations/meter")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -260,7 +261,7 @@ describe("(Unit) Sharing Operation Module", () => {
           req.attach("file", file.buffer, { filename: file.originalname, contentType: file.mimetype });
         }
 
-        req.set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        req.set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         const response = await req;
 
@@ -295,7 +296,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .patch("/sharing_operations/key")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -326,7 +327,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .patch("/sharing_operations/meter")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -355,7 +356,7 @@ describe("(Unit) Sharing Operation Module", () => {
         const response = await request(app)
           .delete(`/sharing_operations/${id}`)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -386,7 +387,7 @@ describe("(Unit) Sharing Operation Module", () => {
           .delete(`/sharing_operations/${id}/meter`)
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -419,7 +420,7 @@ describe("(Unit) Get Sharing Operation Meters List", () => {
         .get(`/sharing_operations/${id}/meters`)
         .query(query)
         .set("x-user-id", "1")
-        .set("x-community-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
@@ -467,7 +468,7 @@ describe("(Unit) Get Sharing Operation Keys List", () => {
         .get(`/sharing_operations/${id}/keys`)
         .query(query)
         .set("x-user-id", "1")
-        .set("x-community-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {

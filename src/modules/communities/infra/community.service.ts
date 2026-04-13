@@ -39,8 +39,8 @@ export class CommunityService implements ICommunityService {
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
   ) {}
 
-  async getAllCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]> {
-    const [values, total] = await this.community_repository.getAllCommunities(query);
+  async getAllPublicCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]> {
+    const [values, total] = await this.community_repository.getAllPublicCommunities(query);
     const return_values = values.map((value) => toCommunityDTO(value));
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total, total_pages }];

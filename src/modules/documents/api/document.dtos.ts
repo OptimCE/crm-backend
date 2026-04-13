@@ -75,9 +75,9 @@ export class UploadDocumentDTO {
  */
 export class DownloadDocument {
   /**
-   * The file content buffer.
+   * Presigned URL for direct download from storage.
    */
-  document!: Buffer;
+  url!: string;
   /**
    * The name of the file.
    */

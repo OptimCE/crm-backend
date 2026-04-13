@@ -11,7 +11,7 @@ interface UserResponse {
 // --- Test Cases ---
 
 // 0. Get All Communities (public list)
-export const testCasesGetAllCommunities = [
+export const testCasesGetAllPublicCommunities = [
   {
     description: "Success - Returns only communities with public sharing ops",
     query: {},

@@ -20,7 +20,7 @@ export class AuthContextRepository implements IAuthContextRepository {
   async getInternalCommunityId(query_runner?: QueryRunner): Promise<number> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const { community_id } = getContext();
-
+    console.log("COMMUNITY ID : ", community_id)
     const community = await manager.findOne(Community, {
       where: { auth_community_id: community_id }, // Cast if partial type definition issues arise
       select: ["id"], // Select only ID for performance

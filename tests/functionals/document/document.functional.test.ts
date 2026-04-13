@@ -39,28 +39,25 @@ describe("(Functional) Document Module", () => {
   describe("(Functional) Download Document", () => {
     it.each(testCasesDownload)(
       "GET /documents/:member_id/:document_id : $description",
-      async ({ document_id, document_member_id, orgs, status_code, is_binary, mocks, expected_error_code }) => {
+      async ({ document_id, document_member_id, orgs, status_code, mocks, expected_error_code }) => {
         if (mocks?.storageService) await mockStorageServiceModule(mocks.storageService);
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
 
-        // Note: The route is /documents/:member_id/:document_id
-        // The member_id in URL is theoretically redundant if SERVICE only uses ID, but we must respect route param.
         const url = `/documents/${document_member_id}/${document_id}`;
 
         const response = await request(app).get(url).set("x-user-id", "auth0|admin").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
-        if (is_binary && status_code === 200) {
+        if (status_code === 200) {
           expect(response.status).toBe(200);
-          expect(response.body).toBeInstanceOf(Buffer);
-          // Optionally check content length or headers
+          expect(response.body.data).toHaveProperty("url");
+          expect(response.body.data).toHaveProperty("fileName");
+          expect(response.body.data).toHaveProperty("fileType");
         } else {
           await expectWithLog(response, () => {
             expect(response.status).toBe(status_code);
             if (expected_error_code) {
-              // AppError usually returns JSON with error_code
-              // But verify if response is JSON
               if (response.headers["content-type"]?.includes("application/json")) {
                 expect(response.body.error_code).toBe(expected_error_code);
               }

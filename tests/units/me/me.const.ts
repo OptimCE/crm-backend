@@ -83,7 +83,7 @@ export const mockDocumentEntity: Document = {
 
 export const mockDocumentExposed = toDocumentExposed(mockDocumentEntity);
 export const mockDocumentExposedJSON = JSON.parse(JSON.stringify(mockDocumentExposed));
-export const mockDocumentBuffer = Buffer.from("fake-pdf-content");
+export const mockPresignedUrl = "https://minio.local/crm-files/documents/test_report.pdf?X-Amz-Signature=mock";
 
 // --- Meter Mock ---
 export const mockMeterEntity: Meter = {
@@ -166,13 +166,12 @@ export const testCasesDownloadDocument = [
     id: 100,
     status_code: 200,
     orgs: ORGS_MEMBER,
-    is_binary: true,
     mocks: {
       meRepo: {
         getDocumentById: jest.fn(() => Promise.resolve(mockDocumentEntity)),
       },
       storageService: {
-        getDocument: jest.fn(() => Promise.resolve(mockDocumentBuffer)),
+        getDocumentUrl: jest.fn(() => Promise.resolve(mockPresignedUrl)),
       },
     },
   },
@@ -201,7 +200,7 @@ export const testCasesDownloadDocument = [
         getDocumentById: jest.fn(() => Promise.resolve(mockDocumentEntity)),
       },
       storageService: {
-        getDocument: jest.fn(() => Promise.reject(new Error("Storage Error"))),
+        getDocumentUrl: jest.fn(() => Promise.reject(new Error("Storage Error"))),
       },
     },
   },

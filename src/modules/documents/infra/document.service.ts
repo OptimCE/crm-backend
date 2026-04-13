@@ -59,14 +59,15 @@ export class DocumentService implements IDocumentService {
   async downloadDocument(document_id: number): Promise<DownloadDocument> {
     // Retrieve entry from database
     const document: Document | null = await this.documentRepository.getDocumentById(document_id);
+    console.log(document)
     if (!document) {
       logger.error({ operation: "downloadDocument" }, `Document ${document_id} not found`);
       throw new AppError(DOCUMENT_ERRORS.DOWNLOAD_DOCUMENT.DOCUMENT_NOT_FOUND, 400);
     }
-    // Download documents from storage service
-    const result = await this.storageService.getDocument(document.file_url);
+    // Generate presigned URL for direct download
+    const url = await this.storageService.getDocumentUrl(document.file_url);
     return {
-      document: result,
+      url,
       fileName: document.file_name,
       fileType: document.file_type,
     };

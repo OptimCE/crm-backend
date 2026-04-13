@@ -4,6 +4,7 @@ import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { expectWithLog, mockKeyRepositoryModule } from "../../utils/helper.js";
 import { testCasesAddKey, testCasesDeleteKey, testCasesDownloadKey, testCasesGetKey, testCasesGetKeysList, testCasesUpdateKey } from "./key.const.js";
 import type { Response } from "supertest";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
 
 type ParserCallback = (err: Error | null, body?: unknown) => void;
 describe("(Unit) Key Module", () => {
@@ -19,7 +20,7 @@ describe("(Unit) Key Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/keys/").query(query).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get("/keys/").query(query).set("x-user-id", AUTH_COMMUNITY_1).set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -47,7 +48,7 @@ describe("(Unit) Key Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).get(`/keys/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).get(`/keys/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -96,7 +97,7 @@ describe("(Unit) Key Module", () => {
         const response = await request(app)
           .get(`/keys/${id}/download`)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs)
           .buffer(true)
           .parse(smartParser);
@@ -129,7 +130,7 @@ describe("(Unit) Key Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).post("/keys/").send(body).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).post("/keys/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -153,7 +154,7 @@ describe("(Unit) Key Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).put("/keys/").send(body).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).put("/keys/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -177,7 +178,7 @@ describe("(Unit) Key Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).delete(`/keys/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).delete(`/keys/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);

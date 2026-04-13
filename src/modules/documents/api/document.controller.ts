@@ -45,12 +45,7 @@ export class DocumentController {
   async downloadDocument(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const result: DownloadDocument = await this.documentService.downloadDocument(+req.params.document_id);
     logger.info("Document successfully retrieved");
-    res.set({
-      "Content-Type": result.fileType,
-      "Content-Disposition": "attachment; filename=" + result.fileName,
-      "Content-Length": result.document.length,
-    });
-    res.send(result.document);
+    res.status(200).json(new ApiResponse<DownloadDocument>(result, SUCCESS));
   }
 
   /**

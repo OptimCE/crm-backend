@@ -69,7 +69,7 @@ export class DocumentRepository implements IDocumentRepository {
     withCommunityScope(qb, "document");
 
     // Base filter: Documents belonging to the member
-    qb = qb.where("document.id_member = :member_id", { member_id });
+    qb = qb.andWhere("document.id_member = :member_id", { member_id });
 
     // Apply declarative filters and sorts
     qb = applyFilters(this.documentFilters, qb, query);
@@ -93,6 +93,9 @@ export class DocumentRepository implements IDocumentRepository {
   async saveDocument(new_document: DocumentDTO, query_runner?: QueryRunner): Promise<Document> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+    console.log("SAVE DOCUMENT : ")
+    console.log("INTERNAL ID")
+    console.log(internal_community_id)
     const new_document_model = manager.create(Document, {
       file_name: new_document.file_name,
       file_url: new_document.file_url,

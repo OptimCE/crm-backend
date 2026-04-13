@@ -24,7 +24,7 @@ community_routes.get(
        }]
     */
   idChecker(),
-  community_controller.getAllCommunities.bind(community_controller),
+  community_controller.getAllPublicCommunities.bind(community_controller),
 );
 // Get (/my-communities) : Get my communities
 community_routes.get(

@@ -12,6 +12,7 @@ import {
   testCasesGetMetersList,
   testCasesPatchMeterData,
 } from "./meter.const.js";
+import {AUTH_COMMUNITY_1} from "../../utils/shared.consts.js";
 
 describe("(Unit) Meter Module", () => {
   // --- GET METERS LIST ---
@@ -26,7 +27,7 @@ describe("(Unit) Meter Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/meters/").query(query).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).get("/meters/").query(query).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -54,7 +55,7 @@ describe("(Unit) Meter Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).get(`/meters/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).get(`/meters/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -84,7 +85,7 @@ describe("(Unit) Meter Module", () => {
           .get(`/meters/${id}/consumptions`)
           .query(query)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -116,7 +117,7 @@ describe("(Unit) Meter Module", () => {
           .get(`/meters/${id}/consumptions/download`)
           .query(query)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -147,7 +148,7 @@ describe("(Unit) Meter Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).post("/meters/").send(body).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+      const response = await request(app).post("/meters/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -177,7 +178,7 @@ describe("(Unit) Meter Module", () => {
           .patch("/meters/data")
           .send(body)
           .set("x-user-id", "1")
-          .set("x-community-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
@@ -205,7 +206,7 @@ describe("(Unit) Meter Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).delete(`/meters/${id}`).set("x-user-id", "1").set("x-community-id", "1").set("x-user-orgs", orgs);
+        const response = await request(app).delete(`/meters/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -236,7 +237,7 @@ describe("(Unit) Patch Meter Data Delete", () => {
         .patch("/meters/data/delete")
         .send(body)
         .set("x-user-id", "1")
-        .set("x-community-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {

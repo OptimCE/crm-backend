@@ -28,6 +28,8 @@ function parseUserOrgs(user_orgs: string): OrgToken[] {
       if (!fieldMatch) continue;
       const roleList = fieldMatch[3].split(",");
       const higherRole = resolveHighestRole(roleList);
+      console.log("FIELD MATCH")
+      console.log(fieldMatch);
       orgToken.push({
         orgId: fieldMatch[1],
         orgPath: fieldMatch[2],
@@ -53,6 +55,8 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
         }
       }
     };
+    console.log("HEADERS : ")
+    console.log(req.headers);
     const userId = extractHeader("x-user-id");
     let targetCommunityId = extractHeader("x-community-id");
     const userGroupsHeader = extractHeader("x-user-orgs");
@@ -63,10 +67,13 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
       groups = parseUserOrgs(userGroupsHeader);
       // Find group
       const finded = groups.find((x) => x.orgId === targetCommunityId);
+      console.log("FINDED ")
+      console.log(finded);
       if (finded) {
         effectiveRole = finded.role;
       }
     } else {
+      console.log("TARGET COMMUNITY ID UNDEFINED")
       targetCommunityId = undefined;
     }
 
@@ -76,6 +83,9 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
       role: effectiveRole,
       source_ip: sourceIp,
     };
+
+    console.log("STORE : ")
+    console.log(store);
 
     requestContext.run(store, () => {
       next();
@@ -102,6 +112,26 @@ function resolveHighestRole(roles: string[] = []): Role | undefined {
   }
   return highestRole;
 }
+/**
+ * Wraps a middleware to preserve the AsyncLocalStorage context across async boundaries.
+ * Needed for middlewares like multer that process data asynchronously via streams,
+ * which breaks the AsyncLocalStorage context chain.
+ */
+export function preserveContext(
+  middleware: (req: Request, res: Response, next: NextFunction) => void,
+): (req: Request, res: Response, next: NextFunction) => void {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const store = requestContext.getStore();
+    middleware(req, res, (...args: unknown[]) => {
+      if (store) {
+        requestContext.run(store, () => (next as (...a: unknown[]) => void)(...args));
+      } else {
+        (next as (...a: unknown[]) => void)(...args);
+      }
+    });
+  };
+}
+
 // Utilitaire pour récupérer le contexte complet
 /**
  * Retrieves the current request context from AsyncLocalStorage.
@@ -109,5 +139,7 @@ function resolveHighestRole(roles: string[] = []): Role | undefined {
  */
 export function getContext(): Context {
   const store = requestContext.getStore();
+  console.log("GET CONTEXT")
+  console.log(store);
   return store || { user_id: undefined, community_id: undefined, role: undefined };
 }
