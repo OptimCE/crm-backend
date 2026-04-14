@@ -10,7 +10,7 @@ export function toUserDTO(user: User): UserDTO {
     first_name: user.firstName,
     last_name: user.lastName,
     billing_address: user.billingAddress ? toAddressDTO(user.billingAddress) : undefined,
-    home_address: user.billingAddress ? toAddressDTO(user.billingAddress) : undefined,
+    home_address: user.homeAddress ? toAddressDTO(user.homeAddress) : undefined,
     nrn: user.NRN,
     iban: user.iban,
   };

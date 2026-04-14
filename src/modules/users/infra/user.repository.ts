@@ -16,8 +16,9 @@ export class UserRepository implements IUserRepository {
   async getUser(query_runner?: QueryRunner): Promise<User | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const { user_id } = getContext();
-    return manager.findOneBy(User, {
-      auth_user_id: user_id,
+    return manager.findOne(User, {
+      where: { auth_user_id: user_id },
+      relations: ["homeAddress", "billingAddress"],
     });
   }
 
@@ -40,7 +41,8 @@ export class UserRepository implements IUserRepository {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     return manager.findOneBy(User, {
       email: email,
-    });
+    }
+    );
   }
 
   async updateInvitations(user: User, query_runner?: QueryRunner): Promise<void> {
