@@ -89,7 +89,7 @@ export const testCasesAddMeter = [
       reading_frequency: ReadingFrequency.MONTHLY,
       address: { street: "New St", number: 1, postcode: "1000", city: "Bruxelles" },
       initial_data: {
-        start_date: "2024-06-01T00:00:00.000Z",
+        start_date: "2024-06-01",
         status: MeterDataStatus.ACTIVE,
         rate: MeterRate.SIMPLE,
         client_type: ClientType.RESIDENTIAL,
@@ -110,7 +110,7 @@ export const testCasesAddMeter = [
       reading_frequency: ReadingFrequency.MONTHLY,
       address: { street: "New St", number: 1, postcode: "1000", city: "Bruxelles" },
       initial_data: {
-        start_date: "2024-06-01T00:00:00.000Z",
+        start_date: "2024-06-01",
         status: MeterDataStatus.ACTIVE,
         rate: MeterRate.SIMPLE,
         client_type: ClientType.RESIDENTIAL,
@@ -128,7 +128,7 @@ export const testCasesPatchMeterData = [
     description: "Success - Add New Configuration",
     body: {
       EAN: existingEAN,
-      start_date: "2025-01-01T00:00:00.000Z", // Future date relative to seeded '2024-01-01'
+      start_date: "2025-01-01", // Future date relative to seeded '2024-01-01'
       status: MeterDataStatus.INACTIVE, // Changing status
       rate: MeterRate.SIMPLE,
       client_type: ClientType.RESIDENTIAL,

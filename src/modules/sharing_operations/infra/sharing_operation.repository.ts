@@ -13,6 +13,7 @@ import { DeleteResult, In, type QueryRunner, SelectQueryBuilder } from "typeorm"
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import { Meter, MeterData } from "../../meters/domain/meter.models.js";
+import { addDaysISO, localTodayISO } from "../../../shared/utils/date.utils.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { SharingKeyStatus } from "../shared/sharing_operation.types.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
@@ -333,23 +334,29 @@ export class SharingOperationRepository implements ISharingOperationRepository {
   getSharingOperationMetersList(id_sharing: number, query: SharingOperationMetersQuery, query_runner?: QueryRunner): Promise<[Meter[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const qb = manager.createQueryBuilder(Meter, "meter");
-    const now = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    const now = localTodayISO();
 
     // 1. Join Address
     qb.leftJoinAndSelect("meter.address", "address");
 
-    // 2. Select the specific MeterData based on the Query Type
-    // We use an Inner Join here because we only want meters that
-    // actually HAVE data matching the requested sharing operation period.
+    // 2. Inner-join the MeterData record we want to expose for this row.
     qb.innerJoinAndSelect("meter.meter_data", "active_data");
 
     // 3. Apply Temporal Logic + Sharing Operation ID
     qb.where("active_data.id_sharing_operation = :id_sharing", { id_sharing });
 
     switch (query.type) {
-      case SharingOperationMetersQueryType.PAST:
-        qb.andWhere("active_data.end_date <= :now", { now });
-        // Logic: Pick the most recent historical record
+      case SharingOperationMetersQueryType.PAST: {
+        qb.andWhere("active_data.end_date IS NOT NULL").andWhere("active_data.end_date <= :now", { now });
+        // Range-overlap filter: a meter's past participation overlaps [range_from, range_to]
+        // when start_date <= range_to AND (end_date IS NULL OR end_date >= range_from).
+        if (query.start_date_from) {
+          qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date >= :range_from)", { range_from: query.start_date_from });
+        }
+        if (query.end_date_to) {
+          qb.andWhere("active_data.start_date <= :range_to", { range_to: query.end_date_to });
+        }
+        // Pick the most recent historical record per meter.
         qb.andWhere((sub) => {
           const subQuery = sub
             .subQuery()
@@ -357,32 +364,28 @@ export class SharingOperationRepository implements ISharingOperationRepository {
             .from(MeterData, "md")
             .where("md.ean = meter.ean")
             .andWhere("md.id_sharing_operation = :id_sharing")
-            .andWhere("md.end_date <= :now")
+            .andWhere("md.end_date IS NOT NULL AND md.end_date <= :now")
             .getQuery();
           return "active_data.start_date = " + subQuery;
         });
         break;
+      }
 
       case SharingOperationMetersQueryType.NOW:
         qb.andWhere("active_data.start_date <= :now", { now });
         qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date > :now)", { now });
         break;
 
-      case SharingOperationMetersQueryType.FUTURE:
-        qb.andWhere("active_data.start_date > :now", { now });
-        // Logic: Pick the nearest upcoming record
-        qb.andWhere((sub) => {
-          const subQuery = sub
-            .subQuery()
-            .select("MIN(md.start_date)")
-            .from(MeterData, "md")
-            .where("md.ean = meter.ean")
-            .andWhere("md.id_sharing_operation = :id_sharing")
-            .andWhere("md.start_date > :now")
-            .getQuery();
-          return "active_data.start_date = " + subQuery;
-        });
+      case SharingOperationMetersQueryType.FUTURE: {
+        // Snapshot semantics: for each meter, the unique record valid at `future_at`.
+        // Default is tomorrow so the FUTURE tab answers "what will be in the operation next".
+        // This naturally includes currently-active meters that continue past `future_at` AND
+        // newly-scheduled meters that have started by then.
+        const futureAt = query.future_at ?? addDaysISO(now, 1);
+        qb.andWhere("active_data.start_date <= :future_at", { future_at: futureAt });
+        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date > :future_at)", { future_at: futureAt });
         break;
+      }
     }
 
     // 4. Scopes and Filters

@@ -1,6 +1,12 @@
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
-
+CREATE TABLE schema_version (
+    version INTEGER PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT NOW(),
+    description TEXT
+);
+INSERT INTO schema_version (version, description) VALUES
+(1, 'Initial version');
 CREATE OR REPLACE FUNCTION update_changetimestamp_column()
 RETURNS TRIGGER AS $$
 BEGIN

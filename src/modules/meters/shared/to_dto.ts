@@ -10,8 +10,12 @@ export function toMeterPartialDTO(meter: Meter): PartialMeterDTO {
   let holder = undefined;
   let status = MeterDataStatus.INACTIVE;
   let sharing_op = undefined;
+  let start_date: string | undefined = undefined;
+  let end_date: string | undefined = undefined;
   if (activeData) {
     status = activeData.status;
+    start_date = activeData.start_date;
+    end_date = activeData.end_date ?? undefined;
     if (activeData.member) {
       holder = toMemberPartialDTO(activeData.member);
     }
@@ -24,6 +28,8 @@ export function toMeterPartialDTO(meter: Meter): PartialMeterDTO {
     meter_number: meter.meter_number,
     holder: holder,
     status: status,
+    start_date: start_date,
+    end_date: end_date,
     address: toAddressDTO(meter.address),
     sharing_operation: sharing_op,
   };
@@ -38,8 +44,8 @@ function toMetersDataDTO(data: MeterData): MetersDataDTO {
   dto.amperage = data.amperage || 0;
   dto.rate = data.rate;
   dto.client_type = data.client_type;
-  dto.start_date = new Date(data.start_date);
-  if (data.end_date) dto.end_date = new Date(data.end_date);
+  dto.start_date = data.start_date;
+  if (data.end_date) dto.end_date = data.end_date;
   dto.injection_status = data.injection_status!;
   dto.production_chain = data.production_chain!;
   dto.totalGenerating_capacity = data.total_generating_capacity || 0;
@@ -69,9 +75,11 @@ export function toMeterDTO(meter: Meter): MetersDTO {
   dto.phases_number = meter.phases_number;
   dto.reading_frequency = meter.reading_frequency;
 
-  // Temporal classification
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Temporal classification — compare YYYY-MM-DD strings lexicographically
+  // against today's local calendar date so a record starting "today" stays
+  // active regardless of host timezone.
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   const history: MetersDataDTO[] = [];
   const future: MetersDataDTO[] = [];
@@ -80,8 +88,8 @@ export function toMeterDTO(meter: Meter): MetersDTO {
   if (meter.meter_data) {
     for (const data of meter.meter_data) {
       const dataDto = toMetersDataDTO(data);
-      const start = new Date(data.start_date);
-      const end = data.end_date ? new Date(data.end_date) : null;
+      const start = data.start_date;
+      const end = data.end_date;
 
       // Future: Starts after today
       if (start > today) {

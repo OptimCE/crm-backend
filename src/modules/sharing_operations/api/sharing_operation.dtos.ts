@@ -1,7 +1,7 @@
 import { Expose, Type } from "class-transformer";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
-import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, Min } from "class-validator";
 import { KeyPartialDTO } from "../../keys/api/key.dtos.js";
 import { HasMimeType, IsFile, MaxFileSize } from "../../../shared/dtos/file.validators.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
@@ -123,6 +123,34 @@ export class SharingOperationMetersQuery extends PaginationQuery {
   @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
   @IsOptional()
   holder_id?: number;
+
+  /**
+   * PAST tab range-overlap filter: lower bound (YYYY-MM-DD).
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  start_date_from?: string;
+
+  /**
+   * PAST tab range-overlap filter: upper bound (YYYY-MM-DD).
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  end_date_to?: string;
+
+  /**
+   * FUTURE tab snapshot date (YYYY-MM-DD). Defaults to tomorrow when omitted.
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  future_at?: string;
+
   /**
    * Filter by street name.
    */
@@ -270,11 +298,14 @@ export class AddMeterToSharingOperationDTO {
   @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   id_sharing!: number;
+  /**
+   * Calendar date `YYYY-MM-DD` — no time/zone, to keep PAST/NOW/FUTURE classification deterministic.
+   */
   @Expose()
-  @Type(() => Date)
-  @IsDate(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
-  date!: Date;
+  date!: string;
   @Expose()
   @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING, { each: true }))
   @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
@@ -355,11 +386,14 @@ export class PatchMeterToSharingOperationDTO {
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   status!: MeterDataStatus;
 
+  /**
+   * Calendar date `YYYY-MM-DD` — no time/zone.
+   */
   @Expose()
-  @Type(() => Date)
-  @IsDate(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
-  date!: Date;
+  date!: string;
 }
 
 /**
@@ -381,6 +415,12 @@ export class PatchSharingOperationVisibilityDTO {
 
 /**
  * DTO for removing a meter from a sharing operation.
+ *
+ * Two modes:
+ *  - default (`hard_delete` falsy): close the meter's participation by appending an
+ *    INACTIVE record starting at `date` (required).
+ *  - `hard_delete = true`: physically delete the latest MeterData row when it has not
+ *    yet started (start_date strictly in the future). `date` is ignored.
  */
 export class RemoveMeterFromSharingOperationDTO {
   @Expose()
@@ -395,9 +435,18 @@ export class RemoveMeterFromSharingOperationDTO {
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   id_sharing!: number;
 
+  /**
+   * Calendar date `YYYY-MM-DD` — required when `hard_delete` is falsy.
+   */
   @Expose()
-  @Type(() => Date)
-  @IsDate(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
-  @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
-  date!: Date;
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  date?: string;
+
+  @Expose()
+  @Type(() => Boolean)
+  @IsBoolean(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.BOOLEAN))
+  @IsOptional()
+  hard_delete?: boolean;
 }

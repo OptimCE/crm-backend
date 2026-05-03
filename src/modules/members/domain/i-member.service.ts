@@ -72,8 +72,9 @@ export interface IMemberService {
   /**
    * Internal method to add a member within a transaction (shared logic).
    * @param new_member - DTO for creation.
+   * @param internal_community_id - Internal id of the community
    * @param query_runner - Transaction runner.
    * @returns Created entity instance.
    */
-  sharedAddMember(new_member: CreateMemberDTO, query_runner: QueryRunner): Promise<Individual | Company | undefined>;
+  sharedAddMember(new_member: CreateMemberDTO, internal_community_id: number, query_runner: QueryRunner): Promise<Individual | Company | undefined>;
 }

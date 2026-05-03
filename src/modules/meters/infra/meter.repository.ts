@@ -12,6 +12,7 @@ import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
 import logger from "../../../shared/monitor/logger.js";
 import { MeterDataStatus } from "../shared/meter.types.js";
+import { addDaysISO } from "../../../shared/utils/date.utils.js";
 
 @injectable()
 export class MeterRepository implements IMeterRepository {
@@ -131,23 +132,22 @@ export class MeterRepository implements IMeterRepository {
       order: { start_date: "DESC" },
     });
 
-    const newStart = new Date(new_data.start_date as string);
-    newStart.setHours(0, 0, 0, 0);
+    const newStart = new_data.start_date as string;
 
     if (latestMeterData) {
-      const latestStart = new Date(latestMeterData.start_date);
-      latestStart.setHours(0, 0, 0, 0);
+      const latestStart = latestMeterData.start_date;
 
       // Case 1: Future configuration exists -> Error
       // We cannot easily insert history before a future state without complex re-linking.
-      if (latestStart.getTime() > newStart.getTime()) {
+      // Lexicographic comparison is correct for zero-padded YYYY-MM-DD strings.
+      if (latestStart > newStart) {
         logger.error({ operation: "addMeterData" }, `Conflict: Meter ${ean} already has a configuration starting on ${latestMeterData.start_date}`);
         throw new AppError(METER_ERRORS.ADD_METER_DATA.CONFLICT_CONFIG_ALREADY_EXISTING, 400);
       }
 
       // Case 2: Configuration exists on the SAME day -> Update it
       // This allows correcting a mistake made for "today" or "future date".
-      if (latestStart.getTime() === newStart.getTime()) {
+      if (latestStart === newStart) {
         // Merge the new data into the existing one
         const updated = manager.merge(MeterData, latestMeterData, new_data);
         return await manager.save(updated);
@@ -155,10 +155,8 @@ export class MeterRepository implements IMeterRepository {
 
       // Case 3: Configuration exists in the past -> Close it
       // Close if it's currently open (null) OR if it currently ends AFTER our new start (overlap)
-      if (!latestMeterData.end_date || new Date(latestMeterData.end_date).getTime() >= newStart.getTime()) {
-        const prevEndDate = new Date(newStart);
-        prevEndDate.setDate(prevEndDate.getDate() - 1);
-        latestMeterData.end_date = prevEndDate.toISOString().split("T")[0];
+      if (!latestMeterData.end_date || latestMeterData.end_date >= newStart) {
+        latestMeterData.end_date = addDaysISO(newStart, -1);
         await manager.save(latestMeterData);
       }
     }
@@ -361,12 +359,11 @@ export class MeterRepository implements IMeterRepository {
      * Logic: Find the record for this meter where its end_date
      * matches the start_date of the record we just removed.
      */
-    const prevEndDate = new Date(previous_start_date);
-    prevEndDate.setDate(prevEndDate.getDate() - 1);
+    const prevEndDate = addDaysISO(previous_start_date, -1);
     const previousRecord = await manager.findOne(MeterData, {
       where: {
         meter: { EAN: ean },
-        end_date: prevEndDate.toISOString().split("T")[0],
+        end_date: prevEndDate,
       },
     });
 

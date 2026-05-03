@@ -64,8 +64,8 @@ export class MeterService implements IMeterService {
       await this.meterRepository.addMeterData(
         new_meter.EAN,
         {
-          start_date: initial.start_date.toISOString().split("T")[0],
-          end_date: initial.end_date ? initial.end_date.toISOString().split("T")[0] : null,
+          start_date: initial.start_date,
+          end_date: initial.end_date ?? null,
           status: initial.status,
           rate: initial.rate,
           client_type: initial.client_type,
@@ -200,8 +200,8 @@ export class MeterService implements IMeterService {
       await this.meterRepository.addMeterData(
         patched_meter_data.EAN,
         {
-          start_date: patched_meter_data.start_date.toISOString().split("T")[0],
-          end_date: patched_meter_data.end_date ? patched_meter_data.end_date.toISOString().split("T")[0] : null,
+          start_date: patched_meter_data.start_date,
+          end_date: patched_meter_data.end_date ?? null,
           status: patched_meter_data.status,
           rate: patched_meter_data.rate,
           client_type: patched_meter_data.client_type,

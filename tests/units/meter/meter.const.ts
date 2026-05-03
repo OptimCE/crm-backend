@@ -253,7 +253,7 @@ export const testCasesAddMeter = [
       reading_frequency: ReadingFrequency.MONTHLY,
       address: { street: "S", number: "1", city: "C", postcode: "1000" },
       initial_data: {
-        start_date: "2024-01-01T00:00:00.000Z",
+        start_date: "2024-01-01",
         status: MeterDataStatus.ACTIVE,
         rate: MeterRate.SIMPLE,
         client_type: ClientType.RESIDENTIAL,
@@ -281,7 +281,7 @@ export const testCasesAddMeter = [
       reading_frequency: ReadingFrequency.MONTHLY,
       address: { street: "S", number: "1", city: "C", postcode: "1000" },
       initial_data: {
-        start_date: "2024-01-01T00:00:00.000Z",
+        start_date: "2024-01-01",
         status: MeterDataStatus.ACTIVE,
         rate: MeterRate.SIMPLE,
         client_type: ClientType.RESIDENTIAL,
@@ -307,7 +307,7 @@ export const testCasesAddMeter = [
       reading_frequency: ReadingFrequency.MONTHLY,
       address: { street: "S", number: "1", city: "C", postcode: "1000" },
       initial_data: {
-        start_date: "2024-01-01T00:00:00.000Z",
+        start_date: "2024-01-01",
         status: MeterDataStatus.ACTIVE,
         rate: MeterRate.SIMPLE,
         client_type: ClientType.RESIDENTIAL,
@@ -332,7 +332,7 @@ export const testCasesPatchMeterData = [
     description: "Success",
     body: {
       EAN: "123",
-      start_date: "2024-02-01T00:00:00.000Z",
+      start_date: "2024-02-01",
       status: MeterDataStatus.ACTIVE,
       rate: MeterRate.SIMPLE,
       client_type: ClientType.RESIDENTIAL,
@@ -352,7 +352,7 @@ export const testCasesPatchMeterData = [
     description: "Fail (Not Found)",
     body: {
       EAN: "999",
-      start_date: "2024-02-01T00:00:00.000Z",
+      start_date: "2024-02-01",
       status: MeterDataStatus.ACTIVE,
       rate: MeterRate.SIMPLE,
       client_type: ClientType.RESIDENTIAL,
@@ -371,7 +371,7 @@ export const testCasesPatchMeterData = [
     description: "Fail (fail database)",
     body: {
       EAN: "123",
-      start_date: "2024-02-01T00:00:00.000Z",
+      start_date: "2024-02-01",
       status: MeterDataStatus.ACTIVE,
       rate: MeterRate.SIMPLE,
       client_type: ClientType.RESIDENTIAL,
@@ -391,7 +391,7 @@ export const testCasesPatchMeterData = [
     description: "Fail (fail database - app error throws from repository)",
     body: {
       EAN: "123",
-      start_date: "2024-02-01T00:00:00.000Z",
+      start_date: "2024-02-01",
       status: MeterDataStatus.ACTIVE,
       rate: MeterRate.SIMPLE,
       client_type: ClientType.RESIDENTIAL,
@@ -453,8 +453,8 @@ export const testCasesDeleteMeter = [
 ];
 const mockMeterDataEntity = {
   id_meter_data: 1,
-  start_date: "2024-02-01T00:00:00.000Z",
-  end_date: "2024-03-01T00:00:00.000Z",
+  start_date: "2024-02-01",
+  end_date: "2024-03-01",
   meter: {
     EAN: "123456789",
   },

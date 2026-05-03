@@ -106,8 +106,8 @@ function toMetersDataDTO(data: MeterData): MetersDataDTO {
   dto.amperage = data.amperage || 0;
   dto.rate = data.rate;
   dto.client_type = data.client_type;
-  dto.start_date = new Date(data.start_date);
-  if (data.end_date) dto.end_date = new Date(data.end_date);
+  dto.start_date = data.start_date;
+  if (data.end_date) dto.end_date = data.end_date;
   dto.injection_status = data.injection_status!;
   dto.production_chain = data.production_chain!;
   dto.totalGenerating_capacity = data.total_generating_capacity || 0;

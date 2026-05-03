@@ -260,7 +260,8 @@ export class MeService implements IMeService {
     }
     let new_member: Individual | Company | undefined;
     try {
-      new_member = await this.memberService.sharedAddMember(accept_invitation.member, query_runner!);
+      const internal_community_id = invitation.community.id;
+      new_member = await this.memberService.sharedAddMember(accept_invitation.member, internal_community_id, query_runner!);
       if (!new_member) {
         logger.error({ operation: "acceptInvitationMemberWEncoded" }, "An error happened during adding a new member: new_member undefined");
         throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MEMBER_ENCODED.DATABASE_MEMBER_SAVE, 400);

@@ -2,7 +2,7 @@ import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import { Expose, Type } from "class-transformer";
 import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 import { MembersPartialDTO } from "../../members/api/member.dtos.js";
-import { IsBoolean, IsDate, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { IsBoolean, IsDate, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, Min, ValidateNested } from "class-validator";
 import { SharingOperationPartialDTO } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
@@ -154,6 +154,18 @@ export class PartialMeterDTO {
   @Expose()
   status!: MeterDataStatus;
   /**
+   * Start date (`YYYY-MM-DD`) of the meter data record selected for this view.
+   * In the sharing-operation tabs, lets the UI tell whether the row is a future-only
+   * scheduled record (eligible for hard delete) or already-active.
+   */
+  @Expose()
+  start_date?: string;
+  /**
+   * End date (`YYYY-MM-DD`) of the meter data record selected for this view, if closed.
+   */
+  @Expose()
+  end_date?: string;
+  /**
    * Active sharing operation details, if any.
    */
   @Expose()
@@ -179,9 +191,9 @@ export class MetersDataDTO {
   @Expose()
   client_type!: ClientType;
   @Expose()
-  start_date!: Date;
+  start_date!: string;
   @Expose()
-  end_date!: Date;
+  end_date!: string;
   @Expose()
   injection_status!: InjectionStatus;
   @Expose()
@@ -285,22 +297,22 @@ export class MeterConsumptionDTO {
  */
 export class CreateMeterDataDTO {
   /**
-   * Start date of validity for this configuration.
+   * Start date of validity for this configuration (`YYYY-MM-DD`, calendar date, no time/zone).
    */
   @Expose()
-  @Type(() => Date)
-  @IsDate(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
-  start_date!: Date;
+  start_date!: string;
 
   /**
-   * End date of validity (optional).
+   * End date of validity (`YYYY-MM-DD`, optional).
    */
   @Expose()
-  @Type(() => Date)
-  @IsDate(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsOptional()
-  end_date?: Date;
+  end_date?: string;
 
   /**
    * Status of the meter during this period.

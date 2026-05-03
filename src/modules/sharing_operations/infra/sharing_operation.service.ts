@@ -38,6 +38,7 @@ import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { toMeterPartialDTO } from "../../meters/shared/to_dto.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
+import { localTodayISO } from "../../../shared/utils/date.utils.js";
 
 @injectable()
 export class SharingOperationService implements ISharingOperationService {
@@ -368,7 +369,7 @@ export class SharingOperationService implements ISharingOperationService {
           ean,
           {
             sharing_operation: { id: id_sharing } as SharingOperation,
-            start_date: new Date(date).toISOString().split("T")[0], // Ensure YYYY-MM-DD
+            start_date: date,
             status: MeterDataStatus.WAITING_GRD,
           },
           query_runner,
@@ -599,7 +600,7 @@ export class SharingOperationService implements ISharingOperationService {
         id_meter,
         {
           sharing_operation: { id: id_sharing } as SharingOperation,
-          start_date: new Date(date).toISOString().split("T")[0],
+          start_date: date,
           status: status,
         },
         query_runner,
@@ -650,13 +651,21 @@ export class SharingOperationService implements ISharingOperationService {
     }
   }
   /**
-   * Removes a meter from a sharing operation (logically deletes the link by setting status to INACTIVE).
-   * @param removed_meter_status - DTO with meter EAN and operation ID.
+   * Removes a meter from a sharing operation.
+   *
+   * Two modes:
+   *  - `hard_delete = true`: physically delete the latest MeterData row when it has not yet
+   *    started (start_date strictly in the future) and reopens the predecessor record. Used
+   *    to undo a meter that was scheduled but never participated.
+   *  - default: append a new INACTIVE record starting at `date` (required), closing the
+   *    meter's participation while preserving history.
+   *
+   * @param removed_meter_status - DTO with meter EAN, operation ID, and either `date` or `hard_delete`.
    * @param query_runner - Optional query runner.
    */
   @Transactional()
   async deleteMeterFromSharingOperation(removed_meter_status: RemoveMeterFromSharingOperationDTO, query_runner?: QueryRunner): Promise<void> {
-    const { id_sharing, id_meter, date } = removed_meter_status;
+    const { id_sharing, id_meter, date, hard_delete } = removed_meter_status;
 
     // 1. Validate Sharing Operation
     const sharingOp = await this.sharing_operationRepository.getSharingOperationById(id_sharing, query_runner);
@@ -692,14 +701,39 @@ export class SharingOperationService implements ISharingOperationService {
       throw new AppError(SHARING_OPERATION_ERRORS.DELETE_METER_FROM_SHARING.METER_NOT_PART_OF_SHARING, 400);
     }
 
-    // 4. Delegate to MeterRepository to handle history/update
-    // Set sharingOperation to null and status to INACTIVE
+    // 4a. Hard delete branch: future, never-started row.
+    if (hard_delete) {
+      const today = localTodayISO();
+      if (latestMeterData.start_date <= today) {
+        logger.warn(
+          { operation: "deleteMeterFromSharingOperation", id_meter, start_date: latestMeterData.start_date },
+          "Hard delete refused: meter has already started",
+        );
+        throw new AppError(SHARING_OPERATION_ERRORS.DELETE_METER_FROM_SHARING.HARD_DELETE_NOT_FUTURE, 400);
+      }
+      const previousStartDate = latestMeterData.start_date;
+      const previousEndDate = latestMeterData.end_date;
+      try {
+        await this.meterRepository.deleteMeterData(latestMeterData, query_runner);
+      } catch (err) {
+        logger.error({ operation: "deleteMeterFromSharingOperation", error: err }, "Failed to hard-delete meter data");
+        throw new AppError(SHARING_OPERATION_ERRORS.DELETE_METER_FROM_SHARING.DATABASE_DELETE, 400);
+      }
+      // Reopen the predecessor (if it was closed by this future row's creation).
+      await this.meterRepository.activePreviousInactiveMeterData(id_meter, previousStartDate, previousEndDate, query_runner);
+      return;
+    }
+
+    // 4b. Soft removal: append an INACTIVE record starting at `date`.
+    if (!date) {
+      throw new AppError(SHARING_OPERATION_ERRORS.DELETE_METER_FROM_SHARING.DATE_REQUIRED, 400);
+    }
     try {
       await this.meterRepository.addMeterData(
         id_meter,
         {
           sharing_operation: null,
-          start_date: new Date(date).toISOString().split("T")[0],
+          start_date: date,
           status: MeterDataStatus.INACTIVE,
         },
         query_runner,

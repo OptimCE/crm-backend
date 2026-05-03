@@ -46,11 +46,12 @@ export class MemberService implements IMemberService {
    * Internal shared logic to add a member.
    * Handles address creation and polymorphic entity creation (Individual vs Company).
    * @param new_member - DTO with member details.
+   * @param internal_community_id - Internal community ID for member association.
    * @param query_runner - Database transaction runner.
    * @returns The created specific entity (Individual | Company) or undefined.
    */
-  async sharedAddMember(new_member: CreateMemberDTO, query_runner: QueryRunner): Promise<Individual | Company | undefined> {
-    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+  async sharedAddMember(new_member: CreateMemberDTO, internal_community_id: number, query_runner: QueryRunner): Promise<Individual | Company | undefined> {
+    // const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     const home_address = await this.address_repository.addAddress(new_member.home_address, query_runner);
     const billing_address = await this.address_repository.addAddress(new_member.billing_address, query_runner);
     const member_model = query_runner.manager.create(Member, {
@@ -116,7 +117,8 @@ export class MemberService implements IMemberService {
       throw new AppError(MEMBER_ERRORS.DATABASE.QUERY_RUNNER_MANDATORY, 400);
     }
     try {
-      await this.sharedAddMember(new_member, query_runner);
+      const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+      await this.sharedAddMember(new_member, internal_community_id, query_runner);
     } catch (err) {
       logger.error({ operation: "addMember", error: err }, "An error happened during adding a new member");
       throw new AppError(MEMBER_ERRORS.ADD_MEMBER.DATABASE_ADD, 400);
