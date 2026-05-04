@@ -3,6 +3,7 @@ import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { expectWithLog, mockAddressRepositoryModule, mockIAMServiceModule, mockUserRepositoryModule } from "../../utils/helper.js";
 import { testCasesGetProfile, testCasesUpdateProfile } from "./user.const.js";
+import {AUTH_COMMUNITY_1} from "../../utils/shared.consts.js";
 
 describe("(Unit) User Module", () => {
   useUnitTestDb();

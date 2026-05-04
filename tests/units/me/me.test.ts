@@ -27,7 +27,7 @@ import {
   testCasesRefuseMember,
   testCasesRefuseManager,
 } from "./me.const.js";
-import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
 
 describe("(Unit) Me Module", () => {
   // --- GET DOCUMENTS ---
@@ -232,12 +232,12 @@ describe("(Unit) Me Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result = expected_data;
+            let result:unknown = expected_data as string;
             if (response.status !== 200) {
               if (translation_field) {
-                result = i18next.t(expected_data, translation_field);
+                result = i18next.t(expected_data as string, translation_field);
               } else {
-                result = i18next.t(expected_data);
+                result = i18next.t(expected_data as string);
               }
             }
             expect(response.body.data).toEqual(result);

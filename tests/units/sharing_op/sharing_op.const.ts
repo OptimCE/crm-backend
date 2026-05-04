@@ -25,6 +25,7 @@ export const mockSharingOperationEntity: SharingOperation = {
   updated_at: mockDate,
   community: mockCommunity as Community,
   keys: [],
+  municipalities: [],
 };
 
 export const mockSharingOpConsumption = [
@@ -191,7 +192,7 @@ export const testCasesDownload = [
 export const testCasesCreate = [
   {
     description: "Success",
-    body: { name: "New Op", type: SharingOperationType.LOCAL },
+    body: { name: "New Op", type: SharingOperationType.LOCAL, municipality_nis_codes: [11001] },
     status_code: 200,
     orgs: ORGS_ADMIN,
     expected_error_code: SUCCESS,
@@ -200,11 +201,14 @@ export const testCasesCreate = [
       sharingOpRepo: {
         createSharingOperation: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
       },
+      municipalityRepo: {
+        findManyByNisCodes: jest.fn(() => Promise.resolve([{ nis_code: 11001 }])),
+      },
     },
   },
   {
     description: "Fail (DB Error)",
-    body: { name: "New Op", type: SharingOperationType.LOCAL },
+    body: { name: "New Op", type: SharingOperationType.LOCAL, municipality_nis_codes: [11001] },
     status_code: 400,
     orgs: ORGS_ADMIN,
     expected_error_code: SHARING_OPERATION_ERRORS.CREATE_SHARING_OPERATION.DATABASE_ADD.errorCode,
@@ -212,6 +216,9 @@ export const testCasesCreate = [
     mocks: {
       sharingOpRepo: {
         createSharingOperation: jest.fn(() => Promise.reject(new Error("Fail"))),
+      },
+      municipalityRepo: {
+        findManyByNisCodes: jest.fn(() => Promise.resolve([{ nis_code: 11001 }])),
       },
     },
   },

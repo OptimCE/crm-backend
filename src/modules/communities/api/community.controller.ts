@@ -7,7 +7,8 @@ import type { NextFunction, Request, Response } from "express";
 import { validateDto } from "../../../shared/utils/dto.validator.js";
 import logger from "../../../shared/monitor/logger.js";
 import { ApiResponse, ApiResponsePaginated } from "../../../shared/dtos/ApiResponses.js";
-import { SUCCESS } from "../../../shared/errors/errors.js";
+import { GLOBAL_ERRORS, SUCCESS } from "../../../shared/errors/errors.js";
+import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import {
   CommunityDetailDTO,
   CommunityDTO,
@@ -16,6 +17,7 @@ import {
   CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
+  UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "./community.dtos.js";
 import { SharingOperationPartialDTO, SharingOperationPartialQuery } from "../../sharing_operations/api/sharing_operation.dtos.js";
@@ -62,6 +64,23 @@ export class CommunityController {
     const queryObject = await validateDto(SharingOperationPartialQuery, req.query);
     const [result, pagination] = await this.sharingOperationService.getSharingOperationList(queryObject);
     logger.info("Community sharing operations list successfully retrieved");
+    res.status(200).json(new ApiResponsePaginated<SharingOperationPartialDTO[]>(result, pagination, SUCCESS));
+  }
+
+  /**
+   * Public list of a community's sharing operations.
+   * Returns only operations flagged `is_public = true`. Visible to any
+   * authenticated user — no GESTIONNAIRE check.
+   */
+  @communityControllerTraceDecorator.traceSpan("getCommunityPublicSharingOperations", {
+    url: "/communities/:id/sharing_operations/public",
+    method: "get",
+  })
+  @Cache(cacheKey("communities:public-sharing-operations", "none", (req) => `${req.params.id}:${JSON.stringify(req.query)}`), 60)
+  async getCommunityPublicSharingOperations(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(SharingOperationPartialQuery, req.query);
+    const [result, pagination] = await this.sharingOperationService.getPublicCommunitySharingOperations(+req.params.id, queryObject);
+    logger.info("Community public sharing operations list successfully retrieved");
     res.status(200).json(new ApiResponsePaginated<SharingOperationPartialDTO[]>(result, pagination, SUCCESS));
   }
 
@@ -141,9 +160,46 @@ export class CommunityController {
     cachePattern("communities:sharing-operations", "community"),
   ])
   async updateCommunity(req: Request, res: Response, _next: NextFunction): Promise<void> {
-    const updated_community = await validateDto(CreateCommunityDTO, req.body);
+    const updated_community = await validateDto(UpdateCommunityDTO, req.body);
     await this.communityService.updateCommunity(updated_community);
-    logger.info("Community successfully created");
+    logger.info("Community successfully updated");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Uploads a new logo for the active community.
+   * Stores the file in MinIO/S3 and updates `logo_url` on the community row.
+   * @param req - Express request. File arrives as multipart/form-data on `req.file`.
+   * @param res - Express response. Returns the new presigned URL.
+   * @param _next - Express next middleware function.
+   */
+  @communityControllerTraceDecorator.traceSpan("uploadLogo", { url: "/communities/logo", method: "post" })
+  @InvalidateCache([
+    cachePattern("communities:user-list", "user"),
+    cachePattern("communities:all-list", "none"),
+    cachePattern("communities:detail", "none"),
+  ])
+  async uploadLogo(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    if (!req.file) {
+      throw new AppError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.FILE, 422);
+    }
+    const result = await this.communityService.uploadLogo(req.file);
+    logger.info("Community logo successfully uploaded");
+    res.status(200).json(new ApiResponse<{ logo_url: string; logo_presigned_url: string }>(result, SUCCESS));
+  }
+
+  /**
+   * Deletes the active community's logo from storage and clears `logo_url`.
+   */
+  @communityControllerTraceDecorator.traceSpan("deleteLogo", { url: "/communities/logo", method: "delete" })
+  @InvalidateCache([
+    cachePattern("communities:user-list", "user"),
+    cachePattern("communities:all-list", "none"),
+    cachePattern("communities:detail", "none"),
+  ])
+  async deleteLogo(_req: Request, res: Response, _next: NextFunction): Promise<void> {
+    await this.communityService.deleteLogo();
+    logger.info("Community logo successfully deleted");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 

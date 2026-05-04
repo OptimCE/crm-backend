@@ -7,6 +7,7 @@ import {
   testCasesDeleteCommunity,
   testCasesGetAdmins,
   testCasesGetAllPublicCommunities,
+  testCasesGetCommunityPublicSharingOps,
   testCasesGetMyCommunities,
   testCasesGetUsers,
   testCasesKickUser,
@@ -232,6 +233,32 @@ describe("(Functional) Community Module", () => {
           expect(response.status).toBe(status_code);
           expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data) expect(response.body.data).toBe(expected_data);
+        });
+      },
+    );
+  });
+
+  // --- GET COMMUNITY PUBLIC SHARING OPS ---
+  describe("(Functional) Get Community Public Sharing Operations", () => {
+    it.each(testCasesGetCommunityPublicSharingOps)(
+      "GET /communities/:id/sharing_operations/public : $description",
+      async ({ community_id, query, orgs, status_code, expected_error_code, check_data }) => {
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const response = await request(app)
+          .get(`/communities/${community_id}/sharing_operations/public`)
+          .query(query)
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (check_data) {
+            expect(check_data(response.body.data)).toBe(true);
+          }
         });
       },
     );

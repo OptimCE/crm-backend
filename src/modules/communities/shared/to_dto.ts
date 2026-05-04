@@ -1,5 +1,6 @@
 import type { CommunityDTO, CommunityDetailDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
 import type { Community, CommunityUser } from "../domain/community.models.js";
+import { toAddressDTO } from "../../../shared/address/to_dto.js";
 
 export function toUsersCommunityDTO(community_user: CommunityUser): UsersCommunityDTO {
   return {
@@ -29,7 +30,7 @@ export function toCommunityPartial(community: Community): CommunityDTO {
   };
 }
 
-export function toCommunityDetailDTO(community: Community, member_count: number): CommunityDetailDTO {
+export function toCommunityDetailDTO(community: Community, member_count: number, logo_presigned_url?: string | null): CommunityDetailDTO {
   return {
     id: community.id,
     name: community.name,
@@ -38,6 +39,10 @@ export function toCommunityDetailDTO(community: Community, member_count: number)
     updated_at: community.updated_at,
     member_count,
     description: community.description,
+    website_url: community.website_url,
+    logo_url: community.logo_url,
+    logo_presigned_url: logo_presigned_url ?? null,
+    headquarters_address: community.headquarters_address ? toAddressDTO(community.headquarters_address) : null,
   };
 }
 

@@ -18,7 +18,9 @@ import {
   SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
+  UpdateSharingOperationMunicipalitiesDTO,
 } from "../api/sharing_operation.dtos.js";
+import type { IMunicipalityRepository } from "../../municipalities/domain/i-municipality.repository.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
 import logger from "../../../shared/monitor/logger.js";
@@ -46,8 +48,24 @@ export class SharingOperationService implements ISharingOperationService {
     @inject("SharingOperationRepository") private sharing_operationRepository: ISharingOperationRepository,
     @inject("MeterRepository") private meterRepository: IMeterRepository,
     @inject("KeyRepository") private keyRepository: IKeyRepository,
+    @inject("MunicipalityRepository") private municipalityRepository: IMunicipalityRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
   ) {}
+
+  /**
+   * Validates the requested NIS codes against the municipality reference table.
+   * Throws if any of them is not found.
+   */
+  private async assertMunicipalitiesExist(nis_codes: number[], unknownError: AppError, query_runner?: QueryRunner): Promise<void> {
+    const unique = Array.from(new Set(nis_codes));
+    const found = await this.municipalityRepository.findManyByNisCodes(unique, query_runner);
+    if (found.length !== unique.length) {
+      const foundCodes = new Set(found.map((m) => m.nis_code));
+      const missing = unique.filter((c) => !foundCodes.has(c));
+      logger.warn({ operation: "assertMunicipalitiesExist", missing }, "Unknown municipality NIS codes provided");
+      throw unknownError;
+    }
+  }
 
   /**
    * Uploads and processes consumption data from an Excel file.
@@ -391,12 +409,58 @@ export class SharingOperationService implements ISharingOperationService {
    */
   @Transactional()
   async createSharingOperation(new_sharing_operations: CreateSharingOperationDTO, query_runner?: QueryRunner): Promise<void> {
+    await this.assertMunicipalitiesExist(
+      new_sharing_operations.municipality_nis_codes,
+      new AppError(SHARING_OPERATION_ERRORS.CREATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY, 400),
+      query_runner,
+    );
     try {
       await this.sharing_operationRepository.createSharingOperation(new_sharing_operations, query_runner);
     } catch (err) {
+      if (isAppErrorLike(err)) {
+        throw err;
+      }
       logger.error({ operation: "createSharingOperation", error: err }, `An error occurred while saving a new sharing operation`);
       throw new AppError(SHARING_OPERATION_ERRORS.CREATE_SHARING_OPERATION.DATABASE_ADD, 400);
     }
+  }
+
+  /**
+   * Replaces the full set of municipalities linked to a sharing operation.
+   * The operation must belong to the caller's community.
+   */
+  @Transactional()
+  async updateMunicipalities(dto: UpdateSharingOperationMunicipalitiesDTO, query_runner?: QueryRunner): Promise<void> {
+    const sharingOp = await this.sharing_operationRepository.getSharingOperationById(dto.id_sharing, query_runner);
+    if (!sharingOp) {
+      logger.error({ operation: "updateMunicipalities", id_sharing: dto.id_sharing }, "Sharing operation not found");
+      throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+    await this.assertMunicipalitiesExist(
+      dto.municipality_nis_codes,
+      new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.UNKNOWN_MUNICIPALITY, 400),
+      query_runner,
+    );
+    try {
+      await this.sharing_operationRepository.replaceMunicipalities(dto.id_sharing, dto.municipality_nis_codes, query_runner);
+    } catch (err) {
+      logger.error({ operation: "updateMunicipalities", error: err }, "Failed to replace sharing operation municipalities");
+      throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.DATABASE_UPDATE, 400);
+    }
+  }
+
+  /**
+   * Public list of a community's sharing operations (only `is_public = true`).
+   * Used by the new `/communities/:id/sharing_operations/public` endpoint.
+   */
+  async getPublicCommunitySharingOperations(
+    community_id: number,
+    query: SharingOperationPartialQuery,
+  ): Promise<[SharingOperationPartialDTO[], Pagination]> {
+    const [values, total] = await this.sharing_operationRepository.getPublicCommunitySharingOperations(community_id, query);
+    const return_values = values.map((value) => toSharingOperationPartialDTO(value));
+    const total_pages = total === 0 ? 0 : Math.ceil(total / query.limit);
+    return [return_values, { page: query.page, limit: query.limit, total, total_pages }];
   }
 
   /**

@@ -1,7 +1,13 @@
 import { expect, it } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
-import { expectWithLog, mockKeyRepositoryModule, mockMeterRepositoryModule, mockSharingOperationRepositoryModule } from "../../utils/helper.js";
+import {
+  expectWithLog,
+  mockKeyRepositoryModule,
+  mockMeterRepositoryModule,
+  mockMunicipalityRepositoryModule,
+  mockSharingOperationRepositoryModule,
+} from "../../utils/helper.js";
 import {
   testCasesAddData,
   testCasesAddKey,
@@ -18,7 +24,7 @@ import {
   testCasesPatchKey,
   testCasesPatchMeter,
 } from "./sharing_op.const.js";
-import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
 
 describe("(Unit) Sharing Operation Module", () => {
   useUnitTestDb();
@@ -153,6 +159,7 @@ describe("(Unit) Sharing Operation Module", () => {
       "POST /sharing_operations/ : $description",
       async ({ body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
         if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+        if (mocks?.municipalityRepo) await mockMunicipalityRepositoryModule(mocks.municipalityRepo);
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;

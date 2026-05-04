@@ -10,6 +10,7 @@ import {
   CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
+  UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
@@ -25,6 +26,8 @@ import type { IAuthContextRepository } from "../../../shared/context/i-authconte
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
 import { getContext } from "../../../shared/middlewares/context.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
+import type { IStorageService } from "../../../shared/storage/i-storage.service.js";
+import type { IAddressRepository } from "../../../shared/address/i-address.repository.js";
 
 /**
  * Implementation of the Community Service.
@@ -37,6 +40,8 @@ export class CommunityService implements ICommunityService {
     @inject("IAMService") private iam_service: IIamService,
     @inject("AuthContext") private authContext: IAuthContextRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("StorageService") private storage_service: IStorageService,
+    @inject("AddressRepository") private address_repository: IAddressRepository,
   ) {}
 
   async getAllPublicCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]> {
@@ -52,7 +57,16 @@ export class CommunityService implements ICommunityService {
       throw new AppError(COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND, 404);
     }
 
-    return toCommunityDetailDTO(result.community, result.member_count);
+    let logo_presigned_url: string | null = null;
+    if (result.community.logo_url) {
+      try {
+        logo_presigned_url = await this.storage_service.getDocumentUrl(result.community.logo_url);
+      } catch (err) {
+        logger.error({ operation: "getCommunityById", error: err }, "Failed to generate presigned URL for community logo");
+      }
+    }
+
+    return toCommunityDetailDTO(result.community, result.member_count, logo_presigned_url);
   }
 
   /**
@@ -103,17 +117,35 @@ export class CommunityService implements ICommunityService {
 
   /**
    * Updates an existing community.
-   * Updates the name in the local database first, then in the IAM service.
-   * @param updated_community - DTO containing the new community details.
+   * Resolves an optional headquarters_address (creating or reusing one),
+   * updates the local row, and propagates a name change to the IAM service.
+   * Only fields explicitly present in the DTO are touched.
+   * @param updated_community - Partial DTO containing the fields to update.
    * @param query_runner - Optional query runner.
    * @throws AppError if DB update or IAM update fails.
    */
   @Transactional()
-  async updateCommunity(updated_community: CreateCommunityDTO, query_runner?: QueryRunner): Promise<void> {
+  async updateCommunity(updated_community: UpdateCommunityDTO, query_runner?: QueryRunner): Promise<void> {
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+
+    let headquarters_address_id: number | undefined;
+    if (updated_community.headquarters_address) {
+      try {
+        const address = await this.address_repository.addAddress(updated_community.headquarters_address, query_runner);
+        headquarters_address_id = address.id;
+      } catch (err) {
+        logger.error({ operation: "updateCommunity", error: err }, "An exception occurred while persisting the headquarters address");
+        throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
+      }
+    }
+
     let community_updated: Community;
     try {
-      community_updated = await this.community_repository.updateCommunity(internal_community_id, updated_community);
+      community_updated = await this.community_repository.updateCommunity(
+        internal_community_id,
+        { ...updated_community, headquarters_address_id },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -121,11 +153,92 @@ export class CommunityService implements ICommunityService {
       logger.error({ operation: "updateCommunity", error: err }, "An exception occurred while updating the community in the database");
       throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
     }
+
+    if (updated_community.name !== undefined) {
+      try {
+        await this.iam_service.updateCommunity(community_updated.auth_community_id, updated_community.name);
+      } catch (err) {
+        logger.error({ operation: "updateCommunity", error: err }, "An exception occurred while updating the community in the IAM service");
+        throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.IAM_ERROR_UPDATE, 400);
+      }
+    }
+  }
+
+  /**
+   * Uploads a new logo for the active community to MinIO/S3 and updates the community row.
+   * If the community already had a logo, the previous object is best-effort deleted.
+   * @returns The new presigned URL for displaying the logo.
+   */
+  @Transactional()
+  async uploadLogo(file: Express.Multer.File, query_runner?: QueryRunner): Promise<{ logo_url: string; logo_presigned_url: string }> {
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+
+    const existing = await this.community_repository.getCommunityById(internal_community_id, query_runner);
+    if (!existing) {
+      throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.COMMUNITY_NOT_FOUND, 400);
+    }
+    const previous_key = existing.community.logo_url;
+
+    let upload_key: string;
     try {
-      await this.iam_service.updateCommunity(community_updated.auth_community_id, updated_community.name);
+      const result = await this.storage_service.uploadDocument(file);
+      upload_key = result.url;
     } catch (err) {
-      logger.error({ operation: "updateCommunity", error: err }, "An exception occurred while creating a new community in the IAM service");
-      throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.IAM_ERROR_UPDATE, 400);
+      logger.error({ operation: "uploadLogo", error: err }, "Failed to upload logo to storage service");
+      throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
+    }
+
+    try {
+      await this.community_repository.updateCommunity(internal_community_id, { logo_url: upload_key }, query_runner);
+    } catch (err) {
+      try {
+        await this.storage_service.deleteDocument(upload_key);
+      } catch (cleanup_err) {
+        logger.error({ operation: "uploadLogo", error: cleanup_err }, "Failed to clean up newly uploaded logo after DB failure");
+      }
+      if (isAppErrorLike(err)) throw err;
+      logger.error({ operation: "uploadLogo", error: err }, "Failed to persist logo URL on the community row");
+      throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
+    }
+
+    if (previous_key && previous_key !== upload_key) {
+      try {
+        await this.storage_service.deleteDocument(previous_key);
+      } catch (err) {
+        logger.error({ operation: "uploadLogo", error: err }, `Failed to delete previous logo object ${previous_key}`);
+      }
+    }
+
+    const logo_presigned_url = await this.storage_service.getDocumentUrl(upload_key);
+    return { logo_url: upload_key, logo_presigned_url };
+  }
+
+  /**
+   * Removes the logo from MinIO/S3 and clears `logo_url` on the active community.
+   * Idempotent: succeeds when no logo is set.
+   */
+  @Transactional()
+  async deleteLogo(query_runner?: QueryRunner): Promise<void> {
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+    const existing = await this.community_repository.getCommunityById(internal_community_id, query_runner);
+    if (!existing) {
+      throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.COMMUNITY_NOT_FOUND, 400);
+    }
+    const previous_key = existing.community.logo_url;
+    if (!previous_key) return;
+
+    try {
+      await this.community_repository.updateCommunity(internal_community_id, { logo_url: null }, query_runner);
+    } catch (err) {
+      if (isAppErrorLike(err)) throw err;
+      logger.error({ operation: "deleteLogo", error: err }, "Failed to clear logo_url on the community row");
+      throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
+    }
+
+    try {
+      await this.storage_service.deleteDocument(previous_key);
+    } catch (err) {
+      logger.error({ operation: "deleteLogo", error: err }, `Failed to delete logo object ${previous_key}`);
     }
   }
 

@@ -5,10 +5,16 @@ import { AllocationKey, Consumer, Iteration } from "../../modules/keys/domain/ke
 import { Individual, Company, Manager, Member } from "../../modules/members/domain/member.models.js";
 import { Document } from "../../modules/documents/domain/document.models.js";
 import { Meter, MeterConsumption, MeterData } from "../../modules/meters/domain/meter.models.js";
-import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../../modules/sharing_operations/domain/sharing_operation.models.js";
+import {
+  SharingOpConsumption,
+  SharingOperation,
+  SharingOperationKey,
+  SharingOperationMunicipality
+} from "../../modules/sharing_operations/domain/sharing_operation.models.js";
 import { User, UserMemberLink } from "../../modules/users/domain/user.models.js";
 import { GestionnaireInvitation, UserMemberInvitation } from "../../modules/invitations/domain/invitation.models.js";
 import { Address } from "../address/address.models.js";
+import {Municipality, MunicipalityPostalCode} from "../../modules/municipalities/domain/municipality.models.js";
 
 const host: string = config.get("database.host");
 const port: number = config.get("database.port");
@@ -50,6 +56,9 @@ export const AppDataSource = new DataSource({
     UserMemberInvitation,
     GestionnaireInvitation,
     CommunityUser,
+    SharingOperationMunicipality,
+    Municipality,
+    MunicipalityPostalCode
   ],
   logging: logging,
 });

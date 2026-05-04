@@ -14,6 +14,7 @@ import type {
   SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
+  UpdateSharingOperationMunicipalitiesDTO,
 } from "../api/sharing_operation.dtos.js";
 import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import type { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
@@ -59,6 +60,21 @@ export interface ISharingOperationService {
    * @param new_sharing_operations - DTO for creation.
    */
   createSharingOperation(new_sharing_operations: CreateSharingOperationDTO): Promise<void>;
+
+  /**
+   * Replaces the full set of municipalities linked to a sharing operation.
+   * @param dto - DTO with the operation id and new NIS code list.
+   */
+  updateMunicipalities(dto: UpdateSharingOperationMunicipalitiesDTO): Promise<void>;
+
+  /**
+   * Public list of a community's sharing operations (filters `is_public = true`).
+   * Bypasses tenant scope deliberately.
+   */
+  getPublicCommunitySharingOperations(
+    community_id: number,
+    query: SharingOperationPartialQuery,
+  ): Promise<[SharingOperationPartialDTO[], import("../../../shared/dtos/ApiResponses.js").Pagination]>;
 
   /**
    * Adds an allocation key to a sharing operation (request status).

@@ -23,6 +23,7 @@ import {
   SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
+  UpdateSharingOperationMunicipalitiesDTO,
 } from "./sharing_operation.dtos.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
@@ -143,11 +144,36 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("createSharingOperation", { url: "/sharing_operations/", method: "post" })
-  @InvalidateCache([cachePattern("sharing-op:list", "community")])
+  @InvalidateCache([
+    cachePattern("sharing-op:list", "community"),
+    cachePattern("communities:public-sharing-operations", "none"),
+  ])
   async createSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_sharing_operations = await validateDto(CreateSharingOperationDTO, req.body);
     await this.sharing_operationService.createSharingOperation(new_sharing_operations);
     logger.info("Sharing operation consumptions successfully created");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Replaces the full set of municipalities linked to a sharing operation.
+   * @param req - Express request object. Body: UpdateSharingOperationMunicipalitiesDTO.
+   * @param res - Express response object. Returns success message.
+   * @param _next - Express next middleware.
+   */
+  @sharing_operationControllerTraceDecorator.traceSpan("updateMunicipalities", { url: "/sharing_operations/:id/municipalities", method: "put" })
+  @InvalidateCache([
+    cachePattern("sharing-op:list", "community"),
+    cachePattern("sharing-op:detail", "community"),
+    cachePattern("communities:public-sharing-operations", "none"),
+  ])
+  async updateMunicipalities(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const dto = await validateDto(UpdateSharingOperationMunicipalitiesDTO, {
+      ...req.body,
+      id_sharing: +req.params.id,
+    });
+    await this.sharing_operationService.updateMunicipalities(dto);
+    logger.info("Sharing operation municipalities updated");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 
@@ -237,7 +263,11 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("patchVisibility", { url: "/sharing_operations/visibility", method: "patch" })
-  @InvalidateCache([cachePattern("sharing-op:list", "community"), cachePattern("sharing-op:detail", "community")])
+  @InvalidateCache([
+    cachePattern("sharing-op:list", "community"),
+    cachePattern("sharing-op:detail", "community"),
+    cachePattern("communities:public-sharing-operations", "none"),
+  ])
   async patchVisibility(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const dto = await validateDto(PatchSharingOperationVisibilityDTO, req.body);
     await this.sharing_operationService.patchVisibility(dto);
@@ -258,6 +288,7 @@ export class SharingOperationController {
     cachePattern("sharing-op:meters", "community"),
     cachePattern("sharing-op:keys", "community"),
     cachePattern("sharing-op:consumptions", "community"),
+    cachePattern("communities:public-sharing-operations", "none"),
   ])
   async deleteSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.sharing_operationService.deleteSharingOperation(+req.params.id);

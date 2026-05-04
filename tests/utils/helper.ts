@@ -19,6 +19,8 @@ import { createMockMeterRepository } from "../repository_mocked/meter.repository
 import type { IMeterRepository } from "../../src/modules/meters/domain/i-meter.repository.js";
 import { createMockSharingOperationRepository } from "../repository_mocked/sharing_operation.repository.mock.js";
 import type { ISharingOperationRepository } from "../../src/modules/sharing_operations/domain/i-sharing_operation.repository.js";
+import { createMockMunicipalityRepository } from "../repository_mocked/municipality.repository.mock.js";
+import type { IMunicipalityRepository } from "../../src/modules/municipalities/domain/i-municipality.repository.js";
 import { createMockUserRepository } from "../repository_mocked/user.repository.mock.js";
 import type { IUserRepository } from "../../src/modules/users/domain/i-user.repository.js";
 import { createMockIamService } from "../external_mocking/iam_service.mock.js";
@@ -232,6 +234,14 @@ export async function mockSharingOperationRepositoryModule(overrides: { [K in ke
   const mock = createMockSharingOperationRepository();
   Object.assign(mock, overrides);
   return await mockModule<ISharingOperationRepository>(mock, "SharingOperationRepository");
+}
+
+export async function mockMunicipalityRepositoryModule(overrides: { [K in keyof IMunicipalityRepository]?: jest.Mock }): Promise<
+  jest.Mocked<IMunicipalityRepository>
+> {
+  const mock = createMockMunicipalityRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IMunicipalityRepository>(mock, "MunicipalityRepository");
 }
 
 export async function mockUserRepositoryModule(overrides: { [K in keyof IUserRepository]?: jest.Mock }): Promise<jest.Mocked<IUserRepository>> {

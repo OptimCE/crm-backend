@@ -1,10 +1,11 @@
 import { Expose, Type } from "class-transformer";
-import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
 import { Role } from "../../../shared/dtos/role.js";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
+import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 /**
  * DTO for querying communities with pagination and filtering.
  */
@@ -181,6 +182,20 @@ export class CommunityDetailDTO {
 
   @Expose()
   description?: string | null;
+
+  @Expose()
+  website_url?: string | null;
+
+  /** Storage key in MinIO/S3 (e.g. `documents/<uuid>-name.png`). */
+  @Expose()
+  logo_url?: string | null;
+
+  /** Short-lived presigned URL (~15 min) for direct logo display. */
+  @Expose()
+  logo_presigned_url?: string | null;
+
+  @Expose()
+  headquarters_address?: AddressDTO | null;
 }
 
 /**
@@ -195,6 +210,33 @@ export class CreateCommunityDTO {
   @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.EMPTY))
   name!: string;
+}
+
+/**
+ * DTO for partial updates to an existing community.
+ * All fields are optional — only the provided fields are applied.
+ */
+export class UpdateCommunityDTO {
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsNotEmpty(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.EMPTY))
+  @IsOptional()
+  name?: string;
+
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  description?: string | null;
+
+  @Type(() => String)
+  @IsUrl({}, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  website_url?: string | null;
+
+  @ValidateNested()
+  @Type(() => CreateAddressDTO)
+  @IsOptional()
+  headquarters_address?: CreateAddressDTO;
 }
 
 /**
