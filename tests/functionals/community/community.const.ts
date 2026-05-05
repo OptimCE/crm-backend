@@ -130,7 +130,7 @@ export const testCasesUpdateCommunity = [
   {
     description: "Success Update",
     body: { name: "Updated Name" },
-    orgs: ORGS_GESTIONNAIRE,
+    orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
     expected_data: "success",
@@ -215,6 +215,28 @@ export const testCasesLeave = [
         deleteUserFromCommunity: jest.fn(() => Promise.resolve()),
       },
     },
+  },
+];
+
+// 8b. Get Community Public Sharing Operations
+export const testCasesGetCommunityPublicSharingOps = [
+  {
+    description: "Success - Returns only public sharing operations for community 1",
+    community_id: 1,
+    query: {},
+    orgs: ORGS_MEMBER,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => data.length === 2,
+  },
+  {
+    description: "Success - Community with no public sharing operations returns empty",
+    community_id: 2,
+    query: {},
+    orgs: ORGS_MEMBER,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => data.length === 0,
   },
 ];
 

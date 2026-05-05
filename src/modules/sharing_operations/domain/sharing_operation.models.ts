@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Community } from "../../communities/domain/community.models.js";
 import { AllocationKey } from "../../keys/domain/key.models.js";
+import { Municipality } from "../../municipalities/domain/municipality.models.js";
 import { SharingKeyStatus, SharingOperationType } from "../shared/sharing_operation.types.js";
 
 /**
@@ -45,6 +46,37 @@ export class SharingOperation {
    */
   @OneToMany(() => SharingOperationKey, (key) => key.sharing_operation)
   keys!: SharingOperationKey[];
+
+  /**
+   * Municipalities (Belgian communes) covered by this operation.
+   */
+  @OneToMany(() => SharingOperationMunicipality, (link) => link.sharing_operation)
+  municipalities!: SharingOperationMunicipality[];
+}
+
+/**
+ * Join entity linking a sharing operation to one of the Belgian municipalities
+ * it covers. Composite primary key (id_sharing_operation, nis_code).
+ */
+@Entity("sharing_operation_municipality")
+@Index("idx_sharing_op_muni_nis", ["municipality"])
+export class SharingOperationMunicipality {
+  @PrimaryColumn({ name: "id_sharing_operation", type: "int" })
+  id_sharing_operation!: number;
+
+  @PrimaryColumn({ name: "nis_code", type: "int" })
+  nis_code!: number;
+
+  @ManyToOne(() => SharingOperation, (so) => so.municipalities, { onDelete: "CASCADE", nullable: false })
+  @JoinColumn({ name: "id_sharing_operation" })
+  sharing_operation!: SharingOperation;
+
+  @ManyToOne(() => Municipality, { onDelete: "RESTRICT", nullable: false })
+  @JoinColumn({ name: "nis_code" })
+  municipality!: Municipality;
+
+  @CreateDateColumn({ name: "created_at" })
+  created_at!: Date;
 }
 
 /**

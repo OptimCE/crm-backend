@@ -21,6 +21,12 @@ export const SHARING_OPERATION_ERRORS = {
   },
   CREATE_SHARING_OPERATION: {
     DATABASE_ADD: new LocalError(70008, "sharing_operation:create_sharing_operation.database_add"),
+    UNKNOWN_MUNICIPALITY: new LocalError(70029, "sharing_operation:create_sharing_operation.unknown_municipality"),
+  },
+  UPDATE_MUNICIPALITIES: {
+    SHARING_OPERATION_NOT_FOUND: new LocalError(70030, "sharing_operation:update_municipalities.sharing_operation_not_found"),
+    UNKNOWN_MUNICIPALITY: new LocalError(70031, "sharing_operation:update_municipalities.unknown_municipality"),
+    DATABASE_UPDATE: new LocalError(70032, "sharing_operation:update_municipalities.database_update"),
   },
   GET_SHARING_OPERATION: {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70009, "sharing_operation:get_sharing_operation.sharing_operation_not_found"),

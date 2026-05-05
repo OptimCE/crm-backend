@@ -1,4 +1,4 @@
-import type { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
+import type { SharingOpConsumption, SharingOperation, SharingOperationKey, SharingOperationMunicipality } from "../domain/sharing_operation.models.js";
 import {
   SharingOpConsumptionDTO,
   SharingOperationDTO,
@@ -7,12 +7,20 @@ import {
 } from "../api/sharing_operation.dtos.js";
 import { toKeyPartialDTO } from "../../keys/shared/to_dto.js";
 import { SharingKeyStatus } from "./sharing_operation.types.js";
+import { toMunicipalityPartialDTO } from "../../municipalities/shared/to_dto.js";
+import type { MunicipalityPartialDTO } from "../../municipalities/api/municipality.dtos.js";
+
+function municipalitiesFromLinks(links: SharingOperationMunicipality[] | undefined): MunicipalityPartialDTO[] {
+  if (!links) return [];
+  return links.filter((link) => link.municipality).map((link) => toMunicipalityPartialDTO(link.municipality));
+}
 
 export function toSharingOperationPartialDTO(value: SharingOperation): SharingOperationPartialDTO {
   return {
     id: value.id,
     type: value.type,
     name: value.name,
+    municipalities: municipalitiesFromLinks(value.municipalities),
   };
 }
 export function toSharingOperationKeyDTO(entity: SharingOperationKey): SharingOperationKeyDTO {
@@ -38,6 +46,7 @@ export function toSharingOperation(value: SharingOperation): SharingOperationDTO
   dto.name = value.name;
   dto.type = value.type;
   dto.is_public = value.is_public;
+  dto.municipalities = municipalitiesFromLinks(value.municipalities);
 
   // Safety check if keys are not loaded
   const keys = value.keys || [];

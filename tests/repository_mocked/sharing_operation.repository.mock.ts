@@ -11,11 +11,13 @@ export function createMockSharingOperationRepository(): jest.Mocked<ISharingOper
     createSharingOperation: jest.fn(),
     deleteSharingOperation: jest.fn(),
     getAuthorizedEans: jest.fn(),
+    getPublicCommunitySharingOperations: jest.fn(),
     getSharingOperationById: jest.fn(),
     getSharingOperationConsumption: jest.fn(),
     getSharingOperationList: jest.fn(),
     getSharingOperationKeysList: jest.fn(),
     getSharingOperationMetersList: jest.fn(),
     rejectSpecificKeyEntry: jest.fn(),
+    replaceMunicipalities: jest.fn(),
   };
 }

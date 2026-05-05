@@ -69,11 +69,52 @@ export const testCasesCreate = [
     body: {
       name: newSharingOpName,
       type: SharingOperationType.LOCAL,
+      municipality_nis_codes: [21001],
     },
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
     expected_data: "success",
+  },
+  {
+    description: "Fail - Unknown municipality",
+    body: {
+      name: "Bad Op",
+      type: SharingOperationType.LOCAL,
+      municipality_nis_codes: [999999],
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.CREATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY.errorCode,
+  },
+];
+
+// 3b. Update Municipalities
+export const testCasesUpdateMunicipalities = [
+  {
+    description: "Success - Replace municipalities",
+    id: existingSharingOpId1,
+    body: { municipality_nis_codes: [21009] },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Fail - Unknown municipality",
+    id: existingSharingOpId1,
+    body: { municipality_nis_codes: [999999] },
+    orgs: ORGS_ADMIN,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.UNKNOWN_MUNICIPALITY.errorCode,
+  },
+  {
+    description: "Fail - Sharing operation not found",
+    id: 999,
+    body: { municipality_nis_codes: [21001] },
+    orgs: ORGS_ADMIN,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.SHARING_OPERATION_NOT_FOUND.errorCode,
   },
 ];
 

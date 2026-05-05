@@ -3,7 +3,7 @@ import request from "supertest";
 import { useFunctionalCacheTestDb } from "../../utils/test.functional.cached.wrapper.js";
 import { expectWithLog, mockIAMServiceModule } from "../../utils/helper.js";
 import type { ICacheService } from "../../../src/shared/cache/i-cache.service.js";
-import { ORGS_ADMIN, ORGS_MEMBER, ORGS_GESTIONNAIRE } from "../../utils/shared.consts.js";
+import { ORGS_ADMIN, ORGS_MEMBER } from "../../utils/shared.consts.js";
 
 const AUTH_USER_ADMIN = "auth0|admin";
 const AUTH_USER_MEMBER = "auth0|member";
@@ -366,7 +366,7 @@ describe("(Cache Integration) Community Module", () => {
         .send({ name: "Updated Name" })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-community-id", AUTH_COMMUNITY_1)
-        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+        .set("x-user-orgs", ORGS_ADMIN);
       expect(updateRes.status).toBe(200);
 
       await new Promise((r) => setTimeout(r, 50));

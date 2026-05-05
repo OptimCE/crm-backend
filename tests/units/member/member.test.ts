@@ -13,7 +13,7 @@ import {
   testCasesPatchMemberStatus,
   testCasesUpdateMember,
 } from "./member.const.js";
-import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const";
+import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
 
 describe("(Unit) Member Module", () => {
   // --- GET MEMBERS LIST ---

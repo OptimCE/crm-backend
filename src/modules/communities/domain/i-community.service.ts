@@ -6,6 +6,7 @@ import type {
   CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
+  UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
 import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
@@ -53,10 +54,23 @@ export interface ICommunityService {
   addCommunity(new_community: CreateCommunityDTO): Promise<void>;
   /**
    * Updates a community.
-   * Updates the community name in IAM and local database.
-   * @param updated_community - DTO containing the updated details.
+   * Applies only the fields present in the DTO. Resolves an optional headquarters_address
+   * (creating or reusing one) and propagates a name change to the IAM service.
+   * @param updated_community - Partial DTO containing the updated details.
    */
-  updateCommunity(updated_community: CreateCommunityDTO): Promise<void>;
+  updateCommunity(updated_community: UpdateCommunityDTO): Promise<void>;
+  /**
+   * Uploads a new logo for the active community.
+   * Stores the file in MinIO/S3, updates `logo_url` on the community row, and
+   * best-effort deletes the previous logo object.
+   * @param file - The uploaded file (from Multer).
+   * @returns The new storage key and a short-lived presigned URL.
+   */
+  uploadLogo(file: Express.Multer.File): Promise<{ logo_url: string; logo_presigned_url: string }>;
+  /**
+   * Deletes the current community's logo from storage and clears `logo_url`.
+   */
+  deleteLogo(): Promise<void>;
   /**
    * Updates a user's role in a community.
    * Handles role changes and logic like downgrading admins.

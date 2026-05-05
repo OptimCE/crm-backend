@@ -13,6 +13,20 @@ import type { KeyPartialQuery } from "../../keys/api/key.dtos.js";
 export interface ISharingOperationRepository {
   getSharingOperationList(query: SharingOperationPartialQuery, query_runner?: QueryRunner): Promise<[SharingOperation[], number]>;
   getSharingOperationById(id_sharing: number, query_runner?: QueryRunner): Promise<SharingOperation | null>;
+  /**
+   * Public listing of a community's sharing operations (no tenant scope).
+   * Filters `is_public = true`.
+   */
+  getPublicCommunitySharingOperations(
+    community_id: number,
+    query: SharingOperationPartialQuery,
+    query_runner?: QueryRunner,
+  ): Promise<[SharingOperation[], number]>;
+  /**
+   * Replaces the full set of municipality links for a sharing operation.
+   * Pass an empty array to clear them all.
+   */
+  replaceMunicipalities(id_sharing: number, nis_codes: number[], query_runner?: QueryRunner): Promise<void>;
   getSharingOperationConsumption(
     id_sharing: number,
     query: SharingOperationConsumptionQuery,

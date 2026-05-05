@@ -1,13 +1,16 @@
 import express from "express";
+import multer from "multer";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
 import { container } from "../../../container/di-container.js";
 import { CommunityController } from "./community.controller.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
+import { preserveContext } from "../../../shared/middlewares/context.js";
 
 export const community_routes = express.Router();
 const community_controller = container.get<CommunityController>(CommunityController);
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Get (/) : Get all communities (paginated, minimal info)
 community_routes.get(
@@ -116,7 +119,7 @@ community_routes.put(
            required: true,
            content: {
                "application/json": {
-                   schema: { $ref: "#/components/schemas/CreateCommunityDTO" }
+                   schema: { $ref: "#/components/schemas/UpdateCommunityDTO" }
                }
            }
        }
@@ -132,8 +135,62 @@ community_routes.put(
     */
   idChecker(),
   communityIdChecker(),
-  roleChecker(Role.GESTIONNAIRE),
+  roleChecker(Role.ADMIN),
   community_controller.updateCommunity.bind(community_controller),
+);
+// POST (/logo) : Upload a logo for the active community
+community_routes.post(
+  "/logo",
+  /* #swagger.summary = 'Upload a logo for the active community'
+       #swagger.tags = ['Communities']
+       #swagger.consumes = ['multipart/form-data']
+       #swagger.requestBody = {
+           required: true,
+           content: {
+               "multipart/form-data": {
+                   schema: {
+                       type: "object",
+                       properties: { file: { type: "string", format: "binary" } },
+                       required: ["file"]
+                   }
+               }
+           }
+       }
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunityUpdateSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.ADMIN),
+  preserveContext(upload.single("file")),
+  community_controller.uploadLogo.bind(community_controller),
+);
+// DELETE (/logo) : Remove the logo from the active community
+community_routes.delete(
+  "/logo",
+  /* #swagger.summary = 'Delete the logo of the active community'
+       #swagger.tags = ['Communities']
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunityUpdateSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.ADMIN),
+  community_controller.deleteLogo.bind(community_controller),
 );
 // PATCH / : Patch the role of a user
 community_routes.patch(
@@ -239,6 +296,24 @@ community_routes.get(
     */
   idChecker(),
   community_controller.getCommunityById.bind(community_controller),
+);
+// Get (/:id/sharing_operations/public) : Public list of a community's sharing operations
+// (declared before /:id/sharing_operations so the more specific path matches first)
+community_routes.get(
+  "/:id/sharing_operations/public",
+  /* #swagger.summary = "Public list of a community's sharing operations (paginated, only is_public=true)"
+       #swagger.tags = ['Communities']
+       #swagger.parameters['id'] = { $ref: '#/components/parameters/CommunityId' }
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationPartialQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunityPublicSharingOperationsSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  community_controller.getCommunityPublicSharingOperations.bind(community_controller),
 );
 // Get (/:id/sharing_operations) : Get sharing operations for a community (paginated)
 community_routes.get(

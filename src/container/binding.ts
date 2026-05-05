@@ -23,6 +23,11 @@ import type { IMeterRepository } from "../modules/meters/domain/i-meter.reposito
 import { MeterRepository } from "../modules/meters/infra/meter.repository.js";
 import type { ISharingOperationRepository } from "../modules/sharing_operations/domain/i-sharing_operation.repository.js";
 import { SharingOperationRepository } from "../modules/sharing_operations/infra/sharing_operation.repository.js";
+import type { IMunicipalityRepository } from "../modules/municipalities/domain/i-municipality.repository.js";
+import { MunicipalityRepository } from "../modules/municipalities/infra/municipality.repository.js";
+import type { IMunicipalityService } from "../modules/municipalities/domain/i-municipality.service.js";
+import { MunicipalityService } from "../modules/municipalities/infra/municipality.service.js";
+import { MunicipalityController } from "../modules/municipalities/api/municipality.controller.js";
 import type { IUserRepository } from "../modules/users/domain/i-user.repository.js";
 import { UserRepository } from "../modules/users/infra/user.repository.js";
 import type { IMeRepository } from "../modules/me/domain/i-me.repository.js";
@@ -109,6 +114,9 @@ if (!container.isBound("MeterRepository")) {
 if (!container.isBound("SharingOperationRepository")) {
   container.bind<ISharingOperationRepository>("SharingOperationRepository").to(SharingOperationRepository);
 }
+if (!container.isBound("MunicipalityRepository")) {
+  container.bind<IMunicipalityRepository>("MunicipalityRepository").to(MunicipalityRepository);
+}
 if (!container.isBound("UserRepository")) {
   container.bind<IUserRepository>("UserRepository").to(UserRepository);
 }
@@ -125,6 +133,7 @@ container.bind<IMeService>("MeService").to(MeService);
 container.bind<IMemberService>("MemberService").to(MemberService);
 container.bind<IMeterService>("MeterService").to(MeterService);
 container.bind<ISharingOperationService>("SharingOperationService").to(SharingOperationService);
+container.bind<IMunicipalityService>("MunicipalityService").to(MunicipalityService);
 container.bind<IUserService>("UserService").to(UserService);
 
 // API controller bindings.
@@ -136,6 +145,7 @@ container.bind<MeController>(MeController).toSelf();
 container.bind<MemberController>(MemberController).toSelf();
 container.bind<MeterController>(MeterController).toSelf();
 container.bind<SharingOperationController>(SharingOperationController).toSelf();
+container.bind<MunicipalityController>(MunicipalityController).toSelf();
 container.bind<UserController>(UserController).toSelf();
 
 // Health module bindings.

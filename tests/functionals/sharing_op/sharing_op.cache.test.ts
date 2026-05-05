@@ -15,6 +15,11 @@ function sharingOpKeys(keys: string[]): string[] {
   return keys.filter((k) => k.startsWith("sharing-op:"));
 }
 
+/** Filter cache keys to only public-sharing-operations entries (none-scoped, populated by GET /communities/:id/sharing_operations/public). */
+function publicSharingOpKeys(keys: string[]): string[] {
+  return keys.filter((k) => k.startsWith("communities:public-sharing-operations:"));
+}
+
 describe("(Cache Integration) Sharing Operation Module", () => {
   useFunctionalCacheTestDb();
 
@@ -240,7 +245,7 @@ describe("(Cache Integration) Sharing Operation Module", () => {
       // Create sharing operation → fires cachePattern("sharing-op:list", "community")
       const createRes = await request(app)
         .post("/sharing_operations/")
-        .send({ name: "Cache Test Op", type: SharingOperationType.LOCAL })
+        .send({ name: "Cache Test Op", type: SharingOperationType.LOCAL, municipality_nis_codes: [21001] })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", ORGS_GESTIONNAIRE);
@@ -611,7 +616,7 @@ describe("(Cache Integration) Sharing Operation Module", () => {
       // Create sharing op in community 1 → pattern "sharing-op:list:c:1:*"
       const createRes = await request(app)
         .post("/sharing_operations/")
-        .send({ name: "Selectivity Test Op", type: SharingOperationType.LOCAL })
+        .send({ name: "Selectivity Test Op", type: SharingOperationType.LOCAL, municipality_nis_codes: [21001] })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", ORGS_GESTIONNAIRE);
@@ -768,6 +773,79 @@ describe("(Cache Integration) Sharing Operation Module", () => {
       expect(spy).toHaveBeenCalledTimes(2); // Called again after expiry
 
       spy.mockRestore();
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Scenario 16 — communities:public-sharing-operations invalidation
+  //
+  // GET /communities/:id/sharing_operations/public uses
+  //   cacheKey("communities:public-sharing-operations", "none", ...)
+  // Mutating sharing-op endpoints (create, patchVisibility, delete, updateMunicipalities)
+  // invalidate the same prefix (none-scoped → wipes ALL community entries).
+  // ────────────────────────────────────────────────────────────────────────────
+  describe("Cache Invalidation — Communities Public Sharing Operations", () => {
+    it("should invalidate communities:public-sharing-operations on create/patchVisibility/delete", async () => {
+      const cache = await getCacheService();
+      const { default: app } = await import("../../../src/app.js");
+
+      // Populate the public-sharing-operations cache for community 1
+      const populateRes = await request(app)
+        .get("/communities/1/sharing_operations/public")
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(populateRes.status).toBe(200);
+      expect(publicSharingOpKeys(cache.keys() as string[])).toHaveLength(1);
+
+      // Create a sharing op → invalidates the public-sharing-operations prefix
+      const createRes = await request(app)
+        .post("/sharing_operations/")
+        .send({ name: "Public Cache Op", type: SharingOperationType.LOCAL, municipality_nis_codes: [21001] })
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(createRes.status).toBe(200);
+
+      await new Promise((r) => setTimeout(r, 50));
+      expect(publicSharingOpKeys(cache.keys() as string[])).toHaveLength(0);
+
+      // Re-populate, then patchVisibility → invalidates again
+      await request(app)
+        .get("/communities/1/sharing_operations/public")
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(publicSharingOpKeys(cache.keys() as string[])).toHaveLength(1);
+
+      const patchRes = await request(app)
+        .patch("/sharing_operations/visibility")
+        .send({ id_sharing: existingSharingOpId1, is_public: false })
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(patchRes.status).toBe(200);
+
+      await new Promise((r) => setTimeout(r, 50));
+      expect(publicSharingOpKeys(cache.keys() as string[])).toHaveLength(0);
+
+      // Re-populate, then delete (Op 2 is deletable) → invalidates again
+      await request(app)
+        .get("/communities/1/sharing_operations/public")
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(publicSharingOpKeys(cache.keys() as string[])).toHaveLength(1);
+
+      const deleteRes = await request(app)
+        .delete(`/sharing_operations/${existingSharingOpId2}`)
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_ADMIN);
+      expect(deleteRes.status).toBe(200);
+
+      await new Promise((r) => setTimeout(r, 50));
+      expect(publicSharingOpKeys(cache.keys() as string[])).toHaveLength(0);
     });
   });
 });

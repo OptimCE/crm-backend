@@ -204,6 +204,38 @@ BEFORE UPDATE ON meter
 FOR EACH ROW
 EXECUTE FUNCTION update_changetimestamp_column();
 
+-- Belgian municipalities reference data (source: opendata.brussels.be,
+-- "codes-ins-nis-postaux-belgique"). The dataset is loaded separately;
+-- this DDL only creates the structure.
+CREATE TABLE IF NOT EXISTS municipality (
+    nis_code   INT PRIMARY KEY,
+    fr_name    VARCHAR(255) NOT NULL,
+    nl_name    VARCHAR(255),
+    de_name    VARCHAR(255),
+    region_fr  VARCHAR(64),
+    region_nl  VARCHAR(64),
+    geo_point  JSONB,
+    geo_shape  JSONB,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    updated_at TIMESTAMP DEFAULT current_timestamp
+);
+CREATE INDEX idx_municipality_fr_name ON municipality (fr_name);
+CREATE INDEX idx_municipality_nl_name ON municipality (nl_name);
+
+CREATE TRIGGER update_municipality_modtime
+BEFORE UPDATE ON municipality
+FOR EACH ROW
+EXECUTE FUNCTION update_changetimestamp_column();
+
+CREATE TABLE IF NOT EXISTS municipality_postal_code (
+    postal_code VARCHAR(10) NOT NULL,
+    nis_code    INT NOT NULL REFERENCES municipality (nis_code) ON DELETE CASCADE,
+    PRIMARY KEY (postal_code, nis_code)
+);
+CREATE INDEX idx_municipality_postal_code_nis ON municipality_postal_code (
+    nis_code
+);
+
 CREATE TABLE IF NOT EXISTS sharing_operation (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -221,6 +253,21 @@ CREATE TRIGGER update_sharing_operation_modtime
 BEFORE UPDATE ON sharing_operation
 FOR EACH ROW
 EXECUTE FUNCTION update_changetimestamp_column();
+
+-- Many-to-many join: sharing operations <-> municipalities they cover.
+CREATE TABLE IF NOT EXISTS sharing_operation_municipality (
+    id_sharing_operation INT NOT NULL REFERENCES sharing_operation (
+        id
+    ) ON DELETE CASCADE,
+    nis_code             INT NOT NULL REFERENCES municipality (
+        nis_code
+    ) ON DELETE RESTRICT,
+    created_at           TIMESTAMP DEFAULT current_timestamp,
+    PRIMARY KEY (id_sharing_operation, nis_code)
+);
+CREATE INDEX idx_sharing_op_muni_nis ON sharing_operation_municipality (
+    nis_code
+);
 
 CREATE TABLE IF NOT EXISTS sharing_operation_key (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

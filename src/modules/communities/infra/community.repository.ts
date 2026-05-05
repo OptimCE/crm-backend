@@ -1,9 +1,10 @@
 import type { ICommunityRepository } from "../domain/i-community.repository.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { inject, injectable } from "inversify";
-import { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO } from "../api/community.dtos.js";
+import { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO, UpdateCommunityDTO } from "../api/community.dtos.js";
 import type { QueryRunner } from "typeorm";
 import { Community, CommunityUser } from "../domain/community.models.js";
+import { Member } from "../../members/domain/member.models.js";
 import { Role } from "../../../shared/dtos/role.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
@@ -145,12 +146,12 @@ export class CommunityRepository implements ICommunityRepository {
   async getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
-    const community = await manager.findOne(Community, { where: { id } });
+    const community = await manager.findOne(Community, { where: { id }, relations: ["headquarters_address"] });
     if (!community) {
       return null;
     }
 
-    const member_count = await manager.count(CommunityUser, { where: { id_community: id } });
+    const member_count = await manager.count(Member, { where: { community: { id } } });
 
     return { community, member_count };
   }
@@ -234,17 +235,24 @@ export class CommunityRepository implements ICommunityRepository {
     return await manager.save(communityUser);
   }
 
-  async updateCommunity(id_community: number, community_details: CreateCommunityDTO, query_runner?: QueryRunner): Promise<Community> {
+  async updateCommunity(
+    id_community: number,
+    community_details: UpdateCommunityDTO & { headquarters_address_id?: number | null; logo_url?: string | null },
+    query_runner?: QueryRunner,
+  ): Promise<Community> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
-    const community = await manager.findOne(Community, { where: { id: id_community } });
+    const community = await manager.findOne(Community, { where: { id: id_community }, relations: ["headquarters_address"] });
     if (!community) {
       logger.error({ operation: "updateCommunity" }, `Community with id ${id_community} not found`);
       throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.COMMUNITY_NOT_FOUND, 400);
     }
 
-    // Update only the name
-    community.name = community_details.name;
+    if (community_details.name !== undefined) community.name = community_details.name;
+    if (community_details.description !== undefined) community.description = community_details.description;
+    if (community_details.website_url !== undefined) community.website_url = community_details.website_url;
+    if (community_details.logo_url !== undefined) community.logo_url = community_details.logo_url;
+    if (community_details.headquarters_address_id !== undefined) community.headquarters_address_id = community_details.headquarters_address_id;
 
     return await manager.save(community);
   }

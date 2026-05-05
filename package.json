@@ -8,6 +8,7 @@
     "clean": "rimraf dist coverage docs/typedoc",
     "test": "cross-env NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:unit": "npm run test -- --selectProjects unit",
+    "test:unit-band": "npm run test -- --selectProjects unit --runInBand --workerIdleMemoryLimit=1500MB",
     "test:functional": "npm run test -- --selectProjects functional --runInBand",
     "test:cache": "npm run test -- --selectProjects cache --runInBand",
     "coverage": "npm run test -- --coverage --runInBand  --max-old-space-size=8192",

@@ -8,7 +8,7 @@ import {
   SharingOperationMetersQueryType,
   SharingOperationPartialQuery,
 } from "../api/sharing_operation.dtos.js";
-import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
+import { SharingOpConsumption, SharingOperation, SharingOperationKey, SharingOperationMunicipality } from "../domain/sharing_operation.models.js";
 import { DeleteResult, In, type QueryRunner, SelectQueryBuilder } from "typeorm";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
@@ -35,6 +35,24 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       key: "type",
       // Assuming the DTO passes the value (likely numeric id as string) that matches the DB column
       apply: (qb, val) => qb.andWhere("sharing_op.type = :type", { type: val }),
+    },
+    {
+      // EXISTS subquery instead of JOIN: keeps `getManyAndCount` accurate when an
+      // operation links to several municipalities (a JOIN would multiply rows and
+      // break the LIMIT, same reason municipalities are loaded separately below).
+      key: "municipality_nis_codes",
+      apply: (qb, val) => {
+        const codes = val as number[];
+        if (codes.length === 0) return;
+        qb.andWhere(
+          `EXISTS (
+             SELECT 1 FROM sharing_operation_municipality som
+             WHERE som.id_sharing_operation = sharing_op.id
+               AND som.nis_code IN (:...nis_codes)
+           )`,
+          { nis_codes: codes },
+        );
+      },
     },
   ];
 
@@ -68,7 +86,12 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     const take = query.limit;
     const skip = (query.page - 1) * take;
 
-    return qb.skip(skip).take(take).getManyAndCount();
+    // 5. Page-then-load municipalities. Joining municipalities directly on the
+    // paginated query inflates row count and breaks LIMIT, so we paginate first
+    // and then enrich the result with the municipality relation.
+    const [items, total] = await qb.skip(skip).take(take).getManyAndCount();
+    await this.loadMunicipalitiesInto(manager, items);
+    return [items, total];
   }
 
   async getSharingOperationById(id_sharing: number, query_runner?: QueryRunner): Promise<SharingOperation | null> {
@@ -86,7 +109,71 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       // Order by start date DESC so the most recent keys (candidates for active/waiting) come first
       .addOrderBy("keys.start_date", "DESC");
 
-    return qb.getOne();
+    const item = await qb.getOne();
+    if (item) {
+      await this.loadMunicipalitiesInto(manager, [item]);
+    }
+    return item;
+  }
+
+  /**
+   * Public-facing list of a community's sharing operations: only those flagged
+   * `is_public = true`. No tenant scoping — the public flag is the access
+   * control. Used by the new `/communities/:id/sharing_operations/public` route.
+   */
+  async getPublicCommunitySharingOperations(
+    community_id: number,
+    query: SharingOperationPartialQuery,
+    query_runner?: QueryRunner,
+  ): Promise<[SharingOperation[], number]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    let qb = manager
+      .createQueryBuilder(SharingOperation, "sharing_op")
+      .where("sharing_op.is_public = :is_public", { is_public: true })
+      .andWhere("sharing_op.id_community = :community_id", { community_id });
+
+    qb = applyFilters(this.sharingOpFilters, qb, query);
+    qb = applySorts(this.sharingOpSorts, qb, query);
+
+    const take = query.limit;
+    const skip = (query.page - 1) * take;
+    const [items, total] = await qb.skip(skip).take(take).getManyAndCount();
+    await this.loadMunicipalitiesInto(manager, items);
+    return [items, total];
+  }
+
+  private async loadMunicipalitiesInto(
+    manager: SharingOperationRepository["dataSource"]["manager"],
+    operations: SharingOperation[],
+  ): Promise<void> {
+    if (operations.length === 0) return;
+    const ids = operations.map((op) => op.id);
+    const links = await manager.find(SharingOperationMunicipality, {
+      where: { id_sharing_operation: In(ids) },
+      relations: ["municipality", "municipality.postal_codes"],
+    });
+    const byOpId = new Map<number, SharingOperationMunicipality[]>();
+    for (const link of links) {
+      const arr = byOpId.get(link.id_sharing_operation) ?? [];
+      arr.push(link);
+      byOpId.set(link.id_sharing_operation, arr);
+    }
+    for (const op of operations) {
+      op.municipalities = byOpId.get(op.id) ?? [];
+    }
+  }
+
+  async replaceMunicipalities(id_sharing: number, nis_codes: number[], query_runner?: QueryRunner): Promise<void> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    await manager.delete(SharingOperationMunicipality, { id_sharing_operation: id_sharing });
+    if (nis_codes.length === 0) return;
+    const rows = nis_codes.map((nis_code) =>
+      manager.create(SharingOperationMunicipality, {
+        id_sharing_operation: id_sharing,
+        nis_code,
+      }),
+    );
+    await manager.save(rows);
   }
 
   async getSharingOperationConsumption(
@@ -128,7 +215,19 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       community: { id: internal_community_id },
     });
 
-    return await manager.save(sharing_op);
+    const saved = await manager.save(sharing_op);
+
+    if (new_sharing_op.municipality_nis_codes.length > 0) {
+      const links = new_sharing_op.municipality_nis_codes.map((nis_code) =>
+        manager.create(SharingOperationMunicipality, {
+          id_sharing_operation: saved.id,
+          nis_code,
+        }),
+      );
+      await manager.save(links);
+    }
+
+    return saved;
   }
 
   async addConsumptions(id_sharing: number, consumptions: Partial<SharingOpConsumption>[], query_runner?: QueryRunner): Promise<void> {

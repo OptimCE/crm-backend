@@ -352,6 +352,35 @@ sharing_operation_routes.patch(
   roleChecker(Role.GESTIONNAIRE),
   sharing_operation_controller.patchVisibility.bind(sharing_operation_controller),
 );
+// Put (/:id/municipalities): Replace the full set of municipalities linked to a sharing operation
+sharing_operation_routes.put(
+  "/:id/municipalities",
+  /* #swagger.summary = 'Replace the full set of municipalities linked to a sharing operation'
+       #swagger.tags = ['SharingOperations']
+       #swagger.parameters['id'] = { $ref: '#/components/parameters/SharingOperationId' }
+       #swagger.requestBody = {
+           required: true,
+           content: {
+               "application/json": {
+                   schema: { $ref: "#/components/schemas/UpdateSharingOperationMunicipalitiesDTO" }
+               }
+           }
+       }
+       #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationUpdateMunicipalitiesSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.updateMunicipalities.bind(sharing_operation_controller),
+);
 // DELETE (/:id) : Delete a sharing operation
 sharing_operation_routes.delete(
   "/:id",

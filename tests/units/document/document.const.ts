@@ -3,7 +3,7 @@ import { SUCCESS } from "../../../src/shared/errors/errors.js";
 import type { Document } from "../../../src/modules/documents/domain/document.models.js";
 import { toDocumentExposed } from "../../../src/modules/documents/shared/to_dto.js";
 import { DOCUMENT_ERRORS } from "../../../src/modules/documents/shared/document.errors.js";
-import { ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
+import { AUTH_COMMUNITY_1, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 import type { Member } from "../../../src/modules/members/domain/member.models.js";
 import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
@@ -42,7 +42,7 @@ export const testCasesGetDocuments = [
   {
     description: "Success (Gestionnaire)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     member_id: 1,
     query: {},
@@ -59,7 +59,7 @@ export const testCasesGetDocuments = [
   {
     description: "Success (Empty List)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     member_id: 1,
     query: {},
@@ -76,7 +76,7 @@ export const testCasesGetDocuments = [
   {
     description: "Fail (Role Insufficient - Member)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_MEMBER,
     member_id: 1,
     query: {},
@@ -88,7 +88,7 @@ export const testCasesGetDocuments = [
   {
     description: "Fail (Auth Missing)",
     id_user: "",
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     member_id: 1,
     query: {},
@@ -100,7 +100,7 @@ export const testCasesGetDocuments = [
   {
     description: "Fail (DB Error)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     member_id: 1,
     query: {},
@@ -119,7 +119,7 @@ export const testCasesDownload = [
   {
     description: "Success Download",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 100,
     status_code: 200,
@@ -135,7 +135,7 @@ export const testCasesDownload = [
   {
     description: "Fail (Document Not Found in DB)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 999,
     status_code: 400,
@@ -150,7 +150,7 @@ export const testCasesDownload = [
   {
     description: "Fail (Storage Error)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 100,
     status_code: 500, // Or 500 depending on how app handles it, but service throws AppError(DOCUMENT_ERRORS.EXCEPTION, 400) usually
@@ -171,7 +171,7 @@ export const testCasesUpload = [
   {
     description: "Success Upload",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     field_member: "1",
     file_name: "test.pdf",
@@ -195,7 +195,7 @@ export const testCasesUpload = [
   {
     description: "Fail (Storage Error)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     field_member: "1",
     file_name: "test.pdf",
@@ -211,7 +211,7 @@ export const testCasesUpload = [
   {
     description: "Fail (DB Error after Upload)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     field_member: "1",
     file_name: "test.pdf",
@@ -239,7 +239,7 @@ export const testCasesDelete = [
   {
     description: "Success Delete",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 100,
     status_code: 200,
@@ -257,7 +257,7 @@ export const testCasesDelete = [
   {
     description: "Fail (Not Found in DB)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 999,
     status_code: 400,
@@ -272,7 +272,7 @@ export const testCasesDelete = [
   {
     description: "Fail (DB Error)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 100,
     status_code: 500,
@@ -287,7 +287,7 @@ export const testCasesDelete = [
   {
     description: "Fail (Storage Delete Error)",
     id_user: 1,
-    id_community: 1,
+    id_community: AUTH_COMMUNITY_1,
     orgs: ORGS_GESTIONNAIRE,
     document_id: 100,
     status_code: 400,

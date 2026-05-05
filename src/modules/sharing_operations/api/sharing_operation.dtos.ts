@@ -1,13 +1,14 @@
-import { Expose, Type } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
-import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, Min } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, Min } from "class-validator";
 import { KeyPartialDTO } from "../../keys/api/key.dtos.js";
 import { HasMimeType, IsFile, MaxFileSize } from "../../../shared/dtos/file.validators.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import { SharingKeyStatus, SharingOperationType } from "../shared/sharing_operation.types.js";
 import { MeterDataStatus } from "../../meters/shared/meter.types.js";
+import { MunicipalityPartialDTO } from "../../municipalities/api/municipality.dtos.js";
 /**
  * Query parameters for filtering and paginating a list of sharing operations.
  */
@@ -27,6 +28,21 @@ export class SharingOperationPartialQuery extends PaginationQuery {
   @IsEnum(SharingOperationType, withError(SHARING_OPERATION_ERRORS.VALIDATION.WRONG_TYPE.SHARING_OPERATION_TYPE))
   @IsOptional()
   type?: string;
+
+  /**
+   * Filter by NIS codes of municipalities (any-of match). Accepts repeated query
+   * params (`?municipality_nis_codes=1&municipality_nis_codes=2`) or a single
+   * scalar (auto-wrapped into a one-element array).
+   */
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === "") return undefined;
+    const arr = Array.isArray(value) ? value : [value];
+    return arr.map((v) => Number(v));
+  })
+  @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER, { each: true }))
+  @IsOptional()
+  municipality_nis_codes?: number[];
 
   /**
    * Sort by name (ASC or DESC).
@@ -199,6 +215,11 @@ export class SharingOperationPartialDTO {
    */
   @Expose()
   type!: SharingOperationType;
+  /**
+   * Municipalities (Belgian communes) covered by this operation.
+   */
+  @Expose()
+  municipalities!: MunicipalityPartialDTO[];
 }
 /**
  * DTO representing a key associated with a sharing operation.
@@ -271,6 +292,34 @@ export class CreateSharingOperationDTO {
   @IsEnum(SharingOperationType, withError(SHARING_OPERATION_ERRORS.VALIDATION.WRONG_TYPE.SHARING_OPERATION_TYPE))
   @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   type!: SharingOperationType;
+  /**
+   * NIS codes of the Belgian municipalities this operation covers.
+   * At least one is required.
+   */
+  @Expose()
+  @Type(() => Number)
+  @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
+  @ArrayNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER, { each: true }))
+  municipality_nis_codes!: number[];
+}
+
+/**
+ * DTO for replacing the full set of municipalities linked to a sharing operation.
+ */
+export class UpdateSharingOperationMunicipalitiesDTO {
+  @Expose()
+  @Type(() => Number)
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  id_sharing!: number;
+
+  @Expose()
+  @Type(() => Number)
+  @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
+  @ArrayNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER, { each: true }))
+  municipality_nis_codes!: number[];
 }
 
 /**
