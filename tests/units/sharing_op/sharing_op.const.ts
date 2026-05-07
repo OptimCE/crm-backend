@@ -21,11 +21,24 @@ export const mockSharingOperationEntity: SharingOperation = {
   id: 1,
   name: "Sharing Op 1",
   type: SharingOperationType.LOCAL,
+  is_public: false,
   created_at: mockDate,
   updated_at: mockDate,
   community: mockCommunity as Community,
   keys: [],
   municipalities: [],
+};
+
+const mockMunicipalityLink = { id_sharing_operation: 1, nis_code: 11001 } as unknown as SharingOperation["municipalities"][number];
+export const mockSharingOperationPublicWithMuni: SharingOperation = {
+  ...mockSharingOperationEntity,
+  is_public: true,
+  municipalities: [mockMunicipalityLink],
+};
+export const mockSharingOperationPrivateWithMuni: SharingOperation = {
+  ...mockSharingOperationEntity,
+  is_public: false,
+  municipalities: [mockMunicipalityLink],
 };
 
 export const mockSharingOpConsumption = [
@@ -203,6 +216,32 @@ export const testCasesCreate = [
       },
       municipalityRepo: {
         findManyByNisCodes: jest.fn(() => Promise.resolve([{ nis_code: 11001 }])),
+      },
+    },
+  },
+  {
+    description: "Success (no municipalities — operation stays private)",
+    body: { name: "New Op", type: SharingOperationType.LOCAL },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        createSharingOperation: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+      },
+    },
+  },
+  {
+    description: "Success (empty municipalities array)",
+    body: { name: "New Op", type: SharingOperationType.LOCAL, municipality_nis_codes: [] },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        createSharingOperation: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
       },
     },
   },
@@ -927,6 +966,270 @@ export const testCasesGetSharingOperationKeysList = [
     mocks: {
       sharingOpRepo: {
         getSharingOperationKeysList: jest.fn(() => Promise.reject(new Error("DB Error"))),
+      },
+    },
+  },
+];
+
+// 13. Update Sharing Operation (PUT /:id) — name/type/municipalities together
+export const testCasesUpdateSharingOperation = [
+  {
+    description: "Success — name only",
+    id: 1,
+    body: { name: "Renamed" },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        updateSharingOperationFields: jest.fn(() => Promise.resolve(1)),
+      },
+    },
+  },
+  {
+    description: "Success — type only",
+    id: 1,
+    body: { type: SharingOperationType.CER },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        updateSharingOperationFields: jest.fn(() => Promise.resolve(1)),
+      },
+    },
+  },
+  {
+    description: "Success — municipalities only",
+    id: 1,
+    body: { municipality_nis_codes: [11001] },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        replaceMunicipalities: jest.fn(() => Promise.resolve()),
+      },
+      municipalityRepo: {
+        findManyByNisCodes: jest.fn(() => Promise.resolve([{ nis_code: 11001 }])),
+      },
+    },
+  },
+  {
+    description: "Success — all three fields",
+    id: 1,
+    body: { name: "Full Update", type: SharingOperationType.CEC, municipality_nis_codes: [11001] },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        updateSharingOperationFields: jest.fn(() => Promise.resolve(1)),
+        replaceMunicipalities: jest.fn(() => Promise.resolve()),
+      },
+      municipalityRepo: {
+        findManyByNisCodes: jest.fn(() => Promise.resolve([{ nis_code: 11001 }])),
+      },
+    },
+  },
+  {
+    description: "Fail (no fields)",
+    id: 1,
+    body: {},
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.NO_FIELDS_TO_UPDATE.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.NO_FIELDS_TO_UPDATE.message,
+    mocks: {},
+  },
+  {
+    description: "Fail (operation not found)",
+    id: 999,
+    body: { name: "Renamed" },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+  {
+    description: "Fail (unknown municipality)",
+    id: 1,
+    body: { municipality_nis_codes: [99999] },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+      },
+      municipalityRepo: {
+        findManyByNisCodes: jest.fn(() => Promise.resolve([])),
+      },
+    },
+  },
+  {
+    description: "Fail (clearing municipalities on a public operation)",
+    id: 1,
+    body: { municipality_nis_codes: [] },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.MUNICIPALITIES_REQUIRED_FOR_PUBLIC.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.MUNICIPALITIES_REQUIRED_FOR_PUBLIC.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationPublicWithMuni)),
+      },
+    },
+  },
+  {
+    description: "Fail (DB error during update)",
+    id: 1,
+    body: { name: "Renamed" },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.DATABASE_UPDATE.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.DATABASE_UPDATE.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        updateSharingOperationFields: jest.fn(() => Promise.reject(new Error("DB fail"))),
+      },
+    },
+  },
+];
+
+// 14. Update Municipalities (PUT /:id/municipalities)
+export const testCasesUpdateMunicipalities = [
+  {
+    description: "Success — clear municipalities on a private operation",
+    id: 1,
+    body: { municipality_nis_codes: [] },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        replaceMunicipalities: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Success — replace with a new set",
+    id: 1,
+    body: { municipality_nis_codes: [11001] },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        replaceMunicipalities: jest.fn(() => Promise.resolve()),
+      },
+      municipalityRepo: {
+        findManyByNisCodes: jest.fn(() => Promise.resolve([{ nis_code: 11001 }])),
+      },
+    },
+  },
+  {
+    description: "Fail (clearing municipalities on a public operation)",
+    id: 1,
+    body: { municipality_nis_codes: [] },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.MUNICIPALITIES_REQUIRED_FOR_PUBLIC.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.MUNICIPALITIES_REQUIRED_FOR_PUBLIC.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationPublicWithMuni)),
+      },
+    },
+  },
+  {
+    description: "Fail (sharing operation not found)",
+    id: 999,
+    body: { municipality_nis_codes: [11001] },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.SHARING_OPERATION_NOT_FOUND.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.SHARING_OPERATION_NOT_FOUND.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+];
+
+// 15. Patch Visibility
+export const testCasesPatchVisibility = [
+  {
+    description: "Success — make public (operation has municipalities)",
+    body: { id_sharing: 1, is_public: true },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationPrivateWithMuni)),
+        patchVisibility: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Success — make private",
+    body: { id_sharing: 1, is_public: false },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationPublicWithMuni)),
+        patchVisibility: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Fail (cannot publish without municipalities)",
+    body: { id_sharing: 1, is_public: true },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.MUNICIPALITIES_REQUIRED.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.MUNICIPALITIES_REQUIRED.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+      },
+    },
+  },
+  {
+    description: "Fail (sharing operation not found)",
+    body: { id_sharing: 999, is_public: true },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.SHARING_OPERATION_NOT_FOUND.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.SHARING_OPERATION_NOT_FOUND.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(null)),
       },
     },
   },

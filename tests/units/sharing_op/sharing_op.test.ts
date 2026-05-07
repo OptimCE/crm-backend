@@ -23,6 +23,9 @@ import {
   testCasesGetSharingOperationMetersList,
   testCasesPatchKey,
   testCasesPatchMeter,
+  testCasesPatchVisibility,
+  testCasesUpdateMunicipalities,
+  testCasesUpdateSharingOperation,
 } from "./sharing_op.const.js";
 import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
 
@@ -362,6 +365,98 @@ describe("(Unit) Sharing Operation Module", () => {
         const i18next = appModule.i18next;
         const response = await request(app)
           .delete(`/sharing_operations/${id}`)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          let result = expected_data;
+          if (response.status !== 200) {
+            result = i18next.t(expected_data);
+          }
+          expect(response.body.data).toEqual(result);
+        });
+      },
+    );
+  });
+
+  // --- UPDATE SHARING OPERATION (full) ---
+  describe("(Unit) Update Sharing Operation", () => {
+    it.each(testCasesUpdateSharingOperation)(
+      "PUT /sharing_operations/:id : $description",
+      async ({ id, body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
+        if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+        if (mocks?.municipalityRepo) await mockMunicipalityRepositoryModule(mocks.municipalityRepo);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+        const i18next = appModule.i18next;
+        const response = await request(app)
+          .put(`/sharing_operations/${id}`)
+          .send(body)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          let result = expected_data;
+          if (response.status !== 200) {
+            result = i18next.t(expected_data);
+          }
+          expect(response.body.data).toEqual(result);
+        });
+      },
+    );
+  });
+
+  // --- UPDATE MUNICIPALITIES ---
+  describe("(Unit) Update Sharing Operation Municipalities", () => {
+    it.each(testCasesUpdateMunicipalities)(
+      "PUT /sharing_operations/:id/municipalities : $description",
+      async ({ id, body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
+        if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+        if (mocks?.municipalityRepo) await mockMunicipalityRepositoryModule(mocks.municipalityRepo);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+        const i18next = appModule.i18next;
+        const response = await request(app)
+          .put(`/sharing_operations/${id}/municipalities`)
+          .send(body)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          let result = expected_data;
+          if (response.status !== 200) {
+            result = i18next.t(expected_data);
+          }
+          expect(response.body.data).toEqual(result);
+        });
+      },
+    );
+  });
+
+  // --- PATCH VISIBILITY ---
+  describe("(Unit) Patch Sharing Operation Visibility", () => {
+    it.each(testCasesPatchVisibility)(
+      "PATCH /sharing_operations/visibility : $description",
+      async ({ body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
+        if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+        const i18next = appModule.i18next;
+        const response = await request(app)
+          .patch("/sharing_operations/visibility")
+          .send(body)
           .set("x-user-id", "1")
           .set("x-community-id", AUTH_COMMUNITY_1)
           .set("x-user-orgs", orgs);

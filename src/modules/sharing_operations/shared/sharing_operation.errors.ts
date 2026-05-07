@@ -27,6 +27,14 @@ export const SHARING_OPERATION_ERRORS = {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70030, "sharing_operation:update_municipalities.sharing_operation_not_found"),
     UNKNOWN_MUNICIPALITY: new LocalError(70031, "sharing_operation:update_municipalities.unknown_municipality"),
     DATABASE_UPDATE: new LocalError(70032, "sharing_operation:update_municipalities.database_update"),
+    MUNICIPALITIES_REQUIRED_FOR_PUBLIC: new LocalError(70033, "sharing_operation:update_municipalities.municipalities_required_for_public"),
+  },
+  UPDATE_SHARING_OPERATION: {
+    SHARING_OPERATION_NOT_FOUND: new LocalError(70034, "sharing_operation:update_sharing_operation.sharing_operation_not_found"),
+    UNKNOWN_MUNICIPALITY: new LocalError(70035, "sharing_operation:update_sharing_operation.unknown_municipality"),
+    DATABASE_UPDATE: new LocalError(70036, "sharing_operation:update_sharing_operation.database_update"),
+    NO_FIELDS_TO_UPDATE: new LocalError(70037, "sharing_operation:update_sharing_operation.no_fields_to_update"),
+    MUNICIPALITIES_REQUIRED_FOR_PUBLIC: new LocalError(70038, "sharing_operation:update_sharing_operation.municipalities_required_for_public"),
   },
   GET_SHARING_OPERATION: {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70009, "sharing_operation:get_sharing_operation.sharing_operation_not_found"),
@@ -58,6 +66,7 @@ export const SHARING_OPERATION_ERRORS = {
   PATCH_VISIBILITY: {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70024, "sharing_operation:patch_visibility.sharing_operation_not_found"),
     DATABASE_UPDATE: new LocalError(70025, "sharing_operation:patch_visibility.database_update"),
+    MUNICIPALITIES_REQUIRED: new LocalError(70039, "sharing_operation:patch_visibility.municipalities_required"),
   },
   GET_SHARING_OPERATION_CONSUMPTION: {
     NO_CONSUMPTION_FOUND: new LocalError(70023, "sharing_operation:get_sharing_operation_consumption.no_consumption_found"),

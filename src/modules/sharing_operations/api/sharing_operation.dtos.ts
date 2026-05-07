@@ -1,7 +1,7 @@
 import { Expose, Transform, Type } from "class-transformer";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
-import { ArrayNotEmpty, IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, Min } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, Min } from "class-validator";
 import { KeyPartialDTO } from "../../keys/api/key.dtos.js";
 import { HasMimeType, IsFile, MaxFileSize } from "../../../shared/dtos/file.validators.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
@@ -294,18 +294,20 @@ export class CreateSharingOperationDTO {
   type!: SharingOperationType;
   /**
    * NIS codes of the Belgian municipalities this operation covers.
-   * At least one is required.
+   * Optional at creation; required to flip `is_public` to true.
    */
   @Expose()
   @Type(() => Number)
+  @IsOptional()
   @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
-  @ArrayNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER, { each: true }))
-  municipality_nis_codes!: number[];
+  municipality_nis_codes?: number[];
 }
 
 /**
  * DTO for replacing the full set of municipalities linked to a sharing operation.
+ * The array may be empty (clearing all links) only if the operation is private — the
+ * service rejects emptying municipalities on a public operation.
  */
 export class UpdateSharingOperationMunicipalitiesDTO {
   @Expose()
@@ -317,9 +319,34 @@ export class UpdateSharingOperationMunicipalitiesDTO {
   @Expose()
   @Type(() => Number)
   @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
-  @ArrayNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
   @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER, { each: true }))
   municipality_nis_codes!: number[];
+}
+
+/**
+ * DTO for updating an existing sharing operation. All fields are optional; the
+ * service rejects payloads where every field is undefined. When
+ * `municipality_nis_codes` is included it replaces the existing set.
+ */
+export class UpdateSharingOperationDTO {
+  @Expose()
+  @IsOptional()
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsNotEmpty(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.EMPTY))
+  name?: string;
+
+  @Expose()
+  @IsOptional()
+  @Type(() => Number)
+  @IsEnum(SharingOperationType, withError(SHARING_OPERATION_ERRORS.VALIDATION.WRONG_TYPE.SHARING_OPERATION_TYPE))
+  type?: SharingOperationType;
+
+  @Expose()
+  @IsOptional()
+  @Type(() => Number)
+  @IsArray(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
+  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER, { each: true }))
+  municipality_nis_codes?: number[];
 }
 
 /**

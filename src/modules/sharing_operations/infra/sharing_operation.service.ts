@@ -18,6 +18,7 @@ import {
   SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
+  UpdateSharingOperationDTO,
   UpdateSharingOperationMunicipalitiesDTO,
 } from "../api/sharing_operation.dtos.js";
 import type { IMunicipalityRepository } from "../../municipalities/domain/i-municipality.repository.js";
@@ -403,19 +404,24 @@ export class SharingOperationService implements ISharingOperationService {
   }
 
   /**
-   * Creates a new sharing operation entity.
+   * Creates a new sharing operation entity. Municipalities are optional; the
+   * operation is created private. Setting it public later requires at least
+   * one municipality (enforced by `patchVisibility`).
    * @param new_sharing_operations - DTO with details for the new operation.
    * @param query_runner - Optional query runner.
    */
   @Transactional()
   async createSharingOperation(new_sharing_operations: CreateSharingOperationDTO, query_runner?: QueryRunner): Promise<void> {
-    await this.assertMunicipalitiesExist(
-      new_sharing_operations.municipality_nis_codes,
-      new AppError(SHARING_OPERATION_ERRORS.CREATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY, 400),
-      query_runner,
-    );
+    const nis_codes = new_sharing_operations.municipality_nis_codes ?? [];
+    if (nis_codes.length > 0) {
+      await this.assertMunicipalitiesExist(
+        nis_codes,
+        new AppError(SHARING_OPERATION_ERRORS.CREATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY, 400),
+        query_runner,
+      );
+    }
     try {
-      await this.sharing_operationRepository.createSharingOperation(new_sharing_operations, query_runner);
+      await this.sharing_operationRepository.createSharingOperation({ ...new_sharing_operations, municipality_nis_codes: nis_codes }, query_runner);
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -427,7 +433,9 @@ export class SharingOperationService implements ISharingOperationService {
 
   /**
    * Replaces the full set of municipalities linked to a sharing operation.
-   * The operation must belong to the caller's community.
+   * The operation must belong to the caller's community. Clearing the list is
+   * allowed only if the operation is currently private — a public operation
+   * must always cover at least one municipality.
    */
   @Transactional()
   async updateMunicipalities(dto: UpdateSharingOperationMunicipalitiesDTO, query_runner?: QueryRunner): Promise<void> {
@@ -436,16 +444,77 @@ export class SharingOperationService implements ISharingOperationService {
       logger.error({ operation: "updateMunicipalities", id_sharing: dto.id_sharing }, "Sharing operation not found");
       throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.SHARING_OPERATION_NOT_FOUND, 400);
     }
-    await this.assertMunicipalitiesExist(
-      dto.municipality_nis_codes,
-      new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.UNKNOWN_MUNICIPALITY, 400),
-      query_runner,
-    );
+    if (dto.municipality_nis_codes.length === 0 && sharingOp.is_public) {
+      logger.warn(
+        { operation: "updateMunicipalities", id_sharing: dto.id_sharing },
+        "Refusing to clear municipalities on a public sharing operation",
+      );
+      throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.MUNICIPALITIES_REQUIRED_FOR_PUBLIC, 400);
+    }
+    if (dto.municipality_nis_codes.length > 0) {
+      await this.assertMunicipalitiesExist(
+        dto.municipality_nis_codes,
+        new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.UNKNOWN_MUNICIPALITY, 400),
+        query_runner,
+      );
+    }
     try {
       await this.sharing_operationRepository.replaceMunicipalities(dto.id_sharing, dto.municipality_nis_codes, query_runner);
     } catch (err) {
       logger.error({ operation: "updateMunicipalities", error: err }, "Failed to replace sharing operation municipalities");
       throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.DATABASE_UPDATE, 400);
+    }
+  }
+
+  /**
+   * Updates the editable fields of a sharing operation in one shot. Any field
+   * left undefined on the DTO is preserved. Rejects when no field is provided,
+   * when an operation is not found in the caller's community scope, or when
+   * the change would leave a public operation without any municipality.
+   */
+  @Transactional()
+  async updateSharingOperation(id_sharing: number, dto: UpdateSharingOperationDTO, query_runner?: QueryRunner): Promise<void> {
+    if (dto.name === undefined && dto.type === undefined && dto.municipality_nis_codes === undefined) {
+      throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.NO_FIELDS_TO_UPDATE, 400);
+    }
+    const sharingOp = await this.sharing_operationRepository.getSharingOperationById(id_sharing, query_runner);
+    if (!sharingOp) {
+      logger.error({ operation: "updateSharingOperation", id_sharing }, "Sharing operation not found");
+      throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+    if (dto.municipality_nis_codes !== undefined) {
+      if (dto.municipality_nis_codes.length === 0 && sharingOp.is_public) {
+        logger.warn(
+          { operation: "updateSharingOperation", id_sharing },
+          "Refusing to clear municipalities on a public sharing operation",
+        );
+        throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.MUNICIPALITIES_REQUIRED_FOR_PUBLIC, 400);
+      }
+      if (dto.municipality_nis_codes.length > 0) {
+        await this.assertMunicipalitiesExist(
+          dto.municipality_nis_codes,
+          new AppError(SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY, 400),
+          query_runner,
+        );
+      }
+    }
+    try {
+      if (dto.name !== undefined || dto.type !== undefined) {
+        await this.sharing_operationRepository.updateSharingOperationFields(
+          id_sharing,
+          { name: dto.name, type: dto.type },
+          query_runner,
+        );
+      }
+      if (dto.municipality_nis_codes !== undefined) {
+        await this.sharing_operationRepository.replaceMunicipalities(id_sharing, dto.municipality_nis_codes, query_runner);
+      }
+    } catch (err) {
+      if (isAppErrorLike(err)) {
+        throw err;
+      }
+      logger.error({ operation: "updateSharingOperation", error: err }, "Failed to update sharing operation");
+      throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.DATABASE_UPDATE, 400);
     }
   }
 
@@ -679,7 +748,9 @@ export class SharingOperationService implements ISharingOperationService {
   }
 
   /**
-   * Toggles the visibility (is_public) of a sharing operation.
+   * Toggles the visibility (is_public) of a sharing operation. Setting
+   * `is_public = true` requires the operation to already cover at least one
+   * municipality.
    * @param dto - DTO with sharing operation ID and new visibility.
    * @param query_runner - Optional query runner.
    */
@@ -691,6 +762,11 @@ export class SharingOperationService implements ISharingOperationService {
     if (!sharingOp) {
       logger.error({ operation: "patchVisibility" }, `Sharing Operation with Id (${id_sharing}) was not found`);
       throw new AppError(SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+
+    if (is_public && (sharingOp.municipalities?.length ?? 0) === 0) {
+      logger.warn({ operation: "patchVisibility", id_sharing }, "Refusing to publish operation without municipalities");
+      throw new AppError(SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.MUNICIPALITIES_REQUIRED, 400);
     }
 
     try {

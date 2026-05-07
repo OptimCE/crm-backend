@@ -19,5 +19,7 @@ export function createMockSharingOperationRepository(): jest.Mocked<ISharingOper
     getSharingOperationMetersList: jest.fn(),
     rejectSpecificKeyEntry: jest.fn(),
     replaceMunicipalities: jest.fn(),
+    updateSharingOperationFields: jest.fn(),
+    patchVisibility: jest.fn(),
   };
 }

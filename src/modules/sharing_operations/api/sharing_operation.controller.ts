@@ -23,6 +23,7 @@ import {
   SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
+  UpdateSharingOperationDTO,
   UpdateSharingOperationMunicipalitiesDTO,
 } from "./sharing_operation.dtos.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
@@ -174,6 +175,25 @@ export class SharingOperationController {
     });
     await this.sharing_operationService.updateMunicipalities(dto);
     logger.info("Sharing operation municipalities updated");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Updates a sharing operation's editable fields (name, type, municipalities).
+   * @param req - Express request object. Params: id. Body: UpdateSharingOperationDTO.
+   * @param res - Express response object. Returns success message.
+   * @param _next - Express next middleware.
+   */
+  @sharing_operationControllerTraceDecorator.traceSpan("updateSharingOperation", { url: "/sharing_operations/:id", method: "put" })
+  @InvalidateCache([
+    cachePattern("sharing-op:list", "community"),
+    cachePattern("sharing-op:detail", "community"),
+    cachePattern("communities:public-sharing-operations", "none"),
+  ])
+  async updateSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const dto = await validateDto(UpdateSharingOperationDTO, req.body);
+    await this.sharing_operationService.updateSharingOperation(+req.params.id, dto);
+    logger.info("Sharing operation updated");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 

@@ -153,6 +153,19 @@ export const SharingOperationResponses = {
       },
     },
   },
+  SharingOperationUpdateSuccess: {
+    description: "Sharing operation successfully updated",
+    content: {
+      "application/json": {
+        schema: {
+          data: { type: "string", example: "success" },
+        },
+        example: {
+          data: "success",
+        },
+      },
+    },
+  },
   SharingOperationAddKeySuccess: {
     description: "Key successfully added to waiting list",
     content: {

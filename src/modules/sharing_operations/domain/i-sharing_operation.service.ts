@@ -14,6 +14,7 @@ import type {
   SharingOperationMetersQuery,
   SharingOperationPartialDTO,
   SharingOperationPartialQuery,
+  UpdateSharingOperationDTO,
   UpdateSharingOperationMunicipalitiesDTO,
 } from "../api/sharing_operation.dtos.js";
 import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
@@ -66,6 +67,14 @@ export interface ISharingOperationService {
    * @param dto - DTO with the operation id and new NIS code list.
    */
   updateMunicipalities(dto: UpdateSharingOperationMunicipalitiesDTO): Promise<void>;
+
+  /**
+   * Updates a sharing operation's editable fields (name, type, municipalities).
+   * Only the fields provided in the DTO are touched.
+   * @param id_sharing - Sharing operation ID.
+   * @param dto - DTO with the optional fields to update.
+   */
+  updateSharingOperation(id_sharing: number, dto: UpdateSharingOperationDTO): Promise<void>;
 
   /**
    * Public list of a community's sharing operations (filters `is_public = true`).

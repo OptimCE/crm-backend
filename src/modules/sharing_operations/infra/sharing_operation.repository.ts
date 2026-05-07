@@ -163,6 +163,30 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     }
   }
 
+  async updateSharingOperationFields(
+    id_sharing: number,
+    partial: { name?: string; type?: number },
+    query_runner?: QueryRunner,
+  ): Promise<number> {
+    const updates: { name?: string; type?: number } = {};
+    if (partial.name !== undefined) updates.name = partial.name;
+    if (partial.type !== undefined) updates.type = partial.type;
+    if (Object.keys(updates).length === 0) return 0;
+
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+
+    const result = await manager
+      .createQueryBuilder()
+      .update(SharingOperation)
+      .set(updates)
+      .where("id = :id_sharing", { id_sharing })
+      .andWhere("id_community = :community_id", { community_id: internal_community_id })
+      .execute();
+
+    return result.affected ?? 0;
+  }
+
   async replaceMunicipalities(id_sharing: number, nis_codes: number[], query_runner?: QueryRunner): Promise<void> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     await manager.delete(SharingOperationMunicipality, { id_sharing_operation: id_sharing });
@@ -217,8 +241,9 @@ export class SharingOperationRepository implements ISharingOperationRepository {
 
     const saved = await manager.save(sharing_op);
 
-    if (new_sharing_op.municipality_nis_codes.length > 0) {
-      const links = new_sharing_op.municipality_nis_codes.map((nis_code) =>
+    const nis_codes = new_sharing_op.municipality_nis_codes ?? [];
+    if (nis_codes.length > 0) {
+      const links = nis_codes.map((nis_code) =>
         manager.create(SharingOperationMunicipality, {
           id_sharing_operation: saved.id,
           nis_code,
