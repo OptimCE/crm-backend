@@ -3,13 +3,13 @@ import type { ICommunityService } from "../domain/i-community.service.js";
 import type { ICommunityRepository } from "../domain/i-community.repository.js";
 import { inject, injectable } from "inversify";
 import {
-  CommunityDTO,
   CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
   CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
+  PublicCommunityDTO,
   UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
@@ -20,7 +20,7 @@ import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Role } from "../../../shared/dtos/role.js";
-import { toCommunityDTO, toCommunityDetailDTO, toMyCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
+import { toCommunityDetailDTO, toMyCommunityDTO, toPublicCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
 import type { IIamService } from "../../../shared/iam/i-iam.service.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
@@ -44,9 +44,24 @@ export class CommunityService implements ICommunityService {
     @inject("AddressRepository") private address_repository: IAddressRepository,
   ) {}
 
-  async getAllPublicCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]> {
+  async getAllPublicCommunities(query: CommunityQueryDTO): Promise<[PublicCommunityDTO[], Pagination]> {
     const [values, total] = await this.community_repository.getAllPublicCommunities(query);
-    const return_values = values.map((value) => toCommunityDTO(value));
+    const return_values = await Promise.all(
+      values.map(async (community) => {
+        let logo_presigned_url: string | null = null;
+        if (community.logo_url) {
+          try {
+            logo_presigned_url = await this.storage_service.getDocumentUrl(community.logo_url);
+          } catch (err) {
+            logger.error(
+              { operation: "getAllPublicCommunities", error: err, communityId: community.id },
+              "Failed to generate presigned URL for community logo",
+            );
+          }
+        }
+        return toPublicCommunityDTO(community, logo_presigned_url);
+      }),
+    );
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total, total_pages }];
   }

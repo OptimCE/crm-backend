@@ -97,6 +97,25 @@ export class CommunityDTO {
 }
 
 /**
+ * DTO returned by the public communities list. Includes a short-lived
+ * presigned logo URL so the client can render the image directly.
+ */
+export class PublicCommunityDTO {
+  @Expose()
+  id!: number;
+
+  @Expose()
+  name!: string;
+
+  @Expose()
+  logo_url!: string | null;
+
+  /** Short-lived presigned URL (~15 min). Null when the community has no logo or URL generation failed. */
+  @Expose()
+  logo_presigned_url!: string | null;
+}
+
+/**
  * DTO representing a community from the perspective of the current user.
  * Includes the user's role in that community.
  */

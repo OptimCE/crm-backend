@@ -11,12 +11,12 @@ import { GLOBAL_ERRORS, SUCCESS } from "../../../shared/errors/errors.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import {
   CommunityDetailDTO,
-  CommunityDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
   CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
+  PublicCommunityDTO,
   UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "./community.dtos.js";
@@ -47,7 +47,7 @@ export class CommunityController {
     const queryObject = await validateDto(CommunityQueryDTO, req.query);
     const [result, pagination] = await this.communityService.getAllPublicCommunities(queryObject);
     logger.info("All communities list successfully retrieved");
-    res.status(200).json(new ApiResponsePaginated<CommunityDTO[]>(result, pagination, SUCCESS));
+    res.status(200).json(new ApiResponsePaginated<PublicCommunityDTO[]>(result, pagination, SUCCESS));
   }
 
   @communityControllerTraceDecorator.traceSpan("getCommunityById", { url: "/communities/:id", method: "get" })

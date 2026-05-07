@@ -1,11 +1,11 @@
 import type {
-  CommunityDTO,
   CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
   CreateCommunityDTO,
   MyCommunityDTO,
   PatchRoleUserDTO,
+  PublicCommunityDTO,
   UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
@@ -19,9 +19,9 @@ export interface ICommunityService {
   /**
    * Retrieves a paginated list of all communities in the system.
    * @param query - Query parameters for filtering and pagination.
-   * @returns A tuple containing the list of CommunityDTO and pagination info.
+   * @returns A tuple containing the list of PublicCommunityDTO and pagination info.
    */
-  getAllPublicCommunities(query: CommunityQueryDTO): Promise<[CommunityDTO[], Pagination]>;
+  getAllPublicCommunities(query: CommunityQueryDTO): Promise<[PublicCommunityDTO[], Pagination]>;
   /**
    * Retrieves detailed information about a specific community.
    * @param id - The community ID.

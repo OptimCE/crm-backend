@@ -68,7 +68,7 @@ export const CommunityResponses = {
           error_code: 0,
           data: {
             type: "array",
-            items: { $ref: "#/components/schemas/CommunityDTO" },
+            items: { $ref: "#/components/schemas/PublicCommunityDTO" },
           },
           pagination: { $ref: "#/components/schemas/Pagination" },
         },
@@ -78,7 +78,8 @@ export const CommunityResponses = {
             {
               id: 1,
               name: "Test Community",
-              logo_url: "https://example.com/logo.png",
+              logo_url: "communities/1/logo.png",
+              logo_presigned_url: "https://minio.example.com/communities/1/logo.png?X-Amz-Signature=...",
             },
           ],
           pagination: {

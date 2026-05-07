@@ -1,4 +1,4 @@
-import type { CommunityDTO, CommunityDetailDTO, MyCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
+import type { CommunityDTO, CommunityDetailDTO, MyCommunityDTO, PublicCommunityDTO, UsersCommunityDTO } from "../api/community.dtos.js";
 import type { Community, CommunityUser } from "../domain/community.models.js";
 import { toAddressDTO } from "../../../shared/address/to_dto.js";
 
@@ -27,6 +27,15 @@ export function toCommunityPartial(community: Community): CommunityDTO {
     id: community.id,
     name: community.name,
     logo_url: community.logo_url,
+  };
+}
+
+export function toPublicCommunityDTO(community: Community, logo_presigned_url: string | null): PublicCommunityDTO {
+  return {
+    id: community.id,
+    name: community.name,
+    logo_url: community.logo_url,
+    logo_presigned_url,
   };
 }
 
