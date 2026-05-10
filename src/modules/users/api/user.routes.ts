@@ -1,10 +1,10 @@
 import express from "express";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { UserController } from "./user.controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 
 export const user_router = express.Router();
-const user_controller = container.get<UserController>(UserController);
+const user_controller = lazyController<UserController>(UserController);
 
 // GET (/) : Get the user profile
 user_router.get(

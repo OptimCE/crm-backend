@@ -1,10 +1,10 @@
 import express from "express";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { MunicipalityController } from "./municipality.controller.js";
 
 export const municipality_routes = express.Router();
-const municipality_controller = container.get<MunicipalityController>(MunicipalityController);
+const municipality_controller = lazyController<MunicipalityController>(MunicipalityController);
 
 // Get (/) : Search municipalities (paginated, name + postal code filters)
 municipality_routes.get(

@@ -1,4 +1,4 @@
-import { beforeEach, afterEach, jest } from "@jest/globals";
+import { beforeEach, afterEach } from "@jest/globals";
 import { initializeExternalServices, initiliazeDbMock, tearDownCache } from "./helper.js";
 import type { TestHookOverrides } from "./shared.consts.js";
 
@@ -10,7 +10,6 @@ import type { TestHookOverrides } from "./shared.consts.js";
  */
 export const useUnitTestDb = (initializeExternal: boolean = true, hookOverrides: TestHookOverrides = {}): void => {
   beforeEach(async () => {
-    jest.resetModules();
     if (hookOverrides.beforeEach) {
       await hookOverrides.beforeEach();
     } else {

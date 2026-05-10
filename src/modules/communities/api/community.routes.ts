@@ -3,13 +3,13 @@ import multer from "multer";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { CommunityController } from "./community.controller.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 import { preserveContext } from "../../../shared/middlewares/context.js";
 
 export const community_routes = express.Router();
-const community_controller = container.get<CommunityController>(CommunityController);
+const community_controller = lazyController<CommunityController>(CommunityController);
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get (/) : Get all communities (paginated, minimal info)

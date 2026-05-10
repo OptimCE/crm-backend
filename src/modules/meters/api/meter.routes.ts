@@ -1,13 +1,13 @@
 import express from "express";
 import { MeterController } from "./meter.controller.js";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
 
 export const meter_router = express.Router();
-const meter_controller = container.get<MeterController>(MeterController);
+const meter_controller = lazyController<MeterController>(MeterController);
 
 // GET (/) : Get a partial list of meters
 meter_router.get(

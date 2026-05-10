@@ -1,5 +1,5 @@
 import express from "express";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { DocumentController } from "./document.controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
@@ -9,7 +9,7 @@ import { Role } from "../../../shared/dtos/role.js";
 import multer from "multer";
 
 export const document_router = express.Router();
-const document_controller = container.get<DocumentController>(DocumentController);
+const document_controller = lazyController<DocumentController>(DocumentController);
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get (/:member_id) : Get all documents linked to a member

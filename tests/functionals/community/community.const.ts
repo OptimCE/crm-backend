@@ -256,3 +256,133 @@ export const testCasesDeleteCommunity = [
     },
   },
 ];
+
+// 10. Get Community By Id (GET /communities/:id) — covers toCommunityDetailDTO with presigned logo URL (commit 926a12c)
+export const presignedLogoUrl = "https://signed.example.com/logo.png?token=abc";
+
+export const testCasesGetCommunityById = [
+  {
+    description: "Success - Returns CommunityDetailDTO with presigned logo URL when logo_url is set",
+    id: existingCommunityId, // Test Community has logo_url populated
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown): boolean => {
+      const d = data as { id: number; logo_url: string | null; logo_presigned_url: string | null };
+      return d.id === existingCommunityId && d.logo_url !== null && d.logo_presigned_url === presignedLogoUrl;
+    },
+    external_mocks: {
+      storageService: {
+        getDocumentUrl: jest.fn(() => Promise.resolve(presignedLogoUrl)),
+      },
+    },
+  },
+  {
+    description: "Success - Returns null logo_presigned_url when community has no logo",
+    id: 2, // Other Community has logo_url = NULL
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown): boolean => {
+      const d = data as { id: number; logo_url: string | null; logo_presigned_url: string | null };
+      return d.id === 2 && d.logo_url === null && d.logo_presigned_url === null;
+    },
+    external_mocks: undefined,
+  },
+  {
+    description: "Fail - Community not found",
+    id: 999,
+    orgs: ORGS_ADMIN,
+    status_code: 404,
+    expected_error_code: COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND.errorCode,
+    check_data: undefined,
+    external_mocks: undefined,
+  },
+];
+
+// 11. Get All Public Communities — verify logo_presigned_url field on PublicCommunityDTO (commit 926a12c)
+export const testCasesGetAllPublicCommunitiesWithLogo = [
+  {
+    description: "Success - PublicCommunityDTO includes logo_presigned_url for communities with logo_url",
+    query: {},
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => {
+      // Community 1 (Test Community) has logo_url so it should also have a presigned_url
+      const arr = data as Array<{ id: number; logo_url: string | null; logo_presigned_url: string | null }>;
+      const c1 = arr.find((c) => c.id === existingCommunityId);
+      return c1 !== undefined && c1.logo_url !== null && c1.logo_presigned_url === presignedLogoUrl;
+    },
+    external_mocks: {
+      storageService: {
+        getDocumentUrl: jest.fn(() => Promise.resolve(presignedLogoUrl)),
+      },
+    },
+  },
+];
+
+// 12. Upload Logo (POST /communities/logo)
+export const uploadedLogoUrl = "documents/abc-uploaded-logo.png";
+
+export const testCasesUploadLogo = [
+  {
+    description: "Success - Upload PNG logo (returns logo_url + presigned URL)",
+    file: {
+      buffer: Buffer.from("fake-png-content"),
+      originalname: "logo.png",
+      mimetype: "image/png",
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown): boolean => {
+      const d = data as { logo_url: string; logo_presigned_url: string };
+      return d.logo_url === uploadedLogoUrl && d.logo_presigned_url === presignedLogoUrl;
+    },
+    external_mocks: {
+      storageService: {
+        uploadDocument: jest.fn(() => Promise.resolve({ url: uploadedLogoUrl })),
+        getDocumentUrl: jest.fn(() => Promise.resolve(presignedLogoUrl)),
+        deleteDocument: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Fail - Non-admin role rejected",
+    file: {
+      buffer: Buffer.from("fake-png-content"),
+      originalname: "logo.png",
+      mimetype: "image/png",
+    },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 403,
+    expected_error_code: undefined as number | undefined,
+    check_data: undefined,
+    external_mocks: undefined,
+  },
+];
+
+// 13. Delete Logo (DELETE /communities/logo)
+export const testCasesDeleteLogo = [
+  {
+    description: "Success - Delete logo of the active community",
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    external_mocks: {
+      storageService: {
+        deleteDocument: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Fail - Non-admin role rejected",
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 403,
+    expected_error_code: undefined as number | undefined,
+    expected_data: undefined as string | undefined,
+    external_mocks: undefined,
+  },
+];

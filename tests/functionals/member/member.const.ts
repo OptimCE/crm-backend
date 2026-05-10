@@ -121,6 +121,31 @@ export const testCasesUpdateMember = [
     expected_error_code: SUCCESS,
     expected_data: "success",
   },
+  {
+    description: "Success - Update Individual-specific fields (NRN, first_name)",
+    body: {
+      id: existingIndividualId,
+      name: "Updated Individual",
+      first_name: "Updated First",
+      NRN: "11111111111",
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Update Company-specific fields (vat_number)",
+    body: {
+      id: existingCompanyId,
+      name: "Updated Company",
+      vat_number: "BE0987654321",
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
 ];
 
 // 6. Patch Status
@@ -136,15 +161,37 @@ export const testCasesPatchStatus = [
     expected_error_code: SUCCESS,
     expected_data: "success",
   },
+  {
+    description: "Success - Reactivate (INACTIVE → ACTIVE)",
+    body: {
+      id_member: existingCompanyId,
+      status: MemberStatus.ACTIVE,
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
 ];
 
 // 7. Patch Link (Invite)
 export const testCasesPatchLink = [
   {
-    description: "Success - Invite User",
+    description: "Success - Invite User to Individual",
     body: {
       id_member: existingIndividualId,
       user_email: "invite_link@test.com",
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Invite User to Company member",
+    body: {
+      id_member: existingCompanyId,
+      user_email: "invite_company@test.com",
     },
     orgs: ORGS_ADMIN,
     status_code: 200,
@@ -168,8 +215,16 @@ export const testCasesDeleteLink = [
 // 9. Delete Member
 export const testCasesDeleteMember = [
   {
-    description: "Success - Delete Member",
+    description: "Success - Delete Individual",
     member_id: existingIndividualId,
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Delete Company",
+    member_id: existingCompanyId,
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,

@@ -1,10 +1,10 @@
 import express from "express";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { MeController } from "./me.controller.js";
 
 export const me_routes = express.Router();
-const me_controller = container.get<MeController>(MeController);
+const me_controller = lazyController<MeController>(MeController);
 
 // GET /documents -> Fetch all documents related to this user
 me_routes.get(

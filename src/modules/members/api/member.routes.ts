@@ -3,11 +3,11 @@ import { idChecker } from "../../../shared/middlewares/user.check.middleware.js"
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { MemberController } from "./member.controller.js";
 
 export const member_routes = express.Router();
-const member_controller = container.get<MemberController>(MemberController);
+const member_controller = lazyController<MemberController>(MemberController);
 // Get (/) : Retrieve all members
 member_routes.get(
   "/",

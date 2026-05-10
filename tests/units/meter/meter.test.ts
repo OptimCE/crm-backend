@@ -168,7 +168,7 @@ describe("(Unit) Meter Module", () => {
 
     it.each(testCasesPatchMeterData)(
       "PATCH /meters/data : $description",
-      async ({ body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
+      async ({ body, status_code, expected_error_code, expected_data, mocks, orgs, translation_field }) => {
         if (mocks?.meterRepo) await mockMeterRepositoryModule(mocks.meterRepo);
 
         const appModule = await import("../../../src/app.js");
@@ -186,7 +186,7 @@ describe("(Unit) Meter Module", () => {
           expect(response.body.error_code).toBe(expected_error_code);
           let result = expected_data;
           if (response.status !== 200) {
-            result = i18next.t(expected_data);
+            result = translation_field ? i18next.t(expected_data, translation_field) : i18next.t(expected_data);
           }
           expect(response.body.data).toEqual(result);
         });

@@ -1,12 +1,15 @@
 import { expect, it } from "@jest/globals";
 import request from "supertest";
 import { useFunctionalTestDb } from "../../utils/test.functional.wrapper.js";
-import { expectWithLog, mockIAMServiceModule } from "../../utils/helper.js";
+import { expectWithLog, mockIAMServiceModule, mockStorageServiceModule } from "../../utils/helper.js";
 import {
   testCasesCreateCommunity,
   testCasesDeleteCommunity,
+  testCasesDeleteLogo,
   testCasesGetAdmins,
   testCasesGetAllPublicCommunities,
+  testCasesGetAllPublicCommunitiesWithLogo,
+  testCasesGetCommunityById,
   testCasesGetCommunityPublicSharingOps,
   testCasesGetMyCommunities,
   testCasesGetUsers,
@@ -14,6 +17,7 @@ import {
   testCasesLeave,
   testCasesPatchRole,
   testCasesUpdateCommunity,
+  testCasesUploadLogo,
 } from "./community.const.js";
 
 const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
@@ -259,6 +263,116 @@ describe("(Functional) Community Module", () => {
           if (check_data) {
             expect(check_data(response.body.data)).toBe(true);
           }
+        });
+      },
+    );
+  });
+
+  // --- GET COMMUNITY BY ID (with presigned logo URL — commit 926a12c) ---
+  describe("(Functional) Get Community By Id", () => {
+    it.each(testCasesGetCommunityById)(
+      "GET /communities/:id : $description",
+      async ({ id, orgs, status_code, expected_error_code, check_data, external_mocks }) => {
+        if (external_mocks?.storageService) await mockStorageServiceModule(external_mocks.storageService);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const response = await request(app)
+          .get(`/communities/${id}`)
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (check_data) {
+            expect(check_data(response.body.data)).toBe(true);
+          }
+        });
+      },
+    );
+  });
+
+  // --- GET ALL PUBLIC COMMUNITIES (with presigned logo URL — commit 926a12c) ---
+  describe("(Functional) Get All Public Communities With Logo Presigned URL", () => {
+    it.each(testCasesGetAllPublicCommunitiesWithLogo)(
+      "GET /communities/ : $description",
+      async ({ query, orgs, status_code, expected_error_code, check_data, external_mocks }) => {
+        if (external_mocks?.storageService) await mockStorageServiceModule(external_mocks.storageService);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const response = await request(app).get("/communities/").query(query).set("x-user-id", "auth0|admin").set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (check_data) {
+            expect(check_data(response.body.data)).toBe(true);
+          }
+        });
+      },
+    );
+  });
+
+  // --- UPLOAD LOGO ---
+  describe("(Functional) Upload Logo", () => {
+    it.each(testCasesUploadLogo)(
+      "POST /communities/logo : $description",
+      async ({ file, orgs, status_code, expected_error_code, check_data, external_mocks }) => {
+        if (external_mocks?.storageService) await mockStorageServiceModule(external_mocks.storageService);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const req = request(app)
+          .post("/communities/logo")
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+        if (file) {
+          req.attach("file", file.buffer, { filename: file.originalname, contentType: file.mimetype });
+        }
+        const response = await req;
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          if (expected_error_code !== undefined) {
+            expect(response.body.error_code).toBe(expected_error_code);
+          }
+          if (check_data) {
+            expect(check_data(response.body.data)).toBe(true);
+          }
+        });
+      },
+    );
+  });
+
+  // --- DELETE LOGO ---
+  describe("(Functional) Delete Logo", () => {
+    it.each(testCasesDeleteLogo)(
+      "DELETE /communities/logo : $description",
+      async ({ orgs, status_code, expected_error_code, expected_data, external_mocks }) => {
+        if (external_mocks?.storageService) await mockStorageServiceModule(external_mocks.storageService);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const response = await request(app)
+          .delete("/communities/logo")
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          if (expected_error_code !== undefined) {
+            expect(response.body.error_code).toBe(expected_error_code);
+          }
+          if (expected_data) expect(response.body.data).toBe(expected_data);
         });
       },
     );

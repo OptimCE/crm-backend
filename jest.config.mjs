@@ -40,8 +40,8 @@ const config = {
       testMatch: ['**/tests/functionals/**/*.test.ts'],
       setupFiles: ['reflect-metadata'],
       maxWorkers: 1,
-      globalSetup: "./tests/utils/global.setup.ts",
-      globalTeardown: "./tests/utils/global.teardown.ts",
+      globalSetup: "./tests/utils/global.setup.mjs",
+      globalTeardown: "./tests/utils/global.teardown.mjs",
       moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
       },
@@ -57,8 +57,8 @@ const config = {
       testMatch: ['**/tests/functionals/**/*.cache.test.ts'],
       setupFiles: ['reflect-metadata'],
       maxWorkers: 1,
-      globalSetup: "./tests/utils/global.setup.ts",
-      globalTeardown: "./tests/utils/global.teardown.ts",
+      globalSetup: "./tests/utils/global.setup.mjs",
+      globalTeardown: "./tests/utils/global.teardown.mjs",
       moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
       },

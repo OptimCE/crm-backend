@@ -1,13 +1,13 @@
 import express from "express";
 import { InvitationController } from "./invitation.controller.js";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
 
 export const invitation_routes = express.Router();
-const invitation_controller = container.get<InvitationController>(InvitationController);
+const invitation_controller = lazyController<InvitationController>(InvitationController);
 // GET (/) : Get all member pending invitations (admin/manager view within community)
 invitation_routes.get(
   "/",

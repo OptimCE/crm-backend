@@ -1,9 +1,9 @@
 import express from "express";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { HealthController } from "./health.controller.js";
 
 export const health_routes = express.Router();
-const health_controller = container.get<HealthController>(HealthController);
+const health_controller = lazyController<HealthController>(HealthController);
 
 health_routes.get("/", health_controller.getHealth.bind(health_controller));
 health_routes.get("/db", health_controller.getDbHealth.bind(health_controller));

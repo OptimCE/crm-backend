@@ -220,6 +220,70 @@ export const testCasesPatchVisibility = [
   },
 ];
 
+// 9b. Update Sharing Operation (PUT /:id) — commit 71ebaea
+export const testCasesUpdate = [
+  {
+    description: "Success - Update name only",
+    id: existingSharingOpId1,
+    body: { name: "Renamed Op 1" },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Update type only",
+    id: existingSharingOpId1,
+    body: { type: SharingOperationType.CER },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Replace municipalities only",
+    id: existingSharingOpId1,
+    body: { municipality_nis_codes: [21009] },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Success - Update name + type + municipalities",
+    id: existingSharingOpId1,
+    body: { name: "Combined Update", type: SharingOperationType.CEC, municipality_nis_codes: [21001] },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
+  {
+    description: "Fail - No fields provided",
+    id: existingSharingOpId1,
+    body: {},
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.NO_FIELDS_TO_UPDATE.errorCode,
+  },
+  {
+    description: "Fail - Operation not found",
+    id: 999,
+    body: { name: "Renamed" },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND.errorCode,
+  },
+  {
+    description: "Fail - Unknown municipality NIS code",
+    id: existingSharingOpId1,
+    body: { municipality_nis_codes: [999999] },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 400,
+    expected_error_code: SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.UNKNOWN_MUNICIPALITY.errorCode,
+  },
+];
+
 // 9. Delete Op
 export const testCasesDelete = [
   {

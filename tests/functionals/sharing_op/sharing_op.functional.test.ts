@@ -12,6 +12,7 @@ import {
   testCasesPatchKey,
   testCasesPatchMeter,
   testCasesPatchVisibility,
+  testCasesUpdate,
   testCasesUpdateMunicipalities,
   AUTH_COMMUNITY_1,
 } from "./sharing_op.const.js";
@@ -217,6 +218,30 @@ describe("(Functional) Sharing Operation Module", () => {
 
         const response = await request(app)
           .patch("/sharing_operations/visibility")
+          .send(body)
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (expected_data) expect(response.body.data).toBe(expected_data);
+        });
+      },
+    );
+  });
+
+  // --- UPDATE (PUT /:id) — commit 71ebaea ---
+  describe("(Functional) Update Sharing Operation", () => {
+    it.each(testCasesUpdate)(
+      "PUT /sharing_operations/:id : $description",
+      async ({ id, body, orgs, status_code, expected_error_code, expected_data }) => {
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+
+        const response = await request(app)
+          .put(`/sharing_operations/${id}`)
           .send(body)
           .set("x-user-id", "auth0|admin")
           .set("x-community-id", AUTH_COMMUNITY_1)

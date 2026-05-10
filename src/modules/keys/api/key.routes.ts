@@ -1,13 +1,13 @@
 import express from "express";
 import { KeyController } from "./key.controller.js";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 
 export const key_router = express.Router();
-const key_controller = container.get<KeyController>(KeyController);
+const key_controller = lazyController<KeyController>(KeyController);
 
 // Get partial list of keys (/)
 key_router.get(

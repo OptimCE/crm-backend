@@ -59,7 +59,12 @@ export async function initalizeDb(): Promise<void> {
   const { AppDataSource } = await import("../../src/shared/database/database.connector.js");
   if (!AppDataSource.isInitialized) {
     await AppDataSource.initialize();
-    (await import("../../src/container/di-container.js")).container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
+  }
+  const { container } = await import("../../src/container/di-container.js");
+  if (container.isBound("AppDataSource")) {
+    (await container.rebind<typeof AppDataSource>("AppDataSource")).toConstantValue(AppDataSource);
+  } else {
+    container.bind<typeof AppDataSource>("AppDataSource").toConstantValue(AppDataSource);
   }
 }
 

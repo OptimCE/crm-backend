@@ -1,5 +1,5 @@
 import express from "express";
-import { container } from "../../../container/di-container.js";
+import { lazyController } from "../../../container/lazy-controller.js";
 import { SharingOperationController } from "./sharing_operation.controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
@@ -10,7 +10,7 @@ import multer from "multer";
 const upload = multer({ storage: multer.memoryStorage() });
 
 export const sharing_operation_routes = express.Router();
-const sharing_operation_controller = container.get<SharingOperationController>(SharingOperationController);
+const sharing_operation_controller = lazyController<SharingOperationController>(SharingOperationController);
 
 // Get (/) : Get partial list of sharing operations
 sharing_operation_routes.get(

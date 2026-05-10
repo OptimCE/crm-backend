@@ -138,6 +138,35 @@ export const testCasesPatchMeterData = [
     expected_error_code: SUCCESS,
     expected_data: "success",
   },
+  {
+    description: "Fail - start_date with time component (commit 8c71b07 enforces YYYY-MM-DD)",
+    body: {
+      EAN: existingEAN,
+      start_date: "2025-01-01T10:00:00Z",
+      status: MeterDataStatus.INACTIVE,
+      rate: MeterRate.SIMPLE,
+      client_type: ClientType.RESIDENTIAL,
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 422,
+    expected_error_code: 5005, // GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE
+    expected_data: undefined as string | undefined,
+  },
+  {
+    description: "Fail - end_date with wrong format (slashes)",
+    body: {
+      EAN: existingEAN,
+      start_date: "2025-01-01",
+      end_date: "2025/12/31",
+      status: MeterDataStatus.INACTIVE,
+      rate: MeterRate.SIMPLE,
+      client_type: ClientType.RESIDENTIAL,
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 422,
+    expected_error_code: 5005,
+    expected_data: undefined as string | undefined,
+  },
 ];
 
 // 6. Delete Meter
