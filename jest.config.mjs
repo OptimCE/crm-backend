@@ -38,6 +38,7 @@ const config = {
       preset: 'ts-jest/presets/default-esm',
       testEnvironment: 'node',
       testMatch: ['**/tests/functionals/**/*.test.ts'],
+      testPathIgnorePatterns: ['/node_modules/', '\\.cache\\.test\\.ts$'],
       setupFiles: ['reflect-metadata'],
       maxWorkers: 1,
       globalSetup: "./tests/utils/global.setup.mjs",
