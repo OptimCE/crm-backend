@@ -7,7 +7,7 @@
     "dev": "cross-env NODE_ENV=development tsx watch src/app.ts",
     "clean": "rimraf dist coverage docs/typedoc",
     "test": "npm run test:unit && npm run test:functional && npm run test:cache",
-    "test-all": "cross-env NODE_ENV=test NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=4096\" jest --selectProjects unit --selectProjects functional --selectProjects cache --runInBand",
+    "test-all": "cross-env NODE_ENV=test NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=4096\" jest --selectProjects unit --selectProjects functional --selectProjects cache --runInBand --forceExit",
     "test:raw": "cross-env NODE_ENV=test NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=4096\" jest",
     "test:unit": "npm run test:raw -- --selectProjects unit",
     "test:unit-band": "npm run test:raw -- --selectProjects unit --runInBand",
