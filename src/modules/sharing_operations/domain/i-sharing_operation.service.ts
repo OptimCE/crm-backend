@@ -83,7 +83,7 @@ export interface ISharingOperationService {
   getPublicCommunitySharingOperations(
     community_id: number,
     query: SharingOperationPartialQuery,
-  ): Promise<[SharingOperationPartialDTO[], import("../../../shared/dtos/ApiResponses.js").Pagination]>;
+  ): Promise<[SharingOperationPartialDTO[], Pagination]>;
 
   /**
    * Adds an allocation key to a sharing operation (request status).

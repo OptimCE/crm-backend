@@ -1,0 +1,14 @@
+{
+  "modules": [
+    {
+      "feature": "algorithm",
+      "displayKey": "ANNEXES_SERVICES.ALGORITHM.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.ALGORITHM.DESCRIPTION",
+      "icon": "pi pi-key",
+      "minRole": "MANAGER",
+      "frontendRoute": "/annexes-services/algorithm",
+      "subscribePath": "/annexes-services/algorithm/subscribe",
+      "unsubscribePath": "/annexes-services/algorithm/unsubscribe"
+    }
+  ]
+}

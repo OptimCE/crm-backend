@@ -59,7 +59,6 @@ export class DocumentService implements IDocumentService {
   async downloadDocument(document_id: number): Promise<DownloadDocument> {
     // Retrieve entry from database
     const document: Document | null = await this.documentRepository.getDocumentById(document_id);
-    console.log(document)
     if (!document) {
       logger.error({ operation: "downloadDocument" }, `Document ${document_id} not found`);
       throw new AppError(DOCUMENT_ERRORS.DOWNLOAD_DOCUMENT.DOCUMENT_NOT_FOUND, 400);

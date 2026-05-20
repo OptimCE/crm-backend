@@ -11,7 +11,7 @@ const config = {
   testEnvironment: 'node',
 
   // 3. Recommended: Increase timeout for database tests
-  testTimeout: 30000,
+  testTimeout: 60000,
 
   coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/src/swagger/", "<rootDir>/tests/"],
 

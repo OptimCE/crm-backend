@@ -15,6 +15,7 @@ import { User, UserMemberLink } from "../../modules/users/domain/user.models.js"
 import { GestionnaireInvitation, UserMemberInvitation } from "../../modules/invitations/domain/invitation.models.js";
 import { Address } from "../address/address.models.js";
 import {Municipality, MunicipalityPostalCode} from "../../modules/municipalities/domain/municipality.models.js";
+import { CommunitySubscription } from "../../modules/annexes_services/domain/annexes-services.models.js";
 
 const host: string = config.get("database.host");
 const port: number = config.get("database.port");
@@ -58,7 +59,8 @@ export const AppDataSource = new DataSource({
     CommunityUser,
     SharingOperationMunicipality,
     Municipality,
-    MunicipalityPostalCode
+    MunicipalityPostalCode,
+    CommunitySubscription
   ],
   logging: logging,
 });

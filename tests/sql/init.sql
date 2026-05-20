@@ -486,6 +486,24 @@ CREATE TABLE IF NOT EXISTS sharing_operation_municipality (
 CREATE INDEX IF NOT EXISTS idx_sharing_op_muni_nis
     ON sharing_operation_municipality (nis_code);
 
+CREATE TABLE IF NOT EXISTS community_subscription (
+    id           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_community INTEGER     NOT NULL,
+    feature      VARCHAR(64) NOT NULL,
+    is_active    BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_community_subscription_community_feature
+    UNIQUE (id_community, feature)
+);
+CREATE INDEX idx_community_subscription_community ON community_subscription (
+     id_community
+);
+
+CREATE TRIGGER update_community_subscription_modtime
+    BEFORE UPDATE ON community_subscription
+    FOR EACH ROW
+    EXECUTE FUNCTION update_changetimestamp_column();
 -- --- MOCK DATA ---
 
 -- 1. Communities

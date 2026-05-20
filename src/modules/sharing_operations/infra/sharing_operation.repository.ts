@@ -41,10 +41,10 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       // operation links to several municipalities (a JOIN would multiply rows and
       // break the LIMIT, same reason municipalities are loaded separately below).
       key: "municipality_nis_codes",
-      apply: (qb, val) => {
+      apply: (qb, val): undefined | SelectQueryBuilder<SharingOperation> => {
         const codes = val as number[];
         if (codes.length === 0) return;
-        qb.andWhere(
+        return qb.andWhere(
           `EXISTS (
              SELECT 1 FROM sharing_operation_municipality som
              WHERE som.id_sharing_operation = sharing_op.id

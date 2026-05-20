@@ -67,7 +67,6 @@ describe("(Functional) Community Module", () => {
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
-          console.log(response.body.data)
           expect(response.body.error_code).toBe(expected_error_code);
           if (check_data) {
             expect(check_data(response.body.data)).toBe(true);

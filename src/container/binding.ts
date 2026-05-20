@@ -69,6 +69,11 @@ import type { IHealthService } from "../modules/health/domain/i-health.service.j
 import { HealthService } from "../modules/health/infra/health.service.js";
 import { HealthController } from "../modules/health/api/health.controller.js";
 import { initializeCacheService } from "./factory/cache.factory.js";
+import type { IAnnexesServicesRepository } from "../modules/annexes_services/domain/i-annexes-services.repository.js";
+import { AnnexesServicesRepository } from "../modules/annexes_services/infra/annexes-services.repository.js";
+import type { IAnnexesServicesService } from "../modules/annexes_services/domain/i-annexes-services.service.js";
+import { AnnexesServicesService } from "../modules/annexes_services/infra/annexes-services.service.js";
+import { AnnexesServicesController } from "../modules/annexes_services/api/annexes-services.controller.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -123,6 +128,9 @@ if (!container.isBound("UserRepository")) {
 if (!container.isBound("HealthService")) {
   container.bind<IHealthService>("HealthService").to(HealthService);
 }
+if (!container.isBound("AnnexesServicesRepository")) {
+  container.bind<IAnnexesServicesRepository>("AnnexesServicesRepository").to(AnnexesServicesRepository);
+}
 
 // Domain service bindings.
 container.bind<ICommunityService>("CommunityService").to(CommunityService);
@@ -135,6 +143,7 @@ container.bind<IMeterService>("MeterService").to(MeterService);
 container.bind<ISharingOperationService>("SharingOperationService").to(SharingOperationService);
 container.bind<IMunicipalityService>("MunicipalityService").to(MunicipalityService);
 container.bind<IUserService>("UserService").to(UserService);
+container.bind<IAnnexesServicesService>("AnnexesServicesService").to(AnnexesServicesService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -147,6 +156,7 @@ container.bind<MeterController>(MeterController).toSelf();
 container.bind<SharingOperationController>(SharingOperationController).toSelf();
 container.bind<MunicipalityController>(MunicipalityController).toSelf();
 container.bind<UserController>(UserController).toSelf();
+container.bind<AnnexesServicesController>(AnnexesServicesController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);
