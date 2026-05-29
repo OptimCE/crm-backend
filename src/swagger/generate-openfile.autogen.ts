@@ -13,6 +13,7 @@ import { MeterParameters, MeterResponses } from "../modules/meters/api/meter.swa
 import { SharingOperationParameters, SharingOperationResponses } from "../modules/sharing_operations/api/sharing_operation.swagger.js";
 import { UserParameters, UserResponses } from "../modules/users/api/user.swagger.js";
 import { MeParameters, MeResponses } from "../modules/me/api/me.swagger.js";
+import { AuditLogResponses } from "../modules/audit_log/api/audit-log.swagger.js";
 interface TsSchemas {
   definitions: Record<string, unknown>;
 }
@@ -105,6 +106,7 @@ const doc = {
       ...SharingOperationResponses,
       ...UserResponses,
       ...MeResponses,
+      ...AuditLogResponses,
       // ...GenericGlobalResponses
     },
 

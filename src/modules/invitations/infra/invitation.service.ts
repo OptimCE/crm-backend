@@ -19,6 +19,8 @@ import type { IUserRepository } from "../../users/domain/i-user.repository.js";
 import { toUserManagerInvitationDTO, toUserMemberInvitationDTO } from "../shared/to_dto.js";
 import { INVITATION_ERRORS } from "../shared/invitation.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
 /**
  * Service implementation for managing invitations.
@@ -30,6 +32,7 @@ export class InvitationService implements IInvitationService {
     @inject("InvitationRepository") private invitationRepository: IInvitationRepository,
     @inject("UserRepository") private userRepository: IUserRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
   ) {}
 
   /**
@@ -46,6 +49,15 @@ export class InvitationService implements IInvitationService {
         logger.error({ operation: "cancelManagerInvitation" }, "An error happened during the cancelling of the manager invitation");
         throw new AppError(INVITATION_ERRORS.CANCEL_MANAGER_INVITATION.DATABASE_CANCEL, 400);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MANAGER_INVITATION_DELETED,
+          entity_type: "manager_invitation",
+          entity_id: String(id_invitation),
+          payload: {},
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -69,6 +81,15 @@ export class InvitationService implements IInvitationService {
         logger.error({ operation: "cancelMemberInvitation" }, "An error happened during the cancelling of the member invitation");
         throw new AppError(INVITATION_ERRORS.CANCEL_MEMBER_INVITATION.DATABASE_CANCEL, 400);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MEMBER_INVITATION_DELETED,
+          entity_type: "member_invitation",
+          entity_id: String(id_invitation),
+          payload: {},
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -112,7 +133,16 @@ export class InvitationService implements IInvitationService {
   async inviteUserToBecomeManager(invitation: InviteUser, query_runner?: QueryRunner): Promise<void> {
     const user = await this.userRepository.getUserByEmail(invitation.user_email, query_runner);
     try {
-      await this.invitationRepository.inviteUserToBecomeManager(invitation.user_email, user, query_runner);
+      const created = await this.invitationRepository.inviteUserToBecomeManager(invitation.user_email, user, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MANAGER_INVITATION_CREATED,
+          entity_type: "manager_invitation",
+          entity_id: String(created.id),
+          payload: { user_email: invitation.user_email },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "inviteUserToBecomeManager", error: err }, "An error happened during the invitation of a user to become manager");
       throw new AppError(INVITATION_ERRORS.INVITE_USER_TO_BECOME_MANAGER.DATABASE_SAVE, 400);
@@ -129,7 +159,16 @@ export class InvitationService implements IInvitationService {
   async inviteUserToBecomeMember(invitation: InviteUser, query_runner?: QueryRunner): Promise<void> {
     const user = await this.userRepository.getUserByEmail(invitation.user_email, query_runner);
     try {
-      await this.invitationRepository.inviteUserToBecomeMember(invitation.user_email, user, query_runner);
+      const created = await this.invitationRepository.inviteUserToBecomeMember(invitation.user_email, user, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MEMBER_INVITATION_CREATED,
+          entity_type: "member_invitation",
+          entity_id: String(created.id),
+          payload: { user_email: invitation.user_email },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "inviteUserToBecomeMember", error: err }, "An error happened during the invitation of a user to become member");
       throw new AppError(INVITATION_ERRORS.INVITE_USER_TO_BECOME_MEMBER.DATABASE_SAVE, 400);

@@ -11,6 +11,7 @@ import { sharing_operation_routes } from "./modules/sharing_operations/api/shari
 import { user_router } from "./modules/users/api/user.routes.js";
 import { health_routes } from "./modules/health/api/health.routes.js";
 import { annexes_services_routes } from "./modules/annexes_services/api/annexes-services.routes.js";
+import { audit_log_routes } from "./modules/audit_log/api/audit-log.routes.js";
 
 export const router = express.Router();
 router.use("/communities", community_routes);
@@ -25,3 +26,4 @@ router.use("/sharing_operations", sharing_operation_routes);
 router.use("/users", user_router);
 router.use("/health", health_routes);
 router.use("/annexes-services", annexes_services_routes);
+router.use("/audit-logs", audit_log_routes);

@@ -47,6 +47,8 @@ import type { IAuthContextRepository } from "../../../shared/context/i-authconte
 import type { IMemberService } from "../../members/domain/i-member.service.js";
 import { getContext } from "../../../shared/middlewares/context.js";
 import { Role } from "../../../shared/dtos/role.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import { Company, Individual } from "../../members/domain/member.models.js";
 
 @injectable()
@@ -59,6 +61,7 @@ export class MeService implements IMeService {
     @inject("IAMService") private iam_service: IIamService,
     @inject("AuthContext") private authContext: IAuthContextRepository,
     @inject("MemberService") private memberService: IMemberService,
+    @inject("AuditLogService") private auditLogService: IAuditLogService,
   ) {}
 
   async downloadDocument(id: number): Promise<DownloadDocument> {
@@ -195,6 +198,15 @@ export class MeService implements IMeService {
       logger.error({ operation: "acceptInvitationManager" }, "An error happend while deleting the user invitation at the end");
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MANAGER.DELETE_INVITATION_FAILED, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.MANAGER_INVITATION_ACCEPTED,
+        entity_type: "manager_invitation",
+        entity_id: String(invitation.id),
+        payload: { community_id: invitation.community.id, community_name: invitation.community.name, granted_role: Role.GESTIONNAIRE },
+      },
+      query_runner,
+    );
   }
 
   @Transactional()
@@ -244,6 +256,15 @@ export class MeService implements IMeService {
       logger.error({ operation: "acceptInvitationMember" }, "An error happend while deleting the user invitation at the end");
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MEMBER.DELETE_INVITATION_FAILED, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.MEMBER_INVITATION_ACCEPTED,
+        entity_type: "member_invitation",
+        entity_id: String(invitation.id),
+        payload: { community_id: invitation.community.id, community_name: invitation.community.name, member_id: invitation.member!.id },
+      },
+      query_runner,
+    );
   }
 
   @Transactional()
@@ -308,6 +329,15 @@ export class MeService implements IMeService {
       logger.error({ operation: "acceptInvitationMember" }, "An error happend while deleting the user invitation at the end");
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MEMBER.DELETE_INVITATION_FAILED, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.MEMBER_INVITATION_ACCEPTED,
+        entity_type: "member_invitation",
+        entity_id: String(invitation.id),
+        payload: { community_id: invitation.community.id, community_name: invitation.community.name, member_id: new_member.id },
+      },
+      query_runner,
+    );
   }
 
   @Transactional()
@@ -318,6 +348,10 @@ export class MeService implements IMeService {
         logger.error({ operation: "refuseManagerInvitation" }, "An error happened during the refusing of the manager invitation");
         throw new AppError(ME_ERRORS.REFUSE_MANAGER_INVITATION.DATABASE_REFUSE, 400);
       }
+      await this.auditLogService.log(
+        { action: AUDIT_ACTIONS.MANAGER_INVITATION_REFUSED, entity_type: "manager_invitation", entity_id: String(id_invitation), payload: {} },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -335,6 +369,10 @@ export class MeService implements IMeService {
         logger.error({ operation: "refuseMemberInvitation" }, "An error happened during the refusing of the member invitation");
         throw new AppError(ME_ERRORS.REFUSE_MEMBER_INVITATION.DATABASE_REFUSE, 400);
       }
+      await this.auditLogService.log(
+        { action: AUDIT_ACTIONS.MEMBER_INVITATION_REFUSED, entity_type: "member_invitation", entity_id: String(id_invitation), payload: {} },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;

@@ -25,6 +25,8 @@ import { METER_ERRORS } from "../shared/meter.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { Member } from "../../members/domain/member.models.js";
 import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
 /**
  * Service implementation for managing meters.
@@ -35,6 +37,7 @@ export class MeterService implements IMeterService {
   constructor(
     @inject("MeterRepository") private meterRepository: IMeterRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
   ) {}
 
   /**
@@ -81,6 +84,23 @@ export class MeterService implements IMeterService {
         },
         query_runner,
       );
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_CREATED,
+          entity_type: "meter",
+          entity_id: new_meter.EAN,
+          payload: {
+            EAN: new_meter.EAN,
+            meter_number: new_meter.meter_number,
+            tarif_group: new_meter.tarif_group,
+            phases_number: new_meter.phases_number,
+            reading_frequency: new_meter.reading_frequency,
+            initial_status: new_meter.initial_data.status,
+            member_id: new_meter.initial_data.member_id ?? null,
+          },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -102,6 +122,15 @@ export class MeterService implements IMeterService {
       logger.error({ operation: "deleteMeter" }, "Failed to delete meter");
       throw new AppError(METER_ERRORS.DELETE_METER.DATABASE_DELETE, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.METER_DELETED,
+        entity_type: "meter",
+        entity_id: id,
+        payload: { EAN: id },
+      },
+      query_runner,
+    );
   }
 
   /**
@@ -197,7 +226,7 @@ export class MeterService implements IMeterService {
     }
 
     try {
-      await this.meterRepository.addMeterData(
+      const result = await this.meterRepository.addMeterData(
         patched_meter_data.EAN,
         {
           start_date: patched_meter_data.start_date,
@@ -214,6 +243,25 @@ export class MeterService implements IMeterService {
           total_generating_capacity: patched_meter_data.total_generating_capacity,
           member: patched_meter_data.member_id ? ({ id: patched_meter_data.member_id } as Member) : null,
           sharing_operation: patched_meter_data.sharing_operation_id ? ({ id: patched_meter_data.sharing_operation_id } as SharingOperation) : null,
+        },
+        query_runner,
+      );
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_DATA_UPDATED,
+          entity_type: "meter_data",
+          entity_id: String(result.id),
+          payload: {
+            meter_ean: patched_meter_data.EAN,
+            start_date: patched_meter_data.start_date,
+            end_date: patched_meter_data.end_date ?? null,
+            status: patched_meter_data.status ?? null,
+            rate: patched_meter_data.rate ?? null,
+            client_type: patched_meter_data.client_type ?? null,
+            changed_fields: (Object.keys(patched_meter_data) as (keyof PatchMeterDataDTO)[]).filter(
+              (k) => k !== "EAN" && patched_meter_data[k] !== undefined,
+            ),
+          },
         },
         query_runner,
       );
@@ -250,6 +298,21 @@ export class MeterService implements IMeterService {
         throw new AppError(METER_ERRORS.DELETE_METER_DATA.UPDATE_DATABASE, 400);
       }
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.METER_DATA_DELETED,
+        entity_type: "meter_data",
+        entity_id: String(delete_meter_data.id_meter_data),
+        payload: {
+          meter_ean: latest_meter_data.meter.EAN,
+          start_date: latest_meter_data.start_date,
+          end_date: latest_meter_data.end_date ?? null,
+          status: latest_meter_data.status,
+          activated_previous: delete_meter_data.active_previous_meter_data ?? false,
+        },
+      },
+      query_runner,
+    );
   }
 
   @Transactional()
@@ -260,6 +323,20 @@ export class MeterService implements IMeterService {
         logger.error({ operation: "updateMeter" }, "Failed to update meter");
         throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_UPDATED,
+          entity_type: "meter",
+          entity_id: updated_meter.EAN,
+          payload: {
+            EAN: updated_meter.EAN,
+            changed_fields: (Object.keys(updated_meter) as (keyof UpdateMeterDTO)[]).filter(
+              (k) => k !== "EAN" && updated_meter[k] !== undefined,
+            ),
+          },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;

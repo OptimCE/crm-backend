@@ -504,6 +504,27 @@ CREATE TRIGGER update_community_subscription_modtime
     BEFORE UPDATE ON community_subscription
     FOR EACH ROW
     EXECUTE FUNCTION update_changetimestamp_column();
+
+-- Append-only audit trail. Mirrors database_script/init.sql.
+CREATE TABLE IF NOT EXISTS audit_log (
+    id              BIGSERIAL PRIMARY KEY,
+    id_community    INT REFERENCES community (id) ON DELETE CASCADE,
+    timestamp       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    action          VARCHAR(128) NOT NULL,
+    source          VARCHAR(32)  NOT NULL,
+    entity_type     VARCHAR(64)  NOT NULL,
+    entity_id       VARCHAR(64),
+    user_id         INT,
+    user_email      VARCHAR(256),
+    payload         JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_audit_log_community_timestamp
+    ON audit_log (id_community, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_community_entity
+    ON audit_log (id_community, entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_community_action
+    ON audit_log (id_community, action);
+
 -- --- MOCK DATA ---
 
 -- 1. Communities

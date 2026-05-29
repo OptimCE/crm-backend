@@ -27,6 +27,8 @@ import type { IAuthContextRepository } from "../../../shared/context/i-authconte
 import { MEMBER_ERRORS } from "../shared/member.errors.js";
 import { MemberStatus, MemberType } from "../shared/member.types.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
 /**
  * Service implementation for managing members.
@@ -40,6 +42,7 @@ export class MemberService implements IMemberService {
     @inject("AddressRepository") private address_repository: IAddressRepository,
     @inject("AuthContext") private authContext: IAuthContextRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private auditLogService: IAuditLogService,
   ) {}
 
   /**
@@ -118,7 +121,25 @@ export class MemberService implements IMemberService {
     }
     try {
       const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
-      await this.sharedAddMember(new_member, internal_community_id, query_runner);
+      const result = await this.sharedAddMember(new_member, internal_community_id, query_runner);
+      if (result) {
+        await this.auditLogService.log(
+          {
+            action: AUDIT_ACTIONS.MEMBER_CREATED,
+            entity_type: "member",
+            entity_id: String(result.id),
+            payload: {
+              name: new_member.name,
+              member_type: new_member.member_type,
+              status: new_member.status,
+              ...(new_member.member_type === MemberType.INDIVIDUAL
+                ? { first_name: new_member.first_name, email: new_member.email }
+                : { vat_number: new_member.vat_number }),
+            },
+          },
+          query_runner,
+        );
+      }
     } catch (err) {
       logger.error({ operation: "addMember", error: err }, "An error happened during adding a new member");
       throw new AppError(MEMBER_ERRORS.ADD_MEMBER.DATABASE_ADD, 400);
@@ -138,6 +159,15 @@ export class MemberService implements IMemberService {
         logger.error({ operation: "deleteMemberLink" }, "The deletion of member failed, affected is not equal to one");
         throw new AppError(MEMBER_ERRORS.DELETE_MEMBER.DATABASE_DELETE, 400);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MEMBER_DELETED,
+          entity_type: "member",
+          entity_id: String(id_member),
+          payload: {},
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -160,6 +190,15 @@ export class MemberService implements IMemberService {
         logger.error({ operation: "deleteMemberLink" }, "The deletion of member link failed, affected is not equal to one");
         throw new AppError(MEMBER_ERRORS.DELETE_MEMBER_LINK.DATABASE_DELETE, 400);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MEMBER_USER_LINK_DELETED,
+          entity_type: "member_user_link",
+          entity_id: String(id_member),
+          payload: {},
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -210,6 +249,15 @@ export class MemberService implements IMemberService {
     }
     try {
       await this.member_repository.addInvitationToMember(patched_member_invite_user.id_member, patched_member_invite_user.user_email, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MEMBER_USER_LINK_INVITED,
+          entity_type: "member_user_link",
+          entity_id: String(patched_member_invite_user.id_member),
+          payload: { user_email: patched_member_invite_user.user_email },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "patchMemberLink", error: err }, "An exception occurred while inviting a user to become member");
       throw new AppError(MEMBER_ERRORS.PATCH_MEMBER_LINK.DATABASE_ADD, 400);
@@ -231,6 +279,15 @@ export class MemberService implements IMemberService {
     value.status = patched_member_status.status;
     try {
       await this.member_repository.saveMember(value, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.MEMBER_UPDATED,
+          entity_type: "member",
+          entity_id: String(patched_member_status.id_member),
+          payload: { changed_fields: ["status"], status: patched_member_status.status },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "patchMemberStatus", error: err }, "An exception occurred while patching the member status");
       throw new AppError(MEMBER_ERRORS.PATCH_MEMBER_STATUS.DATABASE_UPDATE, 400);
@@ -415,6 +472,30 @@ export class MemberService implements IMemberService {
         throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.DATABASE_SAVE_COMPANY, 400);
       }
     }
+
+    const changed_fields: string[] = [
+      ...(update_dto.name !== undefined ? ["name"] : []),
+      ...(update_dto.status !== undefined ? ["status"] : []),
+      ...(update_dto.iban !== undefined ? ["iban"] : []),
+      ...(update_dto.home_address !== undefined ? ["home_address"] : []),
+      ...(update_dto.billing_address !== undefined ? ["billing_address"] : []),
+      ...(update_dto.first_name !== undefined ? ["first_name"] : []),
+      ...(update_dto.email !== undefined ? ["email"] : []),
+      ...(update_dto.phone_number !== undefined ? ["phone_number"] : []),
+      ...(update_dto.social_rate !== undefined ? ["social_rate"] : []),
+      ...(update_dto.NRN !== undefined ? ["nrn"] : []),
+      ...(update_dto.vat_number !== undefined ? ["vat_number"] : []),
+      ...(update_dto.manager !== undefined ? ["manager"] : []),
+    ];
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.MEMBER_UPDATED,
+        entity_type: "member",
+        entity_id: String(update_dto.id),
+        payload: { changed_fields },
+      },
+      query_runner,
+    );
   }
 
   /**

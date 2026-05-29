@@ -28,7 +28,8 @@ import { getContext } from "../../../shared/middlewares/context.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import type { IStorageService } from "../../../shared/storage/i-storage.service.js";
 import type { IAddressRepository } from "../../../shared/address/i-address.repository.js";
-
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 /**
  * Implementation of the Community Service.
  * Manages community creation, updates, membership, and IAM synchronization.
@@ -42,6 +43,7 @@ export class CommunityService implements ICommunityService {
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("StorageService") private storage_service: IStorageService,
     @inject("AddressRepository") private address_repository: IAddressRepository,
+    @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
   ) {}
 
   async getAllPublicCommunities(query: CommunityQueryDTO): Promise<[PublicCommunityDTO[], Pagination]> {
@@ -106,6 +108,15 @@ export class CommunityService implements ICommunityService {
     let new_community_model;
     try {
       new_community_model = await this.community_repository.addCommunity(new_community, org_id, query_runner);
+      await this.auditLogService.log(
+          {
+            action: AUDIT_ACTIONS.COMMUNITY_CREATED,
+            entity_type: "community",
+            entity_id: String(new_community_model.id),
+            payload: { name: new_community.name },
+          },
+          query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "addCommunity", error: err }, "An exception occurred while creating a new community in the database");
       throw new AppError(COMMUNITY_ERRORS.ADD_COMMUNITY.DATABASE_SAVE_EXCEPTION, 400);
@@ -169,6 +180,24 @@ export class CommunityService implements ICommunityService {
       throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
     }
 
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_UPDATED,
+        entity_type: "community",
+        entity_id: String(internal_community_id),
+        payload: {
+          changed_fields: [
+            ...(updated_community.name !== undefined ? ["name"] : []),
+            ...(updated_community.description !== undefined ? ["description"] : []),
+            ...(updated_community.website_url !== undefined ? ["website_url"] : []),
+            ...(headquarters_address_id !== undefined ? ["headquarters_address_id"] : []),
+          ],
+          ...(updated_community.name !== undefined ? { name: updated_community.name } : {}),
+        },
+      },
+      query_runner,
+    );
+
     if (updated_community.name !== undefined) {
       try {
         await this.iam_service.updateCommunity(community_updated.auth_community_id, updated_community.name);
@@ -216,6 +245,16 @@ export class CommunityService implements ICommunityService {
       throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
     }
 
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_UPDATED,
+        entity_type: "community",
+        entity_id: String(internal_community_id),
+        payload: { changed_fields: ["logo_url"] },
+      },
+      query_runner,
+    );
+
     if (previous_key && previous_key !== upload_key) {
       try {
         await this.storage_service.deleteDocument(previous_key);
@@ -249,6 +288,16 @@ export class CommunityService implements ICommunityService {
       logger.error({ operation: "deleteLogo", error: err }, "Failed to clear logo_url on the community row");
       throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
     }
+
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_UPDATED,
+        entity_type: "community",
+        entity_id: String(internal_community_id),
+        payload: { changed_fields: ["logo_url"] },
+      },
+      query_runner,
+    );
 
     try {
       await this.storage_service.deleteDocument(previous_key);
@@ -331,6 +380,15 @@ export class CommunityService implements ICommunityService {
   async kickUser(id_user: number, query_runner?: QueryRunner): Promise<void> {
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     await this.deleteUser(id_user, internal_community_id, query_runner!);
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_MEMBER_KICKED,
+        entity_type: "community_member",
+        entity_id: String(id_user),
+        payload: { id_community: internal_community_id },
+      },
+      query_runner,
+    );
   }
   /**
    * Allows the current user to leave a community.
@@ -342,6 +400,15 @@ export class CommunityService implements ICommunityService {
     // 1. Delete it from the database and fetch the deleted user
     const internal_user_id = await this.authContext.getInternalUserId(query_runner);
     await this.deleteUser(internal_user_id, id_community, query_runner!);
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_MEMBER_LEFT,
+        entity_type: "community_member",
+        entity_id: String(internal_user_id),
+        payload: { id_community },
+      },
+      query_runner,
+    );
   }
 
   /**
@@ -394,6 +461,15 @@ export class CommunityService implements ICommunityService {
       logger.error({ operation: "patchRoleUser", error: err }, "The update of the user fails");
       throw new AppError(COMMUNITY_ERRORS.PATCH_ROLE_USER.EXCEPTION, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_MEMBER_ROLE_UPDATED,
+        entity_type: "community_member",
+        entity_id: String(patched_role.id_user),
+        payload: { new_role: patched_role.new_role, changed_fields: ["role"] },
+      },
+      query_runner,
+    );
     if (updated_result.role === Role.ADMIN) {
       // Downgrade the user making the request
       const internal_user_id = await this.authContext.getInternalUserId(query_runner);
@@ -406,6 +482,15 @@ export class CommunityService implements ICommunityService {
         logger.error({ operation: "patchRoleUser", error: err }, "The update of the user fails");
         throw new AppError(COMMUNITY_ERRORS.PATCH_ROLE_USER.EXCEPTION, 400);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.COMMUNITY_MEMBER_ROLE_UPDATED,
+          entity_type: "community_member",
+          entity_id: String(internal_user_id),
+          payload: { new_role: Role.GESTIONNAIRE, changed_fields: ["role"] },
+        },
+        query_runner,
+      );
     }
   }
 
@@ -432,6 +517,15 @@ export class CommunityService implements ICommunityService {
       logger.error({ operation: "deleteCommunity", error: err }, "The deletion of the community fails in the database");
       throw new AppError(COMMUNITY_ERRORS.DELETE_COMMUNITY.DATABASE_DELETE_EXCEPTION, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_DELETED,
+        entity_type: "community",
+        entity_id: String(id_community),
+        payload: { name: deleted_community.name },
+      },
+      query_runner,
+    );
     try {
       await this.iam_service.deleteCommunity(deleted_community.auth_community_id);
     } catch (err) {

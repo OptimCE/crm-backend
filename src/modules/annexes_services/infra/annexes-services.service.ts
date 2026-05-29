@@ -15,6 +15,8 @@ import type { IAnnexesServicesService } from "../domain/i-annexes-services.servi
 import type { AnnexCatalogEntry, AnnexCatalogFile } from "../domain/annexes-services.types.js";
 import { CommunityAnnexDTO } from "../api/annexes-services.dtos.js";
 import { ANNEXES_SERVICES_ERRORS } from "../shared/annexes-services.errors.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
 const CATALOG_PATH = resolve(process.cwd(), "config", "annexes-services.json");
 
@@ -31,6 +33,7 @@ export class AnnexesServicesService implements IAnnexesServicesService {
     @inject("AnnexesServicesRepository") private readonly annexesRepository: IAnnexesServicesRepository,
     @inject("AuthContext") private readonly authContext: IAuthContextRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
   ) {
     this.catalog = AnnexesServicesService.loadCatalog();
     logger.info({ operation: "annexes_services:catalog_loaded", count: this.catalog.length }, "Annex services catalog loaded");
@@ -96,8 +99,26 @@ export class AnnexesServicesService implements IAnnexesServicesService {
         throw new AppError(ANNEXES_SERVICES_ERRORS.SUBSCRIPTION.ALREADY_SUBSCRIBED, 409);
       }
       await this.annexesRepository.setActive(existing.id, true, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.COMMUNITY_SUBSCRIPTION_REACTIVATED,
+          entity_type: "community_subscription",
+          entity_id: String(existing.id),
+          payload: { feature, changed_fields: ["is_active"] },
+        },
+        query_runner,
+      );
     } else {
-      await this.annexesRepository.createSubscription(internal_community_id, feature, true, query_runner);
+      const created = await this.annexesRepository.createSubscription(internal_community_id, feature, true, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.COMMUNITY_SUBSCRIPTION_CREATED,
+          entity_type: "community_subscription",
+          entity_id: String(created.id),
+          payload: { feature, is_active: true },
+        },
+        query_runner,
+      );
     }
     logger.info(
       { operation: "annexes_services:subscribe", feature, id_community: internal_community_id },
@@ -118,6 +139,15 @@ export class AnnexesServicesService implements IAnnexesServicesService {
       throw new AppError(ANNEXES_SERVICES_ERRORS.SUBSCRIPTION.NOT_SUBSCRIBED, 403);
     }
     await this.annexesRepository.setActive(existing.id, false, query_runner);
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.COMMUNITY_SUBSCRIPTION_UNSUBSCRIBED,
+        entity_type: "community_subscription",
+        entity_id: String(existing.id),
+        payload: { feature, changed_fields: ["is_active"] },
+      },
+      query_runner,
+    );
     logger.info(
       { operation: "annexes_services:unsubscribe", feature, id_community: internal_community_id },
       "Community unsubscribed from feature",
