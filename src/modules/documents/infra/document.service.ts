@@ -13,6 +13,8 @@ import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { UploadedDocument } from "../../../shared/storage/storage.dtos.js";
 import { DOCUMENT_ERRORS } from "../shared/document.errors.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 /**
  * Implementation of Document Service.
  * Orchestrates database operations and storage service interactions for documents.
@@ -23,6 +25,7 @@ export class DocumentService implements IDocumentService {
     @inject("DocumentRepository") private documentRepository: IDocumentRepository,
     @inject("StorageService") private storageService: IStorageService,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private auditLogService: IAuditLogService,
   ) {}
 
   /**
@@ -40,6 +43,15 @@ export class DocumentService implements IDocumentService {
       logger.error({ operation: "deleteDocument" }, `Document ${document_id} not deleted from database`);
       throw new AppError(DOCUMENT_ERRORS.DELETE_DOCUMENT.DATABASE_DELETE, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.DOCUMENT_DELETED,
+        entity_type: "document",
+        entity_id: String(document_id),
+        payload: { file_name: deleted_document.file_name },
+      },
+      query_runner,
+    );
     // Delete document from storage service
     try {
       await this.storageService.deleteDocument(deleted_document.file_url);
@@ -114,7 +126,21 @@ export class DocumentService implements IDocumentService {
       id: -1,
     };
     try {
-      await this.documentRepository.saveDocument(new_document, query_runner);
+      const saved_document = await this.documentRepository.saveDocument(new_document, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.DOCUMENT_CREATED,
+          entity_type: "document",
+          entity_id: String(saved_document.id),
+          payload: {
+            file_name: upload_data.file.originalname,
+            file_size: upload_data.file.size,
+            file_type: result.file_type,
+            member_id: upload_data.id_member,
+          },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "uploadDocument", error: err }, "An error occurred while adding a new row in the datbaase");
       try {

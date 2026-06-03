@@ -42,6 +42,8 @@ import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { toMeterPartialDTO } from "../../meters/shared/to_dto.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
 import { localTodayISO } from "../../../shared/utils/date.utils.js";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
 @injectable()
 export class SharingOperationService implements ISharingOperationService {
@@ -51,6 +53,7 @@ export class SharingOperationService implements ISharingOperationService {
     @inject("KeyRepository") private keyRepository: IKeyRepository,
     @inject("MunicipalityRepository") private municipalityRepository: IMunicipalityRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private auditLogService: IAuditLogService,
   ) {}
 
   /**
@@ -291,6 +294,15 @@ export class SharingOperationService implements ISharingOperationService {
       if (meterConsumptionsToSave.length > 0) {
         await this.meterRepository.addMeterConsumptions(dto.id_sharing_operation, meterConsumptionsToSave, query_runner);
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.SHARING_OP_CONSUMPTION_UPLOADED,
+          entity_type: "sharing_op_consumption",
+          entity_id: dto.id_sharing_operation.toString(),
+          payload: { id_sharing_operation: dto.id_sharing_operation },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "addConsumptionData", error: err }, "Failed to save consumption data");
       throw new AppError(SHARING_OPERATION_ERRORS.ADD_CONSUMPTION_DATA.DATABASE_ADD, 400);
@@ -348,7 +360,16 @@ export class SharingOperationService implements ISharingOperationService {
     // 3. Add Key to Sharing Operation
     try {
       // We use current date as start_date since DTO doesn't provide it
-      await this.sharing_operationRepository.addKeyToSharing(id_sharing, id_key, new Date(), query_runner);
+      const created = await this.sharing_operationRepository.addKeyToSharing(id_sharing, id_key, new Date(), query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.SHARING_OPERATION_KEY_CREATED,
+          entity_type: "sharing_operation_key",
+          entity_id: created.id?.toString(),
+          payload: { id_sharing, id_key, start_date: created.start_date, status: "PENDING" },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "addKeyToSharing", error: err }, "Failed to add key to sharing operation");
       throw new AppError(SHARING_OPERATION_ERRORS.ADD_KEY_TO_SHARING.DATABASE_ADD, 400);
@@ -394,6 +415,14 @@ export class SharingOperationService implements ISharingOperationService {
           query_runner,
         );
       }
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_DATA_CREATED,
+          entity_type: "meter_data",
+          payload: { id_sharing, ean_list, start_date: date, status: "WAITING_GRD" },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -421,7 +450,16 @@ export class SharingOperationService implements ISharingOperationService {
       );
     }
     try {
-      await this.sharing_operationRepository.createSharingOperation({ ...new_sharing_operations, municipality_nis_codes: nis_codes }, query_runner);
+      const created = await this.sharing_operationRepository.createSharingOperation({ ...new_sharing_operations, municipality_nis_codes: nis_codes }, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.SHARING_OPERATION_CREATED,
+          entity_type: "sharing_operation",
+          entity_id: created.id.toString(),
+          payload: { name: new_sharing_operations.name, type: new_sharing_operations.type, municipality_nis_codes: nis_codes },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -460,6 +498,15 @@ export class SharingOperationService implements ISharingOperationService {
     }
     try {
       await this.sharing_operationRepository.replaceMunicipalities(dto.id_sharing, dto.municipality_nis_codes, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.SHARING_OPERATION_UPDATED,
+          entity_type: "sharing_operation",
+          entity_id: dto.id_sharing.toString(),
+          payload: { changed_fields: ["municipality_nis_codes"], municipality_nis_codes: dto.municipality_nis_codes },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "updateMunicipalities", error: err }, "Failed to replace sharing operation municipalities");
       throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_MUNICIPALITIES.DATABASE_UPDATE, 400);
@@ -509,6 +556,19 @@ export class SharingOperationService implements ISharingOperationService {
       if (dto.municipality_nis_codes !== undefined) {
         await this.sharing_operationRepository.replaceMunicipalities(id_sharing, dto.municipality_nis_codes, query_runner);
       }
+      const changed_fields: string[] = [];
+      if (dto.name !== undefined) changed_fields.push("name");
+      if (dto.type !== undefined) changed_fields.push("type");
+      if (dto.municipality_nis_codes !== undefined) changed_fields.push("municipality_nis_codes");
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.SHARING_OPERATION_UPDATED,
+          entity_type: "sharing_operation",
+          entity_id: id_sharing.toString(),
+          payload: { changed_fields },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -655,6 +715,15 @@ export class SharingOperationService implements ISharingOperationService {
     try {
       if (status === SharingKeyStatus.REJECTED) {
         await this.sharing_operationRepository.rejectSpecificKeyEntry(id_sharing, id_key, prevEndDate, query_runner);
+        await this.auditLogService.log(
+          {
+            action: AUDIT_ACTIONS.SHARING_OPERATION_KEY_REJECTED,
+            entity_type: "sharing_operation_key",
+            entity_id: id_key.toString(),
+            payload: { id_sharing, id_key, date, changed_fields: ["status", "end_date"] },
+          },
+          query_runner,
+        );
         return;
       }
 
@@ -668,6 +737,15 @@ export class SharingOperationService implements ISharingOperationService {
 
         // Create the new approved entry starting at decisionDate (if your model uses a new row)
         await this.sharing_operationRepository.addSharingKeyEntry(id_sharing, id_key, prevEndDate, status, query_runner);
+        await this.auditLogService.log(
+          {
+            action: AUDIT_ACTIONS.SHARING_OPERATION_KEY_APPROVED,
+            entity_type: "sharing_operation_key",
+            entity_id: id_key.toString(),
+            payload: { id_sharing, id_key, date, changed_fields: ["status", "end_date"] },
+          },
+          query_runner,
+        );
         return;
       }
     } catch (err) {
@@ -738,6 +816,15 @@ export class SharingOperationService implements ISharingOperationService {
         },
         query_runner,
       );
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_DATA_UPDATED,
+          entity_type: "meter_data",
+          entity_id: id_meter,
+          payload: { id_sharing, ean: id_meter, status, start_date: date, changed_fields: ["status"] },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -771,6 +858,15 @@ export class SharingOperationService implements ISharingOperationService {
 
     try {
       await this.sharing_operationRepository.patchVisibility(id_sharing, is_public, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.SHARING_OPERATION_UPDATED,
+          entity_type: "sharing_operation",
+          entity_id: id_sharing.toString(),
+          payload: { is_public, changed_fields: ["is_public"] },
+        },
+        query_runner,
+      );
     } catch (err) {
       logger.error({ operation: "patchVisibility", error: err }, "Failed to update sharing operation visibility");
       throw new AppError(SHARING_OPERATION_ERRORS.PATCH_VISIBILITY.DATABASE_UPDATE, 400);
@@ -789,6 +885,15 @@ export class SharingOperationService implements ISharingOperationService {
       logger.error({ operation: "deleteSharingOperation" }, "The deletion failed");
       throw new AppError(SHARING_OPERATION_ERRORS.DELETE_SHARING_OPERATION.DATABASE_DELETE, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.SHARING_OPERATION_DELETED,
+        entity_type: "sharing_operation",
+        entity_id: id_sharing.toString(),
+        payload: {},
+      },
+      query_runner,
+    );
   }
   /**
    * Removes a meter from a sharing operation.
@@ -861,6 +966,15 @@ export class SharingOperationService implements ISharingOperationService {
       }
       // Reopen the predecessor (if it was closed by this future row's creation).
       await this.meterRepository.activePreviousInactiveMeterData(id_meter, previousStartDate, previousEndDate, query_runner);
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_DATA_DELETED,
+          entity_type: "meter_data",
+          entity_id: id_meter,
+          payload: { id_sharing },
+        },
+        query_runner,
+      );
       return;
     }
 
@@ -875,6 +989,15 @@ export class SharingOperationService implements ISharingOperationService {
           sharing_operation: null,
           start_date: date,
           status: MeterDataStatus.INACTIVE,
+        },
+        query_runner,
+      );
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_DATA_DEACTIVATED,
+          entity_type: "meter_data",
+          entity_id: id_meter,
+          payload: { id_sharing, start_date: date },
         },
         query_runner,
       );

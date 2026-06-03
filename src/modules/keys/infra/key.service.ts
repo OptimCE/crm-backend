@@ -15,6 +15,8 @@ import { KEY_ERRORS } from "../shared/key.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { Column } from "exceljs";
 import { CellValue } from "exceljs";
+import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
+import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
 /**
  * Service implementation for managing allocation keys.
@@ -25,6 +27,7 @@ export class KeyService implements IKeyService {
   constructor(
     @inject("KeyRepository") private keyRepository: IKeyRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
+    @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
   ) {}
 
   /**
@@ -192,6 +195,15 @@ export class KeyService implements IKeyService {
       logger.error({ operation: "addKey", error: err }, "Error while adding children in the database");
       throw new AppError(KEY_ERRORS.ADD_KEY.ADD_CHILDREN_DATABASE, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.ALLOCATION_KEY_CREATED,
+        entity_type: "allocation_key",
+        entity_id: String(saved.id),
+        payload: { name: new_key.name, description: new_key.description, iteration_count: new_key.iterations.length },
+      },
+      query_runner,
+    );
   }
 
   /**
@@ -208,6 +220,9 @@ export class KeyService implements IKeyService {
       logger.error({ operation: "updateKey" }, "Key not found");
       throw new AppError(KEY_ERRORS.UPDATE_KEY.KEY_NOT_FOUND, 400);
     }
+    const changed_fields: string[] = [];
+    if (existing_key.name !== updated_key.name) changed_fields.push("name");
+    if (existing_key.description !== updated_key.description) changed_fields.push("description");
     existing_key.name = updated_key.name;
     existing_key.description = updated_key.description;
     let updated_key_model: AllocationKey;
@@ -243,6 +258,20 @@ export class KeyService implements IKeyService {
       logger.error({ operation: "updateKey", error: err }, "Creating children failed");
       throw new AppError(KEY_ERRORS.UPDATE_KEY.ADD_CHILDREN_DATABASE, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.ALLOCATION_KEY_UPDATED,
+        entity_type: "allocation_key",
+        entity_id: String(updated_key.id),
+        payload: {
+          name: updated_key.name,
+          description: updated_key.description,
+          changed_fields,
+          iterations_replaced: true,
+        },
+      },
+      query_runner,
+    );
   }
 
   /**
@@ -253,10 +282,20 @@ export class KeyService implements IKeyService {
    */
   @Transactional()
   async deleteKey(key_id: number, query_runner?: QueryRunner): Promise<void> {
+    const key_to_delete = await this.keyRepository.getKeyById(key_id, query_runner);
     const delete_result = await this.keyRepository.deleteKey(key_id, query_runner);
     if (delete_result.affected !== 1) {
       logger.error({ operation: "deleteKey" }, "The deletion failed");
       throw new AppError(KEY_ERRORS.DELETE_KEY.DATABASE_DELETE, 400);
     }
+    await this.auditLogService.log(
+      {
+        action: AUDIT_ACTIONS.ALLOCATION_KEY_DELETED,
+        entity_type: "allocation_key",
+        entity_id: String(key_id),
+        payload: { name: key_to_delete?.name ?? null },
+      },
+      query_runner,
+    );
   }
 }

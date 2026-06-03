@@ -188,7 +188,7 @@ export const testCasesUpload = [
         ),
       },
       documentRepo: {
-        saveDocument: jest.fn(() => Promise.resolve()),
+        saveDocument: jest.fn(() => Promise.resolve(mockDocumentEntity)),
       },
     },
   },
