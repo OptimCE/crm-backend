@@ -9,6 +9,16 @@
       "frontendRoute": "/annexes-services/algorithm",
       "subscribePath": "/annexes-services/algorithm/subscribe",
       "unsubscribePath": "/annexes-services/algorithm/unsubscribe"
+    },
+    {
+      "feature": "simulation",
+      "displayKey": "ANNEXES_SERVICES.SIMULATION.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.SIMULATION.DESCRIPTION",
+      "icon": "pi pi-chart-line",
+      "minRole": "MANAGER",
+      "frontendRoute": "/annexes-services/simulation",
+      "subscribePath": "/annexes-services/simulation/subscribe",
+      "unsubscribePath": "/annexes-services/simulation/unsubscribe"
     }
   ]
 }
