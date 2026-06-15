@@ -15,6 +15,8 @@ import { UploadedDocument } from "../../../shared/storage/storage.dtos.js";
 import { DOCUMENT_ERRORS } from "../shared/document.errors.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
+import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
+import type { IMemberRepository } from "../../members/domain/i-member.repository.js";
 /**
  * Implementation of Document Service.
  * Orchestrates database operations and storage service interactions for documents.
@@ -26,6 +28,8 @@ export class DocumentService implements IDocumentService {
     @inject("StorageService") private storageService: IStorageService,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private auditLogService: IAuditLogService,
+    @inject("NotificationService") private notificationService: INotificationService,
+    @inject("MemberRepository") private memberRepository: IMemberRepository,
   ) {}
 
   /**
@@ -141,6 +145,28 @@ export class DocumentService implements IDocumentService {
         },
         query_runner,
       );
+
+      // Notify the member's linked user account(s) and guardian (minus the actor).
+      // Best-effort: a notification failure must not abort the upload.
+      try {
+        const audience = await this.memberRepository.getMemberNotificationAudience(upload_data.id_member, query_runner);
+        if (audience && audience.userIds.length > 0) {
+          await this.notificationService.publish(
+            {
+              type: "document.uploaded",
+              data: {
+                document_id: saved_document.id,
+                member_id: upload_data.id_member,
+                file_name: upload_data.file.originalname,
+              },
+              target: { kind: "users", userIds: audience.userIds, communityId: audience.communityId },
+            },
+            query_runner,
+          );
+        }
+      } catch (notify_err) {
+        logger.error({ operation: "uploadDocument:notify", error: notify_err }, "Notification publish failed");
+      }
     } catch (err) {
       logger.error({ operation: "uploadDocument", error: err }, "An error occurred while adding a new row in the datbaase");
       try {

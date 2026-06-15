@@ -14,6 +14,7 @@ import { SharingOperationParameters, SharingOperationResponses } from "../module
 import { UserParameters, UserResponses } from "../modules/users/api/user.swagger.js";
 import { MeParameters, MeResponses } from "../modules/me/api/me.swagger.js";
 import { AuditLogResponses } from "../modules/audit_log/api/audit-log.swagger.js";
+import { NotificationResponses } from "../modules/notifications/api/notification.swagger.js";
 interface TsSchemas {
   definitions: Record<string, unknown>;
 }
@@ -107,6 +108,7 @@ const doc = {
       ...UserResponses,
       ...MeResponses,
       ...AuditLogResponses,
+      ...NotificationResponses,
       // ...GenericGlobalResponses
     },
 

@@ -79,6 +79,11 @@ import { AuditLogRepository } from "../modules/audit_log/infra/audit-log.reposit
 import type { IAuditLogService } from "../modules/audit_log/domain/i-audit-log.service.js";
 import { AuditLogService } from "../modules/audit_log/infra/audit-log.service.js";
 import { AuditLogController } from "../modules/audit_log/api/audit-log.controller.js";
+import type { INotificationRepository } from "../modules/notifications/domain/i-notification.repository.js";
+import { NotificationRepository } from "../modules/notifications/infra/notification.repository.js";
+import type { INotificationService } from "../modules/notifications/domain/i-notification.service.js";
+import { NotificationService } from "../modules/notifications/infra/notification.service.js";
+import { NotificationController } from "../modules/notifications/api/notification.controller.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -139,6 +144,9 @@ if (!container.isBound("AnnexesServicesRepository")) {
 if (!container.isBound("AuditLogRepository")) {
   container.bind<IAuditLogRepository>("AuditLogRepository").to(AuditLogRepository);
 }
+if (!container.isBound("NotificationRepository")) {
+  container.bind<INotificationRepository>("NotificationRepository").to(NotificationRepository);
+}
 
 // Domain service bindings.
 container.bind<ICommunityService>("CommunityService").to(CommunityService);
@@ -153,6 +161,7 @@ container.bind<IMunicipalityService>("MunicipalityService").to(MunicipalityServi
 container.bind<IUserService>("UserService").to(UserService);
 container.bind<IAnnexesServicesService>("AnnexesServicesService").to(AnnexesServicesService);
 container.bind<IAuditLogService>("AuditLogService").to(AuditLogService);
+container.bind<INotificationService>("NotificationService").to(NotificationService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -167,6 +176,7 @@ container.bind<MunicipalityController>(MunicipalityController).toSelf();
 container.bind<UserController>(UserController).toSelf();
 container.bind<AnnexesServicesController>(AnnexesServicesController).toSelf();
 container.bind<AuditLogController>(AuditLogController).toSelf();
+container.bind<NotificationController>(NotificationController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);

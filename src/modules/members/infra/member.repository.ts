@@ -232,4 +232,49 @@ export class MemberRepository implements IMemberRepository {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     return manager.save(new_manager);
   }
+
+  async getMemberNotificationAudience(
+    id_member: number,
+    query_runner?: QueryRunner,
+  ): Promise<{ communityId: number; userIds: number[] } | null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    // Reuses getFullMember, which already loads the community and both sub-entity
+    // managers (the guardian).
+    const member = await this.getFullMember(id_member, query_runner);
+    if (!member) {
+      return null;
+    }
+    const communityId = member.community.id;
+
+    const userIds = new Set<number>();
+
+    // 1. User account(s) linked to the member ("user related").
+    const linkRows = await manager
+      .createQueryBuilder(UserMemberLink, "link")
+      .innerJoin("link.member", "member")
+      .innerJoin("link.user", "linked_user")
+      .select("linked_user.id", "id")
+      .where("member.id = :id", { id: id_member })
+      .getRawMany<{ id: number }>();
+    for (const row of linkRows) {
+      userIds.add(row.id);
+    }
+
+    // 2. The member's guardian (a Manager record). It has no app account, so it
+    //    is reachable only when its email matches a registered user.
+    const guardianEmail = member.individual_details?.manager?.email ?? member.company_details?.manager?.email ?? null;
+    if (guardianEmail) {
+      const guardian = await manager.findOne(User, { where: { email: guardianEmail }, select: ["id"] });
+      if (guardian) {
+        userIds.add(guardian.id);
+      }
+    }
+
+    // 3. Never notify the actor about their own action.
+    const actorId = await this.authContext.getInternalUserId(query_runner);
+    userIds.delete(actorId);
+
+    return { communityId, userIds: [...userIds] };
+  }
 }

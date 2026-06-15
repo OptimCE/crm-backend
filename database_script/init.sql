@@ -531,3 +531,25 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_community_entity
     ON audit_log (id_community, entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_community_action
     ON audit_log (id_community, action);
+
+-- Durable per-user notifications. `id_user` is the recipient and mandatory scope
+-- (cascade-deleted with the user). `id_community` is nullable: a user can receive
+-- notifications outside any community context; when present it scopes the row to a
+-- community. `data` is a JSONB payload for type-specific context. Indexes are
+-- recipient-centric: list ordering / cursor, a partial unread-count index, and
+-- community scoping. Real-time delivery (SSE) is not part of this layer.
+CREATE TABLE IF NOT EXISTS notification (
+    id            BIGSERIAL PRIMARY KEY,
+    id_community  INT REFERENCES community (id) ON DELETE CASCADE,
+    id_user       INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    type          VARCHAR(128) NOT NULL,
+    data          JSONB NOT NULL DEFAULT '{}'::jsonb,
+    read_at       TIMESTAMPTZ,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_notification_user_id
+    ON notification (id_user, id DESC);
+CREATE INDEX IF NOT EXISTS idx_notification_user_unread
+    ON notification (id_user) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notification_community
+    ON notification (id_community);
