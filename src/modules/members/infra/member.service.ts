@@ -29,6 +29,7 @@ import { MemberStatus, MemberType } from "../shared/member.types.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
+import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
 
 /**
  * Service implementation for managing members.
@@ -43,6 +44,7 @@ export class MemberService implements IMemberService {
     @inject("AuthContext") private authContext: IAuthContextRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private auditLogService: IAuditLogService,
+    @inject("NotificationService") private notificationService: INotificationService,
   ) {}
 
   /**
@@ -496,6 +498,24 @@ export class MemberService implements IMemberService {
       },
       query_runner,
     );
+
+    // Notify the member's linked user account(s) and guardian (minus the actor).
+    // Best-effort: a notification failure must not abort the update.
+    try {
+      const audience = await this.member_repository.getMemberNotificationAudience(update_dto.id, query_runner);
+      if (audience && audience.userIds.length > 0) {
+        await this.notificationService.publish(
+          {
+            type: "member.updated",
+            data: { member_id: update_dto.id, changed_fields },
+            target: { kind: "users", userIds: audience.userIds, communityId: audience.communityId },
+          },
+          query_runner,
+        );
+      }
+    } catch (notify_err) {
+      logger.error({ operation: "updateMember:notify", error: notify_err }, "Notification publish failed");
+    }
   }
 
   /**

@@ -17,6 +17,7 @@ import { Address } from "../address/address.models.js";
 import {Municipality, MunicipalityPostalCode} from "../../modules/municipalities/domain/municipality.models.js";
 import { CommunitySubscription } from "../../modules/annexes_services/domain/annexes-services.models.js";
 import {AuditLog} from "../../modules/audit_log/domain/audit-log.models.js";
+import { Notification } from "../../modules/notifications/domain/notification.models.js";
 
 const host: string = config.get("database.host");
 const port: number = config.get("database.port");
@@ -62,7 +63,8 @@ export const AppDataSource = new DataSource({
     Municipality,
     MunicipalityPostalCode,
     CommunitySubscription,
-    AuditLog
+    AuditLog,
+    Notification
   ],
   logging: logging,
 });

@@ -17,4 +17,12 @@ export interface IMemberRepository {
   addInvitationToMember(id_member: number, user_email: string, query_runner?: QueryRunner): Promise<void>;
   getMemberInvitation(id_member: number, query: MemberLinkQueryDTO, query_runner?: QueryRunner): Promise<UserMemberInvitation | null>;
   saveManager(manager: Manager, query_runner?: QueryRunner): Promise<Manager>;
+  /**
+   * Resolve the audience for a notification about a member: the member's linked
+   * user account(s) plus the member's guardian (a `Manager` record matched to an
+   * `app_user` by email, when one exists), minus the current actor. Returns the
+   * member's community id with the de-duplicated recipient user ids, or null when
+   * the member does not exist.
+   */
+  getMemberNotificationAudience(id_member: number, query_runner?: QueryRunner): Promise<{ communityId: number; userIds: number[] } | null>;
 }

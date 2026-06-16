@@ -21,6 +21,7 @@ import { INVITATION_ERRORS } from "../shared/invitation.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
+import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
 
 /**
  * Service implementation for managing invitations.
@@ -33,6 +34,7 @@ export class InvitationService implements IInvitationService {
     @inject("UserRepository") private userRepository: IUserRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
+    @inject("NotificationService") private readonly notificationService: INotificationService,
   ) {}
 
   /**
@@ -143,6 +145,22 @@ export class InvitationService implements IInvitationService {
         },
         query_runner,
       );
+      // Notify the invitee — only possible if they already have an account.
+      // Best-effort: a notification failure must not abort the invitation.
+      if (user) {
+        try {
+          await this.notificationService.publish(
+            {
+              type: "manager_invitation.received",
+              data: { invitation_id: created.id, community_id: created.community.id },
+              target: { kind: "user", userId: user.id, communityId: created.community.id },
+            },
+            query_runner,
+          );
+        } catch (notify_err) {
+          logger.error({ operation: "inviteUserToBecomeManager:notify", error: notify_err }, "Notification publish failed");
+        }
+      }
     } catch (err) {
       logger.error({ operation: "inviteUserToBecomeManager", error: err }, "An error happened during the invitation of a user to become manager");
       throw new AppError(INVITATION_ERRORS.INVITE_USER_TO_BECOME_MANAGER.DATABASE_SAVE, 400);
@@ -169,6 +187,22 @@ export class InvitationService implements IInvitationService {
         },
         query_runner,
       );
+      // Notify the invitee — only possible if they already have an account.
+      // Best-effort: a notification failure must not abort the invitation.
+      if (user) {
+        try {
+          await this.notificationService.publish(
+            {
+              type: "member_invitation.received",
+              data: { invitation_id: created.id, community_id: created.community.id },
+              target: { kind: "user", userId: user.id, communityId: created.community.id },
+            },
+            query_runner,
+          );
+        } catch (notify_err) {
+          logger.error({ operation: "inviteUserToBecomeMember:notify", error: notify_err }, "Notification publish failed");
+        }
+      }
     } catch (err) {
       logger.error({ operation: "inviteUserToBecomeMember", error: err }, "An error happened during the invitation of a user to become member");
       throw new AppError(INVITATION_ERRORS.INVITE_USER_TO_BECOME_MEMBER.DATABASE_SAVE, 400);
