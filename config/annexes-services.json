@@ -19,6 +19,16 @@
       "frontendRoute": "/annexes-services/simulation",
       "subscribePath": "/annexes-services/simulation/subscribe",
       "unsubscribePath": "/annexes-services/simulation/unsubscribe"
+    },
+    {
+      "feature": "news",
+      "displayKey": "ANNEXES_SERVICES.NEWS.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.NEWS.DESCRIPTION",
+      "icon": "pi pi-megaphone",
+      "minRole": "MEMBER",
+      "frontendRoute": "/news",
+      "subscribePath": "/annexes-services/news/subscribe",
+      "unsubscribePath": "/annexes-services/news/unsubscribe"
     }
   ]
 }
