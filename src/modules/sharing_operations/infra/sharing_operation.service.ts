@@ -11,6 +11,7 @@ import {
   PatchMeterToSharingOperationDTO,
   PatchSharingOperationVisibilityDTO,
   RemoveMeterFromSharingOperationDTO,
+  SharingOpConsumptionCoverageDTO,
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
   SharingOperationDTO,
@@ -26,7 +27,13 @@ import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { SharingOpConsumption, SharingOperation, SharingOperationKey } from "../domain/sharing_operation.models.js";
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
-import { toSharingOperation, toSharingOperationConsumptions, toSharingOperationKeyDTO, toSharingOperationPartialDTO } from "../shared/to_dto.js";
+import {
+  toSharingOperation,
+  toSharingOperationConsumptionCoverage,
+  toSharingOperationConsumptions,
+  toSharingOperationKeyDTO,
+  toSharingOperationPartialDTO,
+} from "../shared/to_dto.js";
 import * as xlsx from "xlsx";
 import type { QueryRunner } from "typeorm";
 import { Transactional } from "../../../shared/transactional/transaction.uow.js";
@@ -81,6 +88,12 @@ export class SharingOperationService implements ISharingOperationService {
    */
   @Transactional()
   async addConsumptionDataToSharing(dto: AddConsumptionDataDTO, query_runner?: QueryRunner): Promise<void> {
+    const sharingOp = await this.sharing_operationRepository.getSharingOperationById(dto.id_sharing_operation, query_runner);
+    if (!sharingOp) {
+      logger.warn({ operation: "addConsumptionDataToSharing", id: dto.id_sharing_operation }, "Sharing operation not found or not accessible");
+      throw new AppError(SHARING_OPERATION_ERRORS.GET_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+
     // 1. Parse the Excel File
     const buffer = dto.file.buffer;
     const workbook = xlsx.read(buffer, { type: "buffer" });
@@ -635,6 +648,19 @@ export class SharingOperationService implements ISharingOperationService {
   }
 
   /**
+   * Monthly coverage of a sharing operation's consumption data. Unlike
+   * {@link getSharingOperationConsumption}, this does NOT throw when the
+   * operation has no data — it returns an empty array so the UI can render an
+   * empty coverage state (HTTP 200 with `[]`).
+   * @param id_sharing - ID of the sharing operation.
+   * @returns Array of `{ month, count }` ordered ascending by month.
+   */
+  async getSharingOperationConsumptionCoverage(id_sharing: number): Promise<SharingOpConsumptionCoverageDTO[]> {
+    const rows = await this.sharing_operationRepository.getSharingOperationConsumptionCoverage(id_sharing);
+    return toSharingOperationConsumptionCoverage(rows);
+  }
+
+  /**
    * Generates an Excel file containing consumption data.
    * @param id_sharing - ID of the sharing operation.
    * @param query - Date range filters.
@@ -736,7 +762,7 @@ export class SharingOperationService implements ISharingOperationService {
         await this.sharing_operationRepository.closeSpecificKeyEntry(id_sharing, id_key, prevEndDate, query_runner);
 
         // Create the new approved entry starting at decisionDate (if your model uses a new row)
-        await this.sharing_operationRepository.addSharingKeyEntry(id_sharing, id_key, prevEndDate, status, query_runner);
+        await this.sharing_operationRepository.addSharingKeyEntry(id_sharing, id_key, newStartDate, status, query_runner);
         await this.auditLogService.log(
           {
             action: AUDIT_ACTIONS.SHARING_OPERATION_KEY_APPROVED,

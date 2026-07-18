@@ -10,6 +10,13 @@ export const existingSharingOpId2 = 2; // "Op 2"
 export const existingKeyId1 = 1; // "Key 1" linked to Op 1
 export const existingKeyId2 = 2; // "Key 2" linked to Op 2
 export const existingEAN = "123456789012345678"; // Linked to Op 1
+// The 4 dedicated wind meters seeded on Op 2 (Public Wind Sharing), one per new member
+export const newWindMeterEANs = [
+  "541448200000000001",
+  "541448200000000002",
+  "541448200000000003",
+  "541448200000000004",
+];
 
 export const newSharingOpName = "Functional Op";
 export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
@@ -59,6 +66,22 @@ export const testCasesGetDetail = [
     orgs: ORGS_GESTIONNAIRE,
     expected_error_code: SHARING_OPERATION_ERRORS.EXCEPTION.errorCode,
     status_code: 400,
+  },
+];
+
+// 2b. Get Meters List — the wind operation now exposes its 4 dedicated meters
+export const testCasesGetSharingOpMeters = [
+  {
+    description: "Success - Wind op (Op 2) exposes its 4 new dedicated meters",
+    id: existingSharingOpId2,
+    query: { type: 2 }, // SharingOperationMetersQueryType.NOW
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => {
+      const eans = (data as Array<{ EAN: string }>).map((m) => m.EAN);
+      return data.length >= 4 && newWindMeterEANs.every((ean) => eans.includes(ean));
+    },
   },
 ];
 

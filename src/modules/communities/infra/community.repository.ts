@@ -28,6 +28,7 @@ export class CommunityRepository implements ICommunityRepository {
     // Note: We do not need getInternalCommunityId here because we are creating the tenant itself.
     const comm = manager.create(Community, {
       name: new_community.name,
+      regulator: new_community.regulator,
       auth_community_id: org_id,
     });
 
@@ -114,6 +115,10 @@ export class CommunityRepository implements ICommunityRepository {
     {
       key: "name",
       apply: (qb, val) => qb.andWhere("community.name LIKE :name", { name: `%${val}%` }),
+    },
+    {
+      key: "regulator",
+      apply: (qb, val) => qb.andWhere("community.regulator = :regulator", { regulator: val }),
     },
   ];
 
@@ -251,6 +256,11 @@ export class CommunityRepository implements ICommunityRepository {
     if (community_details.name !== undefined) community.name = community_details.name;
     if (community_details.description !== undefined) community.description = community_details.description;
     if (community_details.website_url !== undefined) community.website_url = community_details.website_url;
+    if (community_details.regulator !== undefined) community.regulator = community_details.regulator;
+    if (community_details.vat_number !== undefined) community.vat_number = community_details.vat_number;
+    if (community_details.legal_name !== undefined) community.legal_name = community_details.legal_name;
+    if (community_details.iban !== undefined) community.iban = community_details.iban;
+    if (community_details.account_holder_name !== undefined) community.account_holder_name = community_details.account_holder_name;
     if (community_details.logo_url !== undefined) community.logo_url = community_details.logo_url;
     if (community_details.headquarters_address_id !== undefined) community.headquarters_address_id = community_details.headquarters_address_id;
 

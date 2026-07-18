@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS community (
     website_url VARCHAR(255) NULL,
     logo_url VARCHAR(255) NULL,
     description TEXT NULL,
+    -- Energy-market regulator the community is notified to (region -> regulator is 1:1).
+    -- Coded value from the shared registry; see reference/regulators.json.
+    regulator VARCHAR(32) NOT NULL DEFAULT 'BE-WAL-CWAPE'
+        CHECK (regulator IN ('BE-WAL-CWAPE', 'BE-BRU-BRUGEL', 'BE-VLA-VREG')),
+    -- Legal & bank identity (all optional). The legal/registered address reuses
+    -- headquarters_address. account_holder_name is only set when it differs from legal_name.
+    vat_number VARCHAR(32) NULL,
+    legal_name VARCHAR(255) NULL,
+    iban VARCHAR(34) NULL,
+    account_holder_name VARCHAR(255) NULL,
     headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT current_timestamp,

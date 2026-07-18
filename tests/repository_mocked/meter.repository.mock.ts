@@ -9,6 +9,7 @@ export function createMockMeterRepository(): jest.Mocked<IMeterRepository> {
     createMeter: jest.fn(),
     deleteMeter: jest.fn(),
     getLastMeterData: jest.fn(),
+    countActiveMeterDataForMember: jest.fn(),
     getMeter: jest.fn(),
     getMeterConsumptions: jest.fn(),
     getMetersList: jest.fn(),

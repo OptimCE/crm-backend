@@ -30,6 +30,7 @@ import {
   UserMemberInvitationQuery,
 } from "../../invitations/api/invitation.dtos.js";
 import { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
+import { MeterConsumptionDTO, MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 const userControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
@@ -85,6 +86,15 @@ export class MeController {
     const result: MeMeterDTO = await this.meService.getMeterById(req.params.id);
     logger.info("Own meter successfully retrieved");
     res.status(200).json(new ApiResponse<MeMeterDTO>(result, SUCCESS));
+  }
+
+  @userControllerTraceDecorator.traceSpan("getMeterConsumptions", { url: "/me/meters/:id/consumptions", method: "get" })
+  @Cache(cacheKey("me-meters:consumptions", "user", (req) => req.params.id + ":" + JSON.stringify(req.query)), 60)
+  async getMeterConsumptions(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const query_consumptions = await validateDto(MeterConsumptionQuery, req.query);
+    const result: MeterConsumptionDTO = await this.meService.getMeterConsumptions(req.params.id, query_consumptions);
+    logger.info("Own meter consumptions successfully retrieved");
+    res.status(200).json(new ApiResponse<MeterConsumptionDTO>(result, SUCCESS));
   }
 
   @userControllerTraceDecorator.traceSpan("getOwnMemberPendingInvitation", { url: "/me/invitations", method: "get" })

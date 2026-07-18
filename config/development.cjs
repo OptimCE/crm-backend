@@ -1,5 +1,12 @@
+const path = require("path");
+
 module.exports = {
     microservice_name: process.env.MICROSERVICE_NAME || "BackEndCRM",
+    regulators: {
+        // Canonical regulator code list (shared JSON at the monorepo root).
+        // REGULATORS_CONFIG_PATH overrides; otherwise resolve the monorepo-root file.
+        config_path: process.env.REGULATORS_CONFIG_PATH || path.resolve(__dirname, "..", "..", "reference", "regulators.json")
+    },
     allowed_origin: process.env.ALLOWED_ORIGIN || "http://localhost:8080",
     server: {
         host: process.env.SERVER_HOST || "0.0.0.0",

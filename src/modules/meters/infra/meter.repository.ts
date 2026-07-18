@@ -1,5 +1,6 @@
 import type { IMeterRepository } from "../domain/i-meter.repository.js";
 import { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
+import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
 import { inject, injectable } from "inversify";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { DeepPartial, DeleteResult, In, type QueryRunner, SelectQueryBuilder, UpdateResult } from "typeorm";
@@ -10,9 +11,10 @@ import { Address } from "../../../shared/address/address.models.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
+import { SHARING_OPERATION_ERRORS } from "../../sharing_operations/shared/sharing_operation.errors.js";
 import logger from "../../../shared/monitor/logger.js";
 import { MeterDataStatus } from "../shared/meter.types.js";
-import { addDaysISO } from "../../../shared/utils/date.utils.js";
+import { addDaysISO, CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 
 @injectable()
 export class MeterRepository implements IMeterRepository {
@@ -73,7 +75,7 @@ export class MeterRepository implements IMeterRepository {
     query_runner?: QueryRunner,
   ): Promise<void> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+    const communityId = await this.getSharingOperationCommunityId(id_sharing, manager);
 
     const chunkSize = 1000;
     for (let i = 0; i < consumptions.length; i += chunkSize) {
@@ -107,6 +109,7 @@ export class MeterRepository implements IMeterRepository {
           return manager.merge(MeterConsumption, existing, {
             ...item,
             sharing_operation: { id: id_sharing },
+            community: { id: communityId },
           });
         } else {
           // Create new
@@ -114,7 +117,7 @@ export class MeterRepository implements IMeterRepository {
             ...item,
             meter: { EAN: item.ean },
             sharing_operation: { id: id_sharing },
-            community: { id: internal_community_id },
+            community: { id: communityId },
           });
         }
       });
@@ -214,6 +217,23 @@ export class MeterRepository implements IMeterRepository {
     });
   }
 
+  /**
+   * Counts the meter configurations of a member that are currently "active": their record is
+   * effective now (start_date <= now < end_date) and their status is anything other than INACTIVE.
+   * Used to block member deactivation/deletion while live meters are still attached.
+   */
+  async countActiveMeterDataForMember(memberId: number, query_runner?: QueryRunner): Promise<number> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const now = new Date();
+    return manager
+      .createQueryBuilder(MeterData, "md")
+      .where("md.member = :memberId", { memberId })
+      .andWhere("md.status != :inactive", { inactive: MeterDataStatus.INACTIVE })
+      .andWhere("md.start_date <= :now", { now })
+      .andWhere("(md.end_date IS NULL OR md.end_date > :now)", { now })
+      .getCount();
+  }
+
   getMeter(id: string, query_runner?: QueryRunner): Promise<Meter | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     let qb = manager.createQueryBuilder(Meter, "meter");
@@ -282,10 +302,14 @@ export class MeterRepository implements IMeterRepository {
     qb = qb.where("consumption.meter = :ean", { ean }).andWhere("consumption.community = :commId", { commId: internal_community_id });
 
     if (query.date_start) {
-      qb = qb.andWhere("consumption.timestamp >= :start", { start: query.date_start });
+      qb = qb.andWhere(`(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date >= CAST(:dateStart AS date)`, {
+        dateStart: toCalendarDateString(query.date_start),
+      });
     }
     if (query.date_end) {
-      qb = qb.andWhere("consumption.timestamp <= :end", { end: query.date_end });
+      qb = qb.andWhere(`(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date <= CAST(:dateEnd AS date)`, {
+        dateEnd: toCalendarDateString(query.date_end),
+      });
     }
 
     qb = qb.orderBy("consumption.timestamp", "ASC");
@@ -385,5 +409,16 @@ export class MeterRepository implements IMeterRepository {
   deleteMeterData(meter_data: MeterData, query_runner?: QueryRunner): Promise<MeterData> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     return manager.remove(meter_data);
+  }
+
+  private async getSharingOperationCommunityId(id_sharing: number, manager: typeof AppDataSource.manager): Promise<number> {
+    const sharingOp = await manager.findOne(SharingOperation, {
+      where: { id: id_sharing },
+      relations: ["community"],
+    });
+    if (!sharingOp?.community?.id) {
+      throw new AppError(SHARING_OPERATION_ERRORS.GET_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+    return sharingOp.community.id;
   }
 }

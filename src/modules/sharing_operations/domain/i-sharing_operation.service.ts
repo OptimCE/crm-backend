@@ -7,6 +7,7 @@ import type {
   PatchMeterToSharingOperationDTO,
   PatchSharingOperationVisibilityDTO,
   RemoveMeterFromSharingOperationDTO,
+  SharingOpConsumptionCoverageDTO,
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
   SharingOperationDTO,
@@ -47,6 +48,14 @@ export interface ISharingOperationService {
    * @returns Consumption DTO.
    */
   getSharingOperationConsumption(id_sharing: number, query: SharingOperationConsumptionQuery): Promise<SharingOpConsumptionDTO>;
+
+  /**
+   * Monthly coverage of a sharing operation's consumption data: which Brussels
+   * calendar months (`YYYY-MM`) already hold data and how many rows each has.
+   * Ordered ascending by month. Returns `[]` (not an error) when there is no data.
+   * @param id_sharing - Sharing operation ID.
+   */
+  getSharingOperationConsumptionCoverage(id_sharing: number): Promise<SharingOpConsumptionCoverageDTO[]>;
 
   /**
    * Generates an Excel file buffer with consumption data.

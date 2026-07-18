@@ -42,6 +42,16 @@ export interface ISharingOperationRepository {
     query: SharingOperationConsumptionQuery,
     query_runner?: QueryRunner,
   ): Promise<SharingOpConsumption[] | null>;
+  /**
+   * Monthly coverage aggregate: for each Brussels calendar month that holds
+   * consumption data for the operation, returns the month (`YYYY-MM`) and the
+   * row count. Ordered ascending by month. Returns `[]` when there is no data.
+   * `count` is the raw Postgres bigint rendered as a string.
+   */
+  getSharingOperationConsumptionCoverage(
+    id_sharing: number,
+    query_runner?: QueryRunner,
+  ): Promise<{ month: string; count: string }[]>;
   createSharingOperation(new_sharing_op: CreateSharingOperationDTO, query_runner?: QueryRunner): Promise<SharingOperation>;
   addConsumptions(id_sharing_operation: number, consumptionsToSave: Partial<SharingOpConsumption>[], query_runner?: QueryRunner): Promise<void>;
   getAuthorizedEans(id_sharing_operation: number, query_runner?: QueryRunner): Promise<Set<string>>;

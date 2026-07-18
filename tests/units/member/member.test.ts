@@ -1,7 +1,7 @@
 import { expect, it } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
-import { expectWithLog, mockAddressRepositoryModule, mockAuthContextRepositoryModule, mockMemberRepositoryModule } from "../../utils/helper.js";
+import { expectWithLog, mockAddressRepositoryModule, mockAuthContextRepositoryModule, mockMemberRepositoryModule, mockMeterRepositoryModule } from "../../utils/helper.js";
 import {
   testCasesAddMember,
   testCasesDeleteMember,
@@ -172,6 +172,7 @@ describe("(Unit) Member Module", () => {
       "PATCH /members/status : $description",
       async ({ body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
         if (mocks?.memberRepo) await mockMemberRepositoryModule(mocks.memberRepo);
+        if (mocks?.meterRepo) await mockMeterRepositoryModule(mocks.meterRepo);
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
@@ -236,6 +237,7 @@ describe("(Unit) Member Module", () => {
       "DELETE /members/:id : $description",
       async ({ id, status_code, expected_error_code, expected_data, mocks, orgs }) => {
         if (mocks?.memberRepo) await mockMemberRepositoryModule(mocks.memberRepo);
+        if (mocks?.meterRepo) await mockMeterRepositoryModule(mocks.meterRepo);
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;

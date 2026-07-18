@@ -1,5 +1,11 @@
+const path = require("path");
+
 module.exports = {
     microservice_name: process.env.MICROSERVICE_NAME || "CRM",
+    regulators: {
+        // Self-contained fixture so unit/functional tests don't depend on monorepo layout.
+        config_path: process.env.REGULATORS_CONFIG_PATH || path.resolve(__dirname, "..", "tests", "fixtures", "regulators.json")
+    },
     allowed_origin: process.env.ALLOWED_ORIGIN || "http://localhost:5000",
     server: {
         host: process.env.SERVER_HOST || "localhost",

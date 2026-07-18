@@ -305,7 +305,7 @@ describe("(Cache Integration) Community Module", () => {
       // → pattern "communities:user-list:u:auth0|admin:*" matches the cached key
       const createRes = await request(app)
         .post("/communities/")
-        .send({ name: "Cache Test Community" })
+        .send({ name: "Cache Test Community", regulator: "BE-WAL-CWAPE" })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-user-orgs", ORGS_ADMIN);
       expect(createRes.status).toBe(200);
@@ -647,7 +647,7 @@ describe("(Cache Integration) Community Module", () => {
       // Create community as user A → pattern "communities:user-list:u:auth0|admin:*"
       const createRes = await request(app)
         .post("/communities/")
-        .send({ name: "Selectivity Test Community" })
+        .send({ name: "Selectivity Test Community", regulator: "BE-WAL-CWAPE" })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-user-orgs", ORGS_ADMIN);
       expect(createRes.status).toBe(200);

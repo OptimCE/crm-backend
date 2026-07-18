@@ -1,11 +1,12 @@
 import { Expose, Type } from "class-transformer";
-import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
+import { IsEmail, IsIBAN, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
 import { Role } from "../../../shared/dtos/role.js";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
+import { IsActiveRegulator, IsKnownRegulator } from "../shared/is-active-regulator.validator.js";
 /**
  * DTO for querying communities with pagination and filtering.
  */
@@ -26,6 +27,15 @@ export class CommunityQueryDTO extends PaginationQuery {
   @IsIn(["ASC", "DESC"], withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.SORT))
   @IsOptional()
   sort_name?: Sort;
+
+  /**
+   * Filter communities by regulator code.
+   * Must be a known regulator code (active or not) if provided.
+   */
+  @Type(() => String)
+  @IsKnownRegulator(withError(COMMUNITY_ERRORS.VALIDATION.INVALID_REGULATOR))
+  @IsOptional()
+  regulator?: string;
 
   /**
    * Sort order for the 'id' field.
@@ -109,6 +119,10 @@ export class PublicCommunityDTO {
 
   @Expose()
   logo_url!: string | null;
+
+  /** Coded regulator the community is notified to (see reference/regulators.json). */
+  @Expose()
+  regulator!: string;
 
   /** Short-lived presigned URL (~15 min). Null when the community has no logo or URL generation failed. */
   @Expose()
@@ -199,6 +213,10 @@ export class CommunityDetailDTO {
   @Expose()
   member_count!: number;
 
+  /** Coded regulator the community is notified to (see reference/regulators.json). */
+  @Expose()
+  regulator!: string;
+
   @Expose()
   description?: string | null;
 
@@ -215,6 +233,22 @@ export class CommunityDetailDTO {
 
   @Expose()
   headquarters_address?: AddressDTO | null;
+
+  /** VAT / BTW number of the community. */
+  @Expose()
+  vat_number?: string | null;
+
+  /** Official registered legal name, distinct from the display `name`. */
+  @Expose()
+  legal_name?: string | null;
+
+  /** IBAN of the community's bank account. */
+  @Expose()
+  iban?: string | null;
+
+  /** Name the bank account is held under — only set when it differs from `legal_name`. */
+  @Expose()
+  account_holder_name?: string | null;
 }
 
 /**
@@ -229,6 +263,16 @@ export class CreateCommunityDTO {
   @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.EMPTY))
   name!: string;
+
+  /**
+   * Coded regulator the community is notified to. Required; must be a currently
+   * active code from the shared registry (see reference/regulators.json).
+   */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsNotEmpty(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.EMPTY))
+  @IsActiveRegulator(withError(COMMUNITY_ERRORS.VALIDATION.INVALID_REGULATOR))
+  regulator!: string;
 }
 
 /**
@@ -252,10 +296,44 @@ export class UpdateCommunityDTO {
   @IsOptional()
   website_url?: string | null;
 
+  /**
+   * Coded regulator the community is notified to. Optional on update; when
+   * present must be a currently active code (see reference/regulators.json).
+   * Changing this is admin-gated and audited.
+   */
+  @Type(() => String)
+  @IsActiveRegulator(withError(COMMUNITY_ERRORS.VALIDATION.INVALID_REGULATOR))
+  @IsOptional()
+  regulator?: string;
+
   @ValidateNested()
   @Type(() => CreateAddressDTO)
   @IsOptional()
   headquarters_address?: CreateAddressDTO;
+
+  /** VAT / BTW number. Free-text, optional. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  vat_number?: string | null;
+
+  /** Official registered legal name, distinct from the display `name`. Optional. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  legal_name?: string | null;
+
+  /** IBAN of the bank account. Optional; validated as a well-formed IBAN when present. */
+  @Type(() => String)
+  @IsIBAN(withError(COMMUNITY_ERRORS.VALIDATION.INVALID_IBAN))
+  @IsOptional()
+  iban?: string | null;
+
+  /** Account holder name — only persisted when it differs from `legal_name`. Optional. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  account_holder_name?: string | null;
 }
 
 /**

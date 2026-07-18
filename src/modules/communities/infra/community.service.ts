@@ -113,7 +113,7 @@ export class CommunityService implements ICommunityService {
             action: AUDIT_ACTIONS.COMMUNITY_CREATED,
             entity_type: "community",
             entity_id: String(new_community_model.id),
-            payload: { name: new_community.name },
+            payload: { name: new_community.name, regulator: new_community.regulator },
           },
           query_runner,
       );
@@ -165,6 +165,14 @@ export class CommunityService implements ICommunityService {
       }
     }
 
+    // Capture the current regulator before the update so the audit trail can
+    // record old → new for this sensitive, regulatory field.
+    let previous_regulator: string | undefined;
+    if (updated_community.regulator !== undefined) {
+      const existing = await this.community_repository.getCommunityById(internal_community_id, query_runner);
+      previous_regulator = existing?.community.regulator;
+    }
+
     let community_updated: Community;
     try {
       community_updated = await this.community_repository.updateCommunity(
@@ -190,9 +198,18 @@ export class CommunityService implements ICommunityService {
             ...(updated_community.name !== undefined ? ["name"] : []),
             ...(updated_community.description !== undefined ? ["description"] : []),
             ...(updated_community.website_url !== undefined ? ["website_url"] : []),
+            ...(updated_community.regulator !== undefined ? ["regulator"] : []),
             ...(headquarters_address_id !== undefined ? ["headquarters_address_id"] : []),
+            // Bank/legal fields: log the field name only — never the IBAN/VAT values (sensitive).
+            ...(updated_community.vat_number !== undefined ? ["vat_number"] : []),
+            ...(updated_community.legal_name !== undefined ? ["legal_name"] : []),
+            ...(updated_community.iban !== undefined ? ["iban"] : []),
+            ...(updated_community.account_holder_name !== undefined ? ["account_holder_name"] : []),
           ],
           ...(updated_community.name !== undefined ? { name: updated_community.name } : {}),
+          ...(updated_community.regulator !== undefined
+            ? { old_regulator: previous_regulator, new_regulator: updated_community.regulator }
+            : {}),
         },
       },
       query_runner,

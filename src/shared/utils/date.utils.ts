@@ -1,3 +1,17 @@
+/** Belgian market timezone for consumption settlement timestamps. */
+export const CONSUMPTION_TIMEZONE = "Europe/Brussels";
+
+/**
+ * Extract `YYYY-MM-DD` from a `Date` produced by class-transformer on query params.
+ * Uses UTC components so `2025-02-01` round-trips regardless of host timezone.
+ */
+export function toCalendarDateString(d: Date): string {
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 /**
  * Add `n` days to a `YYYY-MM-DD` calendar date string.
  *

@@ -348,6 +348,9 @@ export const testCasesPatchMemberStatus = [
         getMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
         saveMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
       },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(0)),
+      },
     },
   },
   {
@@ -374,6 +377,25 @@ export const testCasesPatchMemberStatus = [
       memberRepo: {
         getMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
         saveMember: jest.fn(() => Promise.reject(new Error("Fail"))),
+      },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(0)),
+      },
+    },
+  },
+  {
+    description: "Fail (Has active meters)",
+    body: { id_member: 1, status: MemberStatus.INACTIVE },
+    status_code: 409,
+    orgs: ORGS_ADMIN,
+    expected_error_code: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.errorCode,
+    expected_data: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.message,
+    mocks: {
+      memberRepo: {
+        getMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
+      },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(1)),
       },
     },
   },
@@ -437,6 +459,9 @@ export const testCasesDeleteMember = [
       memberRepo: {
         deleteMember: jest.fn(() => Promise.resolve({ affected: 1 })),
       },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(0)),
+      },
     },
   },
   {
@@ -450,6 +475,9 @@ export const testCasesDeleteMember = [
       memberRepo: {
         deleteMember: jest.fn(() => Promise.resolve({ affected: 0 })),
       },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(0)),
+      },
     },
   },
   {
@@ -462,6 +490,22 @@ export const testCasesDeleteMember = [
     mocks: {
       memberRepo: {
         deleteMember: jest.fn(() => Promise.reject(new Error("Fail"))),
+      },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(0)),
+      },
+    },
+  },
+  {
+    description: "Fail (Has active meters)",
+    id: 1,
+    status_code: 409,
+    orgs: ORGS_ADMIN,
+    expected_error_code: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.errorCode,
+    expected_data: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.message,
+    mocks: {
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(1)),
       },
     },
   },

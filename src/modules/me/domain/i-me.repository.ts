@@ -3,7 +3,8 @@ import type { MeDocumentPartialQuery, MeMemberPartialQuery, MeMetersPartialQuery
 import type { DeleteResult, QueryRunner } from "typeorm";
 import type { Document } from "../../documents/domain/document.models.js";
 import type { UserMemberLink } from "../../users/domain/user.models.js";
-import type { Meter } from "../../meters/domain/meter.models.js";
+import type { Meter, MeterConsumption } from "../../meters/domain/meter.models.js";
+import type { MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
 import type { GestionnaireInvitation, UserMemberInvitation } from "../../invitations/domain/invitation.models.js";
 import type { UserManagerInvitationQuery, UserMemberInvitationQuery } from "../../invitations/api/invitation.dtos.js";
 
@@ -14,6 +15,7 @@ export interface IMeRepository {
   getDocuments(query: MeDocumentPartialQuery, query_runner?: QueryRunner): Promise<[Document[], number]>;
   getMeterById(id: string, query_runner?: QueryRunner): Promise<Meter | null>;
   getMeters(query: MeMetersPartialQuery, query_runner?: QueryRunner): Promise<[Meter[], number]>;
+  getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]>;
   getOwnManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]>;
   getOwnMembersPendingInvitation(query: UserMemberInvitationQuery, query_runner?: QueryRunner): Promise<[UserMemberInvitation[], number]>;
   getOwnMembersPendingInvitationById(id: number, query_runner?: QueryRunner): Promise<Member | null>;

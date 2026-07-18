@@ -26,6 +26,9 @@
     "database_save_individual": "An error occurred while updating the individual in the database",
     "database_save_company": "An error occurred while updating the company in the database"
   },
+  "integrity": {
+    "member_has_active_meters": "You cannot deactivate or delete a member who still has active meters. Please deactivate their meters first."
+  },
   "validation": {
     "wrong_type": {
       "member_type": "The field '{{field}}' must be of type 'MemberType'"

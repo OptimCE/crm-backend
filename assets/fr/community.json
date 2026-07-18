@@ -26,5 +26,9 @@
     "mismatch_id": "L'identifiant de la communauté est différent de la communauté à supprimer",
     "database_delete_exception": "Une erreur est survenue lors de la suppression de la communauté dans la base de données",
     "iam_delete_community": "Une erreur est survenue lors de la suppression de la communauté auprès du service IAM"
+  },
+  "validation": {
+    "invalid_regulator": "Le régulateur est invalide ou n'est pas disponible actuellement",
+    "invalid_iban": "L'IBAN est invalide"
   }
 }

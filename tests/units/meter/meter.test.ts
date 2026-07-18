@@ -1,9 +1,11 @@
-import { expect, it } from "@jest/globals";
+import { expect, it, jest } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { expectWithLog, mockMeterRepositoryModule } from "../../utils/helper.js";
 import {
+  mockMeterEntity,
   testCasesAddMeter,
+  testCasesDeactivateMeter,
   testCasesDeleteMeter,
   testCasesDeleteMeterData,
   testCasesDownloadMeterConsumptions,
@@ -12,7 +14,8 @@ import {
   testCasesGetMetersList,
   testCasesPatchMeterData,
 } from "./meter.const.js";
-import {AUTH_COMMUNITY_1} from "../../utils/shared.consts.js";
+import { AUTH_COMMUNITY_1, ORGS_ADMIN } from "../../utils/shared.consts.js";
+import { MeterDataStatus } from "../../../src/modules/meters/shared/meter.types.js";
 
 describe("(Unit) Meter Module", () => {
   // --- GET METERS LIST ---
@@ -192,6 +195,62 @@ describe("(Unit) Meter Module", () => {
         });
       },
     );
+  });
+
+  // --- DEACTIVATE METER ---
+  describe("(Unit) Deactivate Meter", () => {
+    useUnitTestDb();
+
+    it.each(testCasesDeactivateMeter)(
+      "PATCH /meters/data/deactivate : $description",
+      async ({ body, status_code, expected_error_code, expected_data, mocks, orgs, translation_field }) => {
+        if (mocks?.meterRepo) await mockMeterRepositoryModule(mocks.meterRepo);
+
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+        const i18next = appModule.i18next;
+        const response = await request(app)
+          .patch("/meters/data/deactivate")
+          .send(body)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
+
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          let result = expected_data;
+          if (response.status !== 200) {
+            result = translation_field ? i18next.t(expected_data, translation_field) : i18next.t(expected_data);
+          }
+          expect(response.body.data).toEqual(result);
+        });
+      },
+    );
+
+    it("PATCH /meters/data/deactivate : appends an INACTIVE record with the submitted date", async () => {
+      const addMeterData = jest.fn(() => Promise.resolve({ id: 1 }));
+      await mockMeterRepositoryModule({
+        getMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
+        addMeterData,
+      });
+
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+      const response = await request(app)
+        .patch("/meters/data/deactivate")
+        .send({ EAN: "123", date: "2024-02-01" })
+        .set("x-user-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_ADMIN);
+
+      expect(response.status).toBe(200);
+      expect(addMeterData).toHaveBeenCalledWith(
+        "123",
+        expect.objectContaining({ start_date: "2024-02-01", status: MeterDataStatus.INACTIVE }),
+        expect.anything(),
+      );
+    });
   });
 
   // --- DELETE METER ---

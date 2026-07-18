@@ -278,4 +278,11 @@ fabric.properties
 Custom ignores by developers
 config/default.json
 .env.production
-docs
+
+# Generated documentation output (OpenAPI, TypeDoc) is ignored,
+# but keep the tracked README translations and logo.
+docs/*
+!docs/logo.svg
+!docs/README.fr.md
+!docs/README.de.md
+!docs/README.nl.md

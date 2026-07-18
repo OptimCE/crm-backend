@@ -29,6 +29,9 @@ export const MEMBER_ERRORS = {
     DATABASE_SAVE_INDIVIDUAL: new LocalError(500011, "member:update_member.database_save_individual"),
     DATABASE_SAVE_COMPANY: new LocalError(50012, "member:update_member.database_save_company"),
   },
+  INTEGRITY: {
+    MEMBER_HAS_ACTIVE_METERS: new LocalError(50013, "member:integrity.member_has_active_meters"),
+  },
   VALIDATION: {
     WRONG_TYPE: {
       MEMBER_TYPE: new LocalError(55000, "member:validation.wrong_type.member_type"),

@@ -92,6 +92,37 @@ export const CommunityResponses = {
       },
     },
   },
+  RegulatorsListSuccess: {
+    description: "Successful list of valid regulators (reference data)",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                code: { type: "string" },
+                label: { type: "string" },
+                region: { type: "string" },
+                country: { type: "string" },
+                active: { type: "boolean" },
+              },
+            },
+          },
+        },
+        example: {
+          error_code: 0,
+          data: [
+            { code: "BE-WAL-CWAPE", label: "CWaPE", region: "Wallonia", country: "BE", active: true },
+            { code: "BE-BRU-BRUGEL", label: "Brugel", region: "Brussels", country: "BE", active: false },
+            { code: "BE-VLA-VREG", label: "VREG", region: "Flanders", country: "BE", active: false },
+          ],
+        },
+      },
+    },
+  },
   CommunityDetailSuccess: {
     description: "Successful community detail response",
     content: {
@@ -109,6 +140,7 @@ export const CommunityResponses = {
             created_at: "2024-01-01T00:00:00.000Z",
             updated_at: "2024-01-01T00:00:00.000Z",
             member_count: 4,
+            regulator: "BE-WAL-CWAPE",
             description: "A test community description",
           },
         },

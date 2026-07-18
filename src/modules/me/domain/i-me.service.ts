@@ -20,6 +20,7 @@ import type {
   UserMemberInvitationQuery,
 } from "../../invitations/api/invitation.dtos.js";
 import type { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
+import type { MeterConsumptionDTO, MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
 
 export interface IMeService {
   getDocuments(query: MeDocumentPartialQuery): Promise<[MeDocumentDTO[], Pagination]>;
@@ -28,6 +29,7 @@ export interface IMeService {
   getMemberById(id: number): Promise<MeIndividualDTO | MeCompanyDTO>;
   getMeters(query: MeMetersPartialQuery): Promise<[MePartialMeterDTO[], Pagination]>;
   getMeterById(id: string): Promise<MeMeterDTO>;
+  getMeterConsumptions(id: string, query: MeterConsumptionQuery): Promise<MeterConsumptionDTO>;
   getOwnManagerPendingInvitation(query: UserManagerInvitationQuery): Promise<[UserManagerInvitationDTO[], Pagination]>;
   getOwnMemberPendingInvitation(query: UserMemberInvitationQuery): Promise<[UserMemberInvitationDTO[], Pagination]>;
   getOwnMemberPendingInvitationById(id: number): Promise<IndividualDTO | CompanyDTO>;

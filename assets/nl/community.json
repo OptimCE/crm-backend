@@ -26,5 +26,9 @@
     "mismatch_id": "De gemeenschaps-ID komt niet overeen met de te verwijderen gemeenschap",
     "database_delete_exception": "Er is een fout opgetreden bij het verwijderen van de gemeenschap in de database",
     "iam_delete_community": "Er is een fout opgetreden bij het verwijderen van de gemeenschap via de IAM-service"
+  },
+  "validation": {
+    "invalid_regulator": "De regulator is ongeldig of momenteel niet beschikbaar",
+    "invalid_iban": "Het IBAN is ongeldig"
   }
 }

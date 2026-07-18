@@ -13,10 +13,13 @@ import { DeleteResult, In, type QueryRunner, SelectQueryBuilder } from "typeorm"
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import { Meter, MeterData } from "../../meters/domain/meter.models.js";
+import { CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 import { addDaysISO, localTodayISO } from "../../../shared/utils/date.utils.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { SharingKeyStatus } from "../shared/sharing_operation.types.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
+import { AppError } from "../../../shared/middlewares/error.middleware.js";
+import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
 
 @injectable()
 export class SharingOperationRepository implements ISharingOperationRepository {
@@ -102,6 +105,8 @@ export class SharingOperationRepository implements ISharingOperationRepository {
 
     qb = qb
       .where("sharing_op.id = :id", { id: id_sharing })
+      // Load the parent community so the DTO can surface its (read-only) regulator.
+      .leftJoinAndSelect("sharing_op.community", "community")
       // Now we can use leftJoinAndSelect because we added the relation to the model
       .leftJoinAndSelect("sharing_op.keys", "keys")
       // Join the allocationKey to get details for the DTO
@@ -213,18 +218,51 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     // Filter by Sharing Operation ID
     qb = qb.andWhere("consumption.sharing_operation = :id", { id: id_sharing });
 
-    // Date Filters
+    // Date filters on Brussels local calendar dates (matches billing period semantics).
     if (query.date_start) {
-      qb = qb.andWhere("consumption.timestamp >= :start", { start: query.date_start });
+      qb = qb.andWhere(`(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date >= CAST(:dateStart AS date)`, {
+        dateStart: toCalendarDateString(query.date_start),
+      });
     }
     if (query.date_end) {
-      qb = qb.andWhere("consumption.timestamp <= :end", { end: query.date_end });
+      qb = qb.andWhere(`(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date <= CAST(:dateEnd AS date)`, {
+        dateEnd: toCalendarDateString(query.date_end),
+      });
     }
 
     // Sort by timestamp ASC (standard for time series)
     qb = qb.orderBy("consumption.timestamp", "ASC");
 
     return qb.getMany();
+  }
+
+  /**
+   * Monthly coverage aggregate over `sharing_op_consumption` for one operation.
+   *
+   * Groups rows by Brussels calendar month and counts them. `CONSUMPTION_TIMEZONE`
+   * is inlined into the SQL exactly as the sibling `getSharingOperationConsumption`
+   * date filter does (it is a hardcoded constant, never user input), so the month
+   * boundary matches the chart: e.g. a timestamp at Brussels-local
+   * `2026-01-31 23:45` lands in `2026-01`. `to_char(date_trunc(...))` returns the
+   * final `YYYY-MM` string straight from the DB, avoiding any JS timezone re-shift.
+   */
+  getSharingOperationConsumptionCoverage(
+    id_sharing: number,
+    query_runner?: QueryRunner,
+  ): Promise<{ month: string; count: string }[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const qb = manager
+      .createQueryBuilder(SharingOpConsumption, "consumption")
+      .select(`to_char(date_trunc('month', consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}'), 'YYYY-MM')`, "month")
+      .addSelect("COUNT(*)", "count")
+      .where("consumption.sharing_operation = :id", { id: id_sharing })
+      .groupBy("month")
+      .orderBy("month", "ASC");
+
+    // Tenant scoping — same as the row-level consumption query.
+    withCommunityScope(qb, "consumption");
+
+    return qb.getRawMany<{ month: string; count: string }>();
   }
 
   async createSharingOperation(new_sharing_op: CreateSharingOperationDTO, query_runner?: QueryRunner): Promise<SharingOperation> {
@@ -556,5 +594,17 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     const skip = (query.page - 1) * take;
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  /** Community that owns the sharing operation — used to stamp consumption rows. */
+  private async getSharingOperationCommunityId(id_sharing: number, manager: typeof AppDataSource.manager): Promise<number> {
+    const sharingOp = await manager.findOne(SharingOperation, {
+      where: { id: id_sharing },
+      relations: ["community"],
+    });
+    if (!sharingOp?.community?.id) {
+      throw new AppError(SHARING_OPERATION_ERRORS.GET_SHARING_OPERATION.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+    return sharingOp.community.id;
   }
 }

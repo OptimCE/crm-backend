@@ -26,6 +26,9 @@
     "database_save_individual": "Une erreur est survenue lors de la mise à jour de l'individu dans la base de données",
     "database_save_company": "Une erreur est survenue lors de la mise à jour de la société dans la base de données"
   },
+  "integrity": {
+    "member_has_active_meters": "Vous ne pouvez pas désactiver ou supprimer un membre qui possède encore des compteurs actifs. Veuillez d'abord désactiver ses compteurs."
+  },
   "validation": {
     "wrong_type": {
       "member_type": "Le champ '{{field}}' doit être du type 'MemberType'"

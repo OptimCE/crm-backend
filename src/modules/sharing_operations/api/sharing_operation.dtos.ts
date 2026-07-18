@@ -246,6 +246,12 @@ export class SharingOperationDTO extends SharingOperationPartialDTO {
   @Expose()
   is_public!: boolean;
   /**
+   * Regulator inherited (read-only) from the parent community. Sourced from
+   * `community.regulator`; not editable on the sharing operation.
+   */
+  @Expose()
+  community_regulator?: string;
+  /**
    * Current active key.
    */
   @Expose()
@@ -277,6 +283,19 @@ export class SharingOpConsumptionDTO {
   inj_net!: number[];
   @Expose()
   inj_shared!: number[];
+}
+
+/**
+ * DTO describing which Brussels calendar months already hold consumption data
+ * for a sharing operation. Powers the UI "data coverage" indicator.
+ * `month` is formatted `YYYY-MM` (Brussels calendar month); `count` is the
+ * number of consumption rows aggregated into that month.
+ */
+export class SharingOpConsumptionCoverageDTO {
+  @Expose()
+  month!: string;
+  @Expose()
+  count!: number;
 }
 
 /**

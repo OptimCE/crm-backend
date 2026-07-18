@@ -26,6 +26,9 @@
     "database_save_individual": "Er is een fout opgetreden bij het bijwerken van de persoon in de database",
     "database_save_company": "Er is een fout opgetreden bij het bijwerken van het bedrijf in de database"
   },
+  "integrity": {
+    "member_has_active_meters": "U kunt een lid met nog actieve meters niet deactiveren of verwijderen. Deactiveer eerst hun meters."
+  },
   "validation": {
     "wrong_type": {
       "member_type": "Het veld '{{field}}' moet van het type 'MemberType' zijn"

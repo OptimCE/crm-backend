@@ -11,6 +11,7 @@ import { Cache, InvalidateCache } from "../../../shared/cache/decorator/cache.de
 import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 import {
   CreateMeterDTO,
+  DeactivateMeterDTO,
   DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
@@ -133,6 +134,25 @@ export class MeterController {
     const patched_meter_data = await validateDto(PatchMeterDataDTO, req.body);
     await this.meterService.patchMeterData(patched_meter_data);
     logger.info("Meter data patched");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Deactivates a meter by appending an INACTIVE configuration starting on the given date.
+   * @param req - Express request object. Body: DeactivateMeterDTO.
+   * @param res - Express response object. Returns success message.
+   * @param _next - Express next middleware.
+   */
+  @meterControllerTraceDecorator.traceSpan("deactivateMeter", { url: "/meters/data/deactivate", method: "patch" })
+  @InvalidateCache([
+    cachePattern("meters:list", "community"),
+    cachePattern("meters:detail", "community"),
+    cachePattern("meters:consumptions", "community"),
+  ])
+  async deactivateMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const deactivate_meter = await validateDto(DeactivateMeterDTO, req.body);
+    await this.meterService.deactivateMeter(deactivate_meter);
+    logger.info("Meter deactivated");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 

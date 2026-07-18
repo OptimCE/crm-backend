@@ -30,6 +30,7 @@ import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
+import type { IMeterRepository } from "../../meters/domain/i-meter.repository.js";
 
 /**
  * Service implementation for managing members.
@@ -45,6 +46,7 @@ export class MemberService implements IMemberService {
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private auditLogService: IAuditLogService,
     @inject("NotificationService") private notificationService: INotificationService,
+    @inject("MeterRepository") private meter_repository: IMeterRepository,
   ) {}
 
   /**
@@ -77,6 +79,7 @@ export class MemberService implements IMemberService {
         name: new_member.manager.name,
         surname: new_member.manager.surname,
         phone_number: new_member.manager.phone_number,
+        community: { id: internal_community_id },
       });
       manager = await this.member_repository.saveManager(new_manager);
       if (!manager) {
@@ -155,6 +158,11 @@ export class MemberService implements IMemberService {
    */
   @Transactional()
   async deleteMember(id_member: number, query_runner?: QueryRunner): Promise<void> {
+    const active_meters = await this.meter_repository.countActiveMeterDataForMember(id_member, query_runner);
+    if (active_meters > 0) {
+      logger.warn({ operation: "deleteMember", id_member }, "Cannot delete a member that still has active meters");
+      throw new AppError(MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS, 409);
+    }
     try {
       const deleted_result: DeleteResult = await this.member_repository.deleteMember(id_member, query_runner);
       if (deleted_result.affected !== 1) {
@@ -277,6 +285,13 @@ export class MemberService implements IMemberService {
     if (!value) {
       logger.error({ operation: "patchMemberStatus" }, `No member found with id ${patched_member_status.id_member} found`);
       throw new AppError(MEMBER_ERRORS.PATCH_MEMBER_STATUS.MEMBER_NOT_FOUND, 400);
+    }
+    if (patched_member_status.status === MemberStatus.INACTIVE) {
+      const active_meters = await this.meter_repository.countActiveMeterDataForMember(patched_member_status.id_member, query_runner);
+      if (active_meters > 0) {
+        logger.warn({ operation: "patchMemberStatus", id_member: patched_member_status.id_member }, "Cannot deactivate a member that still has active meters");
+        throw new AppError(MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS, 409);
+      }
     }
     value.status = patched_member_status.status;
     try {
@@ -410,6 +425,7 @@ export class MemberService implements IMemberService {
             name: update_dto.manager.name,
             surname: update_dto.manager.surname,
             phone_number: update_dto.manager.phone_number,
+            community: { id: member.community.id },
           });
           manager = await this.member_repository.saveManager(new_manager);
           if (!manager) {
@@ -457,6 +473,7 @@ export class MemberService implements IMemberService {
             name: update_dto.manager.name,
             surname: update_dto.manager.surname,
             phone_number: update_dto.manager.phone_number,
+            community: { id: member.community.id },
           });
           manager = await this.member_repository.saveManager(new_manager);
           if (!manager) {

@@ -396,6 +396,7 @@ export const testCasesAddData = [
     expected_data: "success",
     mocks: {
       sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
         getAuthorizedEans: jest.fn(() => Promise.resolve(new Set(["123"]))),
         addConsumptions: jest.fn(() => Promise.resolve({})),
       },
@@ -424,6 +425,7 @@ export const testCasesAddData = [
     expected_data: SHARING_OPERATION_ERRORS.ADD_CONSUMPTION_DATA.NO_METER_AUTHORIZED.message,
     mocks: {
       sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
         getAuthorizedEans: jest.fn(() => Promise.resolve(new Set([]))),
         addConsumptions: jest.fn(() => Promise.resolve({})),
       },

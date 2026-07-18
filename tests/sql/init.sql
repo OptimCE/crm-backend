@@ -21,6 +21,16 @@ CREATE TABLE IF NOT EXISTS community (
     website_url VARCHAR(255) NULL,
     logo_url VARCHAR(255) NULL,
     description TEXT NULL,
+    -- Energy-market regulator the community is notified to (region -> regulator is 1:1).
+    -- Coded value from the shared registry; see reference/regulators.json.
+    regulator VARCHAR(32) NOT NULL DEFAULT 'BE-WAL-CWAPE'
+        CHECK (regulator IN ('BE-WAL-CWAPE', 'BE-BRU-BRUGEL', 'BE-VLA-VREG')),
+    -- Legal & bank identity (all optional). The legal/registered address reuses
+    -- headquarters_address. account_holder_name is only set when it differs from legal_name.
+    vat_number VARCHAR(32) NULL,
+    legal_name VARCHAR(255) NULL,
+    iban VARCHAR(34) NULL,
+    account_holder_name VARCHAR(255) NULL,
     headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT current_timestamp,
@@ -548,22 +558,32 @@ CREATE INDEX IF NOT EXISTS idx_notification_community
 
 -- 1. Communities
 INSERT INTO community (
-    name, website_url, logo_url, description, auth_community_id
+    name, website_url, logo_url, description, auth_community_id,
+    vat_number, legal_name, iban, account_holder_name
 ) VALUES (
     'Test Community',
     'https://test-community.example.com',
     'https://test-community.example.com/logo.png',
     'A test community',
-    '2c8a0ea5-d597-49d6-ae12-4dceb9e9a018'
+    '2c8a0ea5-d597-49d6-ae12-4dceb9e9a018',
+    'BE0762031208',        -- valid Belgian VAT (mod-97)
+    'Test Community ASBL',
+    'BE71096123456769',    -- valid Belgian IBAN (mod-97)
+    NULL                   -- holder = legal entity; billing falls back to legal_name
 );
 INSERT INTO community (
-    name, website_url, logo_url, description, auth_community_id
+    name, website_url, logo_url, description, auth_community_id,
+    vat_number, legal_name, iban, account_holder_name
 ) VALUES (
     'Other Community',
     'https://other-community.example.com',
     NULL,
     'Another community without public sharing',
-    '2'
+    '2',
+    'BE0477109346',        -- valid Belgian VAT (mod-97)
+    'Other Community ASBL',
+    'BE68539007547034',
+    NULL
 );
 INSERT INTO community (name, logo_url, auth_community_id) VALUES (
     'Empty Community', 'https://empty-community.example.com/logo.png', '3'
@@ -581,6 +601,19 @@ INSERT INTO address (street, number, postcode, city) VALUES (
 );
 INSERT INTO address (street, number, postcode, city) VALUES (
     'Fourth St', 4, '4000', 'Liege'
+);
+-- Home/billing addresses for the wind sharing operation members (ids 5-8)
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Wind Alley', 10, '1000', 'Brussels'
+);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Wind Alley', 12, '1000', 'Brussels'
+);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Wind Alley', 14, '1000', 'Brussels'
+);
+INSERT INTO address (street, number, postcode, city) VALUES (
+    'Wind Alley', 16, '1000', 'Brussels'
 );
 
 -- Link community headquarters to addresses
@@ -688,6 +721,48 @@ INSERT INTO member (
 )
 VALUES ('Member Three', 3, 3, 'BE1122334455', 1, 1, 2); -- Other community
 
+-- Wind sharing operation members (ids 4-7): individuals in community 1, each with a dedicated wind meter
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
+VALUES ('Wind Producer Alpha', 5, 5, 'BE1000000001', 1, 1, 1); -- id 4
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
+VALUES ('Wind Producer Bravo', 6, 6, 'BE1000000002', 1, 1, 1); -- id 5
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
+VALUES ('Wind Producer Charlie', 7, 7, 'BE1000000003', 1, 1, 1); -- id 6
+INSERT INTO member (
+    name,
+    id_home_address,
+    id_billing_address,
+    iban,
+    status,
+    member_type,
+    id_community
+)
+VALUES ('Wind Producer Delta', 8, 8, 'BE1000000004', 1, 1, 1); -- id 7
+
 -- 6. Managers (for Entities)
 INSERT INTO manager (nrn, name, surname, email, phone_number, id_community)
 VALUES ('123456789', 'Manager', 'One', 'mgr1@test.com', '0470000000', 1);
@@ -700,6 +775,24 @@ VALUES (1, 'John', '111111111', 'john@test.com', '0471111111', FALSE, 1);
 
 INSERT INTO company (id, vat_number, id_manager)
 VALUES (2, 'BE0000000000', 1);
+
+-- Individual details for the wind sharing operation members (ids 4-7)
+INSERT INTO individual (
+    id, first_name, nrn, email, phone_number, social_rate, id_manager
+)
+VALUES (4, 'Alice', '200000001', 'alice.wind@test.com', '0470000004', FALSE, 1);
+INSERT INTO individual (
+    id, first_name, nrn, email, phone_number, social_rate, id_manager
+)
+VALUES (5, 'Bob', '200000002', 'bob.wind@test.com', '0470000005', FALSE, 1);
+INSERT INTO individual (
+    id, first_name, nrn, email, phone_number, social_rate, id_manager
+)
+VALUES (6, 'Carol', '200000003', 'carol.wind@test.com', '0470000006', FALSE, 1);
+INSERT INTO individual (
+    id, first_name, nrn, email, phone_number, social_rate, id_manager
+)
+VALUES (7, 'Dave', '200000004', 'dave.wind@test.com', '0470000007', FALSE, 1);
 
 -- 8. Allocation Keys
 INSERT INTO allocation_key (name, description, id_community) VALUES (
@@ -741,6 +834,47 @@ INSERT INTO meter (
     id_community
 )
 VALUES ('987654321098765432', 'M2', 2, 1, 3, 1, 1);
+-- Dedicated wind meters for the wind operation members (community 1, addresses 5-8)
+INSERT INTO meter (
+    ean,
+    meter_number,
+    id_address,
+    tarif_group,
+    phases_number,
+    reading_frequency,
+    id_community
+)
+VALUES ('541448200000000001', 'W1', 5, 1, 3, 1, 1);
+INSERT INTO meter (
+    ean,
+    meter_number,
+    id_address,
+    tarif_group,
+    phases_number,
+    reading_frequency,
+    id_community
+)
+VALUES ('541448200000000002', 'W2', 6, 1, 3, 1, 1);
+INSERT INTO meter (
+    ean,
+    meter_number,
+    id_address,
+    tarif_group,
+    phases_number,
+    reading_frequency,
+    id_community
+)
+VALUES ('541448200000000003', 'W3', 7, 1, 3, 1, 1);
+INSERT INTO meter (
+    ean,
+    meter_number,
+    id_address,
+    tarif_group,
+    phases_number,
+    reading_frequency,
+    id_community
+)
+VALUES ('541448200000000004', 'W4', 8, 1, 3, 1, 1);
 
 -- Only brussels for tests --
 
@@ -902,8 +1036,70 @@ INSERT INTO meter_data (
     production_chain,
     total_generating_capacity
 )
--- Waiting GRD, Bi-horaire, Pro, Op2, Member2
-VALUES ('987654321098765432', 3, 2, 2, '2024-01-01', 2, 1, 2, NULL, NULL, NULL);
+-- Active, Bi-horaire, Pro, Op2, Member2
+VALUES ('987654321098765432', 1, 2, 2, '2024-01-01', 2, 1, 2, NULL, NULL, NULL);
+
+-- Wind operation (Op2) dedicated meters for members 4-7 (production_chain = 2 = eolien/wind)
+INSERT INTO meter_data (
+    ean,
+    status,
+    rate,
+    client_type,
+    start_date,
+    id_sharing_operation,
+    id_community,
+    id_member,
+    injection_status,
+    production_chain,
+    total_generating_capacity
+)
+-- Active, Simple, Res, Op2 (Wind), Member4, Autoprod Owner, Wind, 3.0 kVA
+VALUES ('541448200000000001', 1, 1, 1, '2024-01-01', 2, 1, 4, 1, 2, 3.0);
+INSERT INTO meter_data (
+    ean,
+    status,
+    rate,
+    client_type,
+    start_date,
+    id_sharing_operation,
+    id_community,
+    id_member,
+    injection_status,
+    production_chain,
+    total_generating_capacity
+)
+-- Active, Simple, Res, Op2 (Wind), Member5, Autoprod Owner, Wind, 3.5 kVA
+VALUES ('541448200000000002', 1, 1, 1, '2024-01-01', 2, 1, 5, 1, 2, 3.5);
+INSERT INTO meter_data (
+    ean,
+    status,
+    rate,
+    client_type,
+    start_date,
+    id_sharing_operation,
+    id_community,
+    id_member,
+    injection_status,
+    production_chain,
+    total_generating_capacity
+)
+-- Active, Bi-horaire, Res, Op2 (Wind), Member6, Autoprod Owner, Wind, 4.0 kVA
+VALUES ('541448200000000003', 1, 2, 1, '2024-01-01', 2, 1, 6, 1, 2, 4.0);
+INSERT INTO meter_data (
+    ean,
+    status,
+    rate,
+    client_type,
+    start_date,
+    id_sharing_operation,
+    id_community,
+    id_member,
+    injection_status,
+    production_chain,
+    total_generating_capacity
+)
+-- Active, Simple, Res, Op2 (Wind), Member7, Autoprod Owner, Wind, 2.5 kVA
+VALUES ('541448200000000004', 1, 1, 1, '2024-01-01', 2, 1, 7, 1, 2, 2.5);
 
 -- 14. Documents
 INSERT INTO document (
