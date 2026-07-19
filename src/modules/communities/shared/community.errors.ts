@@ -33,4 +33,8 @@ export const COMMUNITY_ERRORS = {
   GET_COMMUNITY: {
     COMMUNITY_NOT_FOUND: new LocalError(10016, "community:get_community.community_not_found"),
   },
+  VALIDATION: {
+    INVALID_REGULATOR: new LocalError(10017, "community:validation.invalid_regulator"),
+    INVALID_IBAN: new LocalError(10018, "community:validation.invalid_iban"),
+  },
 };

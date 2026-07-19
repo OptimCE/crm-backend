@@ -208,9 +208,20 @@ describe("(Functional) Member Module", () => {
   describe("(Functional) Delete Member", () => {
     it.each(testCasesDeleteMember)(
       "DELETE /members/:id : $description",
-      async ({ member_id, orgs, status_code, expected_error_code, expected_data }) => {
+      async ({ member_id, orgs, status_code, expected_error_code, expected_data, deactivate_ean }) => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
+
+        // Some members hold an active meter; deactivate it first so the integrity guard allows deletion.
+        if (deactivate_ean) {
+          const deactivateRes = await request(app)
+            .patch("/meters/data/deactivate")
+            .send({ EAN: deactivate_ean, date: "2024-06-01" })
+            .set("x-user-id", "auth0|admin")
+            .set("x-community-id", AUTH_COMMUNITY_1)
+            .set("x-user-orgs", orgs);
+          expect(deactivateRes.status).toBe(200);
+        }
 
         const response = await request(app)
           .delete(`/members/${member_id}`)

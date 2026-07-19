@@ -4,6 +4,7 @@ import { AppDataSource } from "../../../shared/database/database.connector.js";
 import type { IMeterRepository } from "../domain/i-meter.repository.js";
 import {
   CreateMeterDTO,
+  DeactivateMeterDTO,
   DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
@@ -27,6 +28,7 @@ import { Member } from "../../members/domain/member.models.js";
 import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
+import { MeterDataStatus } from "../shared/meter.types.js";
 
 /**
  * Service implementation for managing meters.
@@ -270,6 +272,53 @@ export class MeterService implements IMeterService {
         throw err;
       }
       logger.error({ operation: "patchMeterData", error: err }, "Failed to patch meter data");
+      throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
+    }
+  }
+
+  /**
+   * Deactivates a meter by appending an INACTIVE MeterData record starting on the given date.
+   * The remaining configuration (rate, client type, holder, …) is inherited from the current
+   * record by the repository, which also closes the previously open record.
+   * @param deactivate_meter - DTO including EAN and effective date.
+   * @param query_runner - Database transaction runner.
+   * @throws AppError if meter not found or DB error.
+   */
+  @Transactional()
+  async deactivateMeter(deactivate_meter: DeactivateMeterDTO, query_runner?: QueryRunner): Promise<void> {
+    const meter = await this.meterRepository.getMeter(deactivate_meter.EAN, query_runner);
+    if (!meter) {
+      logger.warn({ operation: "deactivateMeter", ean: deactivate_meter.EAN }, "Meter not found");
+      throw new AppError(METER_ERRORS.PATCH_METER_DATA.METER_NOT_FOUND, 400);
+    }
+
+    try {
+      const result = await this.meterRepository.addMeterData(
+        deactivate_meter.EAN,
+        {
+          start_date: deactivate_meter.date,
+          status: MeterDataStatus.INACTIVE,
+        },
+        query_runner,
+      );
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_DATA_DEACTIVATED,
+          entity_type: "meter_data",
+          entity_id: String(result.id),
+          payload: {
+            meter_ean: deactivate_meter.EAN,
+            start_date: deactivate_meter.date,
+            status: MeterDataStatus.INACTIVE,
+          },
+        },
+        query_runner,
+      );
+    } catch (err) {
+      if (isAppErrorLike(err)) {
+        throw err;
+      }
+      logger.error({ operation: "deactivateMeter", error: err }, "Failed to deactivate meter");
       throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
     }
   }

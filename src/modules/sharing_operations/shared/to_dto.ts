@@ -1,5 +1,6 @@
 import type { SharingOpConsumption, SharingOperation, SharingOperationKey, SharingOperationMunicipality } from "../domain/sharing_operation.models.js";
 import {
+  SharingOpConsumptionCoverageDTO,
   SharingOpConsumptionDTO,
   SharingOperationDTO,
   SharingOperationKeyDTO,
@@ -46,6 +47,8 @@ export function toSharingOperation(value: SharingOperation): SharingOperationDTO
   dto.name = value.name;
   dto.type = value.type;
   dto.is_public = value.is_public;
+  // Inherited, read-only from the parent community (loaded via the `community` relation).
+  dto.community_regulator = value.community?.regulator;
   dto.municipalities = municipalitiesFromLinks(value.municipalities);
 
   // Safety check if keys are not loaded
@@ -89,4 +92,20 @@ export function toSharingOperationConsumptions(values: SharingOpConsumption[]): 
   dto.inj_shared = values.map((v) => v.inj_shared ?? 0);
 
   return dto;
+}
+
+/**
+ * Maps the raw monthly-aggregate rows (from the repository GROUP BY query) into
+ * `SharingOpConsumptionCoverageDTO[]`. `month` already arrives as the exact
+ * `YYYY-MM` string (the DB computes it with `to_char(date_trunc(... AT TIME ZONE
+ * 'Europe/Brussels'), 'YYYY-MM')`, so no timezone re-shift happens here);
+ * `count` comes back as a Postgres bigint string and is coerced to `number`.
+ */
+export function toSharingOperationConsumptionCoverage(rows: { month: string; count: string }[]): SharingOpConsumptionCoverageDTO[] {
+  return rows.map((row) => {
+    const dto = new SharingOpConsumptionCoverageDTO();
+    dto.month = row.month;
+    dto.count = Number(row.count);
+    return dto;
+  });
 }

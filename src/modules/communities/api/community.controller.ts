@@ -23,6 +23,7 @@ import {
 import { SharingOperationPartialDTO, SharingOperationPartialQuery } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { cacheKey, cachePattern } from "../../../shared/cache/decorator/cache-key.builder.js";
 import { InvalidateCache, Cache } from "../../../shared/cache/decorator/cache.decorators.js";
+import { getRegulators, RegulatorDef } from "../shared/regulator.js";
 
 const communityControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
@@ -40,6 +41,18 @@ export class CommunityController {
     @inject("CommunityService") private readonly communityService: ICommunityService,
     @inject("SharingOperationService") private readonly sharingOperationService: ISharingOperationService,
   ) {}
+
+  /**
+   * Returns the static reference list of valid regulators (code, label, region,
+   * country, active). Tenant-agnostic, cacheable — served from the shared
+   * registry. Used by the frontend dropdown; annexe services read the file directly.
+   */
+  @communityControllerTraceDecorator.traceSpan("getRegulators", { url: "/communities/regulators", method: "get" })
+  async getRegulators(_req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const regulators = getRegulators();
+    logger.info("Regulator reference list successfully retrieved");
+    res.status(200).json(new ApiResponse<RegulatorDef[]>(regulators, SUCCESS));
+  }
 
   @communityControllerTraceDecorator.traceSpan("getAllPublicCommunities", { url: "/communities", method: "get" })
   // @Cache(cacheKey("communities:all-list", "none", () => ""), 60)

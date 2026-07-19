@@ -34,6 +34,7 @@ export function toPublicCommunityDTO(community: Community, logo_presigned_url: s
   return {
     id: community.id,
     name: community.name,
+    regulator: community.regulator,
     logo_url: community.logo_url,
     logo_presigned_url,
   };
@@ -47,11 +48,16 @@ export function toCommunityDetailDTO(community: Community, member_count: number,
     created_at: community.created_at,
     updated_at: community.updated_at,
     member_count,
+    regulator: community.regulator,
     description: community.description,
     website_url: community.website_url,
     logo_url: community.logo_url,
     logo_presigned_url: logo_presigned_url ?? null,
     headquarters_address: community.headquarters_address ? toAddressDTO(community.headquarters_address) : null,
+    vat_number: community.vat_number,
+    legal_name: community.legal_name,
+    iban: community.iban,
+    account_holder_name: community.account_holder_name,
   };
 }
 

@@ -112,7 +112,7 @@ export const testCasesGetAdmins = [
 export const testCasesCreateCommunity = [
   {
     description: "Success Create",
-    body: { name: "Functional Community" },
+    body: { name: "Functional Community", regulator: "BE-WAL-CWAPE" },
     orgs: ORGS_MEMBER, // Anyone can create? Controller doesn't restrict
     status_code: 200,
     expected_error_code: SUCCESS,
@@ -134,6 +134,36 @@ export const testCasesUpdateCommunity = [
     status_code: 200,
     expected_error_code: SUCCESS,
     expected_data: "success",
+    external_mocks: {
+      iamService: {
+        updateCommunity: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Success Update Bank & Legal Info",
+    body: {
+      vat_number: "BE0123456789",
+      legal_name: "Energy Community SCRL",
+      iban: "BE68539007547034",
+      account_holder_name: "Energy Community SCRL Treasury",
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    external_mocks: {
+      iamService: {
+        updateCommunity: jest.fn(() => Promise.resolve()),
+      },
+    },
+  },
+  {
+    description: "Fail - Invalid IBAN",
+    body: { iban: "NOT-AN-IBAN" },
+    orgs: ORGS_ADMIN,
+    status_code: 422,
+    expected_error_code: COMMUNITY_ERRORS.VALIDATION.INVALID_IBAN.errorCode,
     external_mocks: {
       iamService: {
         updateCommunity: jest.fn(() => Promise.resolve()),
@@ -278,14 +308,30 @@ export const testCasesGetCommunityById = [
     },
   },
   {
-    description: "Success - Returns null logo_presigned_url when community has no logo",
-    id: 2, // Other Community has logo_url = NULL
+    description: "Success - Returns null logo_presigned_url and bank/legal fields when community has no logo",
+    id: 2, // Other Community has logo_url = NULL and seeded bank/legal info
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,
     check_data: (data: unknown): boolean => {
-      const d = data as { id: number; logo_url: string | null; logo_presigned_url: string | null };
-      return d.id === 2 && d.logo_url === null && d.logo_presigned_url === null;
+      const d = data as {
+        id: number;
+        logo_url: string | null;
+        logo_presigned_url: string | null;
+        vat_number: string | null;
+        legal_name: string | null;
+        iban: string | null;
+        account_holder_name: string | null;
+      };
+      return (
+        d.id === 2 &&
+        d.logo_url === null &&
+        d.logo_presigned_url === null &&
+        d.vat_number === "BE0477109346" &&
+        d.legal_name === "Other Community ASBL" &&
+        d.iban === "BE68539007547034" &&
+        d.account_holder_name === null
+      );
     },
     external_mocks: undefined,
   },

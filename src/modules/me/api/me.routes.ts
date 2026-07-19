@@ -117,6 +117,26 @@ me_routes.get(
   me_controller.getMeterById.bind(me_controller),
 );
 
+// GET /meters/:id/consumptions -> Fetch own consumption data for a meter
+me_routes.get(
+  "/meters/:id/consumptions",
+  /* #swagger.summary = 'Retrieve own consumption data for a meter by EAN'
+       #swagger.tags = ['Me']
+       #swagger.description = 'Returns only the readings taken while a member of the requesting user held the meter, so a meter that changed holder shows each member only their own timeline.'
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+       #swagger.parameters['id'] = { $ref: '#/components/parameters/MeMeterId' }
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/MeterConsumptionQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/MeterConsumptionsGetSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+    */
+  idChecker(),
+  me_controller.getMeterConsumptions.bind(me_controller),
+);
+
 // GET /invitations -> Fetch all own member pending invitations
 me_routes.get(
   "/invitations",

@@ -26,6 +26,9 @@
     "database_save_individual": "Beim Aktualisieren der Person in der Datenbank ist ein Fehler aufgetreten",
     "database_save_company": "Beim Aktualisieren des Unternehmens in der Datenbank ist ein Fehler aufgetreten"
   },
+  "integrity": {
+    "member_has_active_meters": "Sie können ein Mitglied mit noch aktiven Zählern nicht deaktivieren oder löschen. Bitte deaktivieren Sie zuerst dessen Zähler."
+  },
   "validation": {
     "wrong_type": {
       "member_type": "Das Feld '{{field}}' muss vom Typ 'MemberType' sein"

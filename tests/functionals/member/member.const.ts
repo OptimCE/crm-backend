@@ -106,6 +106,32 @@ export const testCasesAddMember = [
     expected_error_code: SUCCESS,
     expected_data: "success",
   },
+  {
+    // Company (and any member with a guardian) also creates a Manager row.
+    // Regression guard for the Manager insert missing the NOT NULL id_community
+    // (previously failed as member:add_member.database_add / 50000).
+    description: "Success - Add Company with legal representative (Manager)",
+    body: {
+      name: "New Func Company",
+      member_type: MemberType.COMPANY,
+      status: MemberStatus.ACTIVE,
+      iban: "BE8888888888",
+      vat_number: "BE0123456789",
+      home_address: { street: "Rue", number: "1", city: "Bruxelles", postcode: "1000" },
+      billing_address: { street: "Rue", number: "1", city: "Bruxelles", postcode: "1000" },
+      manager: {
+        NRN: "80000000097",
+        name: "Legal",
+        surname: "Rep",
+        email: "legalrep_func@test.com",
+        phone_number: "+32400000000",
+      },
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+  },
 ];
 
 // 5. Update Member
@@ -151,15 +177,15 @@ export const testCasesUpdateMember = [
 // 6. Patch Status
 export const testCasesPatchStatus = [
   {
-    description: "Success - Deactivate",
+    // existingIndividualId has an ACTIVE meter in the seed → the integrity guard blocks deactivation.
+    description: "Blocked - Deactivate member with active meters (409)",
     body: {
       id_member: existingIndividualId,
       status: MemberStatus.INACTIVE,
     },
     orgs: ORGS_ADMIN,
-    status_code: 200,
-    expected_error_code: SUCCESS,
-    expected_data: "success",
+    status_code: 409,
+    expected_error_code: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.errorCode,
   },
   {
     description: "Success - Reactivate (INACTIVE → ACTIVE)",
@@ -215,16 +241,18 @@ export const testCasesDeleteLink = [
 // 9. Delete Member
 export const testCasesDeleteMember = [
   {
-    description: "Success - Delete Individual",
+    // existingIndividualId has an ACTIVE meter in the seed → deletion is blocked by the guard.
+    description: "Blocked - Delete member with active meters (409)",
     member_id: existingIndividualId,
     orgs: ORGS_ADMIN,
-    status_code: 200,
-    expected_error_code: SUCCESS,
-    expected_data: "success",
+    status_code: 409,
+    expected_error_code: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.errorCode,
   },
   {
-    description: "Success - Delete Company",
+    // Deactivating the member's only meter first clears the guard, so the delete then succeeds.
+    description: "Success - Delete Company after deactivating its meter",
     member_id: existingCompanyId,
+    deactivate_ean: "987654321098765432",
     orgs: ORGS_ADMIN,
     status_code: 200,
     expected_error_code: SUCCESS,

@@ -16,6 +16,7 @@ import * as middleware from "i18next-http-middleware";
 import path from "path";
 import { fileURLToPath } from "url";
 import logger from "./shared/monitor/logger.js";
+import { getRegulators } from "./modules/communities/shared/regulator.js";
 
 // 1. Recreate __filename and __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -29,6 +30,9 @@ const host: string = config.get("server.host");
 
 const startServer = async (): Promise<void> => {
   try {
+    // Fail fast if the shared regulator registry is missing/misconfigured.
+    getRegulators();
+
     // Await the initialization of i18next
 
     await i18next

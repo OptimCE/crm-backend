@@ -387,10 +387,13 @@ describe("(Cache Integration) Member Module", () => {
       const keysBefore = memberKeys(cache.keys() as string[]);
       expect(keysBefore.length).toBe(2);
 
-      // Patch status → fires list + detail invalidation
+      // Patch status → fires list + detail invalidation.
+      // Member 1 has an active meter in the seed; deactivating (status 2) is blocked by the
+      // integrity guard, so patch to ACTIVE (status 1) — the guard only applies to deactivation,
+      // and the save + cache invalidation still fire.
       const patchRes = await request(app)
         .patch("/members/status")
-        .send({ id_member: 1, status: 2 })
+        .send({ id_member: 1, status: 1 })
         .set("x-user-id", AUTH_USER_ADMIN)
         .set("x-community-id", AUTH_COMMUNITY_1)
         .set("x-user-orgs", ORGS_GESTIONNAIRE);
@@ -481,6 +484,17 @@ describe("(Cache Integration) Member Module", () => {
     it("should invalidate all three cache types on delete", async () => {
       const cache = await getCacheService();
       const { default: app } = await import("../../../src/app.js");
+
+      // Member 2 has an active meter in the seed; the integrity guard blocks deletion while a
+      // live meter is attached, so deactivate the meter first (done before populating the member
+      // caches — the meter endpoint only invalidates meter cache keys, not member ones).
+      const deactivateMeterRes = await request(app)
+        .patch("/meters/data/deactivate")
+        .send({ EAN: "987654321098765432", date: "2024-06-01" })
+        .set("x-user-id", AUTH_USER_ADMIN)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+      expect(deactivateMeterRes.status).toBe(200);
 
       // Populate list cache
       const listRes = await request(app)

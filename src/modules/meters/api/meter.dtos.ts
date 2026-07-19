@@ -572,6 +572,30 @@ export class PatchMeterDataDTO extends CreateMeterDataDTO {
 }
 
 /**
+ * DTO for deactivating a meter.
+ * Appends an INACTIVE MeterData record starting on `date`; the remaining configuration
+ * (rate, client type, holder, …) is inherited from the current record by the repository.
+ */
+export class DeactivateMeterDTO {
+  /**
+   * EAN Code of the meter to deactivate.
+   */
+  @Expose()
+  @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
+  EAN!: string;
+
+  /**
+   * Effective date of deactivation (`YYYY-MM-DD`, calendar date, no time/zone).
+   */
+  @Expose()
+  @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
+  date!: string;
+}
+
+/**
  * DTO for deleting future meter data
  * Require ID Meter data to identify the entry to remove
  */

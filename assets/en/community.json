@@ -26,5 +26,9 @@
     "mismatch_id": "The community identifier does not match the community to be deleted",
     "database_delete_exception": "An error occurred while deleting the community in the database",
     "iam_delete_community": "An error occurred while deleting the community with the IAM service"
+  },
+  "validation": {
+    "invalid_regulator": "The regulator is invalid or not currently available",
+    "invalid_iban": "The IBAN is invalid"
   }
 }

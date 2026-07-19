@@ -29,6 +29,16 @@
       "frontendRoute": "/news",
       "subscribePath": "/annexes-services/news/subscribe",
       "unsubscribePath": "/annexes-services/news/unsubscribe"
+    },
+    {
+      "feature": "billing",
+      "displayKey": "ANNEXES_SERVICES.BILLING.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.BILLING.DESCRIPTION",
+      "icon": "pi pi-credit-card",
+      "minRole": "MEMBER",
+      "frontendRoute": "/billing",
+      "subscribePath": "/annexes-services/billing/subscribe",
+      "unsubscribePath": "/annexes-services/billing/unsubscribe"
     }
   ]
 }

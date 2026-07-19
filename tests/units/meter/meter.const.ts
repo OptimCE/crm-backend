@@ -458,6 +458,61 @@ export const testCasesPatchMeterData = [
   },
 ];
 
+// 6b. Deactivate Meter
+export const testCasesDeactivateMeter = [
+  {
+    description: "Success",
+    body: { EAN: "123", date: "2024-02-01" },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      meterRepo: {
+        getMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
+        addMeterData: jest.fn(() => Promise.resolve({ id: 1 })),
+      },
+    },
+  },
+  {
+    description: "Fail (date with time component — YYYY-MM-DD enforcement)",
+    body: { EAN: "123", date: "2024-02-01T00:00:00" },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE.errorCode,
+    expected_data: METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE.message,
+    translation_field: { field: "date", value: "2024-02-01T00:00:00" },
+    mocks: {},
+  },
+  {
+    description: "Fail (Not Found)",
+    body: { EAN: "999", date: "2024-02-01" },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.PATCH_METER_DATA.METER_NOT_FOUND.errorCode,
+    expected_data: METER_ERRORS.PATCH_METER_DATA.METER_NOT_FOUND.message,
+    mocks: {
+      meterRepo: {
+        getMeter: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+  {
+    description: "Fail (fail database)",
+    body: { EAN: "123", date: "2024-02-01" },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE.errorCode,
+    expected_data: METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE.message,
+    mocks: {
+      meterRepo: {
+        getMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
+        addMeterData: jest.fn(() => Promise.reject(new Error("Fail"))),
+      },
+    },
+  },
+];
+
 // 7. Delete Meter
 export const testCasesDeleteMeter = [
   {

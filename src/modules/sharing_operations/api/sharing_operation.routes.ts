@@ -6,6 +6,7 @@ import { communityIdChecker } from "../../../shared/middlewares/community.check.
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
 import multer from "multer";
+import { preserveContext } from "../../../shared/middlewares/context.js";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -141,6 +142,27 @@ sharing_operation_routes.get(
   roleChecker(Role.GESTIONNAIRE),
   sharing_operation_controller.downloadSharingOperationConsumptions.bind(sharing_operation_controller),
 );
+// Get (/:id/consumptions/coverage): Monthly coverage (which months already have consumption data)
+sharing_operation_routes.get(
+  "/:id/consumptions/coverage",
+  /* #swagger.summary = 'Monthly coverage of consumption data for a sharing operation'
+       #swagger.tags = ['SharingOperations']
+       #swagger.parameters['id'] = { $ref: '#/components/parameters/SharingOperationId' }
+       #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationConsumptionsGetSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  sharing_operation_controller.getSharingOperationConsumptionCoverage.bind(sharing_operation_controller),
+);
 // Post (/) : Create a new sharing operation
 sharing_operation_routes.post(
   "/",
@@ -265,7 +287,7 @@ sharing_operation_routes.post(
   idChecker(),
   communityIdChecker(),
   roleChecker(Role.GESTIONNAIRE),
-  upload.single("file"),
+  preserveContext(upload.single("file")),
   sharing_operation_controller.addConsumptionDataToSharing.bind(sharing_operation_controller),
 );
 // Patch (/key): Change the status of a key in the sharing operation

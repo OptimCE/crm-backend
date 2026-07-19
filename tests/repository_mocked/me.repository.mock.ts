@@ -9,6 +9,7 @@ export function createMockMeRepository(): jest.Mocked<IMeRepository> {
     getDocuments: jest.fn(),
     getMeterById: jest.fn(),
     getMeters: jest.fn(),
+    getMeterConsumptions: jest.fn(),
     getOwnManagersPendingInvitation: jest.fn(),
     getOwnMembersPendingInvitation: jest.fn(),
     getOwnMembersPendingInvitationById: jest.fn(),

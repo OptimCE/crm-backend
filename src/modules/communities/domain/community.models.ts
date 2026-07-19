@@ -49,6 +49,30 @@ export class Community {
   @Column({ type: "text", nullable: true })
   description!: string | null;
 
+  /**
+   * Energy-market regulator the community is notified to (region → regulator is 1:1).
+   * Coded value from the shared registry (see `reference/regulators.json`).
+   * Defaults to `BE-WAL-CWAPE` during the Wallonia-only phase.
+   */
+  @Column({ name: "regulator", type: "varchar", length: 32, nullable: false, default: "BE-WAL-CWAPE" })
+  regulator!: string;
+
+  /** VAT / BTW number of the community (e.g. `BE0123456789`). Optional. */
+  @Column({ name: "vat_number", type: "varchar", length: 32, nullable: true })
+  vat_number!: string | null;
+
+  /** Official registered legal name, distinct from the display `name`. Optional. */
+  @Column({ name: "legal_name", type: "varchar", length: 255, nullable: true })
+  legal_name!: string | null;
+
+  /** IBAN of the community's bank account. Optional. */
+  @Column({ name: "iban", type: "varchar", length: 34, nullable: true })
+  iban!: string | null;
+
+  /** Name the bank account is held under — only stored when it differs from `legal_name`. Optional. */
+  @Column({ name: "account_holder_name", type: "varchar", length: 255, nullable: true })
+  account_holder_name!: string | null;
+
   @Column({ name: "headquarters_address_id", type: "int", nullable: true })
   headquarters_address_id!: number | null;
 

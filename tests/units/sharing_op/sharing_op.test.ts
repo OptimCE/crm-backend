@@ -1,4 +1,4 @@
-import { expect, it } from "@jest/globals";
+import { expect, it, jest } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import {
@@ -26,8 +26,11 @@ import {
   testCasesPatchVisibility,
   testCasesUpdateMunicipalities,
   testCasesUpdateSharingOperation,
+  mockSharingOperationEntity,
 } from "./sharing_op.const.js";
 import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
+import { ORGS_ADMIN } from "../../utils/shared.consts.js";
+import { SharingKeyStatus } from "../../../src/modules/sharing_operations/shared/sharing_operation.types.js";
 
 describe("(Unit) Sharing Operation Module", () => {
   useUnitTestDb();
@@ -320,6 +323,47 @@ describe("(Unit) Sharing Operation Module", () => {
         });
       },
     );
+
+    // Regression guard for the approval off-by-one: an APPROVED key must be created
+    // starting on the *submitted* date, exactly one day after the previous key is closed.
+    it("PATCH /sharing_operations/key : APPROVED starts the new key on the submitted date (no off-by-one)", async () => {
+      const addSharingKeyEntry = jest.fn(() => Promise.resolve({}));
+      const closeActiveApprovedKey = jest.fn(() => Promise.resolve({}));
+      const closeSpecificKeyEntry = jest.fn(() => Promise.resolve({}));
+      await mockSharingOperationRepositoryModule({
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        closeActiveApprovedKey,
+        closeSpecificKeyEntry,
+        addSharingKeyEntry,
+      });
+
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+
+      const response = await request(app)
+        .patch("/sharing_operations/key")
+        .send({ id_key: 10, id_sharing: 1, status: SharingKeyStatus.APPROVED, date: "2024-02-01" })
+        .set("x-user-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_ADMIN);
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(200);
+
+        // addSharingKeyEntry(id_sharing, id_key, start_date, status, ...) — start_date is arg index 2.
+        const newEntryStartDate = addSharingKeyEntry.mock.calls[0][2] as Date;
+        // closeActiveApprovedKey(id_sharing, end_date, ...) — end_date is arg index 1.
+        const closedApprovedEndDate = closeActiveApprovedKey.mock.calls[0][1] as Date;
+        // closeSpecificKeyEntry(id_sharing, id_key, end_date, ...) — end_date is arg index 2.
+        const closedPendingEndDate = closeSpecificKeyEntry.mock.calls[0][2] as Date;
+
+        // The new approved entry starts on the submitted date (not the day before).
+        expect(newEntryStartDate.getTime()).toBe(new Date("2024-02-01").getTime());
+        // The previous rows are closed exactly one day before the new key takes over.
+        expect(newEntryStartDate.getTime() - closedApprovedEndDate.getTime()).toBe(24 * 60 * 60 * 1000);
+        expect(closedPendingEndDate.getTime()).toBe(closedApprovedEndDate.getTime());
+      });
+    });
   });
 
   // --- PATCH METER STATUS ---

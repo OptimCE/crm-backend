@@ -15,6 +15,7 @@ export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 export const mockCommunityEntity: Community = {
   id: 100,
   name: "Developers Community",
+  regulator: "BE-WAL-CWAPE",
   auth_community_id: "auth0|org_123",
   created_at: mockDate,
   updated_at: mockDate,
@@ -171,7 +172,7 @@ export const testCasesCreateCommunity = [
     description: "Success Create",
     id_user: 1,
     orgs: ORGS_MEMBER,
-    query: { name: "New Community" },
+    query: { name: "New Community", regulator: "BE-WAL-CWAPE" },
     status_code: 200,
     expected_error_code: SUCCESS,
     expected_data: "success",
@@ -211,9 +212,27 @@ export const testCasesCreateCommunity = [
     },
   },
   {
+    description: "Invalid DTO (invalid regulator)",
+    id_user: 1,
+    orgs: ORGS_MEMBER,
+    query: { name: "New Community", regulator: "XX-INVALID" },
+    status_code: 422,
+    expected_error_code: COMMUNITY_ERRORS.VALIDATION.INVALID_REGULATOR.errorCode,
+    expected_data: COMMUNITY_ERRORS.VALIDATION.INVALID_REGULATOR.message,
+    translation_field: { field: "regulator" },
+    mocks: {
+      iamService: {
+        createCommunity: jest.fn(() => Promise.resolve("new_auth_id")),
+      },
+      authContext: {
+        getInternalUserId: jest.fn(() => Promise.resolve(10)),
+      },
+    },
+  },
+  {
     description: "Fail (IAM Error)",
     id_user: 1,
-    query: { name: "Fail Community" },
+    query: { name: "Fail Community", regulator: "BE-WAL-CWAPE" },
     status_code: 400,
     expected_error_code: COMMUNITY_ERRORS.ADD_COMMUNITY.IAM_ERROR_CREATE.errorCode,
     expected_data: COMMUNITY_ERRORS.ADD_COMMUNITY.IAM_ERROR_CREATE.message,
@@ -229,7 +248,7 @@ export const testCasesCreateCommunity = [
   {
     description: "Fail (DB Error)",
     id_user: 1,
-    query: { name: "Fail Community" },
+    query: { name: "Fail Community", regulator: "BE-WAL-CWAPE" },
     status_code: 400,
     expected_error_code: COMMUNITY_ERRORS.ADD_COMMUNITY.DATABASE_SAVE_EXCEPTION.errorCode,
     expected_data: COMMUNITY_ERRORS.ADD_COMMUNITY.DATABASE_SAVE_EXCEPTION.message,

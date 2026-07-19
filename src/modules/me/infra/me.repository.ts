@@ -10,7 +10,9 @@ import { User, UserMemberLink } from "../../users/domain/user.models.js";
 import { withUserScope } from "../../../shared/database/withUser.js";
 import { getContext } from "../../../shared/middlewares/context.js";
 import { Document } from "../../documents/domain/document.models.js";
-import { Meter, MeterData } from "../../meters/domain/meter.models.js";
+import { Meter, MeterConsumption, MeterData } from "../../meters/domain/meter.models.js";
+import { MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
+import { CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 import { GestionnaireInvitation, UserMemberInvitation } from "../../invitations/domain/invitation.models.js";
 import { UserManagerInvitationQuery, UserMemberInvitationQuery } from "../../invitations/api/invitation.dtos.js";
 
@@ -320,6 +322,52 @@ export class MeRepository implements IMeRepository {
     qb.orderBy("meter.EAN", "ASC");
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  async getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const { user_id } = getContext();
+
+    let qb = manager.createQueryBuilder(MeterConsumption, "consumption");
+
+    // Security fallback: no user in context = no results
+    if (!user_id) {
+      qb.andWhere("1=0");
+      return qb.getMany();
+    }
+
+    qb = qb.where("consumption.meter = :ean", { ean });
+
+    // Ownership-window scoping: a reading is visible only if one of the current
+    // user's members held the meter on the reading's calendar day. A meter that
+    // changed holder mid-month therefore shows each member only their own slice.
+    qb = qb.andWhere(
+      `EXISTS (
+            SELECT 1 FROM meter_data sub_md
+            INNER JOIN user_member_link sub_uml ON sub_uml.id_member = sub_md.id_member
+            INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
+            WHERE sub_md.ean = consumption.ean
+            AND sub_u.auth_user_id = :contextAuthId
+            AND (consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date
+                BETWEEN sub_md.start_date AND COALESCE(sub_md.end_date, 'infinity'::date)
+        )`,
+      { contextAuthId: user_id },
+    );
+
+    if (query.date_start) {
+      qb = qb.andWhere(`(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date >= CAST(:dateStart AS date)`, {
+        dateStart: toCalendarDateString(query.date_start),
+      });
+    }
+    if (query.date_end) {
+      qb = qb.andWhere(`(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date <= CAST(:dateEnd AS date)`, {
+        dateEnd: toCalendarDateString(query.date_end),
+      });
+    }
+
+    qb = qb.orderBy("consumption.timestamp", "ASC");
+
+    return qb.getMany();
   }
 
   async getOwnManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]> {

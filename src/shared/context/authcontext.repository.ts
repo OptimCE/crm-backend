@@ -20,6 +20,9 @@ export class AuthContextRepository implements IAuthContextRepository {
   async getInternalCommunityId(query_runner?: QueryRunner): Promise<number> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const { community_id } = getContext();
+    if (!community_id) {
+      throw new AppError(GLOBAL_ERRORS.UNAUTHORIZED, 401);
+    }
     const community = await manager.findOne(Community, {
       where: { auth_community_id: community_id }, // Cast if partial type definition issues arise
       select: ["id"], // Select only ID for performance
@@ -34,6 +37,9 @@ export class AuthContextRepository implements IAuthContextRepository {
   async getInternalUserId(query_runner?: QueryRunner): Promise<number> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const { user_id } = getContext();
+    if (!user_id) {
+      throw new AppError(GLOBAL_ERRORS.UNAUTHENTICATED, 401);
+    }
 
     const user = await manager.findOne(User, {
       where: { auth_user_id: user_id }, // Cast if partial type definition issues arise

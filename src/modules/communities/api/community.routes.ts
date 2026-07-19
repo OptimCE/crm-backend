@@ -86,6 +86,21 @@ community_routes.get(
   communityIdChecker(),
   community_controller.getAdmins.bind(community_controller),
 );
+// Get (/regulators) : Static reference list of valid regulators (tenant-agnostic)
+// Declared before the `/:id` route so the literal path matches first.
+community_routes.get(
+  "/regulators",
+  /* #swagger.summary = 'List valid regulators (code, label, region, country, active)'
+       #swagger.tags = ['Communities']
+       #swagger.responses[200] = { $ref: '#/components/responses/RegulatorsListSuccess' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  community_controller.getRegulators.bind(community_controller),
+);
 // Post (/) : Create a new community
 community_routes.post(
   "/",

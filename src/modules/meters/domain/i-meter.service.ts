@@ -1,5 +1,6 @@
 import type {
   CreateMeterDTO,
+  DeactivateMeterDTO,
   DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
@@ -58,6 +59,11 @@ export interface IMeterService {
    * @param patched_meter_data - DTO including EAN and new data.
    */
   patchMeterData(patched_meter_data: PatchMeterDataDTO): Promise<void>;
+  /**
+   * Deactivates a meter by appending an INACTIVE configuration starting on the given date.
+   * @param deactivate_meter - DTO including EAN and effective date.
+   */
+  deactivateMeter(deactivate_meter: DeactivateMeterDTO): Promise<void>;
   /**
    * Deletes a meter.
    * @param id - EAN or internal ID.

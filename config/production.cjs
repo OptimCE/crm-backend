@@ -1,5 +1,9 @@
 module.exports = {
     microservice_name: process.env.MICROSERVICE_NAME,
+    regulators: {
+        // Must be provided in production (mounted shared JSON). No default: fail fast if unset.
+        config_path: process.env.REGULATORS_CONFIG_PATH
+    },
     allowed_origin: process.env.ALLOWED_ORIGIN,
     server: {
         host: process.env.SERVER_HOST,

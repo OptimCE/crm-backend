@@ -25,6 +25,8 @@ import { DOCUMENT_ERRORS } from "../../documents/shared/document.errors.js";
 import type { IStorageService } from "../../../shared/storage/i-storage.service.js";
 import { Meter } from "../../meters/domain/meter.models.js";
 import { METER_ERRORS } from "../../meters/shared/meter.errors.js";
+import { MeterConsumptionDTO, MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
+import { toMeterConsumptionDTO } from "../../meters/shared/to_dto.js";
 import {
   AcceptInvitationDTO,
   AcceptInvitationWEncodedDTO,
@@ -110,6 +112,14 @@ export class MeService implements IMeService {
       throw new AppError(METER_ERRORS.GET_METER.METER_NOT_FOUND, 400);
     }
     return toMeterDTO(value);
+  }
+
+  async getMeterConsumptions(id: string, query: MeterConsumptionQuery): Promise<MeterConsumptionDTO> {
+    // The repository only returns readings inside the current user's members'
+    // ownership windows, so an unknown or unowned EAN yields empty series
+    // rather than an error (no EAN existence oracle for members).
+    const consumptions = await this.meRepository.getMeterConsumptions(id, query);
+    return toMeterConsumptionDTO(id, consumptions);
   }
 
   async getMeters(query: MeMetersPartialQuery): Promise<[MePartialMeterDTO[], Pagination]> {

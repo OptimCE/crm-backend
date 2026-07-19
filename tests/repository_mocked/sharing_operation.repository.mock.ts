@@ -14,6 +14,7 @@ export function createMockSharingOperationRepository(): jest.Mocked<ISharingOper
     getPublicCommunitySharingOperations: jest.fn(),
     getSharingOperationById: jest.fn(),
     getSharingOperationConsumption: jest.fn(),
+    getSharingOperationConsumptionCoverage: jest.fn(),
     getSharingOperationList: jest.fn(),
     getSharingOperationKeysList: jest.fn(),
     getSharingOperationMetersList: jest.fn(),

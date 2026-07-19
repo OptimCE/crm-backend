@@ -16,6 +16,7 @@ import {
   PatchMeterToSharingOperationDTO,
   PatchSharingOperationVisibilityDTO,
   RemoveMeterFromSharingOperationDTO,
+  SharingOpConsumptionCoverageDTO,
   SharingOpConsumptionDTO,
   SharingOperationConsumptionQuery,
   SharingOperationDTO,
@@ -117,6 +118,25 @@ export class SharingOperationController {
     const result: SharingOpConsumptionDTO = await this.sharing_operationService.getSharingOperationConsumption(+req.params.id, query_consumptions);
     logger.info("Sharing operation consumptions successfully retrieved");
     res.status(200).json(new ApiResponse<SharingOpConsumptionDTO>(result, SUCCESS));
+  }
+
+  /**
+   * Retrieves the monthly coverage of a sharing operation's consumption data:
+   * which Brussels calendar months already have data and how many rows each has.
+   * Returns an empty array (HTTP 200) when the operation has no consumption data.
+   * @param req - Express request object. Params: id.
+   * @param res - Express response object. Returns SharingOpConsumptionCoverageDTO[].
+   * @param _next - Express next middleware.
+   */
+  @sharing_operationControllerTraceDecorator.traceSpan("getSharingOperationConsumptionCoverage", {
+    url: "/sharing_operations/:id/consumptions/coverage",
+    method: "get",
+  })
+  @Cache(cacheKey("sharing-op:consumptions", "community", (req) => "coverage:" + req.params.id), 60)
+  async getSharingOperationConsumptionCoverage(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const result: SharingOpConsumptionCoverageDTO[] = await this.sharing_operationService.getSharingOperationConsumptionCoverage(+req.params.id);
+    logger.info("Sharing operation consumption coverage successfully retrieved");
+    res.status(200).json(new ApiResponse<SharingOpConsumptionCoverageDTO[]>(result, SUCCESS));
   }
 
   /**

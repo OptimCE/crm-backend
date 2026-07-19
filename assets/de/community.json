@@ -26,5 +26,9 @@
     "mismatch_id": "Die Gemeinschafts-ID stimmt nicht mit der zu löschenden Gemeinschaft überein",
     "database_delete_exception": "Beim Löschen der Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
     "iam_delete_community": "Beim Löschen der Gemeinschaft über den IAM-Dienst ist ein Fehler aufgetreten"
+  },
+  "validation": {
+    "invalid_regulator": "Der Regulator ist ungültig oder derzeit nicht verfügbar",
+    "invalid_iban": "Die IBAN ist ungültig"
   }
 }

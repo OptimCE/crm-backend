@@ -7,6 +7,7 @@ export interface IMeterRepository {
   addMeterData(ean: string, new_data: Partial<MeterData>, query_runner?: QueryRunner): Promise<MeterData>;
   areMetersInCommunity(eans: string[], query_runner?: QueryRunner): Promise<boolean>;
   getLastMeterData(ean: string, query_runner?: QueryRunner): Promise<MeterData | null>;
+  countActiveMeterDataForMember(memberId: number, query_runner?: QueryRunner): Promise<number>;
   getMetersList(query: MeterPartialQuery, query_runner?: QueryRunner): Promise<[Meter[], number]>;
   getMeter(id: string, query_runner?: QueryRunner): Promise<Meter | null>;
   getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]>;
