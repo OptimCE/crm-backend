@@ -19,7 +19,8 @@
         "boolean": "The field '{{field}}' must be a boolean",
         "date": "The field '{{field}}' must be a valid date",
         "number": "The field '{{field}}' must be a number",
-        "array": "The field '{{field}}' must be a valid array"
+        "array": "The field '{{field}}' must be a valid array",
+        "month": "The field '{{field}}' must be a month formatted as YYYY-MM"
       },
       "sort": "The field '{{field}} must be either 'ASC' or 'DESC'",
       "empty": "The field '{{field}}' is empty",

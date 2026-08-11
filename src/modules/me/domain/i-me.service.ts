@@ -1,7 +1,11 @@
 import type {
+  MeAllocationSharesDTO,
+  MeAllocationSharesQuery,
   MeCompanyDTO,
   MeDocumentDTO,
   MeDocumentPartialQuery,
+  MeEnergySummaryDTO,
+  MeEnergySummaryQuery,
   MeIndividualDTO,
   MeMemberPartialQuery,
   MeMembersPartialDTO,
@@ -30,6 +34,13 @@ export interface IMeService {
   getMeters(query: MeMetersPartialQuery): Promise<[MePartialMeterDTO[], Pagination]>;
   getMeterById(id: string): Promise<MeMeterDTO>;
   getMeterConsumptions(id: string, query: MeterConsumptionQuery): Promise<MeterConsumptionDTO>;
+  /**
+   * The caller's own allocation-key share per (community, sharing operation,
+   * meter), evaluated on `query.at` or today. Cross-community; unlinked users get
+   * an empty list rather than an error.
+   */
+  getAllocationShares(query: MeAllocationSharesQuery): Promise<MeAllocationSharesDTO>;
+  getEnergySummary(query: MeEnergySummaryQuery): Promise<MeEnergySummaryDTO>;
   getOwnManagerPendingInvitation(query: UserManagerInvitationQuery): Promise<[UserManagerInvitationDTO[], Pagination]>;
   getOwnMemberPendingInvitation(query: UserMemberInvitationQuery): Promise<[UserMemberInvitationDTO[], Pagination]>;
   getOwnMemberPendingInvitationById(id: number): Promise<IndividualDTO | CompanyDTO>;

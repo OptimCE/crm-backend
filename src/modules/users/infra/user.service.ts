@@ -101,6 +101,9 @@ export class UserService implements IUserService {
     if (updated_user.phone_number) {
       user.phoneNumber = updated_user.phone_number;
     }
+    if (updated_user.locale) {
+      user.locale = updated_user.locale;
+    }
     try {
       await this.userRepository.updateUser(user, query_runner);
     } catch (err) {

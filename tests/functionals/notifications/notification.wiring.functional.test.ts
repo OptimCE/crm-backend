@@ -34,6 +34,14 @@ interface NotifRow {
   data: Record<string, unknown>;
 }
 
+interface OutboundRow {
+  id_notification: string | null;
+  id_community: number | null;
+  recipient: string;
+  type: string;
+  data: Record<string, unknown>;
+}
+
 /** Run `fn` inside a populated request context (mirrors contextMiddleware on a real call). */
 async function runInContext(headers: Record<string, string>, fn: () => Promise<void>): Promise<void> {
   const mw = contextMiddleware();
@@ -66,6 +74,19 @@ async function totalNotifications(): Promise<number> {
   return AppDataSource.manager.count(Notification);
 }
 
+async function outboundRows(): Promise<OutboundRow[]> {
+  const { AppDataSource } = await import("../../../src/shared/database/database.connector.js");
+  const { OutboundMessage } = await import("../../../src/modules/notifications/domain/notification.models.js");
+  const rows = await AppDataSource.manager.find(OutboundMessage, { order: { id: "ASC" } });
+  return rows.map((r) => ({
+    id_notification: r.id_notification,
+    id_community: r.id_community,
+    recipient: r.recipient,
+    type: r.type,
+    data: r.data,
+  }));
+}
+
 async function setGuardianEmail(managerId: number, email: string): Promise<void> {
   const { AppDataSource } = await import("../../../src/shared/database/database.connector.js");
   const { Manager } = await import("../../../src/modules/members/domain/member.models.js");
@@ -86,11 +107,38 @@ describe("(Functional) Notification wiring", () => {
       expect(rows[0].id_community).toBe(1);
     });
 
-    it("creates no notification when the invitee is not registered yet", async () => {
+    it("also queues an email for the invitee who already has an account", async () => {
+      const service = await getService<IInvitationService>("InvitationService");
+      await runInContext(ADMIN_CTX, () => service.inviteUserToBecomeMember({ user_email: "member@test.com" } as InviteUser));
+
+      const queued = await outboundRows();
+      expect(queued).toHaveLength(1);
+      expect(queued[0]).toMatchObject({ recipient: "member@test.com", type: "member_invitation.received", id_community: 1 });
+      expect(queued[0].id_notification).not.toBeNull();
+    });
+
+    it("queues an email for an invitee with no account — the bug this layer exists for", async () => {
+      // `notification.id_user` is NOT NULL, so an unregistered invitee gets no
+      // in-app row and never can. Before `outbound_message`, inviting such an
+      // address wrote a row, logged an audit entry, and told nobody at all.
+      // Without the outbound assertion below, that bug could ship again and this
+      // whole suite would stay green.
       const service = await getService<IInvitationService>("InvitationService");
       await runInContext(ADMIN_CTX, () => service.inviteUserToBecomeMember({ user_email: "nobody@nowhere.test" } as InviteUser));
 
       expect(await totalNotifications()).toBe(0);
+
+      const queued = await outboundRows();
+      expect(queued).toHaveLength(1);
+      expect(queued[0]).toMatchObject({
+        id_notification: null,
+        recipient: "nobody@nowhere.test",
+        type: "member_invitation.received",
+        id_community: 1,
+      });
+      // The invitation id is in `data` and is what makes a re-invite a new
+      // message rather than a silently deduplicated one.
+      expect(queued[0].data).toMatchObject({ community_id: 1 });
     });
   });
 
@@ -102,6 +150,24 @@ describe("(Functional) Notification wiring", () => {
       const rows = await notificationsFor(MANAGER_USER_ID);
       expect(rows).toHaveLength(1);
       expect(rows[0].type).toBe("manager_invitation.received");
+    });
+
+    it("queues an email for an invitee with no account", async () => {
+      // The manager twin of the member case above. There was no coverage of this
+      // branch at all before the delivery layer.
+      const service = await getService<IInvitationService>("InvitationService");
+      await runInContext(ADMIN_CTX, () => service.inviteUserToBecomeManager({ user_email: "nobody@nowhere.test" } as InviteUser));
+
+      expect(await totalNotifications()).toBe(0);
+
+      const queued = await outboundRows();
+      expect(queued).toHaveLength(1);
+      expect(queued[0]).toMatchObject({
+        id_notification: null,
+        recipient: "nobody@nowhere.test",
+        type: "manager_invitation.received",
+        id_community: 1,
+      });
     });
   });
 

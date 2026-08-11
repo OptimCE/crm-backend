@@ -147,6 +147,44 @@ export const CommunityResponses = {
       },
     },
   },
+  CommunityDashboardSuccess: {
+    description: "Successful community readiness aggregate response",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/CommunityDashboardDTO" },
+        },
+        example: {
+          error_code: 0,
+          data: {
+            as_of: "2026-08-05",
+            members: { total: 12, active: 9, inactive: 1, pending: 2, without_user_account: 5, incomplete: 3 },
+            meters: {
+              total: 14,
+              active: 11,
+              inactive: 0,
+              waiting_grd: 2,
+              waiting_manager: 1,
+              without_active_data: 0,
+              not_in_sharing_operation: 1,
+            },
+            sharing_operations: {
+              total: 3,
+              without_valid_key: 1,
+              with_pending_key: 1,
+              operations_without_valid_key: [{ id: 2, name: "Public Wind Sharing" }],
+            },
+            invitations: { member_pending: 4, member_to_be_encoded: 2, manager_pending: 1 },
+            legal_info: {
+              missing_fields: ["vat_number", "iban", "headquarters_address"],
+              complete: false,
+            },
+          },
+        },
+      },
+    },
+  },
   CommunitySharingOperationsSuccess: {
     description: "Successful list of sharing operations for a community",
     content: {

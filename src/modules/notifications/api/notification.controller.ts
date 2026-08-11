@@ -9,7 +9,14 @@ import TraceDecorator from "../../../shared/monitor/traceDecorator.js";
 import { validateDto } from "../../../shared/utils/dto.validator.js";
 import { NOTIFICATION_ERRORS } from "../shared/notification.errors.js";
 import type { INotificationService } from "../domain/i-notification.service.js";
-import { NotificationDTO, NotificationFilterDTO, NotificationQueryDTO, type UnreadCountDTO } from "./notification.dtos.js";
+import {
+  NotificationDTO,
+  NotificationFilterDTO,
+  type NotificationPreferencesDTO,
+  NotificationPreferenceUpdateDTO,
+  NotificationQueryDTO,
+  type UnreadCountDTO,
+} from "./notification.dtos.js";
 
 const notificationTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
@@ -50,5 +57,20 @@ export class NotificationController {
     await this.notification_service.markRead(id);
     logger.info({ operation: "notification:mark_read", id }, "Notification marked read");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  @notificationTraceDecorator.traceSpan("getNotificationPreferences", { url: "/notifications/preferences", method: "get" })
+  async getPreferences(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const data: NotificationPreferencesDTO = await this.notification_service.getPreferences();
+    logger.info({ operation: "notification:get_preferences", count: data.preferences.length }, "Notification preferences retrieved");
+    res.status(200).json(new ApiResponse<NotificationPreferencesDTO>(data, SUCCESS));
+  }
+
+  @notificationTraceDecorator.traceSpan("setNotificationPreferences", { url: "/notifications/preferences", method: "put" })
+  async setPreferences(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const body: NotificationPreferenceUpdateDTO = await validateDto(NotificationPreferenceUpdateDTO, req.body);
+    const data: NotificationPreferencesDTO = await this.notification_service.setPreferences(body.preferences);
+    logger.info({ operation: "notification:set_preferences", count: data.preferences.length }, "Notification preferences updated");
+    res.status(200).json(new ApiResponse<NotificationPreferencesDTO>(data, SUCCESS));
   }
 }

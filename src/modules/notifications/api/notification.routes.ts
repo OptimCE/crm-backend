@@ -41,6 +41,37 @@ notification_routes.patch(
   notification_controller.markAllRead.bind(notification_controller),
 );
 
+notification_routes.get(
+  "/preferences",
+  /* #swagger.summary = 'The current user\'s notification channel preferences'
+       #swagger.tags = ['Notifications']
+       #swagger.responses[200] = { $ref: '#/components/responses/NotificationPreferencesSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  notification_controller.getPreferences.bind(notification_controller),
+);
+
+notification_routes.put(
+  "/preferences",
+  /* #swagger.summary = 'Replace the current user\'s notification channel preferences'
+       #swagger.tags = ['Notifications']
+       #swagger.requestBody = { required: true, content: { "application/json": { schema: { $ref: '#/components/schemas/NotificationPreferenceUpdateDTO' } } } }
+       #swagger.responses[200] = { $ref: '#/components/responses/NotificationPreferencesSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  notification_controller.setPreferences.bind(notification_controller),
+);
+
 notification_routes.patch(
   "/:id/read",
   /* #swagger.summary = 'Mark a single notification read'

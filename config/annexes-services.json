@@ -39,6 +39,16 @@
       "frontendRoute": "/billing",
       "subscribePath": "/annexes-services/billing/subscribe",
       "unsubscribePath": "/annexes-services/billing/unsubscribe"
+    },
+    {
+      "feature": "administrative-document",
+      "displayKey": "ANNEXES_SERVICES.ADMINISTRATIVE_DOCUMENT.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.ADMINISTRATIVE_DOCUMENT.DESCRIPTION",
+      "icon": "pi pi-folder-open",
+      "minRole": "MEMBER",
+      "frontendRoute": "/administrative-document",
+      "subscribePath": "/annexes-services/administrative-document/subscribe",
+      "unsubscribePath": "/annexes-services/administrative-document/unsubscribe"
     }
   ]
 }

@@ -802,4 +802,59 @@ describe("(Cache Integration) Community Module", () => {
       spy.mockRestore();
     });
   });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Scenario 5 — Readiness dashboard: community-scoped, never user-scoped
+  // ────────────────────────────────────────────────────────────────────────────
+  describe("Dashboard cache scoping", () => {
+    const ORGS_GESTIONNAIRE_C2 = `[orgId:2 orgPath:/org2 roles:[MANAGER]]`;
+
+    async function getDashboard(orgs: string, community: string, user: string): Promise<request.Response> {
+      const { default: app } = await import("../../../src/app.js");
+      return request(app)
+        .get("/communities/dashboard")
+        .set("x-user-id", user)
+        .set("x-community-id", community)
+        .set("x-user-orgs", orgs);
+    }
+
+    it("populates one community-keyed entry and serves the second read from it", async () => {
+      const cache = await getCacheService();
+      const { CommunityService } = await import("../../../src/modules/communities/infra/community.service.js");
+      const spy = jest.spyOn(CommunityService.prototype, "getDashboard");
+
+      const first = await getDashboard(ORGS_ADMIN, AUTH_COMMUNITY_1, AUTH_USER_ADMIN);
+      await expectWithLog(first, () => expect(first.status).toBe(200));
+
+      const keys = communityKeys(cache.keys() as string[]).filter((k) => k.includes("communities:dashboard"));
+      expect(keys).toHaveLength(1);
+      expect(keys[0]).toContain(`c:${AUTH_COMMUNITY_1}`);
+      // "community" scope, not "both": the payload has no per-user variation, so
+      // a user segment would fan identical bytes across one entry per manager.
+      expect(keys[0]).not.toContain("u:");
+
+      const second = await getDashboard(ORGS_ADMIN, AUTH_COMMUNITY_1, AUTH_USER_ADMIN);
+      expect(second.status).toBe(200);
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      spy.mockRestore();
+    });
+
+    it("keys two communities separately", async () => {
+      const cache = await getCacheService();
+
+      const c1 = await getDashboard(ORGS_ADMIN, AUTH_COMMUNITY_1, AUTH_USER_ADMIN);
+      const c2 = await getDashboard(ORGS_GESTIONNAIRE_C2, "2", AUTH_USER_ADMIN);
+      await expectWithLog(c2, () => {
+        expect(c1.status).toBe(200);
+        expect(c2.status).toBe(200);
+      });
+
+      const keys = communityKeys(cache.keys() as string[]).filter((k) => k.includes("communities:dashboard"));
+      // A "none"-scoped key would cross-serve one tenant's counters to the other.
+      expect(keys).toHaveLength(2);
+      expect(new Set(keys).size).toBe(2);
+      expect(c1.body.data).not.toEqual(c2.body.data);
+    });
+  });
 });

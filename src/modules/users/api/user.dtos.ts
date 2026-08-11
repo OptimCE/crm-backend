@@ -1,6 +1,6 @@
 import { Expose, Type } from "class-transformer";
 import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
-import { IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import { USER_ERRORS } from "../shared/user.errors.js";
 
@@ -46,6 +46,13 @@ export class UserDTO {
    */
   @Expose()
   iban?: string | null;
+
+  /**
+   * Preferred language (`fr`, `nl`, `de`, `en`, or a region-tagged variant).
+   * Null until the user has actively chosen one.
+   */
+  @Expose()
+  locale?: string | null;
 
   /**
    * Primary residential address.
@@ -94,6 +101,21 @@ export class UpdateUserDTO {
   @IsString(withError(USER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsOptional()
   iban?: string;
+
+  /**
+   * Preferred language. Persisted so the notification delivery layer can pick an
+   * email template — the frontend otherwise keeps the choice client-side per
+   * session, and email has no other source of truth.
+   *
+   * `MaxLength(8)` matches `app_user.locale VARCHAR(8)`: an over-long value would
+   * otherwise fail at the database with a 500 instead of a validation error.
+   */
+  @Expose()
+  @Type(() => String)
+  @IsString(withError(USER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(8, withError(USER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  locale?: string;
 
   @Expose()
   @Type(() => CreateAddressDTO)

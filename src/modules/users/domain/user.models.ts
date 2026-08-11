@@ -38,6 +38,18 @@ export class User {
   @Column({ name: "iban", type: "text", nullable: true })
   iban?: string | null;
 
+  /**
+   * Preferred language, e.g. `fr` or `fr-BE`.
+   *
+   * The frontend picks a language client-side per session and does not otherwise
+   * persist it; email has no other source of truth, so this column is what the
+   * notification delivery layer resolves onto every queued message. Nullable
+   * because it is unset for every account created before it existed — the
+   * dispatcher falls back to its configured default.
+   */
+  @Column({ name: "locale", type: "varchar", length: 8, nullable: true })
+  locale?: string | null;
+
   @ManyToOne(() => Address)
   @JoinColumn({ name: "id_home_address" })
   homeAddress?: AddressType;

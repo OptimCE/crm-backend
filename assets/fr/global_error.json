@@ -11,7 +11,7 @@
   },
   "validation": {
     "generic": {
-      "wrong_type":{
+      "wrong_type": {
         "string": "Le champ '{{field}}' doit être un string",
         "integer": "Le champ '{{field}}' doit être un integer",
         "email": "Le champ '{{field}}' doit être une adresse e-mail valide",
@@ -19,13 +19,13 @@
         "boolean": "Le champ '{{field}}' doit être un boolean",
         "date": "Le champ '{{field}}' doit être une date valide",
         "number": "Le champ '{{field}}' doit être un nombre",
-        "array": "Le champ '{{field}}' doit être un vecteur valide"
+        "array": "Le champ '{{field}}' doit être un vecteur valide",
+        "month": "Le champ '{{field}}' doit être un mois au format AAAA-MM"
       },
       "sort": "Le champ '{{field}} doit être compris entre 'ASC' et 'DESC'",
       "empty": "Le champ '{{field}}' est vide",
       "wrong_role": {
         "member_manager_admin": "Le champ '{{field}}' doit être compris entre 'MEMBER', 'MANAGER' et 'ADMIN'"
-
       },
       "min_1": "Le champ '{{field}}' doit être supérieur ou égale à 1"
     }

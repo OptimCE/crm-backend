@@ -55,6 +55,8 @@ export const GLOBAL_ERRORS = {
       DATE: new LocalError(5005, "global_error:validation.generic.wrong_type.date"),
       NUMBER: new LocalError(5006, "global_error:validation.generic.wrong_type.number"),
       ARRAY: new LocalError(5007, "global_error:validation.generic.wrong_type.array"),
+      /** A calendar month as `YYYY-MM`. Distinct from DATE: the unit is a month. */
+      MONTH: new LocalError(5012, "global_error:validation.generic.wrong_type.month"),
     },
     EMPTY: new LocalError(5008, "global_error:validation.generic.empty"),
     SORT: new LocalError(5009, "global_error:validation.generic.sort"),

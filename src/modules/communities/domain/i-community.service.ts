@@ -1,4 +1,5 @@
 import type {
+  CommunityDashboardDTO,
   CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
@@ -28,6 +29,12 @@ export interface ICommunityService {
    * @returns A CommunityDetailDTO with member count and optional user role.
    */
   getCommunityById(id: number): Promise<CommunityDetailDTO>;
+  /**
+   * Readiness aggregate for the ACTIVE community, taken from the request context
+   * and never from a parameter. Read-only: no transaction, no audit row.
+   * @returns Counters plus the list of community fields still unset.
+   */
+  getDashboard(): Promise<CommunityDashboardDTO>;
   /**
    * Retrieves a paginated list of communities where the current user is a member.
    * @param query - Query parameters for filtering and pagination.

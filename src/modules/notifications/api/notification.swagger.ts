@@ -45,4 +45,18 @@ export const NotificationResponses = {
       },
     },
   },
+  NotificationPreferencesSuccess: {
+    description: "The current user's notification channel preferences, plus the type prefixes they may be expressed against",
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            data: { $ref: "#/components/schemas/NotificationPreferencesDTO" },
+            error_code: { type: "integer", example: 0 },
+          },
+        },
+      },
+    },
+  },
 };

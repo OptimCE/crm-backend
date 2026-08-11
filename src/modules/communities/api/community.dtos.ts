@@ -154,6 +154,16 @@ export class MyCommunityDTO {
    */
   @Expose()
   role!: Role;
+
+  /**
+   * Time-limited URL for the community logo, or null when there is none.
+   *
+   * Deliberately NOT `logo_url`: that column holds a raw storage key, so
+   * exposing it would give the client an unrenderable string. Presigned in the
+   * service, one call per row, each failure degrading to null.
+   */
+  @Expose()
+  logo_presigned_url!: string | null;
 }
 
 /**
@@ -358,4 +368,162 @@ export class PatchRoleUserDTO {
   @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.EMPTY))
   new_role!: Role;
+}
+
+/**
+ * Community-level fields the readiness dashboard chases. Names mirror
+ * `CommunityDetailDTO` exactly so the frontend can derive its i18n key and its
+ * "fix this" link from the field name alone.
+ */
+export type CommunityLegalField =
+  | "vat_number"
+  | "legal_name"
+  | "iban"
+  | "account_holder_name"
+  | "headquarters_address"
+  | "regulator";
+
+export class CommunityDashboardMembersDTO {
+  @Expose()
+  total!: number;
+
+  /** MemberStatus.ACTIVE */
+  @Expose()
+  active!: number;
+
+  /** MemberStatus.INACTIVE */
+  @Expose()
+  inactive!: number;
+
+  /** MemberStatus.PENDING */
+  @Expose()
+  pending!: number;
+
+  /** Members with no `user_member_link` row — nobody can log in as them. */
+  @Expose()
+  without_user_account!: number;
+
+  /** See the rule documented on {@link CommunityDashboardDTO}. */
+  @Expose()
+  incomplete!: number;
+}
+
+export class CommunityDashboardMetersDTO {
+  @Expose()
+  total!: number;
+
+  /** Counted from the `meter_data` row in force on `as_of`. MeterDataStatus.ACTIVE */
+  @Expose()
+  active!: number;
+
+  @Expose()
+  inactive!: number;
+
+  @Expose()
+  waiting_grd!: number;
+
+  @Expose()
+  waiting_manager!: number;
+
+  /**
+   * Meters with NO `meter_data` row covering `as_of` at all — they have no
+   * status, no holder and no operation. A different failure from the one below,
+   * with a different fix, so both are reported.
+   */
+  @Expose()
+  without_active_data!: number;
+
+  /** Meters whose row in force on `as_of` has `id_sharing_operation IS NULL`. */
+  @Expose()
+  not_in_sharing_operation!: number;
+}
+
+export class CommunityDashboardOperationRefDTO {
+  @Expose()
+  id!: number;
+
+  @Expose()
+  name!: string;
+}
+
+export class CommunityDashboardSharingOperationsDTO {
+  @Expose()
+  total!: number;
+
+  /** Operations with no APPROVED key whose validity window covers `as_of`. */
+  @Expose()
+  without_valid_key!: number;
+
+  /** Operations with a key still awaiting approval (PENDING and not closed). */
+  @Expose()
+  with_pending_key!: number;
+
+  /** Named operations behind `without_valid_key`, capped — the count is the truth. */
+  @Expose()
+  operations_without_valid_key!: CommunityDashboardOperationRefDTO[];
+}
+
+export class CommunityDashboardInvitationsDTO {
+  @Expose()
+  member_pending!: number;
+
+  /** Of `member_pending`, those whose member record still has to be encoded. */
+  @Expose()
+  member_to_be_encoded!: number;
+
+  @Expose()
+  manager_pending!: number;
+}
+
+export class CommunityDashboardLegalInfoDTO {
+  /** Field names still unset. Empty array means complete. */
+  @Expose()
+  missing_fields!: CommunityLegalField[];
+
+  @Expose()
+  complete!: boolean;
+}
+
+/**
+ * Single-call readiness aggregate for the manager dashboard, scoped to the
+ * active community from the request context — never from a query parameter.
+ *
+ * **`members.incomplete` rule.** Every column involved is `NOT NULL` in the DDL
+ * and the create DTOs are all `@IsNotEmpty`, so "incomplete" can only mean an
+ * empty/whitespace string or a missing sub-type row. A member counts when ANY of:
+ *
+ * 1. `member.name` or `member.iban` is blank;
+ * 2. the sub-type row is missing — `member_type = INDIVIDUAL` with no `individual`
+ *    row, or `COMPANY` with no `company` row. This is the state that makes
+ *    `toMemberDTO` throw "Data inconsistency" on the detail endpoint;
+ * 3. `individual.nrn` / `individual.email` blank, or `company.vat_number` blank;
+ * 4. the home or billing address is missing, or its street/postcode/city is blank.
+ *
+ * Deliberately NOT counted: `individual.phone_number` and `individual.id_manager`
+ * are `@IsOptional` by design, and `status = PENDING` is reported as a status
+ * rather than as a defect.
+ *
+ * **`legal_info.missing_fields`.** `regulator` is `NOT NULL DEFAULT
+ * 'BE-WAL-CWAPE'`, so it can never be absent — it is reported only when blank or
+ * no longer an assignable code in the shared registry.
+ */
+export class CommunityDashboardDTO {
+  /** Calendar date (`YYYY-MM-DD`) the windowed counters were evaluated at. */
+  @Expose()
+  as_of!: string;
+
+  @Expose()
+  members!: CommunityDashboardMembersDTO;
+
+  @Expose()
+  meters!: CommunityDashboardMetersDTO;
+
+  @Expose()
+  sharing_operations!: CommunityDashboardSharingOperationsDTO;
+
+  @Expose()
+  invitations!: CommunityDashboardInvitationsDTO;
+
+  @Expose()
+  legal_info!: CommunityDashboardLegalInfoDTO;
 }

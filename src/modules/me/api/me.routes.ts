@@ -137,6 +137,44 @@ me_routes.get(
   me_controller.getMeterConsumptions.bind(me_controller),
 );
 
+// GET /allocation-shares -> Fetch own allocation-key share per operation and meter
+me_routes.get(
+  "/allocation-shares",
+  /* #swagger.summary = "Retrieve own allocation-key share per sharing operation and meter"
+       #swagger.tags = ['Me']
+       #swagger.description = 'Cross-community by design: one row per (community, sharing operation, meter) the caller holds on `at` (default today). The share is resolved by matching `consumer.name` against the meter EAN — a free-text convention with no foreign key — so every row carries `matched` / `match_basis`. When `matched` is false the client must say "not available for this key", never "0 %". `effective_share` is null when the key allocates prorata (the -1 sentinel), which is only resolvable at settlement.'
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/MeAllocationSharesFilters' }
+       #swagger.responses[200] = { $ref: '#/components/responses/MeAllocationSharesSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+    */
+  idChecker(),
+  me_controller.getAllocationShares.bind(me_controller),
+);
+
+// GET /energy-summary -> Fetch own consumption totals for a calendar month
+me_routes.get(
+  "/energy-summary",
+  /* #swagger.summary = "Retrieve own consumption totals for a calendar month, across all communities"
+       #swagger.tags = ['Me']
+       #swagger.description = 'Cross-community by design and needs no active community. Totals are summed only over the days one of the caller\'s members actually held each meter, so a meter that changed holder mid-month contributes each holder their own slice. Defaults to the LAST CLOSED month: a partial month is not comparable to anything, and a member opening the app on the 2nd would otherwise conclude their consumption had collapsed. A meter with no readings in the window produces no row at all — the client must never render an absent meter as 0 kWh.'
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/MeEnergySummaryFilters' }
+       #swagger.responses[200] = { $ref: '#/components/responses/MeEnergySummarySuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+    */
+  idChecker(),
+  me_controller.getEnergySummary.bind(me_controller),
+);
+
 // GET /invitations -> Fetch all own member pending invitations
 me_routes.get(
   "/invitations",

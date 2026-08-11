@@ -1,9 +1,14 @@
 import { Expose, Type } from "class-transformer";
-import { IsInt, IsOptional } from "class-validator";
+import { IsArray, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from "class-validator";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import { GLOBAL_ERRORS } from "../../../shared/errors/errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import type { Role } from "../../../shared/dtos/role.js";
+import type { NotificationTypeKey } from "../domain/notification.taxonomy.js";
+// Value import, not `import type`: `IsEnum` needs the runtime enum objects.
+import { NotificationChannel, PreferenceMode } from "../shared/notification.types.js";
+import { NOTIFICATION_ERRORS } from "../shared/notification.errors.js";
+import type { NotificationCategory } from "../shared/notification.types.js";
 
 /**
  * Recipient targeting for {@link NotificationPublishInput}. Ids are INTERNAL
@@ -25,11 +30,41 @@ export type NotificationTarget =
  * Internal contract used by backend callers of `NotificationService.publish()`.
  * Not validated via class-validator — this is a code-level interface, not a
  * request body (there is no public publish endpoint).
+ *
+ * This is the producer-facing signature from IMPLEMENTATION_PLAN §1.3, and it is
+ * the shape that survives Phase 2's extraction into a standalone service. The
+ * Python annexes speak the same contract via `core/notifications/contract.py`.
  */
 export interface NotificationPublishInput {
-  type: string;
+  /** `<feature>.<event>` taxonomy key. See {@link NOTIFICATION_TYPES}. */
+  type: NotificationTypeKey;
   data?: Record<string, unknown>;
   target: NotificationTarget;
+  /**
+   * The producer's statement of KIND, which decides opt-out policy. Required on
+   * purpose: there is no safe default. TRANSACTIONAL would silently make
+   * everything unsuppressable; INFORMATIONAL would silently make invitations
+   * opt-out-able.
+   */
+  category: NotificationCategory;
+  /**
+   * The channels the producer REQUESTS, not the ones it gets. Effective delivery
+   * is this set intersected with each recipient's preference, except for
+   * TRANSACTIONAL which overrides preference. Required so a producer can never
+   * silently lose its email intent to a default.
+   */
+  channels: NotificationChannel[];
+  /**
+   * Overrides the derived idempotency key for the queued email.
+   *
+   * By default the key is `<channel>:<type>:u<id_user>:<hash of data>`, so
+   * `data` decides — for all time — whether two publishes are the same message.
+   * That is right for anything driven by a status transition, which is every
+   * producer today. Set this ONLY when a recurring sweep can re-emit the same
+   * payload for a genuinely new occurrence, and include the occurrence date:
+   * `admin_deadline.due_soon:{deadline_id}:{as_of}`.
+   */
+  dedupe_key?: string;
 }
 
 /**
@@ -62,6 +97,22 @@ export class NotificationCommunityDTO {
 
   @Expose()
   name!: string;
+
+  /**
+   * The Keycloak org id, i.e. what `X-Community-ID` carries.
+   *
+   * Notifications are cross-community by design, so the client has to decide
+   * whether a row belongs to the community the user is currently in before
+   * following its link. `id` is the internal integer and the frontend only ever
+   * holds the org id, and it has no synchronous way to map between them — so
+   * without this field "is this my active community?" is unanswerable and a
+   * notification from community B opens community A's page.
+   *
+   * Free to add: the repository already `leftJoinAndSelect`s the whole Community
+   * entity, so this needs no query change.
+   */
+  @Expose()
+  auth_community_id!: string;
 }
 
 /**
@@ -97,4 +148,57 @@ export class NotificationDTO {
 export class UnreadCountDTO {
   @Expose()
   count!: number;
+}
+
+/**
+ * One stored preference. `type_prefix` is `''` (the default that applies to
+ * every type) or a value from `NOTIFICATION_TYPE_PREFIXES`.
+ */
+export class NotificationPreferenceDTO {
+  @Expose()
+  @IsString(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  type_prefix!: string;
+
+  @Expose()
+  @Type(() => Number)
+  @IsEnum(NotificationChannel, withError(NOTIFICATION_ERRORS.PREFERENCE_INVALID))
+  channel!: NotificationChannel;
+
+  /**
+   * `PreferenceMode` — IMMEDIATE (1) or OFF (3). `2 DAILY_DIGEST` is rejected:
+   * the encoding reserves it but no digest runner exists, and accepting a value
+   * that silently behaves as IMMEDIATE is worse than refusing it.
+   */
+  @Expose()
+  @Type(() => Number)
+  @IsEnum(PreferenceMode, withError(NOTIFICATION_ERRORS.PREFERENCE_INVALID))
+  mode!: PreferenceMode;
+}
+
+/**
+ * Request body for replacing the current user's preferences wholesale. Rows
+ * absent from `preferences` are deleted, which is how a reset to default is
+ * expressed.
+ */
+export class NotificationPreferenceUpdateDTO {
+  @Type(() => NotificationPreferenceDTO)
+  @ValidateNested({ each: true })
+  @IsArray(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.ARRAY))
+  preferences!: NotificationPreferenceDTO[];
+}
+
+/**
+ * Output of the preferences endpoint.
+ *
+ * `type_prefixes` is served by the backend so the client never hardcodes a list
+ * that could drift from the taxonomy. It excludes `''`, which the UI presents
+ * separately as the catch-all default.
+ */
+export class NotificationPreferencesDTO {
+  @Expose()
+  type_prefixes!: string[];
+
+  @Expose()
+  @Type(() => NotificationPreferenceDTO)
+  preferences!: NotificationPreferenceDTO[];
 }
