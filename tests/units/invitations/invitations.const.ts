@@ -182,7 +182,7 @@ export const testCasesInvite = [
         getUserByEmail: jest.fn(() => Promise.resolve({ id: 99, email: "new@example.com" })),
       },
       invitationRepo: {
-        inviteUserToBecomeMember: jest.fn(() => Promise.resolve({})),
+        inviteUserToBecomeMember: jest.fn(() => Promise.resolve({ id: 1, community: { id: 1 } })),
       },
     },
   },
@@ -220,7 +220,7 @@ export const testCasesInvite = [
         getUserByEmail: jest.fn(() => Promise.resolve({ id: 100, email: "new_manager@example.com" })),
       },
       invitationRepo: {
-        inviteUserToBecomeManager: jest.fn(() => Promise.resolve({})),
+        inviteUserToBecomeManager: jest.fn(() => Promise.resolve({ id: 1, community: { id: 1 } })),
       },
     },
   },

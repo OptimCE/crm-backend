@@ -408,6 +408,9 @@ CREATE TABLE IF NOT EXISTS app_user (
     nrn TEXT NULL,
     phone_number TEXT NULL,
     iban TEXT NULL,
+    -- Preferred language, persisted from the profile. Email has no other source
+    -- of truth: the frontend picks a language client-side per session.
+    locale VARCHAR(8) NULL,
     id_home_address INT,
     FOREIGN KEY (id_home_address) REFERENCES address (id),
     id_billing_address INT,
@@ -563,3 +566,64 @@ CREATE INDEX IF NOT EXISTS idx_notification_user_unread
     ON notification (id_user) WHERE read_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_notification_community
     ON notification (id_community);
+
+-- ---- Notification delivery layer -------------------------------------------
+-- Mirrors database_script/2026-08-03_notification_delivery.sql; see that file
+-- for the full rationale (nullable id_notification for account-less invitees,
+-- literal recipient, persisted category, the CLAIMED status, and the fact that
+-- `data` is the idempotency key for all time).
+
+-- Channel-agnostic outbound queue. One row per (message, channel, recipient).
+CREATE TABLE IF NOT EXISTS outbound_message (
+    id              BIGSERIAL PRIMARY KEY,
+    id_notification BIGINT NULL REFERENCES notification (id) ON DELETE SET NULL,
+    id_community    INT NULL REFERENCES community (id) ON DELETE CASCADE,
+    -- Channel: 1 INAPP, 2 EMAIL
+    channel         SMALLINT NOT NULL CHECK (channel IN (1, 2)),
+    recipient       VARCHAR(320) NOT NULL,
+    recipient_name  VARCHAR(255) NULL,
+    -- '' means "unknown"; the dispatcher applies its own default locale.
+    locale          VARCHAR(8) NOT NULL DEFAULT '',
+    type            VARCHAR(128) NOT NULL,
+    -- NotificationCategory: 1 TRANSACTIONAL, 2 INFORMATIONAL
+    category        SMALLINT NOT NULL CHECK (category IN (1, 2)),
+    data            JSONB NOT NULL DEFAULT '{}'::jsonb,
+    dedupe_key      VARCHAR(200) NOT NULL,
+    -- 1 PENDING, 2 SENT, 3 FAILED, 4 SUPPRESSED, 5 CLAIMED
+    status          SMALLINT NOT NULL DEFAULT 1 CHECK (status IN (1, 2, 3, 4, 5)),
+    attempts        SMALLINT NOT NULL DEFAULT 0,
+    last_error      TEXT NULL,
+    scheduled_for   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    claimed_at      TIMESTAMPTZ NULL,
+    sent_at         TIMESTAMPTZ NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_outbound_message_dedupe
+    ON outbound_message (dedupe_key);
+CREATE INDEX IF NOT EXISTS ix_outbound_message_due
+    ON outbound_message (scheduled_for) WHERE status = 1;
+CREATE INDEX IF NOT EXISTS ix_outbound_message_stale
+    ON outbound_message (claimed_at) WHERE status = 5;
+
+-- Addresses that must never be emailed again. Stored lower-cased.
+CREATE TABLE IF NOT EXISTS email_suppression (
+    email      VARCHAR(320) PRIMARY KEY,
+    -- 1 HARD_BOUNCE, 2 COMPLAINT, 3 UNSUBSCRIBED, 4 MANUAL
+    reason     SMALLINT NOT NULL CHECK (reason IN (1, 2, 3, 4)),
+    detail     TEXT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Per-recipient channel policy. Consulted only for INFORMATIONAL notifications;
+-- TRANSACTIONAL overrides preference entirely and is not opt-out-able.
+CREATE TABLE IF NOT EXISTS notification_preference (
+    id_user     INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    -- '' = default for every type; else the first dot-segment of the type key.
+    type_prefix VARCHAR(128) NOT NULL,
+    -- Channel: 1 INAPP, 2 EMAIL
+    channel     SMALLINT NOT NULL CHECK (channel IN (1, 2)),
+    -- 1 IMMEDIATE, 3 OFF (2 DAILY_DIGEST reserved, no runner yet)
+    mode        SMALLINT NOT NULL CHECK (mode IN (1, 3)),
+
+    PRIMARY KEY (id_user, type_prefix, channel)
+);

@@ -30,6 +30,8 @@ import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
+import { NOTIFICATION_TYPES } from "../../notifications/domain/notification.taxonomy.js";
+import { NotificationCategory, NotificationChannel } from "../../notifications/shared/notification.types.js";
 import type { IMeterRepository } from "../../meters/domain/i-meter.repository.js";
 
 /**
@@ -517,21 +519,24 @@ export class MemberService implements IMemberService {
     );
 
     // Notify the member's linked user account(s) and guardian (minus the actor).
-    // Best-effort: a notification failure must not abort the update.
-    try {
-      const audience = await this.member_repository.getMemberNotificationAudience(update_dto.id, query_runner);
-      if (audience && audience.userIds.length > 0) {
-        await this.notificationService.publish(
-          {
-            type: "member.updated",
-            data: { member_id: update_dto.id, changed_fields },
-            target: { kind: "users", userIds: audience.userIds, communityId: audience.communityId },
-          },
-          query_runner,
-        );
-      }
-    } catch (notify_err) {
-      logger.error({ operation: "updateMember:notify", error: notify_err }, "Notification publish failed");
+    // `publish` never raises and runs in a SAVEPOINT on `query_runner`, so it
+    // needs no try/catch here. The audience lookup deliberately sits outside any
+    // swallow: a repository failure there is a real error, not a best-effort
+    // side effect, and should fail the update.
+    // INFORMATIONAL / INAPP: this fires on any of a dozen fields, including a
+    // phone-number typo fix, so it must stay mutable once preferences ship.
+    const audience = await this.member_repository.getMemberNotificationAudience(update_dto.id, query_runner);
+    if (audience && audience.userIds.length > 0) {
+      await this.notificationService.publish(
+        {
+          type: NOTIFICATION_TYPES.MEMBER_UPDATED,
+          data: { member_id: update_dto.id, changed_fields },
+          target: { kind: "users", userIds: audience.userIds, communityId: audience.communityId },
+          category: NotificationCategory.INFORMATIONAL,
+          channels: [NotificationChannel.INAPP],
+        },
+        query_runner,
+      );
     }
   }
 

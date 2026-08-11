@@ -101,6 +101,28 @@ community_routes.get(
   idChecker(),
   community_controller.getRegulators.bind(community_controller),
 );
+// Get (/dashboard) : Readiness aggregate for the active community
+// Declared before the `/:id` route so the literal path matches first.
+community_routes.get(
+  "/dashboard",
+  /* #swagger.summary = 'Readiness aggregate for the active community'
+       #swagger.tags = ['Communities']
+       #swagger.description = 'Single-call counters for the manager dashboard readiness tile: members, meters, sharing operations, pending invitations, and which community-level fields are still unset. Scoped to the active community from the X-Community-ID header — it accepts no community parameter.'
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunityDashboardSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  community_controller.getDashboard.bind(community_controller),
+);
 // Post (/) : Create a new community
 community_routes.post(
   "/",

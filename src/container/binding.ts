@@ -84,6 +84,10 @@ import { NotificationRepository } from "../modules/notifications/infra/notificat
 import type { INotificationService } from "../modules/notifications/domain/i-notification.service.js";
 import { NotificationService } from "../modules/notifications/infra/notification.service.js";
 import { NotificationController } from "../modules/notifications/api/notification.controller.js";
+import type { IOutboundRepository } from "../modules/notifications/domain/i-outbound.repository.js";
+import { OutboundRepository } from "../modules/notifications/infra/outbound.repository.js";
+import type { IOutboundService } from "../modules/notifications/domain/i-outbound.service.js";
+import { OutboundService } from "../modules/notifications/infra/outbound.service.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -147,6 +151,9 @@ if (!container.isBound("AuditLogRepository")) {
 if (!container.isBound("NotificationRepository")) {
   container.bind<INotificationRepository>("NotificationRepository").to(NotificationRepository);
 }
+if (!container.isBound("OutboundRepository")) {
+  container.bind<IOutboundRepository>("OutboundRepository").to(OutboundRepository);
+}
 
 // Domain service bindings.
 container.bind<ICommunityService>("CommunityService").to(CommunityService);
@@ -162,6 +169,10 @@ container.bind<IUserService>("UserService").to(UserService);
 container.bind<IAnnexesServicesService>("AnnexesServicesService").to(AnnexesServicesService);
 container.bind<IAuditLogService>("AuditLogService").to(AuditLogService);
 container.bind<INotificationService>("NotificationService").to(NotificationService);
+// The only writer of `outbound_message`. Bound separately from NotificationService
+// because the account-less invitation path needs it directly, and because the
+// notification contract test rebinds "NotificationService" to a bare spy.
+container.bind<IOutboundService>("OutboundService").to(OutboundService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();

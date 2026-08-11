@@ -1,4 +1,14 @@
-import type { IMeRepository } from "../domain/i-me.repository.js";
+import type {
+  IMeRepository,
+  MeEnergyMeterRow,
+  MeKeyConsumerRow,
+  MeKeyInForceRow,
+  MeKeyIterationRow,
+  MeMeterHoldingRow,
+} from "../domain/i-me.repository.js";
+import { Consumer, Iteration } from "../../keys/domain/key.models.js";
+import { SharingOperationKey } from "../../sharing_operations/domain/sharing_operation.models.js";
+import { SharingKeyStatus } from "../../sharing_operations/shared/sharing_operation.types.js";
 import { inject, injectable } from "inversify";
 import { Member } from "../../members/domain/member.models.js";
 import { MeDocumentPartialQuery, MeMemberPartialQuery, MeMetersPartialQuery } from "../api/me.dtos.js";
@@ -368,6 +378,219 @@ export class MeRepository implements IMeRepository {
     qb = qb.orderBy("consumption.timestamp", "ASC");
 
     return qb.getMany();
+  }
+
+  /**
+   * Meters the caller's members hold on `at`, restricted to those attached to a
+   * sharing operation (a meter outside one has no key and therefore no share).
+   *
+   * The ownership predicate is anchored on `md.id_member` — the holder of THIS
+   * row — rather than on `getMeters`' looser "any member of mine ever held this
+   * EAN". That difference is the whole authorization: with the loose form, a
+   * member who transferred a meter away would keep seeing the new holder's share.
+   *
+   * The window is inclusive on both ends because `addMeterData` closes a holding
+   * with `next_start - 1 day`, making `end_date` the last day held.
+   */
+  getOwnMeterHoldings(at: string, limit: number, query_runner?: QueryRunner): Promise<MeMeterHoldingRow[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const { user_id } = getContext();
+
+    const qb = manager.createQueryBuilder(MeterData, "md");
+
+    // Security fallback: no user in context = no results
+    if (!user_id) {
+      qb.andWhere("1=0");
+      return qb.getRawMany<MeMeterHoldingRow>();
+    }
+
+    return qb
+      // `ean` is the FK column behind the `meter` relation, not a mapped property
+      // on MeterData, so it has to come through the join.
+      .innerJoin("md.meter", "mt")
+      .innerJoin("md.member", "mem")
+      .innerJoin("md.sharing_operation", "so")
+      .innerJoin("md.community", "com")
+      .select("mt.EAN", "ean")
+      .addSelect("mem.id", "member_id")
+      .addSelect("mem.name", "member_name")
+      .addSelect("so.id", "operation_id")
+      .addSelect("so.name", "operation_name")
+      .addSelect("so.type", "operation_type")
+      .addSelect("com.id", "community_id")
+      .addSelect("com.name", "community_name")
+      .addSelect("com.logo_url", "community_logo_url")
+      .addSelect("md.start_date", "holding_start_date")
+      .addSelect("md.end_date", "holding_end_date")
+      .where("CAST(:at AS date) BETWEEN md.start_date AND COALESCE(md.end_date, 'infinity'::date)", { at })
+      .andWhere(
+        `EXISTS (
+            SELECT 1 FROM user_member_link sub_uml
+            INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
+            WHERE sub_uml.id_member = md.id_member
+            AND sub_u.auth_user_id = :contextAuthId
+        )`,
+        { contextAuthId: user_id },
+      )
+      .orderBy("com.name", "ASC")
+      .addOrderBy("so.name", "ASC")
+      .addOrderBy("mt.EAN", "ASC")
+      // A cap rather than a page/limit contract: the tile's whole point is "my
+      // share everywhere", so paginating it would fragment the only useful view.
+      // This exists so a pathological account degrades instead of exhausting memory.
+      .limit(limit)
+      .getRawMany<MeMeterHoldingRow>();
+  }
+
+  /**
+   * Per-meter consumption totals for a calendar window, across every community.
+   *
+   * Aggregated in Postgres rather than by fetching series and summing in
+   * TypeScript: `/me/meters/{ean}/consumptions` returns seven unbounded
+   * quarter-hourly arrays, so the landing page would otherwise pull ~3000 rows
+   * per meter per month just to render four numbers.
+   *
+   * **The ownership predicate is the windowed one**, character for character
+   * the same as `getMeterConsumptions`': a reading counts only if one of the
+   * caller's members held that meter on the reading's own calendar day. The
+   * looser "ever held this EAN" form used by `getMeters` would hand a former
+   * holder the current holder's kWh — the meter-transfer case is real in this
+   * product, not hypothetical.
+   *
+   * The join to `meter` is what carries the community, and it is an inner join
+   * on purpose: a reading whose meter row has vanished has no community to
+   * attribute it to and must not be silently folded into a total.
+   */
+  getOwnEnergyTotals(
+    period_start: string,
+    period_end: string,
+    limit: number,
+    query_runner?: QueryRunner,
+  ): Promise<MeEnergyMeterRow[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const { user_id } = getContext();
+
+    const qb = manager.createQueryBuilder(MeterConsumption, "consumption");
+
+    // Security fallback: no user in context = no results
+    if (!user_id) {
+      qb.andWhere("1=0");
+      return qb.getRawMany<MeEnergyMeterRow>();
+    }
+
+    const localDay = `(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date`;
+
+    return qb
+      .innerJoin("consumption.meter", "mt")
+      .innerJoin("mt.community", "com")
+      .select("mt.EAN", "ean")
+      .addSelect("mt.meter_number", "meter_number")
+      .addSelect("com.id", "community_id")
+      .addSelect("com.name", "community_name")
+      .addSelect("com.logo_url", "community_logo_url")
+      .addSelect("COUNT(consumption.id)", "reading_count")
+      .addSelect("SUM(consumption.gross)", "gross")
+      .addSelect("SUM(consumption.shared)", "shared")
+      .addSelect("SUM(consumption.inj_gross)", "inj_gross")
+      .addSelect("SUM(consumption.inj_shared)", "inj_shared")
+      .where(`${localDay} BETWEEN CAST(:periodStart AS date) AND CAST(:periodEnd AS date)`, {
+        periodStart: period_start,
+        periodEnd: period_end,
+      })
+      .andWhere(
+        `EXISTS (
+            SELECT 1 FROM meter_data sub_md
+            INNER JOIN user_member_link sub_uml ON sub_uml.id_member = sub_md.id_member
+            INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
+            WHERE sub_md.ean = consumption.ean
+            AND sub_u.auth_user_id = :contextAuthId
+            AND ${localDay}
+                BETWEEN sub_md.start_date AND COALESCE(sub_md.end_date, 'infinity'::date)
+        )`,
+        { contextAuthId: user_id },
+      )
+      .groupBy("mt.EAN")
+      .addGroupBy("mt.meter_number")
+      .addGroupBy("com.id")
+      .addGroupBy("com.name")
+      .addGroupBy("com.logo_url")
+      .orderBy("com.name", "ASC")
+      .addOrderBy("mt.EAN", "ASC")
+      // A cap, not a pagination contract: "my energy everywhere" is the whole
+      // point, so paging it would fragment the only useful view. This exists so
+      // a pathological account degrades instead of exhausting memory.
+      .limit(limit)
+      .getRawMany<MeEnergyMeterRow>();
+  }
+
+  getKeysInForce(operation_ids: number[], at: string, query_runner?: QueryRunner): Promise<MeKeyInForceRow[]> {
+    // TypeORM emits invalid SQL for an empty `IN (:...ids)`.
+    if (operation_ids.length === 0) return Promise.resolve([]);
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    return (
+      manager
+        .createQueryBuilder(SharingOperationKey, "sok")
+        .innerJoin("sok.allocation_key", "ak")
+        .select("sok.id_sharing_operation", "operation_id")
+        .addSelect("ak.id", "key_id")
+        .addSelect("ak.name", "key_name")
+        .addSelect("sok.start_date", "key_start_date")
+        .addSelect("sok.end_date", "key_end_date")
+        // One winner per operation: latest start, then highest id. Overlapping
+        // approved windows are not supposed to exist, but the DB does not forbid
+        // them and a duplicated row would silently double a member's share.
+        .distinctOn(["sok.id_sharing_operation"])
+        .where("sok.id_sharing_operation IN (:...ids)", { ids: operation_ids })
+        .andWhere("sok.status = :approved", { approved: SharingKeyStatus.APPROVED })
+        .andWhere("sok.start_date <= CAST(:at AS date)", { at })
+        .andWhere("(sok.end_date IS NULL OR sok.end_date >= CAST(:at AS date))", { at })
+        .orderBy("sok.id_sharing_operation", "ASC")
+        .addOrderBy("sok.start_date", "DESC")
+        .addOrderBy("sok.id", "DESC")
+        .getRawMany<MeKeyInForceRow>()
+    );
+  }
+
+  getKeyIterations(key_ids: number[], query_runner?: QueryRunner): Promise<MeKeyIterationRow[]> {
+    if (key_ids.length === 0) return Promise.resolve([]);
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    // Read separately from the consumers so an iteration the caller's EAN is
+    // absent from still appears, as a 0 % contribution rather than as a gap.
+    return manager
+      .createQueryBuilder(Iteration, "it")
+      // `id_key` is the FK column behind `allocation_key`, not a mapped property.
+      .innerJoin("it.allocation_key", "ak")
+      .select("ak.id", "key_id")
+      .addSelect("it.id", "iteration_id")
+      .addSelect("it.number", "iteration_number")
+      .addSelect("it.energy_allocated_percentage", "iteration_share")
+      .where("ak.id IN (:...key_ids)", { key_ids })
+      .orderBy("ak.id", "ASC")
+      .addOrderBy("it.number", "ASC")
+      .getRawMany<MeKeyIterationRow>();
+  }
+
+  getKeyConsumersForEans(key_ids: number[], eans: string[], query_runner?: QueryRunner): Promise<MeKeyConsumerRow[]> {
+    if (key_ids.length === 0 || eans.length === 0) return Promise.resolve([]);
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    return (
+      manager
+        .createQueryBuilder(Consumer, "cons")
+        .innerJoin("cons.iteration", "it")
+        .innerJoin("it.allocation_key", "ak")
+        .select("it.id", "iteration_id")
+        .addSelect("cons.id", "consumer_id")
+        .addSelect("cons.name", "consumer_name")
+        .addSelect("cons.energy_allocated_percentage", "consumer_share")
+        .where("ak.id IN (:...key_ids)", { key_ids })
+        // `consumer.name` is varchar(255) free text with NO foreign key to a meter.
+        // TRIM only — EANs are digits, so there is no case to fold.
+        .andWhere("TRIM(cons.name) IN (:...eans)", { eans })
+        .getRawMany<MeKeyConsumerRow>()
+    );
   }
 
   async getOwnManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]> {

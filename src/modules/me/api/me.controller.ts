@@ -4,9 +4,13 @@ import TraceDecorator from "../../../shared/monitor/traceDecorator.js";
 import config from "config";
 import type { NextFunction, Request, Response } from "express";
 import {
+  MeAllocationSharesDTO,
+  MeAllocationSharesQuery,
   MeCompanyDTO,
   MeDocumentDTO,
   MeDocumentPartialQuery,
+  MeEnergySummaryDTO,
+  MeEnergySummaryQuery,
   MeIndividualDTO,
   MeMemberPartialQuery,
   MeMembersPartialDTO,
@@ -95,6 +99,38 @@ export class MeController {
     const result: MeterConsumptionDTO = await this.meService.getMeterConsumptions(req.params.id, query_consumptions);
     logger.info("Own meter consumptions successfully retrieved");
     res.status(200).json(new ApiResponse<MeterConsumptionDTO>(result, SUCCESS));
+  }
+
+  /**
+   * The caller's own allocation-key share per sharing operation and meter.
+   *
+   * Cached on `"user"` scope, not `"both"`: the endpoint is cross-community and
+   * `cacheKey` drops the community segment when the header is absent, so `"both"`
+   * would key identical data twice depending on whether the browser happened to
+   * send X-Community-ID.
+   */
+  @userControllerTraceDecorator.traceSpan("getAllocationShares", { url: "/me/allocation-shares", method: "get" })
+  @Cache(cacheKey("me-allocation-shares:list", "user", (req) => JSON.stringify(req.query)), 60)
+  async getAllocationShares(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject: MeAllocationSharesQuery = await validateDto(MeAllocationSharesQuery, req.query);
+    const result: MeAllocationSharesDTO = await this.meService.getAllocationShares(queryObject);
+    logger.info("Own allocation shares successfully retrieved");
+    res.status(200).json(new ApiResponse<MeAllocationSharesDTO>(result, SUCCESS));
+  }
+
+  /**
+   * The caller's consumption totals for one calendar month, every community.
+   *
+   * `"user"` scope for the same reason as `getAllocationShares`: cross-community
+   * data must not be double-keyed on whether X-Community-ID happened to be sent.
+   */
+  @userControllerTraceDecorator.traceSpan("getEnergySummary", { url: "/me/energy-summary", method: "get" })
+  @Cache(cacheKey("me-energy-summary:list", "user", (req) => JSON.stringify(req.query)), 60)
+  async getEnergySummary(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject: MeEnergySummaryQuery = await validateDto(MeEnergySummaryQuery, req.query);
+    const result: MeEnergySummaryDTO = await this.meService.getEnergySummary(queryObject);
+    logger.info("Own energy summary successfully retrieved");
+    res.status(200).json(new ApiResponse<MeEnergySummaryDTO>(result, SUCCESS));
   }
 
   @userControllerTraceDecorator.traceSpan("getOwnMemberPendingInvitation", { url: "/me/invitations", method: "get" })

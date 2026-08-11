@@ -367,6 +367,9 @@ CREATE TABLE IF NOT EXISTS app_user (
     nrn TEXT NULL,
     phone_number TEXT NULL,
     iban TEXT NULL,
+    -- Preferred language, persisted from the profile. Email has no other source
+    -- of truth: the frontend picks a language client-side per session.
+    locale VARCHAR(8) NULL,
     id_home_address INT,
     FOREIGN KEY (id_home_address) REFERENCES address (id),
     id_billing_address INT,
@@ -553,6 +556,62 @@ CREATE INDEX IF NOT EXISTS idx_notification_user_unread
     ON notification (id_user) WHERE read_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_notification_community
     ON notification (id_community);
+
+-- ---- Notification delivery layer -------------------------------------------
+-- Mirrors database_script/2026-08-03_notification_delivery.sql. No rows are
+-- seeded below: this file is replayed in full before EVERY functional test, so
+-- a seeded preference or suppression row would perturb unrelated suites.
+
+CREATE TABLE IF NOT EXISTS outbound_message (
+    id              BIGSERIAL PRIMARY KEY,
+    id_notification BIGINT NULL REFERENCES notification (id) ON DELETE SET NULL,
+    id_community    INT NULL REFERENCES community (id) ON DELETE CASCADE,
+    -- Channel: 1 INAPP, 2 EMAIL
+    channel         SMALLINT NOT NULL CHECK (channel IN (1, 2)),
+    recipient       VARCHAR(320) NOT NULL,
+    recipient_name  VARCHAR(255) NULL,
+    -- '' means "unknown"; the dispatcher applies its own default locale.
+    locale          VARCHAR(8) NOT NULL DEFAULT '',
+    type            VARCHAR(128) NOT NULL,
+    -- NotificationCategory: 1 TRANSACTIONAL, 2 INFORMATIONAL
+    category        SMALLINT NOT NULL CHECK (category IN (1, 2)),
+    data            JSONB NOT NULL DEFAULT '{}'::jsonb,
+    dedupe_key      VARCHAR(200) NOT NULL,
+    -- 1 PENDING, 2 SENT, 3 FAILED, 4 SUPPRESSED, 5 CLAIMED
+    status          SMALLINT NOT NULL DEFAULT 1 CHECK (status IN (1, 2, 3, 4, 5)),
+    attempts        SMALLINT NOT NULL DEFAULT 0,
+    last_error      TEXT NULL,
+    scheduled_for   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    claimed_at      TIMESTAMPTZ NULL,
+    sent_at         TIMESTAMPTZ NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_outbound_message_dedupe
+    ON outbound_message (dedupe_key);
+CREATE INDEX IF NOT EXISTS ix_outbound_message_due
+    ON outbound_message (scheduled_for) WHERE status = 1;
+CREATE INDEX IF NOT EXISTS ix_outbound_message_stale
+    ON outbound_message (claimed_at) WHERE status = 5;
+
+CREATE TABLE IF NOT EXISTS email_suppression (
+    email      VARCHAR(320) PRIMARY KEY,
+    -- 1 HARD_BOUNCE, 2 COMPLAINT, 3 UNSUBSCRIBED, 4 MANUAL
+    reason     SMALLINT NOT NULL CHECK (reason IN (1, 2, 3, 4)),
+    detail     TEXT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notification_preference (
+    id_user     INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    -- '' = default for every type; else the first dot-segment of the type key.
+    type_prefix VARCHAR(128) NOT NULL,
+    -- Channel: 1 INAPP, 2 EMAIL
+    channel     SMALLINT NOT NULL CHECK (channel IN (1, 2)),
+    -- 1 IMMEDIATE, 3 OFF (2 DAILY_DIGEST reserved, no runner yet)
+    mode        SMALLINT NOT NULL CHECK (mode IN (1, 3)),
+
+    PRIMARY KEY (id_user, type_prefix, channel)
+);
 
 -- --- MOCK DATA ---
 
@@ -764,14 +823,24 @@ INSERT INTO member (
 VALUES ('Wind Producer Delta', 8, 8, 'BE1000000004', 1, 1, 1); -- id 7
 
 -- 6. Managers (for Entities)
+--
+-- Every `nrn` below is a well-formed Belgian national register number:
+-- YY.MM.DD-SSS.CC, where SSS is odd for men / even for women and CC is the
+-- check number, 97 - (YYMMDDSSS mod 97) for a pre-2000 birth date.
+--
+-- The format is load-bearing, not cosmetic. `numRegistreBeValidator()` in
+-- crm-frontend validates this field, so a placeholder like '111111111' makes
+-- the seeded member UNEDITABLE: the update wizard refuses to leave the
+-- personal-information step, and the error summary it shows names the IBAN
+-- rather than the NRN, which sends you looking at the wrong field.
 INSERT INTO manager (nrn, name, surname, email, phone_number, id_community)
-VALUES ('123456789', 'Manager', 'One', 'mgr1@test.com', '0470000000', 1);
+VALUES ('70.01.15-001.56', 'Manager', 'One', 'mgr1@test.com', '0470000000', 1);
 
 -- 7. Individual / Company Details
 INSERT INTO individual (
     id, first_name, nrn, email, phone_number, social_rate, id_manager
 )
-VALUES (1, 'John', '111111111', 'john@test.com', '0471111111', FALSE, 1);
+VALUES (1, 'John', '85.06.21-123.07', 'john@test.com', '0471111111', FALSE, 1);
 
 INSERT INTO company (id, vat_number, id_manager)
 VALUES (2, 'BE0000000000', 1);
@@ -780,19 +849,19 @@ VALUES (2, 'BE0000000000', 1);
 INSERT INTO individual (
     id, first_name, nrn, email, phone_number, social_rate, id_manager
 )
-VALUES (4, 'Alice', '200000001', 'alice.wind@test.com', '0470000004', FALSE, 1);
+VALUES (4, 'Alice', '90.03.12-002.94', 'alice.wind@test.com', '0470000004', FALSE, 1);
 INSERT INTO individual (
     id, first_name, nrn, email, phone_number, social_rate, id_manager
 )
-VALUES (5, 'Bob', '200000002', 'bob.wind@test.com', '0470000005', FALSE, 1);
+VALUES (5, 'Bob', '88.11.05-003.26', 'bob.wind@test.com', '0470000005', FALSE, 1);
 INSERT INTO individual (
     id, first_name, nrn, email, phone_number, social_rate, id_manager
 )
-VALUES (6, 'Carol', '200000003', 'carol.wind@test.com', '0470000006', FALSE, 1);
+VALUES (6, 'Carol', '92.07.19-004.49', 'carol.wind@test.com', '0470000006', FALSE, 1);
 INSERT INTO individual (
     id, first_name, nrn, email, phone_number, social_rate, id_manager
 )
-VALUES (7, 'Dave', '200000004', 'dave.wind@test.com', '0470000007', FALSE, 1);
+VALUES (7, 'Dave', '79.09.30-005.41', 'dave.wind@test.com', '0470000007', FALSE, 1);
 
 -- 8. Allocation Keys
 INSERT INTO allocation_key (name, description, id_community) VALUES (

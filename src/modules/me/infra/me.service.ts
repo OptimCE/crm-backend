@@ -1,12 +1,16 @@
 import { inject, injectable } from "inversify";
 import type { IMeService } from "../domain/i-me.service.js";
-import type { IMeRepository } from "../domain/i-me.repository.js";
+import type { IMeRepository, MeKeyConsumerRow, MeKeyIterationRow } from "../domain/i-me.repository.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { DownloadDocument } from "../../documents/api/document.dtos.js";
 import {
+  MeAllocationSharesDTO,
+  MeAllocationSharesQuery,
   MeCompanyDTO,
   MeDocumentDTO,
   MeDocumentPartialQuery,
+  MeEnergySummaryDTO,
+  MeEnergySummaryQuery,
   MeIndividualDTO,
   MeMemberPartialQuery,
   MeMembersPartialDTO,
@@ -16,7 +20,27 @@ import {
 } from "../api/me.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { Member } from "../../members/domain/member.models.js";
-import { toMemberPartialDTO, toMemberDTO, toDocumentExposed, toMeterDTO, toMeterPartialDTO } from "../shared/to_dto.js";
+import {
+  toMemberPartialWithCompletenessDTO,
+  toMemberDTO,
+  toDocumentExposed,
+  toMeAllocationShareDTO,
+  toMeAllocationSharesDTO,
+  toMeEnergySummaryDTO,
+  toMeterDTO,
+  toMeterPartialDTO,
+} from "../shared/to_dto.js";
+import { lastClosedMonthISO, localTodayISO, monthBoundsISO, toCalendarDateString } from "../../../shared/utils/date.utils.js";
+
+/**
+ * Hard ceiling on allocation-share rows. Not a page/limit contract: the tile's
+ * point is "my share everywhere", so paginating it would fragment the only useful
+ * view. This exists so a pathological account degrades instead of exhausting memory.
+ */
+const ALLOCATION_SHARES_ROW_CAP = 500;
+
+/** The same ceiling, and for the same reason, on the energy summary's meters. */
+const ENERGY_SUMMARY_ROW_CAP = 500;
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { MEMBER_ERRORS } from "../../members/shared/member.errors.js";
@@ -100,7 +124,7 @@ export class MeService implements IMeService {
 
   async getMembers(query: MeMemberPartialQuery): Promise<[MeMembersPartialDTO[], Pagination]> {
     const [values, total]: [Member[], number] = await this.meRepository.getMembersList(query);
-    const return_values = values.map((value) => toMemberPartialDTO(value));
+    const return_values = values.map((value) => toMemberPartialWithCompletenessDTO(value));
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
   }
@@ -127,6 +151,80 @@ export class MeService implements IMeService {
     const return_values = values.map((value) => toMeterPartialDTO(value));
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
+  }
+
+  /**
+   * The caller's own share of the allocation key in force, per (community,
+   * sharing operation, meter). Cross-community — the row filter is
+   * `user_member_link`, never a role or an active community.
+   *
+   * Four small reads rather than one join: the shares are a tree
+   * (holding → key → iterations → consumers) whose leaves are needed per
+   * iteration, and a single flattened join would multiply the holdings by the
+   * consumers and need re-grouping anyway.
+   */
+  async getAllocationShares(query: MeAllocationSharesQuery): Promise<MeAllocationSharesDTO> {
+    const at = query.at ? toCalendarDateString(query.at) : localTodayISO();
+
+    const holdings = await this.meRepository.getOwnMeterHoldings(at, ALLOCATION_SHARES_ROW_CAP);
+    if (holdings.length === 0) {
+      // An unlinked user gets an empty result rather than a 403 — same convention
+      // as getMeterConsumptions, and it avoids a membership existence oracle.
+      return toMeAllocationSharesDTO(at, []);
+    }
+
+    const operation_ids = [...new Set(holdings.map((h) => h.operation_id))];
+    const keys = await this.meRepository.getKeysInForce(operation_ids, at);
+    const keyByOperation = new Map(keys.map((k) => [k.operation_id, k]));
+
+    const key_ids = [...new Set(keys.map((k) => k.key_id))];
+    const eans = [...new Set(holdings.map((h) => h.ean))];
+    const [iterations, consumers] = await Promise.all([
+      this.meRepository.getKeyIterations(key_ids),
+      this.meRepository.getKeyConsumersForEans(key_ids, eans),
+    ]);
+
+    const iterationsByKey = new Map<number, MeKeyIterationRow[]>();
+    for (const iteration of iterations) {
+      const bucket = iterationsByKey.get(iteration.key_id);
+      if (bucket) bucket.push(iteration);
+      else iterationsByKey.set(iteration.key_id, [iteration]);
+    }
+
+    const shares = holdings.map((holding) => {
+      const key = keyByOperation.get(holding.operation_id);
+      // Consumers are matched per EAN: two holdings sharing a key must not see
+      // each other's rows.
+      const consumersByIteration = new Map<number, MeKeyConsumerRow[]>();
+      for (const consumer of consumers) {
+        if (consumer.consumer_name.trim() !== holding.ean) continue;
+        const bucket = consumersByIteration.get(consumer.iteration_id);
+        if (bucket) bucket.push(consumer);
+        else consumersByIteration.set(consumer.iteration_id, [consumer]);
+      }
+      return toMeAllocationShareDTO(holding, key, key ? (iterationsByKey.get(key.key_id) ?? []) : [], consumersByIteration);
+    });
+
+    return toMeAllocationSharesDTO(at, shares);
+  }
+
+  /**
+   * The caller's consumption totals for one calendar month, across every
+   * community. Cross-community and role-free, like the rest of `/me/*`.
+   *
+   * One aggregate read rather than 1+N series reads:
+   * `/me/meters/{ean}/consumptions` returns seven unbounded quarter-hourly
+   * arrays, so composing this client-side would pull thousands of rows per
+   * meter to render four numbers on the app's most-loaded page.
+   *
+   * A meter with no readings in the window produces no row, so it is simply
+   * absent — the alternative, a row of zeroes, would tell the member they
+   * consumed nothing when the truth is that we do not know.
+   */
+  async getEnergySummary(query: MeEnergySummaryQuery): Promise<MeEnergySummaryDTO> {
+    const { start, end } = monthBoundsISO(query.month ?? lastClosedMonthISO());
+    const rows = await this.meRepository.getOwnEnergyTotals(start, end, ENERGY_SUMMARY_ROW_CAP);
+    return toMeEnergySummaryDTO(start, end, rows);
   }
 
   async getOwnManagerPendingInvitation(query: UserManagerInvitationQuery): Promise<[UserManagerInvitationDTO[], Pagination]> {

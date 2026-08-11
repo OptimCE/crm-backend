@@ -13,5 +13,6 @@ export function toUserDTO(user: User): UserDTO {
     home_address: user.homeAddress ? toAddressDTO(user.homeAddress) : undefined,
     nrn: user.NRN,
     iban: user.iban,
+    locale: user.locale ?? null,
   };
 }

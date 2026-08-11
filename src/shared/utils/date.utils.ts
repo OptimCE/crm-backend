@@ -35,3 +35,32 @@ export function localTodayISO(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+
+/**
+ * First and last calendar day of a `YYYY-MM` month, both inclusive.
+ *
+ * UTC arithmetic, like `addDaysISO`: `setUTCMonth(m + 1, 0)` rolls to the last
+ * day of the requested month and handles February and leap years without a
+ * table. The result is a pair of plain calendar strings, never an instant.
+ */
+export function monthBoundsISO(yyyymm: string): { start: string; end: string } {
+  const start = `${yyyymm}-01`;
+  const d = new Date(`${start}T00:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + 1, 0);
+  return { start, end: d.toISOString().slice(0, 10) };
+}
+
+/**
+ * The last CLOSED calendar month, as `YYYY-MM`, in the host's local timezone.
+ *
+ * "Closed" rather than "current" because a partial month is not comparable to
+ * anything: a member opening the app on the 2nd would see two days of readings
+ * and conclude their consumption had collapsed. Local components for the same
+ * reason as `localTodayISO`.
+ */
+export function lastClosedMonthISO(): string {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}

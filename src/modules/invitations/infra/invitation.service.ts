@@ -16,12 +16,15 @@ import { GestionnaireInvitation, UserMemberInvitation } from "../domain/invitati
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import type { IUserRepository } from "../../users/domain/i-user.repository.js";
+import { NOTIFICATION_TYPES } from "../../notifications/domain/notification.taxonomy.js";
+import { NotificationCategory, NotificationChannel } from "../../notifications/shared/notification.types.js";
 import { toUserManagerInvitationDTO, toUserMemberInvitationDTO } from "../shared/to_dto.js";
 import { INVITATION_ERRORS } from "../shared/invitation.errors.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
+import type { IOutboundService } from "../../notifications/domain/i-outbound.service.js";
 
 /**
  * Service implementation for managing invitations.
@@ -35,6 +38,7 @@ export class InvitationService implements IInvitationService {
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
     @inject("NotificationService") private readonly notificationService: INotificationService,
+    @inject("OutboundService") private readonly outboundService: IOutboundService,
   ) {}
 
   /**
@@ -145,21 +149,43 @@ export class InvitationService implements IInvitationService {
         },
         query_runner,
       );
-      // Notify the invitee — only possible if they already have an account.
-      // Best-effort: a notification failure must not abort the invitation.
+      // Notify the invitee. Two paths, one message: a registered invitee gets an
+      // in-app row plus an email through `publish`; an address with no `app_user`
+      // row has no `id_user` to hang a notification on (`notification.id_user` is
+      // NOT NULL), so it goes straight onto the outbound queue with
+      // `id_notification = NULL`. The second branch IS the bug this workstream
+      // exists for — before it, inviting an unregistered address wrote a row,
+      // logged an audit entry, and told nobody.
+      //
+      // Neither call raises and both run in a SAVEPOINT on `query_runner`, so no
+      // try/catch here — and one would not have helped anyway, since catching a
+      // JS error does not un-abort an aborted Postgres transaction.
+      //
+      // `created.id` is load-bearing for email idempotency: the dedupe key hashes
+      // `data`, and a re-invite is a fresh INSERT with a fresh id. Never turn
+      // these inserts into an upsert without passing an explicit dedupe key.
       if (user) {
-        try {
-          await this.notificationService.publish(
-            {
-              type: "manager_invitation.received",
-              data: { invitation_id: created.id, community_id: created.community.id },
-              target: { kind: "user", userId: user.id, communityId: created.community.id },
-            },
-            query_runner,
-          );
-        } catch (notify_err) {
-          logger.error({ operation: "inviteUserToBecomeManager:notify", error: notify_err }, "Notification publish failed");
-        }
+        await this.notificationService.publish(
+          {
+            type: NOTIFICATION_TYPES.MANAGER_INVITATION_RECEIVED,
+            data: { invitation_id: created.id, community_id: created.community.id },
+            target: { kind: "user", userId: user.id, communityId: created.community.id },
+            category: NotificationCategory.TRANSACTIONAL,
+            channels: [NotificationChannel.INAPP, NotificationChannel.EMAIL],
+          },
+          query_runner,
+        );
+      } else {
+        await this.outboundService.enqueueDirect(
+          {
+            type: NOTIFICATION_TYPES.MANAGER_INVITATION_RECEIVED,
+            recipient: invitation.user_email,
+            category: NotificationCategory.TRANSACTIONAL,
+            data: { invitation_id: created.id, community_id: created.community.id },
+            id_community: created.community.id,
+          },
+          query_runner,
+        );
       }
     } catch (err) {
       logger.error({ operation: "inviteUserToBecomeManager", error: err }, "An error happened during the invitation of a user to become manager");
@@ -187,21 +213,30 @@ export class InvitationService implements IInvitationService {
         },
         query_runner,
       );
-      // Notify the invitee — only possible if they already have an account.
-      // Best-effort: a notification failure must not abort the invitation.
+      // Notify the invitee — see inviteUserToBecomeManager for why there is no
+      // try/catch and why the `else` branch bypasses `publish` entirely.
       if (user) {
-        try {
-          await this.notificationService.publish(
-            {
-              type: "member_invitation.received",
-              data: { invitation_id: created.id, community_id: created.community.id },
-              target: { kind: "user", userId: user.id, communityId: created.community.id },
-            },
-            query_runner,
-          );
-        } catch (notify_err) {
-          logger.error({ operation: "inviteUserToBecomeMember:notify", error: notify_err }, "Notification publish failed");
-        }
+        await this.notificationService.publish(
+          {
+            type: NOTIFICATION_TYPES.MEMBER_INVITATION_RECEIVED,
+            data: { invitation_id: created.id, community_id: created.community.id },
+            target: { kind: "user", userId: user.id, communityId: created.community.id },
+            category: NotificationCategory.TRANSACTIONAL,
+            channels: [NotificationChannel.INAPP, NotificationChannel.EMAIL],
+          },
+          query_runner,
+        );
+      } else {
+        await this.outboundService.enqueueDirect(
+          {
+            type: NOTIFICATION_TYPES.MEMBER_INVITATION_RECEIVED,
+            recipient: invitation.user_email,
+            category: NotificationCategory.TRANSACTIONAL,
+            data: { invitation_id: created.id, community_id: created.community.id },
+            id_community: created.community.id,
+          },
+          query_runner,
+        );
       }
     } catch (err) {
       logger.error({ operation: "inviteUserToBecomeMember", error: err }, "An error happened during the invitation of a user to become member");

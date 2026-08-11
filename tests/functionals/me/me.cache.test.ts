@@ -469,4 +469,95 @@ describe("(Cache Integration) Me Module", () => {
       expect(keys).toHaveLength(0);
     });
   });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Allocation shares — user-scoped and cross-community
+  // ────────────────────────────────────────────────────────────────────────────
+  describe("Allocation shares cache scoping", () => {
+    async function getShares(user: string, query = ""): Promise<request.Response> {
+      const { default: app } = await import("../../../src/app.js");
+      return request(app)
+        .get(`/me/allocation-shares${query}`)
+        .set("x-user-id", user)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_MEMBER);
+    }
+
+    it("keys by user, not by community", async () => {
+      const cache = await getCacheService();
+      const response = await getShares(AUTH_USER_MEMBER);
+      await expectWithLog(response, () => expect(response.status).toBe(200));
+
+      const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-allocation-shares"));
+      expect(keys).toHaveLength(1);
+      expect(keys[0]).toContain(`u:${AUTH_USER_MEMBER}`);
+      // The endpoint is cross-community and works with no X-Community-ID at all.
+      // A "both" scope would key identical data twice, depending only on whether
+      // the browser happened to send the header.
+      expect(keys[0]).not.toContain("c:");
+    });
+
+    it("keys two users separately", async () => {
+      const cache = await getCacheService();
+      await getShares(AUTH_USER_MEMBER);
+      await getShares(AUTH_USER_ADMIN);
+
+      const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-allocation-shares"));
+      expect(new Set(keys).size).toBe(2);
+    });
+
+    it("keys two evaluation dates separately", async () => {
+      const cache = await getCacheService();
+      await getShares(AUTH_USER_MEMBER, "?at=2024-01-01");
+      await getShares(AUTH_USER_MEMBER, "?at=2026-01-01");
+
+      const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-allocation-shares"));
+      expect(new Set(keys).size).toBe(2);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Energy summary — user-scoped and cross-community
+  // ────────────────────────────────────────────────────────────────────────────
+  describe("Energy summary cache scoping", () => {
+    async function getSummary(user: string, query = ""): Promise<request.Response> {
+      const { default: app } = await import("../../../src/app.js");
+      return request(app)
+        .get(`/me/energy-summary${query}`)
+        .set("x-user-id", user)
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_MEMBER);
+    }
+
+    it("keys by user, not by community", async () => {
+      const cache = await getCacheService();
+      const response = await getSummary(AUTH_USER_MEMBER);
+      await expectWithLog(response, () => expect(response.status).toBe(200));
+
+      const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-energy-summary"));
+      expect(keys).toHaveLength(1);
+      expect(keys[0]).toContain(`u:${AUTH_USER_MEMBER}`);
+      // Same trap as allocation shares: the user dashboard calls this with no
+      // X-Community-ID at all, so a "both" scope would key identical data twice.
+      expect(keys[0]).not.toContain("c:");
+    });
+
+    it("keys two users separately", async () => {
+      const cache = await getCacheService();
+      await getSummary(AUTH_USER_MEMBER);
+      await getSummary(AUTH_USER_ADMIN);
+
+      const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-energy-summary"));
+      expect(new Set(keys).size).toBe(2);
+    });
+
+    it("keys two months separately", async () => {
+      const cache = await getCacheService();
+      await getSummary(AUTH_USER_MEMBER, "?month=2026-01");
+      await getSummary(AUTH_USER_MEMBER, "?month=2026-02");
+
+      const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-energy-summary"));
+      expect(new Set(keys).size).toBe(2);
+    });
+  });
 });

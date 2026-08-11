@@ -3,6 +3,7 @@ import type { ICommunityService } from "../domain/i-community.service.js";
 import type { ICommunityRepository } from "../domain/i-community.repository.js";
 import { inject, injectable } from "inversify";
 import {
+  CommunityDashboardDTO,
   CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
@@ -20,7 +21,15 @@ import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Role } from "../../../shared/dtos/role.js";
-import { toCommunityDetailDTO, toMyCommunityDTO, toPublicCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
+import { toCommunityDashboardDTO, toCommunityDetailDTO, toMyCommunityDTO, toPublicCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
+import { localTodayISO } from "../../../shared/utils/date.utils.js";
+
+/**
+ * How many "operation without a valid allocation key" names the dashboard
+ * returns. The counter beside it is the truth; this list only exists so the tile
+ * can name the first few instead of saying "3 operations".
+ */
+const DASHBOARD_OPERATION_LIST_CAP = 50;
 import type { IIamService } from "../../../shared/iam/i-iam.service.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
@@ -84,6 +93,33 @@ export class CommunityService implements ICommunityService {
     }
 
     return toCommunityDetailDTO(result.community, result.member_count, logo_presigned_url);
+  }
+
+  /**
+   * Readiness aggregate for the active community.
+   *
+   * Two statements rather than one: the counters are scalar and the "operations
+   * without a valid key" list needs rows, and they are independent, so they run
+   * concurrently. Read-only — no `@Transactional()`, and no audit entry, because
+   * reads are not audited anywhere in this service.
+   */
+  async getDashboard(): Promise<CommunityDashboardDTO> {
+    // Local civil date, not `new Date().toISOString()` — the UTC date disagrees
+    // with the local one for hours around midnight and would flip the meter and
+    // key validity windows a day early.
+    const as_of = localTodayISO();
+
+    const [row, operations_without_valid_key] = await Promise.all([
+      this.community_repository.getDashboardCounts(as_of),
+      this.community_repository.getOperationsWithoutValidKey(as_of, DASHBOARD_OPERATION_LIST_CAP),
+    ]);
+
+    if (!row) {
+      logger.error({ operation: "getDashboard" }, "Active community not found while building the readiness dashboard");
+      throw new AppError(COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND, 404);
+    }
+
+    return toCommunityDashboardDTO(as_of, row, operations_without_valid_key);
   }
 
   /**
@@ -342,7 +378,28 @@ export class CommunityService implements ICommunityService {
    */
   async getMyCommunities(query: CommunityQueryDTO): Promise<[MyCommunityDTO[], Pagination]> {
     const [values, total] = await this.community_repository.getMyCommunities(query);
-    const return_values = values.map((value) => toMyCommunityDTO(value));
+    // Presign each logo, exactly as getAllPublicCommunities does. `logo_url` is
+    // a raw storage key, not a URL, so handing it to the client renders a broken
+    // image — and the user dashboard's community picker is the one screen where
+    // a logo is how a non-technical member recognises where they are going.
+    // A failed presign degrades to null (the client falls back to initials); it
+    // must never fail the whole list.
+    const return_values = await Promise.all(
+      values.map(async (value) => {
+        let logo_presigned_url: string | null = null;
+        if (value.community.logo_url) {
+          try {
+            logo_presigned_url = await this.storage_service.getDocumentUrl(value.community.logo_url);
+          } catch (err) {
+            logger.error(
+              { operation: "getMyCommunities", error: err, communityId: value.id_community },
+              "Failed to generate presigned URL for community logo",
+            );
+          }
+        }
+        return toMyCommunityDTO(value, logo_presigned_url);
+      }),
+    );
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
   }

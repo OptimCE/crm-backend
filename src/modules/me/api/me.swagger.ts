@@ -74,6 +74,26 @@ export const MeParameters = {
     description: "EAN code of the meter",
     example: "541448820000000000",
   },
+  MeAllocationSharesFilters: {
+    name: "filters",
+    in: "query",
+    required: false,
+    description: "Evaluation date for the key-validity and meter-ownership windows",
+    schema: { $ref: "#/components/schemas/MeAllocationSharesQuery" },
+    style: "form",
+    explode: true,
+    example: { at: "2026-06-15" },
+  },
+  MeEnergySummaryFilters: {
+    name: "filters",
+    in: "query",
+    required: false,
+    description: "Calendar month to summarise (`YYYY-MM`). Defaults to the last closed month.",
+    schema: { $ref: "#/components/schemas/MeEnergySummaryQuery" },
+    style: "form",
+    explode: true,
+    example: { month: "2026-07" },
+  },
 };
 
 export const MeResponses = {
@@ -370,6 +390,113 @@ export const MeResponses = {
         },
         example: {
           data: "success",
+        },
+      },
+    },
+  },
+  MeAllocationSharesSuccess: {
+    description: "Successful own allocation-shares response",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/MeAllocationSharesDTO" },
+        },
+        // All three outcomes side by side: matched, prorata, and unmatched.
+        // The last one is the contract the client must not render as "0 %".
+        example: {
+          error_code: 0,
+          data: {
+            at: "2026-06-15",
+            shares: [
+              {
+                community: { id: 1, name: "Test Community", logo_url: null },
+                sharing_operation: { id: 1, name: "Private Local Sharing", type: 1 },
+                ean: "541448200000000001",
+                member: { id: 4, name: "Member Four" },
+                holding_start_date: "2024-01-01",
+                holding_end_date: null,
+                key: { id: 1, name: "Key A", start_date: "2024-01-01", end_date: null },
+                matched: true,
+                match_basis: "ean_consumer_name",
+                is_prorata: false,
+                effective_share: 0.4,
+                iterations: [
+                  { iteration_id: 1, iteration_number: 0, iteration_share: 0.6, consumer_share: 0.5, is_prorata: false, contribution: 0.3 },
+                  { iteration_id: 2, iteration_number: 1, iteration_share: 0.4, consumer_share: 0.25, is_prorata: false, contribution: 0.1 },
+                ],
+              },
+              {
+                community: { id: 1, name: "Test Community", logo_url: null },
+                sharing_operation: { id: 2, name: "Public Wind Sharing", type: 2 },
+                ean: "541448200000000002",
+                member: { id: 5, name: "Member Five" },
+                holding_start_date: "2024-01-01",
+                holding_end_date: null,
+                key: { id: 2, name: "Key B", start_date: "2024-01-01", end_date: null },
+                matched: true,
+                match_basis: "ean_consumer_name",
+                is_prorata: true,
+                effective_share: null,
+                iterations: [
+                  { iteration_id: 3, iteration_number: 0, iteration_share: 1, consumer_share: -1, is_prorata: true, contribution: null },
+                ],
+              },
+              {
+                community: { id: 2, name: "Second Community", logo_url: null },
+                sharing_operation: { id: 3, name: "Neighbourhood Sharing", type: 1 },
+                ean: "541448200000000003",
+                member: { id: 3, name: "Member Three" },
+                holding_start_date: "2024-01-01",
+                holding_end_date: null,
+                key: { id: 3, name: "Key C", start_date: "2024-01-01", end_date: null },
+                matched: false,
+                match_basis: null,
+                is_prorata: false,
+                effective_share: null,
+                iterations: [
+                  { iteration_id: 4, iteration_number: 0, iteration_share: 1, consumer_share: null, is_prorata: false, contribution: 0 },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
+  MeEnergySummarySuccess: {
+    description: "Successful own energy-summary response",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/MeEnergySummaryDTO" },
+        },
+        // Two meters in two different communities, which is the shape the user
+        // dashboard renders. A meter with no readings in the window is ABSENT
+        // from `meters` rather than present with zeroes.
+        example: {
+          error_code: 0,
+          data: {
+            period: { start: "2026-07-01", end: "2026-07-31" },
+            totals: { gross_kwh: 312.4, shared_kwh: 96.15, inj_gross_kwh: 0, inj_shared_kwh: 0 },
+            meters: [
+              {
+                ean: "541448200000000001",
+                meter_number: "M-0001",
+                community: { id: 1, name: "Test Community", logo_url: null },
+                totals: { gross_kwh: 208.2, shared_kwh: 61.4, inj_gross_kwh: 0, inj_shared_kwh: 0 },
+                has_data: true,
+              },
+              {
+                ean: "541448200000000003",
+                meter_number: "M-0003",
+                community: { id: 2, name: "Second Community", logo_url: null },
+                totals: { gross_kwh: 104.2, shared_kwh: 34.75, inj_gross_kwh: 0, inj_shared_kwh: 0 },
+                has_data: true,
+              },
+            ],
+          },
         },
       },
     },

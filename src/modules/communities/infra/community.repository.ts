@@ -1,10 +1,14 @@
-import type { ICommunityRepository } from "../domain/i-community.repository.js";
+import type { CommunityDashboardCountsRow, ICommunityRepository } from "../domain/i-community.repository.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { inject, injectable } from "inversify";
 import { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO, UpdateCommunityDTO } from "../api/community.dtos.js";
 import type { QueryRunner } from "typeorm";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Member } from "../../members/domain/member.models.js";
+import { MemberStatus, MemberType } from "../../members/shared/member.types.js";
+import { MeterDataStatus } from "../../meters/shared/meter.types.js";
+import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
+import { SharingKeyStatus } from "../../sharing_operations/shared/sharing_operation.types.js";
 import { Role } from "../../../shared/dtos/role.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
@@ -132,6 +136,154 @@ export class CommunityRepository implements ICommunityRepository {
       apply: (qb, direction) => qb.addOrderBy("community.id", direction),
     },
   ];
+
+  /**
+   * One row of readiness counters for the active community.
+   *
+   * `withCommunityScope` is deliberately NOT used here: it hard-codes the join
+   * alias `scope_community`, so it can be applied at most once per builder and
+   * cannot reach inside sibling subqueries. The tenant is resolved once from the
+   * context (same pattern as `SharingOperationRepository.patchVisibility`) and
+   * every subquery filters on it explicitly — so no counter can silently escape
+   * its tenant.
+   *
+   * All counters are correlated scalar subqueries over `id_community`-indexed
+   * tables, evaluated for exactly one community. The legal columns ride along for
+   * free because the statement is already `FROM community`.
+   */
+  async getDashboardCounts(as_of: string, query_runner?: QueryRunner): Promise<CommunityDashboardCountsRow | null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const cid = await this.authContext.getInternalCommunityId(query_runner);
+
+    // The meter_data row "in force" on :as_of. end_date is the LAST day held
+    // (addMeterData closes a holding with `next_start - 1 day`), so both bounds
+    // are inclusive — `> :as_of` would under-report on a handover day.
+    const IN_FORCE = `md.start_date <= CAST(:as_of AS date) AND (md.end_date IS NULL OR md.end_date >= CAST(:as_of AS date))`;
+    const meterStatus = (status: MeterDataStatus): string => `
+      (SELECT COUNT(DISTINCT md.ean) FROM meter_data md
+        WHERE md.id_community = c.id AND md.status = ${status} AND ${IN_FORCE})`;
+
+    const qb = manager
+      .createQueryBuilder()
+      .from(Community, "c")
+      .select(`(SELECT COUNT(*) FROM member m WHERE m.id_community = c.id)`, "members_total")
+      .addSelect(`(SELECT COUNT(*) FROM member m WHERE m.id_community = c.id AND m.status = ${MemberStatus.ACTIVE})`, "members_active")
+      .addSelect(`(SELECT COUNT(*) FROM member m WHERE m.id_community = c.id AND m.status = ${MemberStatus.INACTIVE})`, "members_inactive")
+      .addSelect(`(SELECT COUNT(*) FROM member m WHERE m.id_community = c.id AND m.status = ${MemberStatus.PENDING})`, "members_pending")
+      .addSelect(
+        `(SELECT COUNT(*) FROM member m
+            WHERE m.id_community = c.id
+              AND NOT EXISTS (SELECT 1 FROM user_member_link uml WHERE uml.id_member = m.id))`,
+        "members_without_user",
+      )
+      // Every column below is NOT NULL in the DDL, so "missing" can only be an
+      // empty/whitespace string — or an absent sub-type row, which is the state
+      // that makes toMemberDTO throw "Data inconsistency" on the detail endpoint.
+      // phone_number and id_manager are @IsOptional by design and are not counted.
+      .addSelect(
+        `(SELECT COUNT(*)
+            FROM member m
+            LEFT JOIN individual i  ON i.id  = m.id
+            LEFT JOIN company    co ON co.id = m.id
+            JOIN address ha ON ha.id = m.id_home_address
+            JOIN address ba ON ba.id = m.id_billing_address
+           WHERE m.id_community = c.id
+             AND (
+                  COALESCE(TRIM(m.name), '') = ''
+               OR COALESCE(TRIM(m.iban), '') = ''
+               OR (m.member_type = ${MemberType.INDIVIDUAL} AND i.id IS NULL)
+               OR (m.member_type = ${MemberType.COMPANY}    AND co.id IS NULL)
+               OR (m.member_type = ${MemberType.INDIVIDUAL}
+                   AND (COALESCE(TRIM(i.nrn), '') = '' OR COALESCE(TRIM(i.email), '') = ''))
+               OR (m.member_type = ${MemberType.COMPANY} AND COALESCE(TRIM(co.vat_number), '') = '')
+               OR COALESCE(TRIM(ha.street), '') = '' OR COALESCE(TRIM(ha.postcode), '') = '' OR COALESCE(TRIM(ha.city), '') = ''
+               OR COALESCE(TRIM(ba.street), '') = '' OR COALESCE(TRIM(ba.postcode), '') = '' OR COALESCE(TRIM(ba.city), '') = ''
+             ))`,
+        "members_incomplete",
+      )
+      .addSelect(`(SELECT COUNT(*) FROM meter mt WHERE mt.id_community = c.id)`, "meters_total")
+      .addSelect(meterStatus(MeterDataStatus.ACTIVE), "meters_active")
+      .addSelect(meterStatus(MeterDataStatus.INACTIVE), "meters_inactive")
+      .addSelect(meterStatus(MeterDataStatus.WAITING_GRD), "meters_waiting_grd")
+      .addSelect(meterStatus(MeterDataStatus.WAITING_MANAGER), "meters_waiting_manager")
+      // Distinct from the counter below: this meter has NO row covering today at
+      // all, so it has no status, no holder and no operation. Different fix.
+      .addSelect(
+        `(SELECT COUNT(*) FROM meter mt
+            WHERE mt.id_community = c.id
+              AND NOT EXISTS (SELECT 1 FROM meter_data md WHERE md.ean = mt.ean AND ${IN_FORCE}))`,
+        "meters_without_active_data",
+      )
+      .addSelect(
+        `(SELECT COUNT(DISTINCT md.ean) FROM meter_data md
+            WHERE md.id_community = c.id AND md.id_sharing_operation IS NULL AND ${IN_FORCE})`,
+        "meters_not_in_sharing_operation",
+      )
+      .addSelect(`(SELECT COUNT(*) FROM sharing_operation so WHERE so.id_community = c.id)`, "operations_total")
+      .addSelect(
+        `(SELECT COUNT(*) FROM sharing_operation so
+            WHERE so.id_community = c.id
+              AND NOT EXISTS (
+                SELECT 1 FROM sharing_operation_key sok
+                 WHERE sok.id_sharing_operation = so.id
+                   AND sok.status = ${SharingKeyStatus.APPROVED}
+                   AND sok.start_date <= CAST(:as_of AS date)
+                   AND (sok.end_date IS NULL OR sok.end_date >= CAST(:as_of AS date))))`,
+        "operations_without_valid_key",
+      )
+      // `end_date IS NULL` is load-bearing. Approving a key INSERTS a new APPROVED
+      // row and only closes the PENDING one (patchKeyStatus) — its status stays 2
+      // forever. Without this predicate every historically-approved key would be
+      // reported as still awaiting approval.
+      .addSelect(
+        `(SELECT COUNT(DISTINCT sok.id_sharing_operation) FROM sharing_operation_key sok
+            WHERE sok.id_community = c.id AND sok.status = ${SharingKeyStatus.PENDING} AND sok.end_date IS NULL)`,
+        "operations_with_pending_key",
+      )
+      .addSelect(`(SELECT COUNT(*) FROM user_member_invitation umi WHERE umi.id_community = c.id)`, "member_invitations_pending")
+      .addSelect(
+        `(SELECT COUNT(*) FROM user_member_invitation umi WHERE umi.id_community = c.id AND umi.to_be_encoded)`,
+        "member_invitations_to_be_encoded",
+      )
+      .addSelect(`(SELECT COUNT(*) FROM gestionnaire_invitation gi WHERE gi.id_community = c.id)`, "manager_invitations_pending")
+      .addSelect("c.vat_number", "vat_number")
+      .addSelect("c.legal_name", "legal_name")
+      .addSelect("c.iban", "iban")
+      .addSelect("c.account_holder_name", "account_holder_name")
+      .addSelect("c.headquarters_address_id", "headquarters_address_id")
+      .addSelect("c.regulator", "regulator")
+      .where("c.id = :cid", { cid })
+      .setParameter("as_of", as_of);
+
+    const row = await qb.getRawOne<CommunityDashboardCountsRow>();
+    return row ?? null;
+  }
+
+  async getOperationsWithoutValidKey(as_of: string, limit: number, query_runner?: QueryRunner): Promise<{ id: number; name: string }[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const cid = await this.authContext.getInternalCommunityId(query_runner);
+
+    return manager
+      .createQueryBuilder(SharingOperation, "so")
+      .select("so.id", "id")
+      .addSelect("so.name", "name")
+      .where("so.id_community = :cid", { cid })
+      // Same predicate as the `operations_without_valid_key` counter above; the
+      // two must agree, which is why the count is the source of truth and this
+      // list is only the (capped) naming of it.
+      .andWhere(
+        `NOT EXISTS (
+           SELECT 1 FROM sharing_operation_key sok
+            WHERE sok.id_sharing_operation = so.id
+              AND sok.status = :approved
+              AND sok.start_date <= CAST(:as_of AS date)
+              AND (sok.end_date IS NULL OR sok.end_date >= CAST(:as_of AS date)))`,
+        { approved: SharingKeyStatus.APPROVED, as_of },
+      )
+      .orderBy("so.name", "ASC")
+      .limit(limit)
+      .getRawMany<{ id: number; name: string }>();
+  }
 
   async getAllPublicCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;

@@ -2,7 +2,7 @@ import { expect, it } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { testCasesDelete, testCasesDownload, testCasesGetDocuments, testCasesUpload } from "./document.const.js";
-import { expectWithLog, mockDocumentRepositoryModule, mockStorageServiceModule } from "../../utils/helper.js";
+import { expectWithLog, mockDocumentRepositoryModule, mockMemberRepositoryModule, mockStorageServiceModule } from "../../utils/helper.js";
 
 describe("(Unit) Document Module", () => {
   // --- GET DOCUMENTS ---
@@ -98,6 +98,10 @@ describe("(Unit) Document Module", () => {
       async ({ id_user, id_community, orgs, field_member, file_name, status_code, expected_error_code, expected_data, mocks }) => {
         if (mocks?.documentRepo) await mockDocumentRepositoryModule(mocks.documentRepo);
         if (mocks?.storageService) await mockStorageServiceModule(mocks.storageService);
+        // uploadDocument resolves the notification audience through MemberRepository.
+        // Unit tests seed no data, so the real repository would query a table that
+        // isn't there; the mock defaults to "no audience", making the fan-out a no-op.
+        await mockMemberRepositoryModule({});
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;

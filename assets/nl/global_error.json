@@ -19,7 +19,8 @@
         "boolean": "Het veld '{{field}}' moet een boolean zijn",
         "date": "Het veld '{{field}}' moet een geldige datum zijn",
         "number": "Het veld '{{field}}' moet een getal zijn",
-        "array": "Het veld '{{field}}' moet een geldige array zijn"
+        "array": "Het veld '{{field}}' moet een geldige array zijn",
+        "month": "Het veld '{{field}}' moet een maand zijn met de indeling JJJJ-MM"
       },
       "sort": "Het veld '{{field}} moet 'ASC' of 'DESC' zijn",
       "empty": "Het veld '{{field}}' is leeg",

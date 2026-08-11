@@ -4,45 +4,138 @@ import type { DeepPartial, QueryRunner } from "typeorm";
 
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
+import logger from "../../../shared/monitor/logger.js";
+import { withSavepoint } from "../../../shared/transactional/savepoint.js";
 import { Notification } from "../domain/notification.models.js";
+import { NOTIFICATION_TYPE_PREFIXES } from "../domain/notification.taxonomy.js";
+// Value import, not `import type`: these are runtime enums, compared below.
+// Folding them into a type-only import silently yields `undefined`.
+import { NotificationCategory, NotificationChannel, PreferenceMode } from "../shared/notification.types.js";
+import { typePrefixOf } from "../shared/notification.dedupe.js";
 import { NOTIFICATION_ERRORS } from "../shared/notification.errors.js";
 import type { INotificationService } from "../domain/i-notification.service.js";
-import type { INotificationRepository } from "../domain/i-notification.repository.js";
-import { NotificationDTO, type NotificationPublishInput, type NotificationQueryDTO, UnreadCountDTO } from "../api/notification.dtos.js";
+import type { INotificationRepository, PreferenceRow } from "../domain/i-notification.repository.js";
+import type { IOutboundService } from "../domain/i-outbound.service.js";
+import {
+  NotificationDTO,
+  type NotificationPreferenceDTO,
+  NotificationPreferencesDTO,
+  type NotificationPublishInput,
+  type NotificationQueryDTO,
+  UnreadCountDTO,
+} from "../api/notification.dtos.js";
 
 @injectable()
 export class NotificationService implements INotificationService {
-  constructor(@inject("NotificationRepository") private readonly notification_repository: INotificationRepository) {}
+  constructor(
+    @inject("NotificationRepository") private readonly notification_repository: INotificationRepository,
+    @inject("OutboundService") private readonly outbound_service: IOutboundService,
+  ) {}
 
   async publish(input: NotificationPublishInput, query_runner?: QueryRunner): Promise<number> {
-    const { target } = input;
+    try {
+      // The whole body runs in a SAVEPOINT, including the recipient SELECT — a
+      // failing SELECT aborts the caller's Postgres transaction just as
+      // thoroughly as a failing INSERT, and swallowing the JS error does not
+      // un-abort it. See `withSavepoint`.
+      return await withSavepoint(query_runner, async () => {
+        const { target } = input;
 
-    let recipientIds: number[];
-    let communityId: number | null;
-    if (target.kind === "user") {
-      recipientIds = [target.userId];
-      communityId = target.communityId ?? null;
-    } else if (target.kind === "users") {
-      recipientIds = [...new Set(target.userIds)];
-      communityId = target.communityId ?? null;
-    } else {
-      communityId = target.communityId;
-      recipientIds = await this.notification_repository.findCommunityRecipientIds(target.communityId, target.roles, query_runner);
-    }
+        let recipientIds: number[];
+        let communityId: number | null;
+        if (target.kind === "user") {
+          recipientIds = [target.userId];
+          communityId = target.communityId ?? null;
+        } else if (target.kind === "users") {
+          recipientIds = [...new Set(target.userIds)];
+          communityId = target.communityId ?? null;
+        } else {
+          communityId = target.communityId;
+          recipientIds = await this.notification_repository.findCommunityRecipientIds(target.communityId, target.roles, query_runner);
+        }
 
-    if (recipientIds.length === 0) {
+        if (recipientIds.length === 0) {
+          return 0;
+        }
+
+        const effective = await this.resolveDelivery(input, recipientIds, query_runner);
+        const inappIds = recipientIds.filter((userId) => effective.get(userId)?.has(NotificationChannel.INAPP));
+        const emailIds = recipientIds.filter((userId) => effective.get(userId)?.has(NotificationChannel.EMAIL));
+        if (inappIds.length === 0 && emailIds.length === 0) {
+          return 0;
+        }
+
+        const payload = input.data ?? {};
+        const rows: DeepPartial<Notification>[] = inappIds.map((userId) => ({
+          id_user: userId,
+          id_community: communityId,
+          type: input.type,
+          data: payload,
+        }));
+        // insertMany flushes, so the ids exist by the time enqueueOutbound needs
+        // them. Both writes are inside the one SAVEPOINT above: the in-app rows
+        // and the queued email land or vanish together.
+        const saved = await this.notification_repository.insertMany(rows, query_runner);
+        const notificationIdByUser = new Map<number, string>(saved.map((row) => [row.id_user, row.id]));
+
+        if (emailIds.length > 0) {
+          await this.outbound_service.enqueueForRecipients(
+            {
+              type: input.type,
+              category: input.category,
+              data: payload,
+              id_community: communityId,
+              dedupe_key: input.dedupe_key,
+            },
+            emailIds.map((userId) => ({ id_user: userId, id_notification: notificationIdByUser.get(userId) ?? null })),
+            query_runner,
+          );
+        }
+
+        return saved.length;
+      });
+    } catch (err) {
+      // Never raises: a notification failure must not abort the business write
+      // that triggered it. This mirrors the Python annexes' `publish`, so all
+      // four producers have the same failure semantics. Note that the SAVEPOINT
+      // above is what actually keeps the caller's transaction committable —
+      // swallowing alone would not.
+      logger.error({ operation: "notification:publish", type: input.type, error: err }, "Notification publish failed");
       return 0;
     }
+  }
 
-    const rows: DeepPartial<Notification>[] = recipientIds.map((userId) => ({
-      id_user: userId,
-      id_community: communityId,
-      type: input.type,
-      data: input.data ?? {},
-    }));
+  /**
+   * Requested channels ∩ each recipient's preference; TRANSACTIONAL overrides.
+   *
+   * Per-recipient, not per-publish: `notification_preference` is keyed by user,
+   * and a community fan-out reaches many of them. A single answer for everyone
+   * would mean one manager who muted a reminder mutes it for the whole
+   * community.
+   *
+   * `TRANSACTIONAL` skips the lookup entirely — an invoice, an invitation or a
+   * missed regulatory deadline is not opt-out-able, so there is nothing to read
+   * and no query to pay for. That is also why every EMAIL producer shipping
+   * today never touches this table.
+   */
+  private async resolveDelivery(
+    input: NotificationPublishInput,
+    recipientIds: number[],
+    query_runner?: QueryRunner,
+  ): Promise<Map<number, Set<NotificationChannel>>> {
+    const requested = new Set(input.channels);
+    const effective = new Map<number, Set<NotificationChannel>>(recipientIds.map((userId) => [userId, new Set(requested)]));
+    if (input.category === NotificationCategory.TRANSACTIONAL) {
+      return effective;
+    }
 
-    await this.notification_repository.insertMany(rows, query_runner);
-    return rows.length;
+    const preferences = await this.notification_repository.findPreferences(recipientIds, typePrefixOf(input.type), query_runner);
+    for (const preference of preferences) {
+      if (preference.mode === PreferenceMode.OFF) {
+        effective.get(preference.id_user)?.delete(preference.channel);
+      }
+    }
+    return effective;
   }
 
   async list(query: NotificationQueryDTO): Promise<[NotificationDTO[], Pagination]> {
@@ -66,5 +159,36 @@ export class NotificationService implements INotificationService {
 
   async markAllRead(community_id?: number): Promise<void> {
     await this.notification_repository.markAllRead(community_id);
+  }
+
+  async getPreferences(): Promise<NotificationPreferencesDTO> {
+    const rows = await this.notification_repository.listPreferences();
+    return plainToInstance(
+      NotificationPreferencesDTO,
+      { type_prefixes: [...NOTIFICATION_TYPE_PREFIXES], preferences: rows },
+      { excludeExtraneousValues: true },
+    );
+  }
+
+  async setPreferences(preferences: NotificationPreferenceDTO[]): Promise<NotificationPreferencesDTO> {
+    const allowed = new Set<string>(NOTIFICATION_TYPE_PREFIXES);
+    for (const preference of preferences) {
+      // `''` is the catch-all default row and is always accepted; anything else
+      // must be a prefix the taxonomy actually produces, or the row would be
+      // dead weight that silently never matches a notification.
+      if (preference.type_prefix !== "" && !allowed.has(preference.type_prefix)) {
+        throw new AppError(NOTIFICATION_ERRORS.PREFERENCE_INVALID, 400);
+      }
+    }
+    // De-duplicate on the primary key so a body repeating a pair cannot trip the
+    // unique constraint and 500. Last one wins, which is the intuitive reading.
+    const byKey = new Map<string, PreferenceRow>(
+      preferences.map((preference) => [
+        `${preference.type_prefix}:${preference.channel}`,
+        { type_prefix: preference.type_prefix, channel: preference.channel, mode: preference.mode },
+      ]),
+    );
+    await this.notification_repository.replacePreferences([...byKey.values()]);
+    return this.getPreferences();
   }
 }

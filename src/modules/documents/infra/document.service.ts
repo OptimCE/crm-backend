@@ -16,6 +16,8 @@ import { DOCUMENT_ERRORS } from "../shared/document.errors.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import type { INotificationService } from "../../notifications/domain/i-notification.service.js";
+import { NOTIFICATION_TYPES } from "../../notifications/domain/notification.taxonomy.js";
+import { NotificationCategory, NotificationChannel } from "../../notifications/shared/notification.types.js";
 import type { IMemberRepository } from "../../members/domain/i-member.repository.js";
 /**
  * Implementation of Document Service.
@@ -147,25 +149,26 @@ export class DocumentService implements IDocumentService {
       );
 
       // Notify the member's linked user account(s) and guardian (minus the actor).
-      // Best-effort: a notification failure must not abort the upload.
-      try {
-        const audience = await this.memberRepository.getMemberNotificationAudience(upload_data.id_member, query_runner);
-        if (audience && audience.userIds.length > 0) {
-          await this.notificationService.publish(
-            {
-              type: "document.uploaded",
-              data: {
-                document_id: saved_document.id,
-                member_id: upload_data.id_member,
-                file_name: upload_data.file.originalname,
-              },
-              target: { kind: "users", userIds: audience.userIds, communityId: audience.communityId },
+      // `publish` never raises and runs in a SAVEPOINT on `query_runner`, so it
+      // needs no try/catch here — and the outer catch would have compensated the
+      // S3 upload only if the error actually reached it, which a swallowed one
+      // never did.
+      const audience = await this.memberRepository.getMemberNotificationAudience(upload_data.id_member, query_runner);
+      if (audience && audience.userIds.length > 0) {
+        await this.notificationService.publish(
+          {
+            type: NOTIFICATION_TYPES.DOCUMENT_UPLOADED,
+            data: {
+              document_id: saved_document.id,
+              member_id: upload_data.id_member,
+              file_name: upload_data.file.originalname,
             },
-            query_runner,
-          );
-        }
-      } catch (notify_err) {
-        logger.error({ operation: "uploadDocument:notify", error: notify_err }, "Notification publish failed");
+            target: { kind: "users", userIds: audience.userIds, communityId: audience.communityId },
+            category: NotificationCategory.INFORMATIONAL,
+            channels: [NotificationChannel.INAPP],
+          },
+          query_runner,
+        );
       }
     } catch (err) {
       logger.error({ operation: "uploadDocument", error: err }, "An error occurred while adding a new row in the datbaase");

@@ -10,6 +10,7 @@ import { ApiResponse, ApiResponsePaginated } from "../../../shared/dtos/ApiRespo
 import { GLOBAL_ERRORS, SUCCESS } from "../../../shared/errors/errors.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import {
+  CommunityDashboardDTO,
   CommunityDetailDTO,
   CommunityQueryDTO,
   CommunityUsersQueryDTO,
@@ -69,6 +70,23 @@ export class CommunityController {
     const result = await this.communityService.getCommunityById(+req.params.id);
     logger.info("Community detail successfully retrieved");
     res.status(200).json(new ApiResponse<CommunityDetailDTO>(result, SUCCESS));
+  }
+
+  /**
+   * Single-call readiness aggregate for the manager dashboard.
+   *
+   * Reads NOTHING from the request: the tenant comes from the AsyncLocalStorage
+   * context, so there is no query parameter a caller could use to widen scope.
+   * Cached per community rather than per user — the payload has no per-user
+   * variation and the route is role-gated, so a `"both"` scope would just fan the
+   * same bytes across one entry per manager.
+   */
+  @communityControllerTraceDecorator.traceSpan("getDashboard", { url: "/communities/dashboard", method: "get" })
+  @Cache(cacheKey("communities:dashboard", "community"), 60)
+  async getDashboard(_req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const result = await this.communityService.getDashboard();
+    logger.info("Community readiness dashboard successfully retrieved");
+    res.status(200).json(new ApiResponse<CommunityDashboardDTO>(result, SUCCESS));
   }
 
   @communityControllerTraceDecorator.traceSpan("getCommunitySharingOperations", { url: "/communities/:id/sharing_operations", method: "get" })

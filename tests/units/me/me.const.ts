@@ -11,7 +11,14 @@ import type { GestionnaireInvitation, UserMemberInvitation } from "../../../src/
 import type { UserMemberInvitationDTO, UserManagerInvitationDTO } from "../../../src/modules/invitations/api/invitation.dtos.js";
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 import { ClientType, MeterDataStatus, MeterRate, ReadingFrequency, TarifGroup } from "../../../src/modules/meters/shared/meter.types.js";
-import { toMemberPartialDTO, toMemberDTO, toDocumentExposed, toMeterDTO, toMeterPartialDTO } from "../../../src/modules/me/shared/to_dto.js";
+import {
+  toMemberPartialDTO,
+  toMemberPartialWithCompletenessDTO,
+  toMemberDTO,
+  toDocumentExposed,
+  toMeterDTO,
+  toMeterPartialDTO,
+} from "../../../src/modules/me/shared/to_dto.js";
 import {toMemberDTO as toMemberMemberDTO} from "../../../src/modules/members/shared/to_dto.js"
 import { ME_ERRORS } from "../../../src/modules/me/shared/me.errors.js";
 import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors.js";
@@ -63,6 +70,11 @@ export const mockIndividualEntity: Member = {
 export const mockMemberPartialDTO = toMemberPartialDTO(mockIndividualEntity);
 export const mockMeMemberDTO = toMemberDTO(mockIndividualEntity);
 export const mockMemberPartialDTOJSON = JSON.parse(JSON.stringify(mockMemberPartialDTO));
+// `/me/members` reports completeness; the same member embedded as a meter's
+// holder does not, because that query does not load the rows the check needs.
+export const mockMemberPartialWithCompletenessDTOJSON = JSON.parse(
+  JSON.stringify(toMemberPartialWithCompletenessDTO(mockIndividualEntity)),
+);
 export const mockMeMemberDTOJSON = JSON.parse(JSON.stringify(mockMeMemberDTO));
 export const mockMemberDTO = toMemberMemberDTO(mockIndividualEntity);
 export const mockMemberDTOJSON = JSON.parse(JSON.stringify(mockMemberDTO));
@@ -214,7 +226,7 @@ export const testCasesGetMembers = [
     status_code: 200,
     orgs: ORGS_MEMBER,
     expected_error_code: SUCCESS,
-    expected_data: [mockMemberPartialDTOJSON],
+    expected_data: [mockMemberPartialWithCompletenessDTOJSON],
     expected_pagination: { page: 1, limit: 10, total: 1, total_pages: 1 },
     mocks: {
       meRepo: {
