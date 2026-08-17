@@ -7,9 +7,19 @@ interface Context {
   community_id?: string;
   role?: Role;
   source_ip?: string;
+  /**
+   * Every organisation the JWT claims, with the highest role held in each.
+   *
+   * Distinct from `role`, which is only the role in the ACTIVE community
+   * (`x-community-id`). Notifications and the realtime ticket are global — a
+   * user has them outside any community — so the SSE ticket mint needs the full
+   * list, not just the active one. Populated whenever `x-user-orgs` is present;
+   * empty otherwise.
+   */
+  orgs?: OrgToken[];
 }
 
-interface OrgToken {
+export interface OrgToken {
   orgId: string;
   orgPath: string;
   role: Role;
@@ -56,10 +66,14 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
     let targetCommunityId = extractHeader("x-community-id");
     const userGroupsHeader = extractHeader("x-user-orgs");
     const sourceIp = extractHeader("x-source-ip");
-    let groups: OrgToken[] = [];
+    // Parsed whenever the header is present, not only when a community is
+    // active: the realtime ticket mint needs every org the user belongs to, and
+    // /notifications deliberately sends no X-Community-ID. The `role` derivation
+    // below is unchanged — it still only resolves against the active community,
+    // and still clears `targetCommunityId` when there is no usable pair.
+    const groups: OrgToken[] = userGroupsHeader ? parseUserOrgs(userGroupsHeader) : [];
     let effectiveRole: Role | undefined = undefined;
     if (targetCommunityId && userGroupsHeader) {
-      groups = parseUserOrgs(userGroupsHeader);
       // Find group
       const finded = groups.find((x) => x.orgId === targetCommunityId);
       if (finded) {
@@ -74,6 +88,7 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
       community_id: targetCommunityId,
       role: effectiveRole,
       source_ip: sourceIp,
+      orgs: groups,
     };
     requestContext.run(store, () => {
       next();
@@ -127,5 +142,5 @@ export function preserveContext(
  */
 export function getContext(): Context {
   const store = requestContext.getStore();
-  return store || { user_id: undefined, community_id: undefined, role: undefined };
+  return store || { user_id: undefined, community_id: undefined, role: undefined, orgs: [] };
 }

@@ -5,5 +5,6 @@ export function createMockAuthContextRepository(): jest.Mocked<IAuthContextRepos
   return {
     getInternalCommunityId: jest.fn(),
     getInternalUserId: jest.fn(),
+    getInternalCommunityIds: jest.fn(),
   };
 }

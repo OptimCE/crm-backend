@@ -45,5 +45,22 @@ module.exports = {
         opentelemetry: {
             exporter_endpoint: process.env.OPENTELEMETRY_EXPORTER_ENDPOINT ||''
         }
+    },
+    // ---- Realtime SSE fan-out -------------------------------------------
+    // HARDCODED off, not env-driven: it makes "the ticket endpoint 503s when the
+    // feature is off" a cheap deterministic assertion, and binding.ts skips the
+    // factories entirely under NODE_ENV=test anyway. The realtime jest project
+    // constructs RedisRealtimeHub directly and hand-binds it (mirroring
+    // tests/utils/helper.ts initializeCaching), so it never needs this flag.
+    realtime: {
+        enabled: false,
+        redis_url: process.env.REALTIME_REDIS_URL || "",
+        channel_pattern: "notify:v1:*",
+        ticket_ttl_seconds: 30,
+        heartbeat_seconds: 20,
+        max_connection_seconds: 900,
+        max_connections_per_user: 4,
+        max_connections: 2000,
+        mint_per_minute: 30
     }
 };

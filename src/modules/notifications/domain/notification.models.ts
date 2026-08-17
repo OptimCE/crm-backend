@@ -13,7 +13,12 @@ import { NotificationCategory, NotificationChannel, OutboundStatus, PreferenceMo
  * a request carries an active community. The `data` JSONB column holds the
  * type-specific payload (e.g. `{ "simulationId": 42 }`).
  *
- * Real-time delivery (SSE / LISTEN-NOTIFY) is deliberately not part of this layer.
+ * Real-time delivery is a HINT emitted alongside these rows, never a substitute
+ * for them. `NotificationService.publish` registers an after-commit Redis
+ * publish (`shared/realtime/`) whose payload carries no business data at all;
+ * the client reacts by refetching through the REST endpoints below, which is
+ * also where the read is re-authorized. This table stays the only durable record
+ * — a user who had no stream open when the event fired loses nothing.
  */
 @Entity("notification")
 // List ordering + future cursor: newest-first per recipient.

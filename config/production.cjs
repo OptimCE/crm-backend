@@ -45,5 +45,32 @@ module.exports = {
             exporterEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
             exporterProtocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL
         }
+    },
+    // ---- Realtime SSE fan-out -------------------------------------------
+    // A SEPARATE key from cache_service, deliberately. Pointing cache_service at
+    // this Redis would ALSO switch on the dormant HTTP response cache across
+    // every @Cache site (~30 of them, never exercised in any deployment), and
+    // cache-key.builder.ts silently omits the community/user segment when the
+    // header is absent — so a realtime rollout would carry a cross-tenant cache
+    // change with it. cache.factory.ts also THROWS on a missing settings.url,
+    // whereas realtime must always degrade to polling rather than break boot.
+    //
+    // Realtime uses Redis logical db 1, keys prefixed `rt:`. Absent or
+    // unparseable config = feature off = today's polling behaviour.
+    realtime: {
+        enabled: process.env.REALTIME_ENABLED === "true",
+        redis_url: process.env.REALTIME_REDIS_URL || "",
+        channel_pattern: "notify:v1:*",
+        ticket_ttl_seconds: process.env.REALTIME_TICKET_TTL_SECONDS ? parseInt(process.env.REALTIME_TICKET_TTL_SECONDS) : 30,
+        // Must stay well under nginx's 60s proxy_read_timeout default and under
+        // mobile-carrier idle timeouts. 20s gives 3x margin.
+        heartbeat_seconds: process.env.REALTIME_HEARTBEAT_SECONDS ? parseInt(process.env.REALTIME_HEARTBEAT_SECONDS) : 20,
+        // Absolute stream lifetime: the revocation window, and the bound on what
+        // a leaked single-use ticket buys. The client re-mints, which re-verifies
+        // the JWT and re-reads roles.
+        max_connection_seconds: process.env.REALTIME_MAX_CONNECTION_SECONDS ? parseInt(process.env.REALTIME_MAX_CONNECTION_SECONDS) : 900,
+        max_connections_per_user: process.env.REALTIME_MAX_CONNECTIONS_PER_USER ? parseInt(process.env.REALTIME_MAX_CONNECTIONS_PER_USER) : 4,
+        max_connections: process.env.REALTIME_MAX_CONNECTIONS ? parseInt(process.env.REALTIME_MAX_CONNECTIONS) : 2000,
+        mint_per_minute: process.env.REALTIME_MINT_PER_MINUTE ? parseInt(process.env.REALTIME_MINT_PER_MINUTE) : 30
     }
 };

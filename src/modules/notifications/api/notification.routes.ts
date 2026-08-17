@@ -41,6 +41,23 @@ notification_routes.patch(
   notification_controller.markAllRead.bind(notification_controller),
 );
 
+notification_routes.post(
+  "/realtime/ticket",
+  /* #swagger.summary = 'Mint a single-use ticket for the realtime SSE stream'
+       #swagger.tags = ['Notifications']
+       #swagger.responses[200] = { $ref: '#/components/responses/NotificationRealtimeTicketSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[429] = { description: 'Too many tickets minted for this user' }
+       #swagger.responses[503] = { description: 'Realtime disabled or the broker is unavailable' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  notification_controller.mintRealtimeTicket.bind(notification_controller),
+);
+
 notification_routes.get(
   "/preferences",
   /* #swagger.summary = 'The current user\'s notification channel preferences'

@@ -69,6 +69,7 @@ import type { IHealthService } from "../modules/health/domain/i-health.service.j
 import { HealthService } from "../modules/health/infra/health.service.js";
 import { HealthController } from "../modules/health/api/health.controller.js";
 import { initializeCacheService } from "./factory/cache.factory.js";
+import { initializeRealtimeHub } from "./factory/realtime.factory.js";
 import type { IAnnexesServicesRepository } from "../modules/annexes_services/domain/i-annexes-services.repository.js";
 import { AnnexesServicesRepository } from "../modules/annexes_services/infra/annexes-services.repository.js";
 import type { IAnnexesServicesService } from "../modules/annexes_services/domain/i-annexes-services.service.js";
@@ -192,3 +193,14 @@ container.bind<NotificationController>(NotificationController).toSelf();
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);
 container.bind<HealthController>(HealthController).toSelf();
+
+// LAST, deliberately. initializeRealtimeHub() eagerly resolves the hub so the
+// Redis PSUBSCRIBE is live before the first client can attach — which means
+// every binding it could possibly need must already exist. It is also outside
+// the NODE_ENV!=="test" block above only in the sense that it guards itself:
+// the factory binds nothing unless realtime.enabled AND realtime.redis_url are
+// set, and config/test.cjs hardcodes enabled:false. The realtime jest project
+// hand-binds a hub instead, mirroring tests/utils/helper.ts initializeCaching.
+if (process.env.NODE_ENV !== "test") {
+  initializeRealtimeHub();
+}
