@@ -30,7 +30,7 @@ import {
   toMeterDTO,
   toMeterPartialDTO,
 } from "../shared/to_dto.js";
-import { lastClosedMonthISO, localTodayISO, monthBoundsISO, toCalendarDateString } from "../../../shared/utils/date.utils.js";
+import { appTodayISO, lastClosedMonthISO, monthBoundsISO, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 
 /**
  * Hard ceiling on allocation-share rows. Not a page/limit contract: the tile's
@@ -49,8 +49,9 @@ import { DOCUMENT_ERRORS } from "../../documents/shared/document.errors.js";
 import type { IStorageService } from "../../../shared/storage/i-storage.service.js";
 import { Meter } from "../../meters/domain/meter.models.js";
 import { METER_ERRORS } from "../../meters/shared/meter.errors.js";
-import { MeterConsumptionDTO, MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
-import { toMeterConsumptionDTO } from "../../meters/shared/to_dto.js";
+import { MeterConsumptionDTO, MeterConsumptionQuery, MeterMapDTO } from "../../meters/api/meter.dtos.js";
+import { toMeterConsumptionDTO, toMeMeterMapPointDTO } from "../../meters/shared/to_dto.js";
+import { METER_MAP_MAX_POINTS } from "../../meters/shared/meter.types.js";
 import {
   AcceptInvitationDTO,
   AcceptInvitationWEncodedDTO,
@@ -153,6 +154,23 @@ export class MeService implements IMeService {
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
   }
 
+  async getMetersMap(query: MeMetersPartialQuery): Promise<MeterMapDTO> {
+    const cap = METER_MAP_MAX_POINTS;
+    const [values, total_plottable, total_matching] = await this.meRepository.getMetersMap(query, cap);
+
+    const truncated = values.length > cap;
+    const points = (truncated ? values.slice(0, cap) : values).map((value) => toMeMeterMapPointDTO(value));
+
+    return {
+      points,
+      total_matching,
+      total_plottable,
+      missing_coordinates: Math.max(0, total_matching - total_plottable),
+      truncated,
+      cap,
+    };
+  }
+
   /**
    * The caller's own share of the allocation key in force, per (community,
    * sharing operation, meter). Cross-community — the row filter is
@@ -164,7 +182,7 @@ export class MeService implements IMeService {
    * consumers and need re-grouping anyway.
    */
   async getAllocationShares(query: MeAllocationSharesQuery): Promise<MeAllocationSharesDTO> {
-    const at = query.at ? toCalendarDateString(query.at) : localTodayISO();
+    const at = query.at ? toCalendarDateString(query.at) : appTodayISO();
 
     const holdings = await this.meRepository.getOwnMeterHoldings(at, ALLOCATION_SHARES_ROW_CAP);
     if (holdings.length === 0) {

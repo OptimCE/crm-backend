@@ -107,6 +107,12 @@ export interface IMeRepository {
   getDocuments(query: MeDocumentPartialQuery, query_runner?: QueryRunner): Promise<[Document[], number]>;
   getMeterById(id: string, query_runner?: QueryRunner): Promise<Meter | null>;
   getMeters(query: MeMetersPartialQuery, query_runner?: QueryRunner): Promise<[Meter[], number]>;
+
+  /**
+   * Member-scoped mirror of the meters map. Same access rule as getMeters.
+   * @returns [rows, total_plottable, total_matching]
+   */
+  getMetersMap(query: MeMetersPartialQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]>;
   getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]>;
   getOwnManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]>;
   getOwnMembersPendingInvitation(query: UserMemberInvitationQuery, query_runner?: QueryRunner): Promise<[UserMemberInvitation[], number]>;

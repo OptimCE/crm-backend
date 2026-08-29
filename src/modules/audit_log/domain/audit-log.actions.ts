@@ -63,6 +63,8 @@ export const AUDIT_ACTIONS = {
   SHARING_OPERATION_KEY_APPROVED: "crm.sharing_operation_key.approved",
   SHARING_OPERATION_KEY_REJECTED: "crm.sharing_operation_key.rejected",
   SHARING_OP_CONSUMPTION_UPLOADED: "crm.sharing_op_consumption.uploaded",
+  /** One geocoding backfill batch. Logged per batch, never per address. */
+  ADDRESS_GEOCODE_BACKFILL: "crm.address.geocode_backfill",
 } as const;
 
 /**

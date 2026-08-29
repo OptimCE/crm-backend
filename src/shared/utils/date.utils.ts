@@ -2,6 +2,39 @@
 export const CONSUMPTION_TIMEZONE = "Europe/Brussels";
 
 /**
+ * The timezone whose civil calendar defines "today" for this application.
+ *
+ * Deliberately a constant and not `process.env.TZ`. "Today" is a business fact —
+ * a meter joins a sharing operation on a Belgian calendar day — so it must not
+ * depend on where the process happens to run. The container sets no `TZ` at all,
+ * which makes the host calendar UTC; between 22:00 and 24:00 UTC that is already
+ * the *next* Belgian day, and a record the UI created "today" was filed as future.
+ *
+ * The Python annexes pin the same zone with `ZoneInfo("Europe/Brussels")` and
+ * crm-frontend with `Intl`'s `timeZone` option. This is the same decision.
+ */
+export const APP_TIMEZONE = "Europe/Brussels";
+
+/**
+ * Calendar fields of `instant` as observed in `tz`, zero-padded.
+ *
+ * `formatToParts` rather than `format` so the result never depends on how a
+ * locale happens to order or punctuate a date.
+ */
+function calendarPartsIn(tz: string, instant: Date): { year: string; month: string; day: string } {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(instant);
+
+  const get = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? "";
+
+  return { year: get("year"), month: get("month"), day: get("day") };
+}
+
+/**
  * Extract `YYYY-MM-DD` from a `Date` produced by class-transformer on query params.
  * Uses UTC components so `2025-02-01` round-trips regardless of host timezone.
  */
@@ -25,15 +58,17 @@ export function addDaysISO(yyyymmdd: string, n: number): string {
 }
 
 /**
- * Today in the host's local timezone, formatted as `YYYY-MM-DD`.
+ * Today in `APP_TIMEZONE`, formatted as `YYYY-MM-DD`.
  *
- * Avoid `new Date().toISOString().slice(0,10)` for calendar comparisons:
- * it returns the UTC date, which can disagree with the local civil date for hours
- * around midnight and produces TZ-dependent NOW/FUTURE classification.
+ * Never read host-local components (`getFullYear()`…) or `toISOString()` for a
+ * calendar comparison: the first is whatever timezone the container was given,
+ * the second is always UTC, and both disagree with the Belgian civil date for
+ * hours around midnight — which is exactly how a record starting today ends up
+ * classified as future.
  */
-export function localTodayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+export function appTodayISO(): string {
+  const { year, month, day } = calendarPartsIn(APP_TIMEZONE, new Date());
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -51,16 +86,19 @@ export function monthBoundsISO(yyyymm: string): { start: string; end: string } {
 }
 
 /**
- * The last CLOSED calendar month, as `YYYY-MM`, in the host's local timezone.
+ * The last CLOSED calendar month, as `YYYY-MM`, in `APP_TIMEZONE`.
  *
  * "Closed" rather than "current" because a partial month is not comparable to
  * anything: a member opening the app on the 2nd would see two days of readings
- * and conclude their consumption had collapsed. Local components for the same
- * reason as `localTodayISO`.
+ * and conclude their consumption had collapsed.
+ *
+ * Decrements the month as an integer rather than via `Date.setMonth`, which
+ * would reintroduce a host-timezone instant halfway through the calculation.
  */
 export function lastClosedMonthISO(): string {
-  const d = new Date();
-  d.setDate(1);
-  d.setMonth(d.getMonth() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const { year, month } = calendarPartsIn(APP_TIMEZONE, new Date());
+  const y = Number(year);
+  const m = Number(month);
+  const prev = m === 1 ? { y: y - 1, m: 12 } : { y, m: m - 1 };
+  return `${prev.y}-${String(prev.m).padStart(2, "0")}`;
 }

@@ -1,0 +1,6 @@
+{
+  "backfill": {
+    "database": "An error occurred while accessing the geocoding queue",
+    "disabled": "Address geocoding is not configured on this instance"
+  }
+}

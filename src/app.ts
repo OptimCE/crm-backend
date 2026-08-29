@@ -45,7 +45,10 @@ const startServer = async (): Promise<void> => {
         backend: {
           loadPath: path.join(__dirname, "../assets/{{lng}}/{{ns}}.json"),
         },
-        ns: ["global_error", "community", "document", "invitation", "key", "member", "meter", "sharing_operation", "user"],
+        // "municipality" was missing even though MUNICIPALITY_ERRORS has used the
+        // "municipality:" prefix since it was introduced — its messages were
+        // silently rendering as raw keys.
+        ns: ["global_error", "community", "document", "geocoding", "invitation", "key", "member", "meter", "municipality", "sharing_operation", "user"],
         defaultNS: "translation",
         fallbackLng: "en",
         preload: ["en", "fr", "nl"],

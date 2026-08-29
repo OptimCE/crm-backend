@@ -1,0 +1,6 @@
+{
+  "backfill": {
+    "database": "Beim Zugriff auf die Geokodierungs-Warteschlange ist ein Fehler aufgetreten",
+    "disabled": "Die Adress-Geokodierung ist auf dieser Instanz nicht konfiguriert"
+  }
+}

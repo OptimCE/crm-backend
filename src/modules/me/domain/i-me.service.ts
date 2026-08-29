@@ -14,6 +14,7 @@ import type {
   MePartialMeterDTO,
 } from "../api/me.dtos.js";
 import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
+import type { MeterMapDTO } from "../../meters/api/meter.dtos.js";
 import type { DownloadDocument } from "../../documents/api/document.dtos.js";
 import type {
   AcceptInvitationDTO,
@@ -32,6 +33,9 @@ export interface IMeService {
   getMembers(query: MeMemberPartialQuery): Promise<[MeMembersPartialDTO[], Pagination]>;
   getMemberById(id: number): Promise<MeIndividualDTO | MeCompanyDTO>;
   getMeters(query: MeMetersPartialQuery): Promise<[MePartialMeterDTO[], Pagination]>;
+
+  /** Plottable meters this user owns, across every community they belong to. */
+  getMetersMap(query: MeMetersPartialQuery): Promise<MeterMapDTO>;
   getMeterById(id: string): Promise<MeMeterDTO>;
   getMeterConsumptions(id: string, query: MeterConsumptionQuery): Promise<MeterConsumptionDTO>;
   /**

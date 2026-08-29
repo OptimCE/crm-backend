@@ -1,0 +1,8 @@
+{
+  "search": {
+    "database": "An error occurred while searching municipalities"
+  },
+  "lookup": {
+    "unknown_nis_codes": "One or more NIS codes are unknown"
+  }
+}

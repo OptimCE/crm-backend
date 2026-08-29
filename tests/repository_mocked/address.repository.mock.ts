@@ -6,5 +6,8 @@ export function createMockAddressRepository(): jest.Mocked<IAddressRepository> {
     addAddress: jest.fn(),
     deleteAddress: jest.fn(),
     getAddress: jest.fn(),
+    setGeolocation: jest.fn(),
+    findPendingGeocode: jest.fn(),
+    countPendingGeocode: jest.fn(),
   };
 }

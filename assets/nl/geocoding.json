@@ -1,0 +1,6 @@
+{
+  "backfill": {
+    "database": "Er is een fout opgetreden bij het benaderen van de geocoderingswachtrij",
+    "disabled": "Adresgeocodering is niet geconfigureerd op deze instantie"
+  }
+}

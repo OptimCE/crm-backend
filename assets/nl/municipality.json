@@ -1,0 +1,8 @@
+{
+  "search": {
+    "database": "Er is een fout opgetreden bij het zoeken naar gemeenten"
+  },
+  "lookup": {
+    "unknown_nis_codes": "Een of meer NIS-codes zijn onbekend"
+  }
+}

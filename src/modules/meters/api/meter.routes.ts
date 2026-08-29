@@ -30,6 +30,31 @@ meter_router.get(
   roleChecker(Role.GESTIONNAIRE),
   meter_controller.getMetersList.bind(meter_controller),
 );
+// GET (/map) : Every plottable meter of the active community.
+//
+// MUST stay above `GET /:id`. Express matches in registration order, so after
+// it this request becomes `req.params.id === "map"` and 400s with a confusing
+// "meter not found" instead of returning the map.
+meter_router.get(
+  "/map",
+  /* #swagger.summary = 'Get every plottable meter of the active community (capped, not paginated)'
+       #swagger.tags = ['Meters']
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/MeterMapQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/MeterMapSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  meter_controller.getMetersMap.bind(meter_controller),
+);
 // GET (/:id) : Get a detailed meter
 meter_router.get(
   "/:id",

@@ -9,5 +9,8 @@ export function toAddressDTO(address: Address): AddressDTO {
     postcode: address.postcode,
     supplement: address.supplement,
     id: address.id,
+    latitude: address.latitude,
+    longitude: address.longitude,
+    geo_precision: address.geo_precision,
   };
 }

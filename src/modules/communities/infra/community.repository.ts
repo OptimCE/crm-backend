@@ -1,7 +1,7 @@
-import type { CommunityDashboardCountsRow, ICommunityRepository } from "../domain/i-community.repository.js";
+import type { CommunityDashboardCountsRow, ICommunityRepository, PublicCommunityMapRow } from "../domain/i-community.repository.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { inject, injectable } from "inversify";
-import { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO, UpdateCommunityDTO } from "../api/community.dtos.js";
+import { CommunityMapQuery, CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO, UpdateCommunityDTO } from "../api/community.dtos.js";
 import type { QueryRunner } from "typeorm";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Member } from "../../members/domain/member.models.js";
@@ -298,6 +298,38 @@ export class CommunityRepository implements ICommunityRepository {
     const skip = (query.page - 1) * take;
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  async getPublicCommunitiesMap(query: CommunityMapQuery, limit: number, query_runner?: QueryRunner): Promise<PublicCommunityMapRow[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    const qb = manager
+      .createQueryBuilder(Community, "community")
+      // INNER: reproduces the existing definition of "public community" used by
+      // getAllPublicCommunities — at least one public sharing operation.
+      .innerJoin("sharing_operation", "so", "so.id_community = community.id AND so.is_public = :isPublic", { isPublic: true })
+      // LEFT, deliberately. The "a public operation covers at least one commune"
+      // rule lives in patchVisibility, not in a DB constraint, so a legacy row
+      // can be public with no municipalities. An inner join would make such a
+      // community vanish from the map entirely; a left join draws it with an
+      // empty zone so it still appears in the list beside it.
+      .leftJoin("sharing_operation_municipality", "som", "som.id_sharing_operation = so.id")
+      .select("community.id", "id")
+      .addSelect("community.name", "name")
+      .addSelect("community.regulator", "regulator")
+      .addSelect("array_agg(DISTINCT som.nis_code)", "nis_codes")
+      .addSelect("count(DISTINCT so.id)", "public_operations_count")
+      .groupBy("community.id")
+      .addGroupBy("community.name")
+      .addGroupBy("community.regulator")
+      .orderBy("community.name", "ASC")
+      .limit(limit);
+
+    if (query.regulator) {
+      qb.andWhere("community.regulator = :regulator", { regulator: query.regulator });
+    }
+
+    return qb.getRawMany<PublicCommunityMapRow>();
   }
 
   async getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null> {

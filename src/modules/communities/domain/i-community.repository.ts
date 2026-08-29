@@ -1,4 +1,10 @@
-import type { CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO, UpdateCommunityDTO } from "../api/community.dtos.js";
+import type {
+  CommunityMapQuery,
+  CommunityQueryDTO,
+  CommunityUsersQueryDTO,
+  CreateCommunityDTO,
+  UpdateCommunityDTO,
+} from "../api/community.dtos.js";
 import type { QueryRunner } from "typeorm";
 import type { Community, CommunityUser } from "./community.models.js";
 import type { Role } from "../../../shared/dtos/role.js";
@@ -10,6 +16,23 @@ import type { Role } from "../../../shared/dtos/role.js";
  * avoid precision loss, and concatenating instead of adding is a silent bug. The
  * mapper coerces with `Number()`.
  */
+/**
+ * One raw row of the public-communities map query.
+ *
+ * `public_operations_count` is typed `string` for the same reason every counter
+ * in {@link CommunityDashboardCountsRow} is: node-postgres returns COUNT() as a
+ * string, and adding it to anything without coercing concatenates instead.
+ * `nis_codes` can contain a single null — that is what array_agg produces for a
+ * LEFT JOIN miss, and the mapper strips it.
+ */
+export interface PublicCommunityMapRow {
+  id: number;
+  name: string;
+  regulator: string;
+  nis_codes: (number | null)[] | null;
+  public_operations_count: string;
+}
+
 export interface CommunityDashboardCountsRow {
   members_total: string;
   members_active: string;
@@ -48,6 +71,12 @@ export interface ICommunityRepository {
   getOperationsWithoutValidKey(as_of: string, limit: number, query_runner?: QueryRunner): Promise<{ id: number; name: string }[]>;
   addCommunity(new_community: CreateCommunityDTO, org_id: string, query_runner?: QueryRunner): Promise<Community>;
   getAllPublicCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]>;
+
+  /**
+   * Every public community with the union of the NIS codes its PUBLIC sharing
+   * operations cover. Unpaginated (capped) — the map draws the whole set.
+   */
+  getPublicCommunitiesMap(query: CommunityMapQuery, limit: number, query_runner?: QueryRunner): Promise<PublicCommunityMapRow[]>;
   getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null>;
   getAdmins(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;
   getMyCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;

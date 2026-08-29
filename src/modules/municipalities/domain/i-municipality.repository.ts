@@ -15,4 +15,13 @@ export interface IMunicipalityRepository {
    * passed by clients). Returns only the municipalities that actually exist.
    */
   findManyByNisCodes(nis_codes: number[], query_runner?: QueryRunner): Promise<Municipality[]>;
+
+  /**
+   * Municipalities served by a postal code.
+   *
+   * Returns a list, not a single row, because the relation is genuinely
+   * many-to-many: 1050 covers both Bruxelles and Ixelles. Callers must handle
+   * the ambiguity rather than take the first hit.
+   */
+  findByPostalCode(postal_code: string, query_runner?: QueryRunner): Promise<Municipality[]>;
 }

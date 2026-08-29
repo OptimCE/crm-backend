@@ -46,6 +46,35 @@ module.exports = {
             exporterProtocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL
         }
     },
+    // ---- Address geocoding ----------------------------------------------
+    // mode: OFF    -> no adapters bound; addresses stay unplotted (the map still
+    //                 works, it just has nothing to draw).
+    //       LOCAL  -> pin drops + the municipality centroid already stored in
+    //                 `municipality.geo_point`. No network call, ever.
+    //       REMOTE -> LOCAL plus the two free Belgian public geocoders, used by
+    //                 POST /geocoding/backfill only.
+    //
+    // The inline chain is deliberately local-only regardless of this setting:
+    // KrakenD's global timeout is 3000ms with no per-endpoint override, so a
+    // third-party call on the POST /meters path is a 504 waiting to happen.
+    geocoding: {
+        mode: process.env.GEOCODING_MODE || "LOCAL",
+        wallonia: {
+            // SPW ICAR/PICC. `crs=EPSG:4326` is passed on every call - the
+            // service defaults to Lambert 72, whose coordinates are valid
+            // numbers that plot nowhere near Belgium.
+            base_url: process.env.GEOCODING_WALLONIA_URL || "https://geoservices.wallonie.be/geocodeWS"
+        },
+        flanders: {
+            // Vlaanderen Geolocation API (Basisregisters + UrbIS). Answers in
+            // WGS84 natively.
+            base_url: process.env.GEOCODING_FLANDERS_URL || "https://geo.api.vlaanderen.be/Geolocation"
+        },
+        timeout_ms: process.env.GEOCODING_TIMEOUT_MS ? parseInt(process.env.GEOCODING_TIMEOUT_MS) : 2000,
+        // Hard ceiling on one backfill batch, so a typo cannot start an
+        // hours-long run against a free public service.
+        batch_max: process.env.GEOCODING_BATCH_MAX ? parseInt(process.env.GEOCODING_BATCH_MAX) : 1000
+    },
     // ---- Realtime SSE fan-out -------------------------------------------
     // A SEPARATE key from cache_service, deliberately. Pointing cache_service at
     // this Redis would ALSO switch on the dormant HTTP response cache across

@@ -34,7 +34,7 @@ import {
   UserMemberInvitationQuery,
 } from "../../invitations/api/invitation.dtos.js";
 import { CompanyDTO, IndividualDTO } from "../../members/api/member.dtos.js";
-import { MeterConsumptionDTO, MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
+import { MeterConsumptionDTO, MeterConsumptionQuery, MeterMapDTO, pickMeterFilters } from "../../meters/api/meter.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 const userControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
@@ -82,6 +82,22 @@ export class MeController {
     const [results, pagination] = await this.meService.getMeters(queryObject);
     logger.info("Own meters list successfully retrieved");
     res.status(200).json(new ApiResponsePaginated<MePartialMeterDTO[]>(results, pagination, SUCCESS));
+  }
+
+  /**
+   * The member-scoped meters map.
+   *
+   * Cached under the "user" scope, not "community": a member's meters can span
+   * several communities and the request carries no X-Community-ID, so a
+   * community-scoped key would collide across users.
+   */
+  @userControllerTraceDecorator.traceSpan("getMetersMap", { url: "/me/meters/map", method: "get" })
+  @Cache(cacheKey("me-meters:map", "user", (req) => JSON.stringify(pickMeterFilters(req.query))), 60)
+  async getMetersMap(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(MeMetersPartialQuery, req.query);
+    const result = await this.meService.getMetersMap(queryObject);
+    logger.info({ plotted: result.points.length, truncated: result.truncated }, "Own meters map successfully retrieved");
+    res.status(200).json(new ApiResponse<MeterMapDTO>(result, SUCCESS));
   }
 
   @userControllerTraceDecorator.traceSpan("getMeterById", { url: "/me/meters/:id", method: "get" })

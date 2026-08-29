@@ -527,3 +527,39 @@ export class CommunityDashboardDTO {
   @Expose()
   legal_info!: CommunityDashboardLegalInfoDTO;
 }
+
+/**
+ * One public community as a map zone.
+ *
+ * `nis_codes` is the union of the communes covered by this community's PUBLIC
+ * sharing operations — that union IS the zone. The geometry itself is not
+ * inlined: several communities routinely share a commune, so the polygons are
+ * fetched once from `GET /municipalities/geometry` and reused, instead of being
+ * repeated per community in a response that would then be measured in megabytes.
+ *
+ * `logo_presigned_url` is deliberately absent. It costs one S3 round-trip per
+ * row on a whole-set endpoint, and its ~15 minute lifetime would tie the
+ * response's validity to the cache TTL. The popup lazy-loads the logo from the
+ * existing list endpoint instead.
+ */
+export class PublicCommunityMapDTO {
+  @Expose()
+  id!: number;
+  @Expose()
+  name!: string;
+  @Expose()
+  regulator!: string;
+  @Expose()
+  nis_codes!: number[];
+  @Expose()
+  public_operations_count!: number;
+}
+
+/** Query for `GET /communities/map`. */
+export class CommunityMapQuery {
+  /** Optional regulator filter, mirroring the public list. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  regulator?: string;
+}

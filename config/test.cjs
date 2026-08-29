@@ -46,6 +46,12 @@ module.exports = {
             exporter_endpoint: process.env.OPENTELEMETRY_EXPORTER_ENDPOINT ||''
         }
     },
+    // Hardcoded OFF: binding.ts skips the factory under NODE_ENV=test anyway,
+    // and this makes "an unbound geocoder is a silent no-op" an explicit
+    // property of the test config rather than an accident of the guard.
+    geocoding: {
+        mode: "OFF"
+    },
     // ---- Realtime SSE fan-out -------------------------------------------
     // HARDCODED off, not env-driven: it makes "the ticket endpoint 503s when the
     // feature is off" a cheap deterministic assertion, and binding.ts skips the

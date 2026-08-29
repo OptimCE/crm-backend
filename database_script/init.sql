@@ -42,10 +42,35 @@ CREATE TABLE IF NOT EXISTS address (
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
+    -- Geolocation. See database_script/2026-08-20_address_geolocation.sql for
+    -- the enum meanings: geo_precision 1 MANUAL / 2 ROOFTOP / 3 STREET /
+    -- 4 MUNICIPALITY, geocode_status 0 NEVER / 1 OK / 2 NOT_FOUND / 3 ERROR.
+    latitude NUMERIC(9, 6),
+    longitude NUMERIC(9, 6),
+    geo_precision SMALLINT,
+    geo_source VARCHAR(32),
+    geocoded_at TIMESTAMP,
+    geocode_status SMALLINT NOT NULL DEFAULT 0,
     id_community INT REFERENCES community (id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT current_timestamp,
-    updated_at TIMESTAMP DEFAULT current_timestamp
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    -- A half-set coordinate plots on the equator; keep the pair atomic.
+    CONSTRAINT chk_address_geo_pair CHECK (
+        (latitude IS NULL) = (longitude IS NULL)
+    ),
+    CONSTRAINT chk_address_geo_range CHECK (
+        latitude IS NULL
+        OR (
+            latitude BETWEEN -90 AND 90
+            AND longitude BETWEEN -180 AND 180
+        )
+    )
 );
+
+-- The geocoding backfill only ever scans for status 0; once drained the index
+-- is empty and free.
+CREATE INDEX idx_address_geocode_queue
+ON address (geocode_status) WHERE geocode_status = 0;
 
 ALTER TABLE community ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (
     headquarters_address_id

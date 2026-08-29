@@ -5,6 +5,7 @@ import { toUserDTO } from "../../../src/modules/users/shared/to_dto.js";
 import { USER_ERRORS } from "../../../src/modules/users/shared/user.errors.js";
 import { AppError } from "../../../src/shared/middlewares/error.middleware.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
+import { AddressGeocodeStatus } from "../../../src/shared/address/address.types.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
@@ -24,6 +25,13 @@ export const mockUserEntity: User = {
     number: 1,
     city: "City",
     postcode: "1000",
+    latitude: null,
+    longitude: null,
+    geo_precision: null,
+    geo_source: null,
+    geocoded_at: null,
+    geocode_status: AddressGeocodeStatus.NEVER,
+    community: null,
     created_at: mockDate,
     updated_at: mockDate,
   },
@@ -33,6 +41,13 @@ export const mockUserEntity: User = {
     number: 2,
     city: "City",
     postcode: "1000",
+    latitude: null,
+    longitude: null,
+    geo_precision: null,
+    geo_source: null,
+    geocoded_at: null,
+    geocode_status: AddressGeocodeStatus.NEVER,
+    community: null,
     created_at: mockDate,
     updated_at: mockDate,
   },

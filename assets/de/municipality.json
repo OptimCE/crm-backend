@@ -1,0 +1,8 @@
+{
+  "search": {
+    "database": "Bei der Gemeindesuche ist ein Fehler aufgetreten"
+  },
+  "lookup": {
+    "unknown_nis_codes": "Ein oder mehrere NIS-Codes sind unbekannt"
+  }
+}

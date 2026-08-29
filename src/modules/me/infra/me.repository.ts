@@ -22,7 +22,7 @@ import { getContext } from "../../../shared/middlewares/context.js";
 import { Document } from "../../documents/domain/document.models.js";
 import { Meter, MeterConsumption, MeterData } from "../../meters/domain/meter.models.js";
 import { MeterConsumptionQuery } from "../../meters/api/meter.dtos.js";
-import { CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
+import { appTodayISO, CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 import { GestionnaireInvitation, UserMemberInvitation } from "../../invitations/domain/invitation.models.js";
 import { UserManagerInvitationQuery, UserMemberInvitationQuery } from "../../invitations/api/invitation.dtos.js";
 
@@ -150,7 +150,7 @@ export class MeRepository implements IMeRepository {
     {
       key: "not_sharing_operation_id",
       apply: (qb, val): SelectQueryBuilder<Meter> => {
-        const now = new Date();
+        const now = appTodayISO();
 
         return qb
           .andWhere((sub) => {
@@ -160,7 +160,7 @@ export class MeRepository implements IMeRepository {
               .from(MeterData, "md")
               .where("md.sharing_operation = :not_soid")
               .andWhere("md.start_date <= :now")
-              .andWhere("(md.end_date IS NULL OR md.end_date > :now)") // or >= if inclusive
+              .andWhere("(md.end_date IS NULL OR md.end_date >= :now)")
               .getQuery();
 
             return `meter.EAN NOT IN ${subQuery}`;
@@ -291,7 +291,7 @@ export class MeRepository implements IMeRepository {
     qb.leftJoinAndSelect("meter.community", "meter_community");
 
     // Join active MeterData for display and filtering
-    const now = new Date();
+    const now = appTodayISO();
     qb.leftJoinAndSelect(
       "meter.meter_data",
       "active_data",
@@ -299,7 +299,7 @@ export class MeRepository implements IMeRepository {
         active_data.start_date <= :now
         AND (
           active_data.end_date IS NULL
-          OR active_data.end_date > :now
+          OR active_data.end_date >= :now
         )
         `,
       { now },
@@ -332,6 +332,74 @@ export class MeRepository implements IMeRepository {
     qb.orderBy("meter.EAN", "ASC");
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  /**
+   * The member-scoped mirror of MeterRepository.getMetersMap.
+   *
+   * Same access rule as getMeters — the meter must have some meter_data linked
+   * to a member this user owns — and the same counters, so a member sees the
+   * honest "3 of 5 plotted" rather than a map that quietly omits two of their
+   * own meters.
+   *
+   * @returns [rows (up to take+1), total_plottable, total_matching]
+   */
+  async getMetersMap(query: MeMetersPartialQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const { user_id } = getContext();
+
+    const build = (): SelectQueryBuilder<Meter> => {
+      let qb = manager.createQueryBuilder(Meter, "meter");
+
+      // Security fallback: no user in context = no results.
+      if (!user_id) {
+        qb.andWhere("1=0");
+        return qb;
+      }
+
+      qb.leftJoinAndSelect("meter.address", "address");
+      qb.leftJoinAndSelect("meter.community", "meter_community");
+
+      const now = appTodayISO();
+      qb.leftJoinAndSelect(
+        "meter.meter_data",
+        "active_data",
+        `
+        active_data.start_date <= :now
+        AND (
+          active_data.end_date IS NULL
+          OR active_data.end_date >= :now
+        )
+        `,
+        { now },
+      );
+      qb.leftJoinAndSelect("active_data.member", "member");
+      qb.leftJoinAndSelect("active_data.sharing_operation", "sharing_operation");
+
+      qb.andWhere(
+        `EXISTS (
+            SELECT 1 FROM meter_data sub_md
+            INNER JOIN user_member_link sub_uml ON sub_uml.id_member = sub_md.id_member
+            INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
+            WHERE sub_md.ean = meter.EAN
+            AND sub_u.auth_user_id = :contextAuthId
+        )`,
+        { contextAuthId: user_id },
+      );
+
+      qb = applyFilters(this.meterFilters, qb, query);
+      return qb;
+    };
+
+    const total_matching = await build().getCount();
+
+    const qb = build();
+    qb.andWhere("address.latitude IS NOT NULL");
+    qb.orderBy("meter.EAN", "ASC");
+
+    const [rows, total_plottable] = await qb.take(take + 1).getManyAndCount();
+
+    return [rows, total_plottable, total_matching];
   }
 
   async getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]> {

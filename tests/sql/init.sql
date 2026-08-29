@@ -48,10 +48,35 @@ CREATE TABLE IF NOT EXISTS address (
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
+    -- Geolocation. See database_script/2026-08-20_address_geolocation.sql for
+    -- the enum meanings: geo_precision 1 MANUAL / 2 ROOFTOP / 3 STREET /
+    -- 4 MUNICIPALITY, geocode_status 0 NEVER / 1 OK / 2 NOT_FOUND / 3 ERROR.
+    latitude NUMERIC(9, 6),
+    longitude NUMERIC(9, 6),
+    geo_precision SMALLINT,
+    geo_source VARCHAR(32),
+    geocoded_at TIMESTAMP,
+    geocode_status SMALLINT NOT NULL DEFAULT 0,
     id_community INT REFERENCES community (id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT current_timestamp,
-    updated_at TIMESTAMP DEFAULT current_timestamp
+    updated_at TIMESTAMP DEFAULT current_timestamp,
+    -- A half-set coordinate plots on the equator; keep the pair atomic.
+    CONSTRAINT chk_address_geo_pair CHECK (
+        (latitude IS NULL) = (longitude IS NULL)
+    ),
+    CONSTRAINT chk_address_geo_range CHECK (
+        latitude IS NULL
+        OR (
+            latitude BETWEEN -90 AND 90
+            AND longitude BETWEEN -180 AND 180
+        )
+    )
 );
+
+-- The geocoding backfill only ever scans for status 0; once drained the index
+-- is empty and free.
+CREATE INDEX idx_address_geocode_queue
+ON address (geocode_status) WHERE geocode_status = 0;
 
 ALTER TABLE community ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (
     headquarters_address_id
@@ -649,8 +674,24 @@ INSERT INTO community (name, logo_url, auth_community_id) VALUES (
 );
 
 -- 2. Addresses
-INSERT INTO address (street, number, postcode, city) VALUES (
-    'Main St', 1, '1000', 'Brussels'
+-- Geolocation fixtures. The map tests depend on this exact spread, so keep it:
+--   id 1  exact point                          -> meter 123456789012345678 plots
+--   id 2  no coordinates (geocode_status 0)    -> meter 987654321098765432 is
+--         counted in missing_coordinates and never plotted
+--   ids 3, 4  no coordinates
+--   ids 5, 6  IDENTICAL coordinates            -> meters W1 and W2 are the
+--         coincident pair: two distinct addresses that geocode to one rooftop,
+--         exactly what two flats in one block do. They must NEVER be merged
+--         server-side and must never separate on zoom client-side.
+--   id 7  ~150 m from ids 5/6                  -> clusters at low zoom, splits
+--         on zoom in
+--   id 8  municipality centroid (precision 4)  -> the approximate pin
+INSERT INTO address (
+    street, number, postcode, city,
+    latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
+) VALUES (
+    'Main St', 1, '1000', 'Brussels',
+    50.846700, 4.352500, 2, 'test_fixture', current_timestamp, 1
 );
 INSERT INTO address (street, number, postcode, city) VALUES (
     'Second St', 2, '2000', 'Antwerp'
@@ -662,17 +703,33 @@ INSERT INTO address (street, number, postcode, city) VALUES (
     'Fourth St', 4, '4000', 'Liege'
 );
 -- Home/billing addresses for the wind sharing operation members (ids 5-8)
-INSERT INTO address (street, number, postcode, city) VALUES (
-    'Wind Alley', 10, '1000', 'Brussels'
+INSERT INTO address (
+    street, number, postcode, city,
+    latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
+) VALUES (
+    'Wind Alley', 10, '1000', 'Brussels',
+    50.850000, 4.350000, 2, 'test_fixture', current_timestamp, 1
 );
-INSERT INTO address (street, number, postcode, city) VALUES (
-    'Wind Alley', 12, '1000', 'Brussels'
+INSERT INTO address (
+    street, number, postcode, city,
+    latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
+) VALUES (
+    'Wind Alley', 12, '1000', 'Brussels',
+    50.850000, 4.350000, 2, 'test_fixture', current_timestamp, 1
 );
-INSERT INTO address (street, number, postcode, city) VALUES (
-    'Wind Alley', 14, '1000', 'Brussels'
+INSERT INTO address (
+    street, number, postcode, city,
+    latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
+) VALUES (
+    'Wind Alley', 14, '1000', 'Brussels',
+    50.851200, 4.351500, 2, 'test_fixture', current_timestamp, 1
 );
-INSERT INTO address (street, number, postcode, city) VALUES (
-    'Wind Alley', 16, '1000', 'Brussels'
+INSERT INTO address (
+    street, number, postcode, city,
+    latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
+) VALUES (
+    'Wind Alley', 16, '1000', 'Brussels',
+    50.872973, 4.375237, 4, 'municipality_centroid', current_timestamp, 1
 );
 
 -- Link community headquarters to addresses

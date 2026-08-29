@@ -317,6 +317,25 @@ community_routes.delete(
   roleChecker(Role.ADMIN),
   community_controller.deleteCommunity.bind(community_controller),
 );
+// Get (/map) : Every public community as a map zone.
+//
+// A literal segment under the same router as `GET /:id`, so it must be declared
+// before it.
+community_routes.get(
+  "/map",
+  /* #swagger.summary = 'Public communities with the NIS codes their public operations cover'
+       #swagger.tags = ['Communities']
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/CommunityMapQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/CommunityMapSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  community_controller.getPublicCommunitiesMap.bind(community_controller),
+);
 // Get (/:id) : Get detailed community info
 community_routes.get(
   "/:id",

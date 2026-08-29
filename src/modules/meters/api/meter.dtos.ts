@@ -170,6 +170,13 @@ export class PartialMeterDTO {
    */
   @Expose()
   sharing_operation?: SharingOperationPartialDTO;
+  /**
+   * Injection status of the meter data record selected for this view.
+   * `null` means the meter is a pure offtake point (a consumer) — used by the UI to tell
+   * consumers apart from injection points when importing meters as allocation-key participants.
+   */
+  @Expose()
+  injection_status?: InjectionStatus | null;
 }
 
 /**
@@ -617,4 +624,107 @@ export class DeleteFutureMeterDataDTO {
   @IsBoolean(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.BOOLEAN))
   @IsOptional()
   active_previous_meter_data?: boolean;
+}
+
+/**
+ * Query for `GET /meters/map`.
+ *
+ * Extends {@link MeterPartialQuery} rather than re-declaring its fields, so the
+ * map is guaranteed to honour exactly the filters the list honours — a
+ * hand-copied field list drifts the first time someone adds a filter and only
+ * touches one of the two. `page` and `limit` are inherited and ignored: the map
+ * is not paginated, it is capped.
+ */
+export class MeterMapQuery extends MeterPartialQuery {}
+
+/**
+ * The filter keys the map actually reads, in a fixed order.
+ *
+ * Used to build the cache key. Fixing the order means `?city=X&EAN=Y` and
+ * `?EAN=Y&city=X` share one entry, and dropping page/limit means paging the
+ * list does not mint a new map entry for identical data.
+ */
+export function pickMeterFilters(query: Record<string, unknown>): Record<string, unknown> {
+  const keys = [
+    "EAN",
+    "meter_number",
+    "street",
+    "city",
+    "postcode",
+    "address_number",
+    "supplement",
+    "status",
+    "holder_id",
+    "sharing_operation_id",
+    "not_sharing_operation_id",
+    // /me/meters/map only. Omitting it would make two members' different
+    // community filters share one cache entry inside the same user scope.
+    "community_name",
+  ];
+  const picked: Record<string, unknown> = {};
+  for (const key of keys) {
+    if (query[key] !== undefined) {
+      picked[key] = query[key];
+    }
+  }
+  return picked;
+}
+
+/** One plottable meter. Deliberately flat and small — thousands of these ship at once. */
+export class MeterMapPointDTO {
+  @Expose()
+  EAN!: string;
+  @Expose()
+  latitude!: number;
+  @Expose()
+  longitude!: number;
+  /** See AddressGeoPrecision. MUNICIPALITY means the pin is a commune centroid. */
+  @Expose()
+  geo_precision!: number | null;
+  @Expose()
+  status!: MeterDataStatus;
+  /** Null/absent means a pure offtake point, i.e. a consumer. */
+  @Expose()
+  injection_status?: InjectionStatus | null;
+  /** Flattened to a display string — the popup needs a label, not a member record. */
+  @Expose()
+  holder_name?: string;
+  @Expose()
+  sharing_operation_id?: number;
+  @Expose()
+  sharing_operation_name?: string;
+  /**
+   * Only set by `GET /me/meters/map`: a member's own meters can span several
+   * communities, and the popup has to say which one each pin belongs to. The
+   * community-scoped endpoint leaves it undefined, because there it would be
+   * the same value on every point.
+   */
+  @Expose()
+  community_name?: string;
+}
+
+/**
+ * The meters map payload.
+ *
+ * The three counters are the point of this envelope. At launch most addresses
+ * are un-geocoded, so a bare array would let the map silently show a fraction
+ * of the community as though it were all of it.
+ */
+export class MeterMapDTO {
+  @Expose()
+  points!: MeterMapPointDTO[];
+  /** Meters passing the filters, geocoded or not. */
+  @Expose()
+  total_matching!: number;
+  /** Of those, the ones that have coordinates. */
+  @Expose()
+  total_plottable!: number;
+  /** total_matching - total_plottable. Surfaced so the UI can prompt a backfill. */
+  @Expose()
+  missing_coordinates!: number;
+  /** True when `cap` cut the result short. */
+  @Expose()
+  truncated!: boolean;
+  @Expose()
+  cap!: number;
 }
