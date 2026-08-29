@@ -20,7 +20,7 @@ describe("(Unit) realtime channels", () => {
 
   it("uses a pattern that matches every channel it can build", () => {
     const matches = (channel: string): boolean =>
-      new RegExp(`^${CHANNEL_PATTERN.replace("*", ".*")}$`).test(channel);
+      new RegExp(`^${CHANNEL_PATTERN.replace(/\*/g, ".*")}$`).test(channel);
     expect(matches(userChannel(1))).toBe(true);
     expect(matches(communityChannel(1, Tier.MANAGER))).toBe(true);
   });
