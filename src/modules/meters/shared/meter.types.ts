@@ -43,3 +43,14 @@ export enum ProductionChain {
   COGEN_FOSSIL = 6,
   OTHER = 7,
 }
+
+/**
+ * Hard cap on how many points `GET /meters/map` will return.
+ *
+ * MapLibre renders far more than this happily; the constraint is the response
+ * body crossing KrakenD, which parses and re-serialises it inside a 3000ms
+ * global timeout. Exceeding the cap is reported in the body (`truncated`, with
+ * `total_matching`) rather than as a 4xx, so the UI can tell the user which
+ * filter to tighten instead of showing them an empty map.
+ */
+export const METER_MAP_MAX_POINTS = 2000;

@@ -6,6 +6,10 @@ import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import logger from "../../../shared/monitor/logger.js";
 import { withSavepoint } from "../../../shared/transactional/savepoint.js";
+import { onAfterCommit } from "../../../shared/transactional/after-commit.js";
+import { container } from "../../../container/di-container.js";
+import type { IRealtimeHub } from "../../../shared/realtime/i-realtime.hub.js";
+import { REALTIME_TOPICS } from "../../../shared/realtime/realtime.topics.js";
 import { Notification } from "../domain/notification.models.js";
 import { NOTIFICATION_TYPE_PREFIXES } from "../domain/notification.taxonomy.js";
 // Value import, not `import type`: these are runtime enums, compared below.
@@ -89,6 +93,34 @@ export class NotificationService implements INotificationService {
             },
             emailIds.map((userId) => ({ id_user: userId, id_notification: notificationIdByUser.get(userId) ?? null })),
             query_runner,
+          );
+        }
+
+        // Realtime hint for whoever currently has the bell open. REGISTERING
+        // rather than emitting keeps this inside the SAVEPOINT-protected block
+        // while the actual PUBLISH lands after the caller's real COMMIT — see
+        // shared/transactional/after-commit.ts for why that ordering is
+        // load-bearing rather than tidy. Silent no-op when the hub is unbound.
+        //
+        // This one registration gives realtime to EVERY producer that goes
+        // through publish() — documents, invitations (both), members — with no
+        // edit at any call site, and to the next one automatically.
+        const hub = container.isBound("RealtimeHub") ? container.get<IRealtimeHub>("RealtimeHub") : null;
+        if (hub && inappIds.length > 0) {
+          // Capture by value: the after-commit callback runs in a different
+          // async context, where AsyncLocalStorage is gone.
+          const recipients = [...inappIds];
+          const scope_community_id = communityId;
+          onAfterCommit(query_runner, () =>
+            hub.publishToUsers(recipients, {
+              topic: REALTIME_TOPICS.NOTIFICATION_CREATED,
+              // The client refetches /unread-count and the recent slice, so it
+              // needs no row id and no count — and the envelope must not carry
+              // business data anyway.
+              ref: { kind: "notification", id: "0" },
+              scope: { community_id: scope_community_id },
+              hint: {},
+            }),
           );
         }
 

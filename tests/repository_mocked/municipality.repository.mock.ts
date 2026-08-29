@@ -5,5 +5,6 @@ export function createMockMunicipalityRepository(): jest.Mocked<IMunicipalityRep
   return {
     searchMunicipalities: jest.fn(),
     findManyByNisCodes: jest.fn(),
+    findByPostalCode: jest.fn(),
   };
 }

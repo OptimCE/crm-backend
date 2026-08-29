@@ -55,13 +55,12 @@ sharing_operation_routes.get(
   roleChecker(Role.GESTIONNAIRE),
   sharing_operation_controller.getSharingOperation.bind(sharing_operation_controller),
 );
-// GET (:id/meters): Get paginated meters list of meters in the sharing operation (past, now or future)
+// GET (:id/meters): Get paginated meters list of meters in the sharing operation (past, now, future or at a given date)
 sharing_operation_routes.get(
   "/:id/meters",
-  /* #swagger.summary = 'Get paginated meters list of meters in the sharing operation (past, now or future)'
+  /* #swagger.summary = 'Get paginated meters list of meters in the sharing operation (past, now, future or at a given date)'
      #swagger.tags = ['SharingOperations']
      #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationMetersQuery' }
-     #swagger.parameters['filters'] = { $ref: '#/components/parameters/SharingOperationConsumptionQuery' }
      #swagger.responses[200] = { $ref: '#/components/responses/SharingOperationConsumptionsGetSuccess' }
      #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
      #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }

@@ -59,4 +59,18 @@ export const NotificationResponses = {
       },
     },
   },
+  NotificationRealtimeTicketSuccess: {
+    description: "A single-use, short-lived ticket for opening the realtime SSE stream",
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            data: { $ref: "#/components/schemas/RealtimeTicketDTO" },
+            error_code: { type: "integer", example: 0 },
+          },
+        },
+      },
+    },
+  },
 };

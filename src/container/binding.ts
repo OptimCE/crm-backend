@@ -69,6 +69,7 @@ import type { IHealthService } from "../modules/health/domain/i-health.service.j
 import { HealthService } from "../modules/health/infra/health.service.js";
 import { HealthController } from "../modules/health/api/health.controller.js";
 import { initializeCacheService } from "./factory/cache.factory.js";
+import { initializeRealtimeHub } from "./factory/realtime.factory.js";
 import type { IAnnexesServicesRepository } from "../modules/annexes_services/domain/i-annexes-services.repository.js";
 import { AnnexesServicesRepository } from "../modules/annexes_services/infra/annexes-services.repository.js";
 import type { IAnnexesServicesService } from "../modules/annexes_services/domain/i-annexes-services.service.js";
@@ -88,6 +89,10 @@ import type { IOutboundRepository } from "../modules/notifications/domain/i-outb
 import { OutboundRepository } from "../modules/notifications/infra/outbound.repository.js";
 import type { IOutboundService } from "../modules/notifications/domain/i-outbound.service.js";
 import { OutboundService } from "../modules/notifications/infra/outbound.service.js";
+import type { IGeocodingService } from "../modules/geocoding/domain/i-geocoding.service.js";
+import { GeocodingService } from "../modules/geocoding/infra/geocoding.service.js";
+import { GeocodingController } from "../modules/geocoding/api/geocoding.controller.js";
+import { initializeGeocodingService } from "./factory/geocoding.factory.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -173,6 +178,7 @@ container.bind<INotificationService>("NotificationService").to(NotificationServi
 // because the account-less invitation path needs it directly, and because the
 // notification contract test rebinds "NotificationService" to a bare spy.
 container.bind<IOutboundService>("OutboundService").to(OutboundService);
+container.bind<IGeocodingService>("GeocodingService").to(GeocodingService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -188,7 +194,28 @@ container.bind<UserController>(UserController).toSelf();
 container.bind<AnnexesServicesController>(AnnexesServicesController).toSelf();
 container.bind<AuditLogController>(AuditLogController).toSelf();
 container.bind<NotificationController>(NotificationController).toSelf();
+container.bind<GeocodingController>(GeocodingController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);
 container.bind<HealthController>(HealthController).toSelf();
+
+// LAST, deliberately. initializeRealtimeHub() eagerly resolves the hub so the
+// Redis PSUBSCRIBE is live before the first client can attach — which means
+// every binding it could possibly need must already exist. It is also outside
+// the NODE_ENV!=="test" block above only in the sense that it guards itself:
+// the factory binds nothing unless realtime.enabled AND realtime.redis_url are
+// set, and config/test.cjs hardcodes enabled:false. The realtime jest project
+// hand-binds a hub instead, mirroring tests/utils/helper.ts initializeCaching.
+if (process.env.NODE_ENV !== "test") {
+  initializeRealtimeHub();
+}
+
+// Also last, and also after the repository bindings: the geocoder chains hold a
+// MunicipalityRepository instance, so they cannot be built any earlier.
+// Skipped under NODE_ENV=test like every other network adapter — GeocodingService
+// resolves the chains through container.isBound(), so unbound simply means
+// "geocoding off" and the existing meter/member suites keep their behaviour.
+if (process.env.NODE_ENV !== "test") {
+  initializeGeocodingService();
+}

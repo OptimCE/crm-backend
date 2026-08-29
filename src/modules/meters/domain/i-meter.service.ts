@@ -4,6 +4,8 @@ import type {
   DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
+  MeterMapDTO,
+  MeterMapQuery,
   MeterPartialQuery,
   MetersDTO,
   PartialMeterDTO,
@@ -23,6 +25,13 @@ export interface IMeterService {
    * @returns Tuple [List, Pagination].
    */
   getMetersList(queryObject: MeterPartialQuery): Promise<[PartialMeterDTO[], Pagination]>;
+
+  /**
+   * Plottable meters for the map view. Unpaginated but capped; the returned DTO
+   * carries the counters the UI needs to say how much of the community it is
+   * actually showing.
+   */
+  getMetersMap(queryObject: MeterMapQuery): Promise<MeterMapDTO>;
   /**
    * Retrieves full details of a meter.
    * @param id - EAN or internal ID.

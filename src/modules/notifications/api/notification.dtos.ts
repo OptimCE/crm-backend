@@ -202,3 +202,25 @@ export class NotificationPreferencesDTO {
   @Type(() => NotificationPreferenceDTO)
   preferences!: NotificationPreferenceDTO[];
 }
+
+/**
+ * Response of `POST /notifications/realtime/ticket`.
+ *
+ * `ticket` is opaque to the client: 256 bits of base64url that only exists as a
+ * Redis key. Everything the SSE leg needs — the internal user id and the exact
+ * list of channels this connection may subscribe to — is stored SERVER-SIDE
+ * against that key, deliberately. A self-describing token would put internal
+ * community ids and role tiers into the client's hands and would widen forgery
+ * from "steal a live ticket" to "obtain the signing key".
+ *
+ * Single-use and short-lived: the stream endpoint redeems it with GETDEL, so the
+ * client must mint a fresh one on every (re)connect.
+ */
+export class RealtimeTicketDTO {
+  @Expose()
+  ticket!: string;
+
+  /** Seconds until the ticket expires unused. */
+  @Expose()
+  expires_in!: number;
+}

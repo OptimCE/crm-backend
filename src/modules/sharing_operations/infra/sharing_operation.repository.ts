@@ -14,7 +14,7 @@ import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import { Meter, MeterData } from "../../meters/domain/meter.models.js";
 import { CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
-import { addDaysISO, localTodayISO } from "../../../shared/utils/date.utils.js";
+import { addDaysISO, appTodayISO } from "../../../shared/utils/date.utils.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { SharingKeyStatus } from "../shared/sharing_operation.types.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
@@ -474,7 +474,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     {
       key: "not_sharing_operation_id",
       apply: (qb, val): SelectQueryBuilder<Meter> => {
-        const now = new Date();
+        const now = appTodayISO();
 
         return qb
           .andWhere((sub) => {
@@ -484,7 +484,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
               .from(MeterData, "md")
               .where("md.sharing_operation = :not_soid")
               .andWhere("md.start_date <= :now")
-              .andWhere("(md.end_date IS NULL OR md.end_date > :now)") // or >= if inclusive
+              .andWhere("(md.end_date IS NULL OR md.end_date >= :now)")
               .getQuery();
 
             return `meter.EAN NOT IN ${subQuery}`;
@@ -496,7 +496,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
   getSharingOperationMetersList(id_sharing: number, query: SharingOperationMetersQuery, query_runner?: QueryRunner): Promise<[Meter[], number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const qb = manager.createQueryBuilder(Meter, "meter");
-    const now = localTodayISO();
+    const now = appTodayISO();
 
     // 1. Join Address
     qb.leftJoinAndSelect("meter.address", "address");
@@ -507,9 +507,16 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     // 3. Apply Temporal Logic + Sharing Operation ID
     qb.where("active_data.id_sharing_operation = :id_sharing", { id_sharing });
 
+    // `end_date` is INCLUSIVE — the last day the meter is held. `addMeterData`
+    // closes a predecessor with `end_date = newStart - 1 day` (see
+    // meter.repository.ts), so a meter on its handover day is still in the
+    // operation. Every branch below honours that, and PAST is the exact
+    // complement of NOW: `end_date < now` against `end_date >= now`. Moving one
+    // without the other makes a meter ending today show up in both tabs, or
+    // neither.
     switch (query.type) {
       case SharingOperationMetersQueryType.PAST: {
-        qb.andWhere("active_data.end_date IS NOT NULL").andWhere("active_data.end_date <= :now", { now });
+        qb.andWhere("active_data.end_date IS NOT NULL").andWhere("active_data.end_date < :now", { now });
         // Range-overlap filter: a meter's past participation overlaps [range_from, range_to]
         // when start_date <= range_to AND (end_date IS NULL OR end_date >= range_from).
         if (query.start_date_from) {
@@ -526,7 +533,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
             .from(MeterData, "md")
             .where("md.ean = meter.ean")
             .andWhere("md.id_sharing_operation = :id_sharing")
-            .andWhere("md.end_date IS NOT NULL AND md.end_date <= :now")
+            .andWhere("md.end_date IS NOT NULL AND md.end_date < :now")
             .getQuery();
           return "active_data.start_date = " + subQuery;
         });
@@ -535,7 +542,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
 
       case SharingOperationMetersQueryType.NOW:
         qb.andWhere("active_data.start_date <= :now", { now });
-        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date > :now)", { now });
+        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date >= :now)", { now });
         break;
 
       case SharingOperationMetersQueryType.FUTURE: {
@@ -545,7 +552,16 @@ export class SharingOperationRepository implements ISharingOperationRepository {
         // newly-scheduled meters that have started by then.
         const futureAt = query.future_at ?? addDaysISO(now, 1);
         qb.andWhere("active_data.start_date <= :future_at", { future_at: futureAt });
-        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date > :future_at)", { future_at: futureAt });
+        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date >= :future_at)", { future_at: futureAt });
+        break;
+      }
+
+      case SharingOperationMetersQueryType.AT_DATE: {
+        // Point-in-time snapshot at an arbitrary date, past or future. Defaults to today.
+        // Both bounds are INCLUSIVE, like every other branch here.
+        const at = query.at ?? now;
+        qb.andWhere("active_data.start_date <= :at", { at });
+        qb.andWhere("(active_data.end_date IS NULL OR active_data.end_date >= :at)", { at });
         break;
       }
     }

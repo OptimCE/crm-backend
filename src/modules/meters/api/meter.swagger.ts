@@ -24,6 +24,19 @@ export const MeterParameters = {
       limit: 20,
     },
   },
+  MeterMapQuery: {
+    name: "filters",
+    in: "query",
+    description: "Same filters as the meters list. Pagination fields are accepted and ignored.",
+    required: false,
+    schema: { $ref: "#/components/schemas/MeterMapQuery" },
+    style: "form",
+    explode: true,
+    example: {
+      status: 1,
+      sharing_operation_id: 1,
+    },
+  },
   MeterConsumptionQuery: {
     name: "filters",
     in: "query",
@@ -72,6 +85,40 @@ export const MeterResponses = {
             page: 1,
             limit: 20,
             total: 1,
+          },
+        },
+      },
+    },
+  },
+  MeterMapSuccess: {
+    description: "Plottable meters plus the coverage counters",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/MeterMapDTO" },
+        },
+        example: {
+          error_code: 0,
+          data: {
+            points: [
+              {
+                EAN: "541448800000000000",
+                latitude: 50.8467,
+                longitude: 4.3525,
+                geo_precision: 2,
+                status: 1,
+                injection_status: null,
+                holder_name: "Dupont SPRL",
+                sharing_operation_id: 1,
+                sharing_operation_name: "Partage Nord",
+              },
+            ],
+            total_matching: 1204,
+            total_plottable: 812,
+            missing_coordinates: 392,
+            truncated: false,
+            cap: 2000,
           },
         },
       },

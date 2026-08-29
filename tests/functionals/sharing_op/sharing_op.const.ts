@@ -83,6 +83,41 @@ export const testCasesGetSharingOpMeters = [
       return data.length >= 4 && newWindMeterEANs.every((ean) => eans.includes(ean));
     },
   },
+  {
+    description: "AT_DATE - Success - `at` defaults to today, returning the currently-registered meters",
+    id: existingSharingOpId2,
+    query: { type: 4 }, // SharingOperationMetersQueryType.AT_DATE
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => {
+      const eans = (data as Array<{ EAN: string }>).map((m) => m.EAN);
+      return newWindMeterEANs.every((ean) => eans.includes(ean));
+    },
+  },
+  {
+    description: "AT_DATE - Success - exposes injection_status so consumers can be told apart from injection points",
+    id: existingSharingOpId2,
+    query: { type: 4 },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    check_data: (data: unknown[]): boolean => {
+      const rows = data as Array<{ EAN: string; injection_status: number | null }>;
+      // 987654321098765432 is a pure offtake point; the wind meters are autoprod owners.
+      const consumer = rows.find((m) => m.EAN === "987654321098765432");
+      const producer = rows.find((m) => m.EAN === newWindMeterEANs[0]);
+      return consumer?.injection_status === null && producer?.injection_status === 1;
+    },
+  },
+  {
+    description: "AT_DATE - Fail - malformed `at` is rejected",
+    id: existingSharingOpId1,
+    query: { type: 4, at: "01/02/2026" },
+    orgs: ORGS_GESTIONNAIRE,
+    status_code: 422,
+    expected_error_code: SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE.errorCode,
+  },
 ];
 
 // 3. Create

@@ -1,5 +1,6 @@
 import type { DataSource, QueryRunner } from "typeorm";
 import logger from "../monitor/logger.js";
+import { discardAfterCommit, flushAfterCommit } from "./after-commit.js";
 export interface HasDataSource {
   dataSource: DataSource;
 }
@@ -30,8 +31,15 @@ export function Transactional() {
       try {
         const result = await originalMethod.apply(this, [...args, query_runner]);
         await query_runner.commitTransaction();
+        // AFTER the real COMMIT, never before. This is the ONLY drain point:
+        // withSavepoint() also calls commitTransaction() (to release a
+        // SAVEPOINT), so draining there would fire effects while the outer
+        // transaction is still open. See shared/transactional/after-commit.ts.
+        flushAfterCommit(query_runner);
         return result;
       } catch (err) {
+        // A rolled-back write must emit nothing.
+        discardAfterCommit(query_runner);
         logger.error(err);
         await query_runner.rollbackTransaction();
         throw err;

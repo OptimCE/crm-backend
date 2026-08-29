@@ -16,10 +16,7 @@ export class MunicipalityRepository implements IMunicipalityRepository {
     // only when needed), then reload the matched municipalities with ALL their postal
     // codes. This keeps the response complete even when a single postal_code filter is
     // used.
-    const idsQb = manager
-      .createQueryBuilder(Municipality, "muni")
-      .select("muni.nis_code", "nis_code")
-      .orderBy("muni.fr_name", "ASC");
+    const idsQb = manager.createQueryBuilder(Municipality, "muni").select("muni.nis_code", "nis_code").orderBy("muni.fr_name", "ASC");
 
     if (query.postal_code) {
       idsQb.innerJoin("muni.postal_codes", "pc_filter", "pc_filter.postal_code = :pc", { pc: query.postal_code });
@@ -58,6 +55,16 @@ export class MunicipalityRepository implements IMunicipalityRepository {
     });
 
     return [items, total];
+  }
+
+  async findByPostalCode(postal_code: string, query_runner?: QueryRunner): Promise<Municipality[]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    return manager
+      .createQueryBuilder(Municipality, "muni")
+      .innerJoin("muni.postal_codes", "pc", "pc.postal_code = :pc", { pc: postal_code })
+      .orderBy("muni.nis_code", "ASC")
+      .getMany();
   }
 
   async findManyByNisCodes(nis_codes: number[], query_runner?: QueryRunner): Promise<Municipality[]> {

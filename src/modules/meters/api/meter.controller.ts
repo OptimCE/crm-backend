@@ -15,7 +15,10 @@ import {
   DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
+  MeterMapDTO,
+  MeterMapQuery,
   MeterPartialQuery,
+  pickMeterFilters,
   MetersDTO,
   PartialMeterDTO,
   PatchMeterDataDTO,
@@ -40,6 +43,23 @@ export class MeterController {
     const [result, pagination]: [PartialMeterDTO[], Pagination] = await this.meterService.getMetersList(queryObject);
     logger.info("Meters list successfully retrieved");
     res.status(200).json(new ApiResponsePaginated<PartialMeterDTO[]>(result, pagination, SUCCESS));
+  }
+
+  /**
+   * Every plottable meter of the active community, for the map view.
+   *
+   * The cache key is built from `pickMeterFilters` rather than the raw query:
+   * that drops page/limit (which the map ignores, so paging the list must not
+   * mint a second entry for identical data) and fixes the key order, so
+   * `?city=X&EAN=Y` and `?EAN=Y&city=X` share one entry.
+   */
+  @meterControllerTraceDecorator.traceSpan("getMetersMap", { url: "/meters/map", method: "get" })
+  @Cache(cacheKey("meters:map", "community", (req) => JSON.stringify(pickMeterFilters(req.query))), 60)
+  async getMetersMap(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(MeterMapQuery, req.query);
+    const result = await this.meterService.getMetersMap(queryObject);
+    logger.info({ plotted: result.points.length, truncated: result.truncated }, "Meters map successfully retrieved");
+    res.status(200).json(new ApiResponse<MeterMapDTO>(result, SUCCESS));
   }
 
   /**
@@ -95,7 +115,7 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("addMeter", { url: "/meters/", method: "post" })
-  @InvalidateCache([cachePattern("meters:list", "community")])
+  @InvalidateCache([cachePattern("meters:list", "community"), cachePattern("meters:map", "community")])
   async addMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_meter = await validateDto(CreateMeterDTO, req.body);
     await this.meterService.addMeter(new_meter);
@@ -110,7 +130,11 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("updateMeter", { url: "/meters/", method: "put" })
-  @InvalidateCache([cachePattern("meters:list", "community"), cachePattern("meters:detail", "community")])
+  @InvalidateCache([
+    cachePattern("meters:list", "community"),
+    cachePattern("meters:map", "community"),
+    cachePattern("meters:detail", "community"),
+  ])
   async updateMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_meter = await validateDto(UpdateMeterDTO, req.body);
     await this.meterService.updateMeter(updated_meter);
@@ -127,6 +151,9 @@ export class MeterController {
   @meterControllerTraceDecorator.traceSpan("patchMeterData", { url: "/meters/data", method: "patch" })
   @InvalidateCache([
     cachePattern("meters:list", "community"),
+    // Status, holder and operation are all on the map point, so every one of
+    // these mutations can change what the map shows.
+    cachePattern("meters:map", "community"),
     cachePattern("meters:detail", "community"),
     cachePattern("meters:consumptions", "community"),
   ])
@@ -146,6 +173,9 @@ export class MeterController {
   @meterControllerTraceDecorator.traceSpan("deactivateMeter", { url: "/meters/data/deactivate", method: "patch" })
   @InvalidateCache([
     cachePattern("meters:list", "community"),
+    // Status, holder and operation are all on the map point, so every one of
+    // these mutations can change what the map shows.
+    cachePattern("meters:map", "community"),
     cachePattern("meters:detail", "community"),
     cachePattern("meters:consumptions", "community"),
   ])
@@ -165,6 +195,9 @@ export class MeterController {
   @meterControllerTraceDecorator.traceSpan("deleteLatestMeterData", { url: "/meters/data/delete", method: "patch" })
   @InvalidateCache([
     cachePattern("meters:list", "community"),
+    // Status, holder and operation are all on the map point, so every one of
+    // these mutations can change what the map shows.
+    cachePattern("meters:map", "community"),
     cachePattern("meters:detail", "community"),
     cachePattern("meters:consumptions", "community"),
   ])
@@ -184,6 +217,9 @@ export class MeterController {
   @meterControllerTraceDecorator.traceSpan("patchMeterData", { url: "/meters/:id", method: "delete" })
   @InvalidateCache([
     cachePattern("meters:list", "community"),
+    // Status, holder and operation are all on the map point, so every one of
+    // these mutations can change what the map shows.
+    cachePattern("meters:map", "community"),
     cachePattern("meters:detail", "community"),
     cachePattern("meters:consumptions", "community"),
   ])

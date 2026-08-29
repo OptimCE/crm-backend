@@ -7,6 +7,8 @@ import type {
   MyCommunityDTO,
   PatchRoleUserDTO,
   PublicCommunityDTO,
+  PublicCommunityMapDTO,
+  CommunityMapQuery,
   UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
@@ -23,6 +25,12 @@ export interface ICommunityService {
    * @returns A tuple containing the list of PublicCommunityDTO and pagination info.
    */
   getAllPublicCommunities(query: CommunityQueryDTO): Promise<[PublicCommunityDTO[], Pagination]>;
+
+  /**
+   * Every public community as a map zone: identity plus the union of the NIS
+   * codes its public sharing operations cover. Unpaginated but capped.
+   */
+  getPublicCommunitiesMap(query: CommunityMapQuery): Promise<PublicCommunityMapDTO[]>;
   /**
    * Retrieves detailed information about a specific community.
    * @param id - The community ID.

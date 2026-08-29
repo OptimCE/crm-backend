@@ -9,6 +9,7 @@ export function createMockCommunityRepository(): jest.Mocked<ICommunityRepositor
     deleteUserCommunity: jest.fn(),
     getAdmins: jest.fn(),
     getAllPublicCommunities: jest.fn(),
+    getPublicCommunitiesMap: jest.fn(),
     getCommunityById: jest.fn(),
     getCommunityUser: jest.fn(),
     getDashboardCounts: jest.fn(),

@@ -17,6 +17,7 @@ import {
   testCasesUpdateMunicipalities,
   AUTH_COMMUNITY_1,
 } from "./sharing_op.const.js";
+import { ORGS_GESTIONNAIRE } from "../../utils/shared.consts.js";
 
 describe("(Functional) Sharing Operation Module", () => {
   useFunctionalTestDb();
@@ -88,6 +89,56 @@ describe("(Functional) Sharing Operation Module", () => {
           expect(check_data(response.body.data)).toBe(true);
         }
       });
+    });
+  });
+
+  // --- GET METERS AT A GIVEN DATE (AT_DATE snapshot) ---
+  // These seed their own closed participation window rather than extending the shared fixture set,
+  // which other suites count (the community dashboard asserts exact meter totals).
+  describe("(Functional) Get Meters at a given date", () => {
+    /** The wind meter whose participation this block closes, and the day it stops being held. */
+    const EAN = "541448200000000001";
+    const LAST_DAY_HELD = "2025-06-30";
+
+    async function closeParticipation(): Promise<void> {
+      const { AppDataSource } = await import("../../../src/shared/database/database.connector.js");
+      await AppDataSource.manager.query(`UPDATE meter_data SET start_date = '2025-01-01', end_date = $1 WHERE ean = $2`, [LAST_DAY_HELD, EAN]);
+    }
+
+    async function eansAt(at: string): Promise<string[]> {
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+
+      const response = await request(app)
+        .get(`/sharing_operations/2/meters`)
+        .query({ type: 4, at, limit: 100 })
+        .set("x-user-id", "auth0|admin")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_GESTIONNAIRE);
+
+      expect(response.status).toBe(200);
+      return (response.body.data as Array<{ EAN: string }>).map((m) => m.EAN);
+    }
+
+    it("returns a meter whose participation window covers the date", async () => {
+      await closeParticipation();
+      expect(await eansAt("2025-03-15")).toContain(EAN);
+    });
+
+    it("still returns a meter on its end_date — the last day held (inclusive upper bound)", async () => {
+      await closeParticipation();
+      expect(await eansAt(LAST_DAY_HELD)).toContain(EAN);
+    });
+
+    it("drops the meter the day after its end_date", async () => {
+      await closeParticipation();
+      expect(await eansAt("2025-07-01")).not.toContain(EAN);
+    });
+
+    it("returns a meter on its start_date (inclusive lower bound) but not the day before", async () => {
+      await closeParticipation();
+      expect(await eansAt("2025-01-01")).toContain(EAN);
+      expect(await eansAt("2024-12-31")).not.toContain(EAN);
     });
   });
 

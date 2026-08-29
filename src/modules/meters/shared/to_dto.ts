@@ -1,9 +1,11 @@
 import type { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
-import { MeterConsumptionDTO, MetersDataDTO, MetersDTO, type PartialMeterDTO } from "../api/meter.dtos.js";
+import { MeterConsumptionDTO, type MeterMapPointDTO, MetersDataDTO, MetersDTO, type PartialMeterDTO } from "../api/meter.dtos.js";
 import { toAddressDTO } from "../../../shared/address/to_dto.js";
 import { toMemberPartialDTO } from "../../members/shared/to_dto.js";
 import { toSharingOperationPartialDTO } from "../../sharing_operations/shared/to_dto.js";
-import { MeterDataStatus } from "./meter.types.js";
+import { MeterDataStatus, type InjectionStatus } from "./meter.types.js";
+import { classifyMeterDataByDate } from "./meter-data.classifier.js";
+import { appTodayISO } from "../../../shared/utils/date.utils.js";
 
 export function toMeterPartialDTO(meter: Meter): PartialMeterDTO {
   const activeData = meter.meter_data && meter.meter_data.length > 0 ? meter.meter_data[0] : null;
@@ -12,10 +14,12 @@ export function toMeterPartialDTO(meter: Meter): PartialMeterDTO {
   let sharing_op = undefined;
   let start_date: string | undefined = undefined;
   let end_date: string | undefined = undefined;
+  let injection_status: InjectionStatus | null = null;
   if (activeData) {
     status = activeData.status;
     start_date = activeData.start_date;
     end_date = activeData.end_date ?? undefined;
+    injection_status = activeData.injection_status;
     if (activeData.member) {
       holder = toMemberPartialDTO(activeData.member);
     }
@@ -32,6 +36,7 @@ export function toMeterPartialDTO(meter: Meter): PartialMeterDTO {
     end_date: end_date,
     address: toAddressDTO(meter.address),
     sharing_operation: sharing_op,
+    injection_status: injection_status,
   };
 }
 
@@ -75,42 +80,7 @@ export function toMeterDTO(meter: Meter): MetersDTO {
   dto.phases_number = meter.phases_number;
   dto.reading_frequency = meter.reading_frequency;
 
-  // Temporal classification — compare YYYY-MM-DD strings lexicographically
-  // against today's local calendar date so a record starting "today" stays
-  // active regardless of host timezone.
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-  const history: MetersDataDTO[] = [];
-  const future: MetersDataDTO[] = [];
-  let active: MetersDataDTO | undefined;
-
-  if (meter.meter_data) {
-    for (const data of meter.meter_data) {
-      const dataDto = toMetersDataDTO(data);
-      const start = data.start_date;
-      const end = data.end_date;
-
-      // Future: Starts after today
-      if (start > today) {
-        future.push(dataDto);
-      }
-      // History: Ended before today
-      else if (end && end < today) {
-        history.push(dataDto);
-      }
-      // Active: Started on or before today, and either no end date or ends on/after today
-      else {
-        if (!active) {
-          active = dataDto;
-        } else {
-          // Logic to handle overlaps if necessary, generally shouldn't happen with valid data
-          // Treating additional overlaps as history for now
-          history.push(dataDto);
-        }
-      }
-    }
-  }
+  const { active, history, future } = classifyMeterDataByDate(meter.meter_data, toMetersDataDTO, appTodayISO());
 
   dto.meter_data = active;
   dto.meter_data_history = history;
@@ -138,4 +108,44 @@ export function toMeterConsumptionDTO(ean: string, values: MeterConsumption[]): 
   dto.inj_shared = values.map((v) => v.inj_shared ?? 0);
 
   return dto;
+}
+
+/**
+ * Maps a meter onto its map point.
+ *
+ * Only ever called for rows the repository already filtered to
+ * `latitude IS NOT NULL`, and the DB CHECK keeps the pair atomic — hence the
+ * non-null assertions rather than a runtime guard that could never fire.
+ */
+export function toMeterMapPointDTO(meter: Meter): MeterMapPointDTO {
+  const activeData = meter.meter_data && meter.meter_data.length > 0 ? meter.meter_data[0] : null;
+  const holder = activeData?.member ?? null;
+  const operation = activeData?.sharing_operation ?? null;
+
+  return {
+    EAN: meter.EAN,
+    latitude: meter.address.latitude as number,
+    longitude: meter.address.longitude as number,
+    geo_precision: meter.address.geo_precision,
+    status: activeData ? activeData.status : MeterDataStatus.INACTIVE,
+    injection_status: activeData ? activeData.injection_status : null,
+    // `Member.name` is the display name for both individuals and companies —
+    // the type-specific detail rows are not joined here, and the popup only
+    // needs a label.
+    holder_name: holder ? holder.name : undefined,
+    sharing_operation_id: operation ? operation.id : undefined,
+    sharing_operation_name: operation ? operation.name : undefined,
+  };
+}
+
+/**
+ * The /me variant: same point, plus the owning community.
+ *
+ * A member's meters can sit in several communities at once, so the popup needs
+ * the label. Kept as a wrapper rather than a flag on the base mapper so the
+ * community-scoped endpoint cannot accidentally start shipping a redundant
+ * field on every one of two thousand points.
+ */
+export function toMeMeterMapPointDTO(meter: Meter): MeterMapPointDTO {
+  return { ...toMeterMapPointDTO(meter), community_name: meter.community?.name };
 }

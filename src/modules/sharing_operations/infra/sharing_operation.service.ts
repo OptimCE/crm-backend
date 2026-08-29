@@ -48,7 +48,7 @@ import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { toMeterPartialDTO } from "../../meters/shared/to_dto.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
-import { localTodayISO } from "../../../shared/utils/date.utils.js";
+import { appTodayISO } from "../../../shared/utils/date.utils.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
@@ -974,7 +974,7 @@ export class SharingOperationService implements ISharingOperationService {
 
     // 4a. Hard delete branch: future, never-started row.
     if (hard_delete) {
-      const today = localTodayISO();
+      const today = appTodayISO();
       if (latestMeterData.start_date <= today) {
         logger.warn(
           { operation: "deleteMeterFromSharingOperation", id_meter, start_date: latestMeterData.start_date },

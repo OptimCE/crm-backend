@@ -4,7 +4,7 @@ import { SharingOperation } from "../../sharing_operations/domain/sharing_operat
 import { inject, injectable } from "inversify";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { DeepPartial, DeleteResult, In, type QueryRunner, SelectQueryBuilder, UpdateResult } from "typeorm";
-import { CreateMeterDTO, MeterConsumptionQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
+import { CreateMeterDTO, MeterConsumptionQuery, MeterMapQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 import { applyFilters, FilterDef } from "../../../shared/database/filters.js";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { Address } from "../../../shared/address/address.models.js";
@@ -14,7 +14,7 @@ import { METER_ERRORS } from "../shared/meter.errors.js";
 import { SHARING_OPERATION_ERRORS } from "../../sharing_operations/shared/sharing_operation.errors.js";
 import logger from "../../../shared/monitor/logger.js";
 import { MeterDataStatus } from "../shared/meter.types.js";
-import { addDaysISO, CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
+import { addDaysISO, appTodayISO, CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 
 @injectable()
 export class MeterRepository implements IMeterRepository {
@@ -30,7 +30,11 @@ export class MeterRepository implements IMeterRepository {
     { key: "street", apply: (qb, val) => qb.andWhere("address.street LIKE :street", { street: `%${val}%` }) },
     { key: "city", apply: (qb, val) => qb.andWhere("address.city LIKE :city", { city: `%${val}%` }) },
     { key: "postcode", apply: (qb, val) => qb.andWhere("address.postcode = :post", { post: val }) },
-    { key: "address_number", apply: (qb, val) => qb.andWhere("address.address_number = :an", { an: val }) },
+    // The query parameter is `address_number`; the Address property is `number`.
+    // TypeORM passes an unknown property path through verbatim, so the old
+    // "address.address_number" reached Postgres as a column that does not exist
+    // and turned every filtered request into a 500.
+    { key: "address_number", apply: (qb, val) => qb.andWhere("address.number = :an", { an: val }) },
     { key: "supplement", apply: (qb, val) => qb.andWhere("address.supplement LIKE :supp", { supp: `%${val}%` }) },
 
     // Active Meter Data Filters (Status, Holder, Sharing Op)
@@ -50,7 +54,7 @@ export class MeterRepository implements IMeterRepository {
     {
       key: "not_sharing_operation_id",
       apply: (qb, val): SelectQueryBuilder<Meter> => {
-        const now = new Date();
+        const now = appTodayISO();
 
         return qb
           .andWhere((sub) => {
@@ -60,7 +64,7 @@ export class MeterRepository implements IMeterRepository {
               .from(MeterData, "md")
               .where("md.sharing_operation = :not_soid")
               .andWhere("md.start_date <= :now")
-              .andWhere("(md.end_date IS NULL OR md.end_date > :now)") // or >= if inclusive
+              .andWhere("(md.end_date IS NULL OR md.end_date >= :now)")
               .getQuery();
 
             return `meter.EAN NOT IN ${subQuery}`;
@@ -224,13 +228,13 @@ export class MeterRepository implements IMeterRepository {
    */
   async countActiveMeterDataForMember(memberId: number, query_runner?: QueryRunner): Promise<number> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const now = new Date();
+    const now = appTodayISO();
     return manager
       .createQueryBuilder(MeterData, "md")
       .where("md.member = :memberId", { memberId })
       .andWhere("md.status != :inactive", { inactive: MeterDataStatus.INACTIVE })
       .andWhere("md.start_date <= :now", { now })
-      .andWhere("(md.end_date IS NULL OR md.end_date > :now)", { now })
+      .andWhere("(md.end_date IS NULL OR md.end_date >= :now)", { now })
       .getCount();
   }
 
@@ -266,7 +270,7 @@ export class MeterRepository implements IMeterRepository {
 
     // Join ONLY the active MeterData to allow filtering by current status/holder/sharing
     // 'active_data' alias is used in the filters above
-    const now = new Date();
+    const now = appTodayISO();
 
     qb.leftJoinAndSelect(
       "meter.meter_data",
@@ -275,7 +279,7 @@ export class MeterRepository implements IMeterRepository {
         active_data.start_date <= :now
         AND (
           active_data.end_date IS NULL
-          OR active_data.end_date > :now
+          OR active_data.end_date >= :now
         )
         `,
       { now },
@@ -290,6 +294,61 @@ export class MeterRepository implements IMeterRepository {
     qb.orderBy("meter.EAN", "ASC");
 
     return qb.skip(skip).take(take).getManyAndCount();
+  }
+
+  /**
+   * Plottable meters for the map, plus how many matched the filters overall.
+   *
+   * Two statements on purpose. The first counts everything the filters match,
+   * geocoded or not, so the caller can report "812 of 1204 plotted"; the second
+   * fetches only the rows that have coordinates. Doing it in one pass would
+   * force a conditional aggregate and still not give the caller a truncation
+   * signal.
+   *
+   * Coincident meters are NOT collapsed here: two flats in one building are two
+   * EANs and the popup must list both. Grouping is the UI's job.
+   *
+   * @returns [rows (up to take), total_plottable, total_matching]
+   */
+  async getMetersMap(query: MeterMapQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const now = appTodayISO();
+
+    const build = (): SelectQueryBuilder<Meter> => {
+      let qb = manager.createQueryBuilder(Meter, "meter");
+      withCommunityScope(qb, "meter");
+      qb.leftJoinAndSelect("meter.address", "address");
+      qb.leftJoinAndSelect(
+        "meter.meter_data",
+        "active_data",
+        `
+        active_data.start_date <= :now
+        AND (
+          active_data.end_date IS NULL
+          OR active_data.end_date >= :now
+        )
+        `,
+        { now },
+      );
+      qb = applyFilters(this.meterFilters, qb, query);
+      return qb;
+    };
+
+    const total_matching = await build().getCount();
+
+    const qb = build();
+    // The popup labels the holder and the operation, so unlike getMetersList
+    // these two relations are selected explicitly.
+    qb.leftJoinAndSelect("active_data.member", "holder");
+    qb.leftJoinAndSelect("active_data.sharing_operation", "operation");
+    qb.andWhere("address.latitude IS NOT NULL");
+    qb.orderBy("meter.EAN", "ASC");
+
+    // take + 1: one row past the cap is how truncation is detected without a
+    // second COUNT.
+    const [rows, total_plottable] = await qb.take(take + 1).getManyAndCount();
+
+    return [rows, total_plottable, total_matching];
   }
 
   async getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]> {
@@ -345,11 +404,14 @@ export class MeterRepository implements IMeterRepository {
     });
   }
 
-  async updateMeter(update_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<UpdateResult> {
+  async updateMeter(
+    update_meter: UpdateMeterDTO,
+    query_runner?: QueryRunner,
+  ): Promise<{ result: UpdateResult; address_id: number }> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const address = manager.create(Address, update_meter.address);
     const savedAddress = await manager.save(address);
-    return manager.update(
+    const result = await manager.update(
       Meter,
       {
         EAN: update_meter.EAN,
@@ -362,6 +424,7 @@ export class MeterRepository implements IMeterRepository {
         reading_frequency: update_meter.reading_frequency,
       },
     );
+    return { result, address_id: savedAddress.id };
   }
   async getMeterData(id: number, query_runner?: QueryRunner): Promise<MeterData | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;

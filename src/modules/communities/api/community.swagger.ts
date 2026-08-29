@@ -1,4 +1,14 @@
 export const CommunityParameters = {
+  CommunityMapQuery: {
+    name: "filters",
+    in: "query",
+    description: "Optional regulator filter for the public communities map",
+    required: false,
+    schema: { $ref: "#/components/schemas/CommunityMapQuery" },
+    style: "form",
+    explode: true,
+    example: { regulator: "BE-WAL-CWAPE" },
+  },
   CommunityId: {
     name: "id_community",
     in: "path",
@@ -60,6 +70,32 @@ export const CommunityParameters = {
 };
 
 export const CommunityResponses = {
+  CommunityMapSuccess: {
+    description: "Public communities with the NIS codes their public operations cover",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: {
+            type: "array",
+            items: { $ref: "#/components/schemas/PublicCommunityMapDTO" },
+          },
+        },
+        example: {
+          error_code: 0,
+          data: [
+            {
+              id: 1,
+              name: "Communaute Test",
+              regulator: "BE-WAL-CWAPE",
+              nis_codes: [21004, 21009],
+              public_operations_count: 2,
+            },
+          ],
+        },
+      },
+    },
+  },
   CommunitiesListSuccess: {
     description: "Successful list of all communities with public sharing operations",
     content: {

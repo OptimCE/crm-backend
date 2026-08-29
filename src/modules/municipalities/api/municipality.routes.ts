@@ -6,6 +6,25 @@ import { MunicipalityController } from "./municipality.controller.js";
 export const municipality_routes = express.Router();
 const municipality_controller = lazyController<MunicipalityController>(MunicipalityController);
 
+// Get (/geometry) : Simplified GeoJSON for a set of NIS codes.
+// Declared FIRST so a future `/:nis_code` route can never shadow the literal
+// segment — the same ordering trap that bites `/meters/map` vs `/meters/:id`.
+municipality_routes.get(
+  "/geometry",
+  /* #swagger.summary = 'Simplified GeoJSON geometry for a set of municipalities'
+       #swagger.tags = ['Municipalities']
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/MunicipalityGeometryQuery' }
+       #swagger.responses[200] = { $ref: '#/components/responses/MunicipalityGeometrySuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  municipality_controller.getGeometries.bind(municipality_controller),
+);
+
 // Get (/) : Search municipalities (paginated, name + postal code filters)
 municipality_routes.get(
   "/",

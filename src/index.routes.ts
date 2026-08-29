@@ -13,10 +13,12 @@ import { health_routes } from "./modules/health/api/health.routes.js";
 import { annexes_services_routes } from "./modules/annexes_services/api/annexes-services.routes.js";
 import { audit_log_routes } from "./modules/audit_log/api/audit-log.routes.js";
 import { notification_routes } from "./modules/notifications/api/notification.routes.js";
+import { geocoding_routes } from "./modules/geocoding/api/geocoding.routes.js";
 
 export const router = express.Router();
 router.use("/communities", community_routes);
 router.use("/documents", document_router);
+router.use("/geocoding", geocoding_routes);
 router.use("/invitations", invitation_routes);
 router.use("/keys", key_router);
 router.use("/me", me_routes);

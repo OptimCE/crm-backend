@@ -99,6 +99,25 @@ me_routes.get(
   me_controller.getMeters.bind(me_controller),
 );
 
+// GET /meters/map -> Plottable meters this user owns.
+//
+// MUST stay above `/meters/:id`: Express matches in registration order, and
+// after it this request becomes `req.params.id === "map"`.
+me_routes.get(
+  "/meters/map",
+  /* #swagger.summary = 'Retrieve every plottable meter owned by this user (capped, not paginated)'
+       #swagger.tags = ['Me']
+       #swagger.parameters['filters'] = { $ref: '#/components/parameters/MeMeterFilters' }
+       #swagger.responses[200] = { $ref: '#/components/responses/MeMetersMapSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  me_controller.getMetersMap.bind(me_controller),
+);
 // GET /meters/:id -> Fetch detail about a meter
 me_routes.get(
   "/meters/:id",

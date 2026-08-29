@@ -23,6 +23,27 @@ export const SharingOperationParameters = {
       limit: 10,
     },
   },
+  SharingOperationMetersQuery: {
+    name: "filters",
+    in: "query",
+    description:
+      "Pagination and filter options for the meters of a sharing operation. `type` selects the temporal window: " +
+      "1 = PAST (closed participations, optionally narrowed by `start_date_from`/`end_date_to`), " +
+      "2 = NOW (valid today), " +
+      "3 = FUTURE (snapshot at `future_at`, defaulting to tomorrow), " +
+      "4 = AT_DATE (snapshot at `at`, defaulting to today). " +
+      "AT_DATE treats both window bounds as inclusive, so a meter whose participation ends exactly on `at` is still returned.",
+    required: true,
+    schema: { $ref: "#/components/schemas/SharingOperationMetersQuery" },
+    style: "form",
+    explode: true,
+    example: {
+      type: 4,
+      at: "2026-03-15",
+      page: 1,
+      limit: 10,
+    },
+  },
   SharingOperationConsumptionQuery: {
     name: "filters",
     in: "query",

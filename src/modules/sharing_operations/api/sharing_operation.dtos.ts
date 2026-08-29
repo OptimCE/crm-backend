@@ -63,6 +63,11 @@ export enum SharingOperationMetersQueryType {
   PAST = 1,
   NOW = 2,
   FUTURE = 3,
+  /**
+   * Point-in-time snapshot: the meters registered in the operation on an arbitrary date,
+   * past or future. Driven by `at`.
+   */
+  AT_DATE = 4,
 }
 
 export class SharingOperationMetersQuery extends PaginationQuery {
@@ -166,6 +171,18 @@ export class SharingOperationMetersQuery extends PaginationQuery {
   @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsOptional()
   future_at?: string;
+
+  /**
+   * AT_DATE snapshot date (YYYY-MM-DD). Defaults to today when omitted.
+   *
+   * Unlike `future_at`, both bounds are inclusive: `end_date` is the last day a meter is held,
+   * so a meter leaving the operation on this very date is still part of it.
+   */
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  at?: string;
 
   /**
    * Filter by street name.

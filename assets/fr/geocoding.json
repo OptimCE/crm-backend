@@ -1,0 +1,6 @@
+{
+  "backfill": {
+    "database": "Une erreur est survenue lors de l'accès à la file d'attente de géocodage",
+    "disabled": "Le géocodage d'adresses n'est pas configuré sur cette instance"
+  }
+}

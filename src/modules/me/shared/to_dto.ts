@@ -27,6 +27,8 @@ import type { SharingOperationType } from "../../sharing_operations/shared/shari
 import type { Document } from "../../documents/domain/document.models.js";
 import type { Meter, MeterData } from "../../meters/domain/meter.models.js";
 import { MetersDataDTO } from "../../meters/api/meter.dtos.js";
+import { classifyMeterDataByDate } from "../../meters/shared/meter-data.classifier.js";
+import { appTodayISO } from "../../../shared/utils/date.utils.js";
 import { toSharingOperationPartialDTO } from "../../sharing_operations/shared/to_dto.js";
 import { MeterDataStatus } from "../../meters/shared/meter.types.js";
 import { memberMissingFields } from "../../../shared/member/completeness.js";
@@ -171,40 +173,7 @@ export function toMeterDTO(meter: Meter): MeMeterDTO {
   dto.phases_number = meter.phases_number;
   dto.reading_frequency = meter.reading_frequency;
 
-  // Temporal classification
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const history: MetersDataDTO[] = [];
-  const future: MetersDataDTO[] = [];
-  let active: MetersDataDTO | undefined;
-
-  if (meter.meter_data) {
-    for (const data of meter.meter_data) {
-      const dataDto = toMetersDataDTO(data);
-      const start = new Date(data.start_date);
-      const end = data.end_date ? new Date(data.end_date) : null;
-
-      // Future: Starts after today
-      if (start > today) {
-        future.push(dataDto);
-      }
-      // History: Ended before today
-      else if (end && end < today) {
-        history.push(dataDto);
-      }
-      // Active: Started on or before today, and either no end date or ends on/after today
-      else {
-        if (!active) {
-          active = dataDto;
-        } else {
-          // Logic to handle overlaps if necessary, generally shouldn't happen with valid data
-          // Treating additional overlaps as history for now
-          history.push(dataDto);
-        }
-      }
-    }
-  }
+  const { active, history, future } = classifyMeterDataByDate(meter.meter_data, toMetersDataDTO, appTodayISO());
 
   dto.meter_data = active;
   dto.meter_data_history = history;

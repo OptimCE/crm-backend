@@ -11,6 +11,8 @@ import {
   MyCommunityDTO,
   PatchRoleUserDTO,
   PublicCommunityDTO,
+  PublicCommunityMapDTO,
+  CommunityMapQuery,
   UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
@@ -22,7 +24,7 @@ import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Role } from "../../../shared/dtos/role.js";
 import { toCommunityDashboardDTO, toCommunityDetailDTO, toMyCommunityDTO, toPublicCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
-import { localTodayISO } from "../../../shared/utils/date.utils.js";
+import { appTodayISO } from "../../../shared/utils/date.utils.js";
 
 /**
  * How many "operation without a valid allocation key" names the dashboard
@@ -43,6 +45,15 @@ import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
  * Implementation of the Community Service.
  * Manages community creation, updates, membership, and IAM synchronization.
  */
+/**
+ * Cap on the public-communities map.
+ *
+ * Belgium is nowhere near this many energy communities, so it is a runaway
+ * guard rather than a product limit — but it keeps the response bounded if the
+ * definition of "public" ever loosens.
+ */
+const PUBLIC_COMMUNITY_MAP_LIMIT = 500;
+
 @injectable()
 export class CommunityService implements ICommunityService {
   constructor(
@@ -77,6 +88,32 @@ export class CommunityService implements ICommunityService {
     return [return_values, { page: query.page, limit: query.limit, total, total_pages }];
   }
 
+  async getPublicCommunitiesMap(query: CommunityMapQuery): Promise<PublicCommunityMapDTO[]> {
+    const rows = await this.community_repository.getPublicCommunitiesMap(query, PUBLIC_COMMUNITY_MAP_LIMIT);
+
+    return rows.map((row) => {
+      // array_agg over a LEFT JOIN miss yields [null], not []. Stripping it here
+      // rather than in SQL keeps the aggregate readable.
+      const nis_codes = (row.nis_codes ?? []).filter((code): code is number => typeof code === "number");
+
+      if (nis_codes.length === 0) {
+        logger.warn(
+          { operation: "getPublicCommunitiesMap", communityId: row.id },
+          "Public community has no municipality — it will render with an empty zone",
+        );
+      }
+
+      return {
+        id: row.id,
+        name: row.name,
+        regulator: row.regulator,
+        nis_codes,
+        // node-postgres returns COUNT() as a string.
+        public_operations_count: Number(row.public_operations_count),
+      };
+    });
+  }
+
   async getCommunityById(id: number): Promise<CommunityDetailDTO> {
     const result = await this.community_repository.getCommunityById(id);
     if (!result) {
@@ -104,10 +141,10 @@ export class CommunityService implements ICommunityService {
    * reads are not audited anywhere in this service.
    */
   async getDashboard(): Promise<CommunityDashboardDTO> {
-    // Local civil date, not `new Date().toISOString()` — the UTC date disagrees
-    // with the local one for hours around midnight and would flip the meter and
-    // key validity windows a day early.
-    const as_of = localTodayISO();
+    // Belgian civil date, not `new Date().toISOString()` — the UTC date disagrees
+    // with it for hours around midnight and would flip the meter and key
+    // validity windows a day early.
+    const as_of = appTodayISO();
 
     const [row, operations_without_valid_key] = await Promise.all([
       this.community_repository.getDashboardCounts(as_of),

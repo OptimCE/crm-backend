@@ -18,6 +18,8 @@ import {
   MyCommunityDTO,
   PatchRoleUserDTO,
   PublicCommunityDTO,
+  PublicCommunityMapDTO,
+  CommunityMapQuery,
   UpdateCommunityDTO,
   UsersCommunityDTO,
 } from "./community.dtos.js";
@@ -62,6 +64,23 @@ export class CommunityController {
     const [result, pagination] = await this.communityService.getAllPublicCommunities(queryObject);
     logger.info("All communities list successfully retrieved");
     res.status(200).json(new ApiResponsePaginated<PublicCommunityDTO[]>(result, pagination, SUCCESS));
+  }
+
+  /**
+   * Every public community as a map zone.
+   *
+   * A separate endpoint rather than a mode on getAllPublicCommunities: that one
+   * is paginated and presigns one logo per row, and doing either on a whole-set
+   * map payload is waste. Cached with scope "none" — the answer is identical
+   * for every user and carries no tenant data.
+   */
+  @communityControllerTraceDecorator.traceSpan("getPublicCommunitiesMap", { url: "/communities/map", method: "get" })
+  @Cache(cacheKey("communities:map", "none", (req) => JSON.stringify(req.query)), 300)
+  async getPublicCommunitiesMap(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const queryObject = await validateDto(CommunityMapQuery, req.query);
+    const result = await this.communityService.getPublicCommunitiesMap(queryObject);
+    logger.info({ communities: result.length }, "Public communities map successfully retrieved");
+    res.status(200).json(new ApiResponse<PublicCommunityMapDTO[]>(result, SUCCESS));
   }
 
   @communityControllerTraceDecorator.traceSpan("getCommunityById", { url: "/communities/:id", method: "get" })

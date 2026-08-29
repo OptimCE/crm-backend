@@ -97,6 +97,41 @@ export const MeParameters = {
 };
 
 export const MeResponses = {
+  MeMetersMapSuccess: {
+    description: "Plottable meters owned by this user, plus the coverage counters",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/MeterMapDTO" },
+        },
+        example: {
+          error_code: 0,
+          data: {
+            points: [
+              {
+                EAN: "541448800000000000",
+                latitude: 50.8467,
+                longitude: 4.3525,
+                geo_precision: 2,
+                status: 1,
+                injection_status: null,
+                holder_name: "Dupont SPRL",
+                sharing_operation_id: 1,
+                sharing_operation_name: "Partage Nord",
+                community_name: "Communaute Test",
+              },
+            ],
+            total_matching: 3,
+            total_plottable: 2,
+            missing_coordinates: 1,
+            truncated: false,
+            cap: 2000,
+          },
+        },
+      },
+    },
+  },
   MeDocumentsListSuccess: {
     description: "Successful list of documents for the authenticated user",
     content: {

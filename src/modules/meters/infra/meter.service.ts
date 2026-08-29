@@ -8,6 +8,8 @@ import {
   DeleteFutureMeterDataDTO,
   MeterConsumptionDTO,
   MeterConsumptionQuery,
+  MeterMapDTO,
+  MeterMapQuery,
   MeterPartialQuery,
   MetersDTO,
   PartialMeterDTO,
@@ -16,7 +18,7 @@ import {
 } from "../api/meter.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 import { Meter } from "../domain/meter.models.js";
-import { toMeterConsumptionDTO, toMeterDTO, toMeterPartialDTO } from "../shared/to_dto.js";
+import { toMeterConsumptionDTO, toMeterDTO, toMeterMapPointDTO, toMeterPartialDTO } from "../shared/to_dto.js";
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import * as xlsx from "xlsx";
@@ -28,7 +30,9 @@ import { Member } from "../../members/domain/member.models.js";
 import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
-import { MeterDataStatus } from "../shared/meter.types.js";
+import { METER_MAP_MAX_POINTS, MeterDataStatus } from "../shared/meter.types.js";
+import type { IGeocodingService } from "../../geocoding/domain/i-geocoding.service.js";
+import { toGeocodeRequest } from "../../geocoding/infra/geocoding.service.js";
 
 /**
  * Service implementation for managing meters.
@@ -40,6 +44,7 @@ export class MeterService implements IMeterService {
     @inject("MeterRepository") private meterRepository: IMeterRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
+    @inject("GeocodingService") private readonly geocodingService: IGeocodingService,
   ) {}
 
   /**
@@ -60,7 +65,7 @@ export class MeterService implements IMeterService {
 
     try {
       // 2. Create Physical Meter & Address
-      await this.meterRepository.createMeter(new_meter, query_runner);
+      const created = await this.meterRepository.createMeter(new_meter, query_runner);
 
       // 3. Add Initial Configuration (MeterData)
       // We map the flat DTO structure to the entity structure expected by addMeterData
@@ -101,6 +106,17 @@ export class MeterService implements IMeterService {
             member_id: new_meter.initial_data.member_id ?? null,
           },
         },
+        query_runner,
+      );
+
+      // 4. Put the meter on the map. Best-effort by contract: the "inline"
+      // chain never leaves the process, the service swallows its own failures,
+      // and the coordinate write is wrapped in a SAVEPOINT — so nothing here
+      // can cost the caller their meter.
+      await this.geocodingService.geocodeAddress(
+        created.address.id,
+        toGeocodeRequest(created.address),
+        "inline",
         query_runner,
       );
     } catch (err) {
@@ -209,6 +225,25 @@ export class MeterService implements IMeterService {
     const return_values = values.map((value) => toMeterPartialDTO(value));
     const total_pages = Math.ceil(total / query.limit);
     return [return_values, { page: query.page, limit: query.limit, total: total, total_pages: total_pages }];
+  }
+
+  async getMetersMap(query: MeterMapQuery): Promise<MeterMapDTO> {
+    const cap = METER_MAP_MAX_POINTS;
+    const [values, total_plottable, total_matching] = await this.meterRepository.getMetersMap(query, cap);
+
+    // The repository fetched cap+1 precisely so this comparison is possible
+    // without a second COUNT.
+    const truncated = values.length > cap;
+    const points = (truncated ? values.slice(0, cap) : values).map((value) => toMeterMapPointDTO(value));
+
+    return {
+      points,
+      total_matching,
+      total_plottable,
+      missing_coordinates: Math.max(0, total_matching - total_plottable),
+      truncated,
+      cap,
+    };
   }
 
   /**
@@ -367,7 +402,7 @@ export class MeterService implements IMeterService {
   @Transactional()
   async updateMeter(updated_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<void> {
     try {
-      const updated_result = await this.meterRepository.updateMeter(updated_meter, query_runner);
+      const { result: updated_result, address_id } = await this.meterRepository.updateMeter(updated_meter, query_runner);
       if (updated_result.affected !== 1) {
         logger.error({ operation: "updateMeter" }, "Failed to update meter");
         throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
@@ -386,6 +421,11 @@ export class MeterService implements IMeterService {
         },
         query_runner,
       );
+
+      // An update always writes a NEW address row, so the coordinate has to be
+      // resolved again — the old row keeps its own and is left orphaned, which
+      // is pre-existing behaviour (see the TODO in address.repository.ts).
+      await this.geocodingService.geocodeAddress(address_id, toGeocodeRequest(updated_meter.address), "inline", query_runner);
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
