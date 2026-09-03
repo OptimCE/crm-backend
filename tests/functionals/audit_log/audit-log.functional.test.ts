@@ -80,16 +80,23 @@ async function runInContext(
   const mw = contextMiddleware();
   const req = { headers } as unknown as Request;
   await new Promise<void>((resolve, reject) => {
-    mw(req, {} as Response, ((): NextFunction => {
-      return ((): void => {
-        fn().then(resolve, reject);
-      }) as unknown as NextFunction;
-    })());
+    mw(
+      req,
+      {} as Response,
+      ((): NextFunction => {
+        return ((): void => {
+          fn().then(resolve, reject);
+        }) as unknown as NextFunction;
+      })(),
+    );
   });
 }
 
 async function getAuditService(): Promise<{
-  log: (entry: { action: string; entity_type: string; entity_id?: string; payload?: Record<string, unknown>; source?: string }, qr?: QueryRunner) => Promise<void>;
+  log: (
+    entry: { action: string; entity_type: string; entity_id?: string; payload?: Record<string, unknown>; source?: string },
+    qr?: QueryRunner,
+  ) => Promise<void>;
 }> {
   // Ensure DI bindings are loaded.
   await import("../../../src/container/binding.js");
@@ -128,15 +135,13 @@ describe("(Functional) Audit Log Module", () => {
   describe("AuditLogService.log()", () => {
     it("auto-resolves community, user_id and user_email from request context", async () => {
       const service = await getAuditService();
-      await runInContext(
-        { "x-user-id": "auth0|admin", "x-community-id": AUTH_COMMUNITY_1, "x-user-orgs": ORGS_ADMIN },
-        () =>
-          service.log({
-            action: "crm.member.invited",
-            entity_type: "member",
-            entity_id: "42",
-            payload: { ean: "BE-1234" },
-          }),
+      await runInContext({ "x-user-id": "auth0|admin", "x-community-id": AUTH_COMMUNITY_1, "x-user-orgs": ORGS_ADMIN }, () =>
+        service.log({
+          action: "crm.member.invited",
+          entity_type: "member",
+          entity_id: "42",
+          payload: { ean: "BE-1234" },
+        }),
       );
 
       expect(await countAuditRows()).toBe(1);
@@ -199,13 +204,8 @@ describe("(Functional) Audit Log Module", () => {
       await qr.connect();
       await qr.startTransaction();
       try {
-        await runInContext(
-          { "x-user-id": "auth0|admin", "x-community-id": AUTH_COMMUNITY_1, "x-user-orgs": ORGS_ADMIN },
-          () =>
-            service.log(
-              { action: "crm.member.created", entity_type: "member", entity_id: "99", payload: { foo: "bar" } },
-              qr,
-            ),
+        await runInContext({ "x-user-id": "auth0|admin", "x-community-id": AUTH_COMMUNITY_1, "x-user-orgs": ORGS_ADMIN }, () =>
+          service.log({ action: "crm.member.created", entity_type: "member", entity_id: "99", payload: { foo: "bar" } }, qr),
         );
       } finally {
         await qr.rollbackTransaction();
@@ -312,10 +312,14 @@ describe("(Functional) Audit Log Module", () => {
         "x-user-orgs": ORGS_ADMIN,
       };
 
-      const after = await request(app).get(`/audit-logs/?from=${encodeURIComponent("2026-03-01T00:00:00Z")}`).set(headers);
+      const after = await request(app)
+        .get(`/audit-logs/?from=${encodeURIComponent("2026-03-01T00:00:00Z")}`)
+        .set(headers);
       expect(after.body.pagination.total).toBe(1);
 
-      const before = await request(app).get(`/audit-logs/?to=${encodeURIComponent("2026-03-01T00:00:00Z")}`).set(headers);
+      const before = await request(app)
+        .get(`/audit-logs/?to=${encodeURIComponent("2026-03-01T00:00:00Z")}`)
+        .set(headers);
       expect(before.body.pagination.total).toBe(1);
     });
 
@@ -366,7 +370,7 @@ describe("(Functional) Audit Log Module", () => {
           entity_id: "1",
           user_id: ADMIN_USER_ID,
           user_email: ADMIN_USER_EMAIL,
-          payload: { with: "quotes \"and\" newlines\nhere", nested: { ok: true } },
+          payload: { with: 'quotes "and" newlines\nhere', nested: { ok: true } },
         },
         { id_community: INTERNAL_COMMUNITY_1, action: "crm.meter.created", entity_type: "meter", entity_id: "9" },
         { id_community: INTERNAL_COMMUNITY_2, action: "crm.member.invited", entity_type: "member", entity_id: "x" },

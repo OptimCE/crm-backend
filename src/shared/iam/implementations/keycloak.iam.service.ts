@@ -100,10 +100,7 @@ export class KeycloakIamService implements IIamService {
 
       for (const roleName of roles) {
         try {
-          await this.kcAdminClient.groups.createChildGroup(
-            { id: communityId, realm: this.realm },
-            { name: roleName.toString() },
-          );
+          await this.kcAdminClient.groups.createChildGroup({ id: communityId, realm: this.realm }, { name: roleName.toString() });
         } catch (error) {
           logger.error({ operation: "createCommunity", error: error }, "Error while trying to add child group into keycloak");
           if (!isHttpError(error) || error.response.status !== 409) {

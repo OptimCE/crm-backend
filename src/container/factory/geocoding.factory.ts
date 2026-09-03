@@ -10,8 +10,13 @@ import { MunicipalityCentroidGeocoder } from "../../modules/geocoding/infra/muni
 import { WalloniaIcarGeocoder } from "../../modules/geocoding/infra/wallonia-icar.geocoder.js";
 import { FlandersBrusselsGeocoder } from "../../modules/geocoding/infra/flanders-brussels.geocoder.js";
 import { CompositeGeocoder } from "../../modules/geocoding/infra/composite.geocoder.js";
+import { BestAddressClient } from "../../modules/geocoding/infra/best-address.client.js";
+import { BestAddressGeocoder } from "../../modules/geocoding/infra/best-address.geocoder.js";
+import { BestAddressSuggester } from "../../modules/geocoding/infra/best-address.suggester.js";
+import { ADDRESS_SUGGESTER_TOKEN, type IAddressSuggester } from "../../modules/geocoding/domain/i-address-suggester.js";
 
 const DEFAULT_TIMEOUT_MS = 2000;
+const DEFAULT_BEST_TIMEOUT_MS = 1500;
 
 /**
  * Binds the two geocoder chains.
@@ -45,24 +50,65 @@ export function initializeGeocodingService(): void {
   const manual = new ManualGeocoder();
   const centroid = new MunicipalityCentroidGeocoder(municipalityRepository);
 
-  // Stops as soon as it has a MUNICIPALITY-or-better point, i.e. immediately.
-  container
-    .bind<IGeocoder>(GEOCODER_TOKENS.inline)
-    .toConstantValue(new CompositeGeocoder([manual, centroid], AddressGeoPrecision.MUNICIPALITY));
+  // The BeSt Address register, if a box is configured. It is the ONE network
+  // adapter allowed on the inline chain: it is a container we own on the
+  // `backend` network answering an indexed lookup in tens of milliseconds, not
+  // a third party over the internet. Everything else about the inline chain's
+  // 3000 ms budget still holds.
+  const bestUrl: string = config.has("geocoding.best.base_url") ? config.get<string>("geocoding.best.base_url") : "";
+  const bestTimeout: number = config.has("geocoding.best.timeout_ms") ? config.get<number>("geocoding.best.timeout_ms") : DEFAULT_BEST_TIMEOUT_MS;
+  const bestClient = bestUrl ? new BestAddressClient(bestUrl, bestTimeout) : null;
+  const best = bestClient ? new BestAddressGeocoder(bestClient) : null;
+
+  // Ordered best-first. `manual` is a hand-placed pin and outranks everything;
+  // the register is the best automatic answer; the centroid is the floor.
+  const inlineChain: IGeocoder[] = best ? [manual, best, centroid] : [manual, centroid];
+
+  // Stops at ROOFTOP now rather than MUNICIPALITY: with the register present
+  // there is a real rooftop answer worth waiting for on the write path, which
+  // is what upgrades write-time pins from a commune centre to a building.
+  container.bind<IGeocoder>(GEOCODER_TOKENS.inline).toConstantValue(new CompositeGeocoder(inlineChain, AddressGeoPrecision.ROOFTOP));
 
   const remote = mode.toUpperCase() === "REMOTE";
   const fullChain: IGeocoder[] = remote
     ? [
         manual,
+        ...(best ? [best] : []),
         new WalloniaIcarGeocoder(municipalityRepository, config.get<string>("geocoding.wallonia.base_url"), timeout),
         new FlandersBrusselsGeocoder(municipalityRepository, config.get<string>("geocoding.flanders.base_url"), timeout),
         centroid,
       ]
-    : [manual, centroid];
+    : best
+      ? [manual, best, centroid]
+      : [manual, centroid];
 
   // Stops at ROOFTOP: a street-level hit is still worth trying the next adapter
   // for, a rooftop hit is not.
   container.bind<IGeocoder>(GEOCODER_TOKENS.full).toConstantValue(new CompositeGeocoder(fullChain, AddressGeoPrecision.ROOFTOP));
 
-  logger.info({ mode: mode.toUpperCase(), remote }, "Geocoding adapters registered");
+  // The picker. Bound only when a register is configured; unbound means the
+  // suggest endpoint answers with an empty list and every form keeps working
+  // exactly as it does today.
+  if (bestClient) {
+    container.bind<IAddressSuggester>(ADDRESS_SUGGESTER_TOKEN).toConstantValue(new BestAddressSuggester(bestClient, municipalityRepository));
+
+    // The first /addresses read after the container starts took 56 SECONDS on a
+    // cold box, and 0.09 s thereafter — Postgres paging the address table in.
+    // With KrakenD's 3000 ms cap, an un-warmed box means the first person to
+    // type an address gets a 504. Pay it at boot instead, in the background:
+    // nothing here may delay or fail startup.
+    void bestClient
+      .warm()
+      .then(() => {
+        logger.info({ operation: "bestAddress:warm" }, "BeSt Address register warmed");
+      })
+      .catch((err: unknown) => {
+        logger.warn(
+          { operation: "bestAddress:warm", error: err },
+          "BeSt Address register not reachable at boot - suggestions will retry per request",
+        );
+      });
+  }
+
+  logger.info({ mode: mode.toUpperCase(), remote, best_address: bestClient !== null }, "Geocoding adapters registered");
 }

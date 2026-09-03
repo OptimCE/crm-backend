@@ -233,10 +233,7 @@ export class MemberRepository implements IMemberRepository {
     return manager.save(new_manager);
   }
 
-  async getMemberNotificationAudience(
-    id_member: number,
-    query_runner?: QueryRunner,
-  ): Promise<{ communityId: number; userIds: number[] } | null> {
+  async getMemberNotificationAudience(id_member: number, query_runner?: QueryRunner): Promise<{ communityId: number; userIds: number[] } | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
     // Reuses getFullMember, which already loads the community and both sub-entity

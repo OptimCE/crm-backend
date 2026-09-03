@@ -71,10 +71,7 @@ export function toCommunityDetailDTO(community: Community, member_count: number,
   };
 }
 
-export function toMyCommunityDTO(
-  community: CommunityUser,
-  logo_presigned_url: string | null = null,
-): MyCommunityDTO {
+export function toMyCommunityDTO(community: CommunityUser, logo_presigned_url: string | null = null): MyCommunityDTO {
   return {
     id: community.id_community,
     auth_community_id: community.community.auth_community_id,

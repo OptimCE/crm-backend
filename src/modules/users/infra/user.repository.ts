@@ -41,8 +41,7 @@ export class UserRepository implements IUserRepository {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     return manager.findOneBy(User, {
       email: email,
-    }
-    );
+    });
   }
 
   async updateInvitations(user: User, query_runner?: QueryRunner): Promise<void> {

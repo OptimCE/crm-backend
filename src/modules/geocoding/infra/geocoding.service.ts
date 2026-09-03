@@ -11,9 +11,12 @@ import logger from "../../../shared/monitor/logger.js";
 import { withSavepoint } from "../../../shared/transactional/savepoint.js";
 import type { IGeocodingService } from "../domain/i-geocoding.service.js";
 import type { IGeocoder } from "../domain/i-geocoder.js";
+import type { AddressSuggestion } from "../domain/address-suggestion.types.js";
+import { ADDRESS_SUGGESTER_TOKEN, type IAddressSuggester } from "../domain/i-address-suggester.js";
+import { getCachedSuggestions, setCachedSuggestions, suggestionCacheKey } from "./suggestion.cache.js";
 import { GEOCODER_TOKENS, type GeocodeRequest, type GeocoderChain } from "../domain/geocoding.types.js";
 import { GEOCODING_ERRORS } from "../shared/geocoding.errors.js";
-import type { GeocodeBackfillResultDTO } from "../api/geocoding.dtos.js";
+import type { AddressPreviewDTO, GeocodeBackfillResultDTO } from "../api/geocoding.dtos.js";
 
 @injectable()
 export class GeocodingService implements IGeocodingService {
@@ -39,11 +42,36 @@ export class GeocodingService implements IGeocodingService {
     }
   }
 
+  /** Same lazy resolution as {@link geocoder}, for the same reason. */
+  private suggester(): IAddressSuggester | null {
+    try {
+      return container.isBound(ADDRESS_SUGGESTER_TOKEN) ? container.get<IAddressSuggester>(ADDRESS_SUGGESTER_TOKEN) : null;
+    } catch {
+      return null;
+    }
+  }
+
   private cache(): ICacheService | null {
     try {
       return container.isBound("CacheService") ? container.get<ICacheService>("CacheService") : null;
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Drop every tenant's meters-map cache.
+   *
+   * By pattern rather than through @InvalidateCache: the batch endpoints run as
+   * one admin with one community in context, so the decorator could only ever
+   * reach that tenant's keys — and a batch changes coordinates across all of
+   * them.
+   */
+  private async sweepMapCache(): Promise<void> {
+    try {
+      await this.cache()?.delByPattern("meters:map*");
+    } catch (err) {
+      logger.warn({ operation: "sweepMapCache", error: err }, "Could not invalidate the meters map cache");
     }
   }
 
@@ -147,11 +175,7 @@ export class GeocodingService implements IGeocodingService {
     // that tenant keys. Sweeping by pattern directly is the only correct option
     // here, and it is why the controller carries no @InvalidateCache.
     if (succeeded > 0) {
-      try {
-        await this.cache()?.delByPattern("meters:map*");
-      } catch (err) {
-        logger.warn({ operation: "runBackfill:invalidate", error: err }, "Could not invalidate the meters map cache");
-      }
+      await this.sweepMapCache();
     }
 
     let remaining: number;
@@ -165,12 +189,68 @@ export class GeocodingService implements IGeocodingService {
 
     return { attempted: pending.length, succeeded, not_found, errored, remaining };
   }
+
+  async suggest(query: string, limit: number, lang: string): Promise<AddressSuggestion[]> {
+    const suggester = this.suggester();
+    if (!suggester) {
+      // Unbound == the feature is off. An empty list, not a 503: the picker is
+      // advisory and the six forms it sits in stay usable without it.
+      return [];
+    }
+
+    const key = suggestionCacheKey(query, limit, lang);
+    const hit = getCachedSuggestions(key);
+    if (hit) {
+      return hit;
+    }
+
+    try {
+      const results = await suggester.suggest(query, limit, lang);
+      setCachedSuggestions(key, results);
+      return results;
+    } catch (err) {
+      // Never propagate. This runs on every keystroke behind a 250 ms debounce,
+      // so a provider having a bad minute must degrade to "no suggestions" —
+      // which is exactly how the form behaves with the feature switched off.
+      logger.warn({ operation: "suggestAddress", suggester: suggester.id, error: err }, "Address suggestion failed - returning none");
+      return [];
+    }
+  }
+
+  async preview(request: GeocodeRequest, lang: string): Promise<AddressPreviewDTO> {
+    const geocoder = this.geocoder("inline");
+    let result = null;
+    if (geocoder) {
+      try {
+        result = await geocoder.geocode(request);
+      } catch (err) {
+        // Same posture as the rest of this service: a failure means "we cannot
+        // say", and the form must still be submittable.
+        logger.warn({ operation: "previewAddress", error: err }, "Address preview failed");
+      }
+    }
+
+    // Offer a way out of the warning, not just the warning. Only worth the
+    // round trip when nothing was found - a located address needs no rescue.
+    const suggestions = result
+      ? []
+      : await this.suggest([request.street, request.number, request.postcode, request.city].filter(Boolean).join(" "), 5, lang);
+
+    return {
+      found: result !== null,
+      latitude: result?.latitude,
+      longitude: result?.longitude,
+      precision: result?.precision,
+      source: result?.source,
+      suggestions,
+    };
+  }
 }
 
 /** Builds the geocoder input from a stored or submitted address. */
 export function toGeocodeRequest(address: {
   street: string;
-  number: number;
+  number: string;
   postcode: string;
   city: string;
   supplement?: string | null;

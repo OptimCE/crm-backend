@@ -14,6 +14,7 @@ import {
   MetersDTO,
   PartialMeterDTO,
   PatchMeterDataDTO,
+  UpdateMeterAddressDTO,
   UpdateMeterDTO,
 } from "../api/meter.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
@@ -113,12 +114,7 @@ export class MeterService implements IMeterService {
       // chain never leaves the process, the service swallows its own failures,
       // and the coordinate write is wrapped in a SAVEPOINT — so nothing here
       // can cost the caller their meter.
-      await this.geocodingService.geocodeAddress(
-        created.address.id,
-        toGeocodeRequest(created.address),
-        "inline",
-        query_runner,
-      );
+      await this.geocodingService.geocodeAddress(created.address.id, toGeocodeRequest(created.address), "inline", query_runner);
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -229,7 +225,7 @@ export class MeterService implements IMeterService {
 
   async getMetersMap(query: MeterMapQuery): Promise<MeterMapDTO> {
     const cap = METER_MAP_MAX_POINTS;
-    const [values, total_plottable, total_matching] = await this.meterRepository.getMetersMap(query, cap);
+    const [values, total_plottable, total_matching, approximate] = await this.meterRepository.getMetersMap(query, cap);
 
     // The repository fetched cap+1 precisely so this comparison is possible
     // without a second COUNT.
@@ -241,6 +237,7 @@ export class MeterService implements IMeterService {
       total_matching,
       total_plottable,
       missing_coordinates: Math.max(0, total_matching - total_plottable),
+      approximate,
       truncated,
       cap,
     };
@@ -399,6 +396,47 @@ export class MeterService implements IMeterService {
     );
   }
 
+  /**
+   * Repair a meter's address, leaving its configuration alone.
+   *
+   * Mirrors {@link updateMeter}'s address half. Like it, this writes a NEW
+   * address row rather than editing the existing one — an address is shared by
+   * every meter and member at it, so editing in place would silently move all
+   * of them.
+   */
+  @Transactional()
+  async updateMeterAddress(update: UpdateMeterAddressDTO, query_runner?: QueryRunner): Promise<void> {
+    try {
+      const { result, address_id } = await this.meterRepository.updateMeterAddress(update.EAN, update.address, query_runner);
+      if (result.affected !== 1) {
+        logger.error({ operation: "updateMeterAddress", EAN: update.EAN }, "Failed to update the meter address");
+        throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
+      }
+
+      await this.auditLogService.log(
+        {
+          action: AUDIT_ACTIONS.METER_UPDATED,
+          entity_type: "meter",
+          entity_id: update.EAN,
+          payload: { EAN: update.EAN, changed_fields: ["address"] },
+        },
+        query_runner,
+      );
+
+      // The point of the repair: the corrected address reaches the map on this
+      // request rather than waiting for the next admin backfill. Best-effort by
+      // contract — the inline chain never leaves the process and its write is
+      // wrapped in a SAVEPOINT, so it cannot cost the caller their fix.
+      await this.geocodingService.geocodeAddress(address_id, toGeocodeRequest(update.address), "inline", query_runner);
+    } catch (err) {
+      if (isAppErrorLike(err)) {
+        throw err;
+      }
+      logger.error({ operation: "updateMeterAddress", error: err }, "Failed to update the meter address");
+      throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
+    }
+  }
+
   @Transactional()
   async updateMeter(updated_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<void> {
     try {
@@ -414,9 +452,7 @@ export class MeterService implements IMeterService {
           entity_id: updated_meter.EAN,
           payload: {
             EAN: updated_meter.EAN,
-            changed_fields: (Object.keys(updated_meter) as (keyof UpdateMeterDTO)[]).filter(
-              (k) => k !== "EAN" && updated_meter[k] !== undefined,
-            ),
+            changed_fields: (Object.keys(updated_meter) as (keyof UpdateMeterDTO)[]).filter((k) => k !== "EAN" && updated_meter[k] !== undefined),
           },
         },
         query_runner,

@@ -45,16 +45,7 @@ describe("(Unit) Document Module", () => {
 
     it.each(testCasesDownload)(
       "GET /documents/:member_id/:document_id : $description",
-      async ({
-        id_user,
-        id_community,
-        orgs,
-        document_id,
-        status_code,
-        expected_error_code,
-        expected_data,
-        mocks,
-      }) => {
+      async ({ id_user, id_community, orgs, document_id, status_code, expected_error_code, expected_data, mocks }) => {
         if (mocks?.documentRepo) await mockDocumentRepositoryModule(mocks.documentRepo);
         if (mocks?.storageService) await mockStorageServiceModule(mocks.storageService);
 

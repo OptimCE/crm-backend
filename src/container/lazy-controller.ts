@@ -13,7 +13,8 @@ import { container } from "./di-container.js";
  */
 export function lazyController<T extends object>(token: unknown): T {
   return new Proxy({} as T, {
-    get: (_target, prop) =>
+    get:
+      (_target, prop) =>
       (...args: unknown[]): unknown =>
         (container.get<T>(token as never) as unknown as Record<PropertyKey, (...a: unknown[]) => unknown>)[prop as PropertyKey](...args),
   });

@@ -41,11 +41,15 @@ async function runInContext(headers: Record<string, string>, fn: () => Promise<v
   const mw = contextMiddleware();
   const req = { headers } as unknown as Request;
   await new Promise<void>((resolve, reject) => {
-    mw(req, {} as Response, ((): NextFunction => {
-      return ((): void => {
-        fn().then(resolve, reject);
-      }) as unknown as NextFunction;
-    })());
+    mw(
+      req,
+      {} as Response,
+      ((): NextFunction => {
+        return ((): void => {
+          fn().then(resolve, reject);
+        }) as unknown as NextFunction;
+      })(),
+    );
   });
 }
 
@@ -106,9 +110,7 @@ describe("(Functional) Notification producer contract", () => {
     // recipient must be able to mute it once preferences ship.
     const calls = await spyOnPublish();
     const service = await getService<IMemberService>("MemberService");
-    await runInContext(ADMIN_CTX, () =>
-      service.updateMember({ id: MEMBER_1_ID, phone_number: "+32470000000" } as UpdateMemberDTO),
-    );
+    await runInContext(ADMIN_CTX, () => service.updateMember({ id: MEMBER_1_ID, phone_number: "+32470000000" } as UpdateMemberDTO));
 
     expect(calls).toHaveLength(1);
     expect(calls[0].type).toBe(NOTIFICATION_TYPES.MEMBER_UPDATED);

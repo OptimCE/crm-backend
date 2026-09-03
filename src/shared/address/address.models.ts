@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Community } from "../../modules/communities/domain/community.models.js";
 import { AddressGeocodeStatus, AddressGeoPrecision } from "./address.types.js";
-import { numericToNumber } from "./numeric.transformer.js";
+import { houseNumberToString, numericToNumber } from "./numeric.transformer.js";
 type CommunityType = Community;
 /**
  * Entity representing a physical address.
@@ -14,8 +14,18 @@ export class Address {
   @Column({ type: "varchar", length: 255 })
   street!: string;
 
-  @Column({ type: "int" })
-  number!: number;
+  /**
+   * House number. A STRING, because a Belgian house number is not a number:
+   * `12A`, `12-14`, `1/3`, `12 bis` are all real BeSt Address entries.
+   *
+   * The declared type runs ahead of the database on purpose. Until
+   * `database_script/2026-08-30_address_number_country_best.sql` is applied the
+   * column is still `int`; the transformer stringifies on read, and a
+   * digits-only string parameter is accepted by an `int` column on write, so
+   * this build is correct against both schemas.
+   */
+  @Column({ type: "varchar", length: 32, transformer: houseNumberToString })
+  number!: string;
 
   @Column({ type: "varchar", length: 255 })
   postcode!: string;
@@ -25,6 +35,17 @@ export class Address {
 
   @Column({ type: "varchar", length: 255 })
   city!: string;
+
+  /** ISO-3166-1 alpha-2. The schema had no country at all before 2026-08-30. */
+  @Column({ type: "char", length: 2, default: "BE" })
+  country!: string;
+
+  /**
+   * The BeSt Address register's stable object id for this address, e.g.
+   * `geodata.wallonie.be/id/Address/1948446/2`. Null until matched.
+   */
+  @Column({ name: "best_address_id", type: "varchar", length: 64, nullable: true })
+  best_address_id!: string | null;
 
   /**
    * WGS84 latitude. Null until the address has been geocoded.

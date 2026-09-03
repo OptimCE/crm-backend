@@ -22,6 +22,7 @@ import {
   MetersDTO,
   PartialMeterDTO,
   PatchMeterDataDTO,
+  UpdateMeterAddressDTO,
   UpdateMeterDTO,
 } from "./meter.dtos.js";
 const meterControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
@@ -130,15 +131,26 @@ export class MeterController {
    * @param _next - Express next middleware.
    */
   @meterControllerTraceDecorator.traceSpan("updateMeter", { url: "/meters/", method: "put" })
-  @InvalidateCache([
-    cachePattern("meters:list", "community"),
-    cachePattern("meters:map", "community"),
-    cachePattern("meters:detail", "community"),
-  ])
+  @InvalidateCache([cachePattern("meters:list", "community"), cachePattern("meters:map", "community"), cachePattern("meters:detail", "community")])
   async updateMeter(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_meter = await validateDto(UpdateMeterDTO, req.body);
     await this.meterService.updateMeter(updated_meter);
     logger.info("Meter updated");
+    res.status(200).json(new ApiResponse<string>("success", SUCCESS));
+  }
+
+  /**
+   * Repairs a meter's address without touching its configuration.
+   *
+   * Same cache invalidation as a full update: the address is on the list row,
+   * the map point and the detail view.
+   */
+  @meterControllerTraceDecorator.traceSpan("updateMeterAddress", { url: "/meters/address", method: "patch" })
+  @InvalidateCache([cachePattern("meters:list", "community"), cachePattern("meters:map", "community"), cachePattern("meters:detail", "community")])
+  async updateMeterAddress(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const update = await validateDto(UpdateMeterAddressDTO, req.body);
+    await this.meterService.updateMeterAddress(update);
+    logger.info({ operation: "updateMeterAddress", EAN: update.EAN }, "Meter address repaired");
     res.status(200).json(new ApiResponse<string>("success", SUCCESS));
   }
 

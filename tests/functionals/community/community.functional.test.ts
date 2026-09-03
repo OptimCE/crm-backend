@@ -33,11 +33,7 @@ describe("(Functional) Community Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
 
-        const response = await request(app)
-          .get("/communities/")
-          .query(query)
-          .set("x-user-id", "auth0|admin")
-          .set("x-user-orgs", orgs);
+        const response = await request(app).get("/communities/").query(query).set("x-user-id", "auth0|admin").set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);

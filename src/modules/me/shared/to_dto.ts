@@ -388,11 +388,7 @@ function toKwh(value: string | number | null | undefined): number {
   return Math.round(toNumber(value) * 1e3) / 1e3;
 }
 
-export function toMeEnergySummaryDTO(
-  period_start: string,
-  period_end: string,
-  rows: MeEnergyMeterRow[],
-): MeEnergySummaryDTO {
+export function toMeEnergySummaryDTO(period_start: string, period_end: string, rows: MeEnergyMeterRow[]): MeEnergySummaryDTO {
   const meters: MeEnergyMeterDTO[] = rows.map((row) => ({
     ean: row.ean,
     meter_number: row.meter_number,

@@ -463,7 +463,10 @@ export class SharingOperationService implements ISharingOperationService {
       );
     }
     try {
-      const created = await this.sharing_operationRepository.createSharingOperation({ ...new_sharing_operations, municipality_nis_codes: nis_codes }, query_runner);
+      const created = await this.sharing_operationRepository.createSharingOperation(
+        { ...new_sharing_operations, municipality_nis_codes: nis_codes },
+        query_runner,
+      );
       await this.auditLogService.log(
         {
           action: AUDIT_ACTIONS.SHARING_OPERATION_CREATED,
@@ -544,10 +547,7 @@ export class SharingOperationService implements ISharingOperationService {
     }
     if (dto.municipality_nis_codes !== undefined) {
       if (dto.municipality_nis_codes.length === 0 && sharingOp.is_public) {
-        logger.warn(
-          { operation: "updateSharingOperation", id_sharing },
-          "Refusing to clear municipalities on a public sharing operation",
-        );
+        logger.warn({ operation: "updateSharingOperation", id_sharing }, "Refusing to clear municipalities on a public sharing operation");
         throw new AppError(SHARING_OPERATION_ERRORS.UPDATE_SHARING_OPERATION.MUNICIPALITIES_REQUIRED_FOR_PUBLIC, 400);
       }
       if (dto.municipality_nis_codes.length > 0) {
@@ -560,11 +560,7 @@ export class SharingOperationService implements ISharingOperationService {
     }
     try {
       if (dto.name !== undefined || dto.type !== undefined) {
-        await this.sharing_operationRepository.updateSharingOperationFields(
-          id_sharing,
-          { name: dto.name, type: dto.type },
-          query_runner,
-        );
+        await this.sharing_operationRepository.updateSharingOperationFields(id_sharing, { name: dto.name, type: dto.type }, query_runner);
       }
       if (dto.municipality_nis_codes !== undefined) {
         await this.sharing_operationRepository.replaceMunicipalities(id_sharing, dto.municipality_nis_codes, query_runner);

@@ -1,10 +1,4 @@
-import type {
-  CommunityMapQuery,
-  CommunityQueryDTO,
-  CommunityUsersQueryDTO,
-  CreateCommunityDTO,
-  UpdateCommunityDTO,
-} from "../api/community.dtos.js";
+import type { CommunityMapQuery, CommunityQueryDTO, CommunityUsersQueryDTO, CreateCommunityDTO, UpdateCommunityDTO } from "../api/community.dtos.js";
 import type { QueryRunner } from "typeorm";
 import type { Community, CommunityUser } from "./community.models.js";
 import type { Role } from "../../../shared/dtos/role.js";

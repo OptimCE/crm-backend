@@ -23,10 +23,7 @@ async function sql(query: string, params: unknown[] = []): Promise<void> {
 
 async function linkUserToMember(auth_user_id: string, email: string, id_member: number): Promise<void> {
   await sql(`INSERT INTO app_user (email, first_name, last_name, auth_user_id) VALUES ($1, 'Test', 'User', $2)`, [email, auth_user_id]);
-  await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT id, $2 FROM app_user WHERE auth_user_id = $1`, [
-    auth_user_id,
-    id_member,
-  ]);
+  await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT id, $2 FROM app_user WHERE auth_user_id = $1`, [auth_user_id, id_member]);
 }
 
 /**
@@ -202,17 +199,13 @@ describe("(Functional) GET /me/allocation-shares", () => {
       await sql(`UPDATE iteration SET energy_allocated_percentage = 0.6 WHERE id = 1`);
       await sql(`DELETE FROM consumer WHERE name = 'Consumer 2'`);
       await sql(`UPDATE consumer SET name = $1, energy_allocated_percentage = 0.5 WHERE id_iteration = 1`, [EAN_ONE]);
-      await sql(
-        `INSERT INTO iteration (number, energy_allocated_percentage, id_key, id_community) VALUES (2, 0.4, 1, 1)`,
-      );
+      await sql(`INSERT INTO iteration (number, energy_allocated_percentage, id_key, id_community) VALUES (2, 0.4, 1, 1)`);
       await sql(
         `INSERT INTO consumer (name, energy_allocated_percentage, id_iteration, id_community)
          SELECT $1, 0.25, id, 1 FROM iteration WHERE id_key = 1 AND number = 2`,
         [EAN_ONE],
       );
-      await sql(
-        `INSERT INTO iteration (number, energy_allocated_percentage, id_key, id_community) VALUES (3, 0, 1, 1)`,
-      );
+      await sql(`INSERT INTO iteration (number, energy_allocated_percentage, id_key, id_community) VALUES (3, 0, 1, 1)`);
 
       const share = only(await getShares(AUTH_USER_MEMBER_1));
 
@@ -271,9 +264,7 @@ describe("(Functional) GET /me/allocation-shares", () => {
       // Member 1 is in community 1; member 3 is in community 2. One user, both.
       await sql(`UPDATE meter_data SET id_member = 3, id_sharing_operation = 3, id_community = 2 WHERE ean = $1`, [EAN_WIND_ALPHA]);
       await sql(`UPDATE meter SET id_community = 2 WHERE ean = $1`, [EAN_WIND_ALPHA]);
-      await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT id, 3 FROM app_user WHERE auth_user_id = $1`, [
-        AUTH_USER_MEMBER_1,
-      ]);
+      await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT id, 3 FROM app_user WHERE auth_user_id = $1`, [AUTH_USER_MEMBER_1]);
 
       const appModule = await import("../../../src/app.js");
       const response = await request(appModule.default).get("/me/allocation-shares").set("x-user-id", AUTH_USER_MEMBER_1);

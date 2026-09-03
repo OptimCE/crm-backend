@@ -147,10 +147,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     return [items, total];
   }
 
-  private async loadMunicipalitiesInto(
-    manager: SharingOperationRepository["dataSource"]["manager"],
-    operations: SharingOperation[],
-  ): Promise<void> {
+  private async loadMunicipalitiesInto(manager: SharingOperationRepository["dataSource"]["manager"], operations: SharingOperation[]): Promise<void> {
     if (operations.length === 0) return;
     const ids = operations.map((op) => op.id);
     const links = await manager.find(SharingOperationMunicipality, {
@@ -168,11 +165,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     }
   }
 
-  async updateSharingOperationFields(
-    id_sharing: number,
-    partial: { name?: string; type?: number },
-    query_runner?: QueryRunner,
-  ): Promise<number> {
+  async updateSharingOperationFields(id_sharing: number, partial: { name?: string; type?: number }, query_runner?: QueryRunner): Promise<number> {
     const updates: { name?: string; type?: number } = {};
     if (partial.name !== undefined) updates.name = partial.name;
     if (partial.type !== undefined) updates.type = partial.type;
@@ -246,10 +239,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
    * `2026-01-31 23:45` lands in `2026-01`. `to_char(date_trunc(...))` returns the
    * final `YYYY-MM` string straight from the DB, avoiding any JS timezone re-shift.
    */
-  getSharingOperationConsumptionCoverage(
-    id_sharing: number,
-    query_runner?: QueryRunner,
-  ): Promise<{ month: string; count: string }[]> {
+  getSharingOperationConsumptionCoverage(id_sharing: number, query_runner?: QueryRunner): Promise<{ month: string; count: string }[]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const qb = manager
       .createQueryBuilder(SharingOpConsumption, "consumption")
@@ -454,7 +444,12 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     { key: "street", apply: (qb, val) => qb.andWhere("address.street LIKE :street", { street: `%${val}%` }) },
     { key: "city", apply: (qb, val) => qb.andWhere("address.city LIKE :city", { city: `%${val}%` }) },
     { key: "postcode", apply: (qb, val) => qb.andWhere("address.postcode = :post", { post: val }) },
-    { key: "address_number", apply: (qb, val) => qb.andWhere("address.address_number = :an", { an: val }) },
+    // The query parameter is `address_number`; the Address property is `number`.
+    // TypeORM passes an unknown property path through verbatim, so
+    // "address.address_number" reached Postgres as a column that does not exist
+    // and turned every filtered request into a 500. Same fix as
+    // meters/infra/meter.repository.ts.
+    { key: "address_number", apply: (qb, val) => qb.andWhere("address.number = :an", { an: val }) },
     { key: "supplement", apply: (qb, val) => qb.andWhere("address.supplement LIKE :supp", { supp: `%${val}%` }) },
 
     // Active Meter Data Filters (Status, Holder, Sharing Op)

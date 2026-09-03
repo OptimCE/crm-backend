@@ -263,26 +263,28 @@ export class CommunityRepository implements ICommunityRepository {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const cid = await this.authContext.getInternalCommunityId(query_runner);
 
-    return manager
-      .createQueryBuilder(SharingOperation, "so")
-      .select("so.id", "id")
-      .addSelect("so.name", "name")
-      .where("so.id_community = :cid", { cid })
-      // Same predicate as the `operations_without_valid_key` counter above; the
-      // two must agree, which is why the count is the source of truth and this
-      // list is only the (capped) naming of it.
-      .andWhere(
-        `NOT EXISTS (
+    return (
+      manager
+        .createQueryBuilder(SharingOperation, "so")
+        .select("so.id", "id")
+        .addSelect("so.name", "name")
+        .where("so.id_community = :cid", { cid })
+        // Same predicate as the `operations_without_valid_key` counter above; the
+        // two must agree, which is why the count is the source of truth and this
+        // list is only the (capped) naming of it.
+        .andWhere(
+          `NOT EXISTS (
            SELECT 1 FROM sharing_operation_key sok
             WHERE sok.id_sharing_operation = so.id
               AND sok.status = :approved
               AND sok.start_date <= CAST(:as_of AS date)
               AND (sok.end_date IS NULL OR sok.end_date >= CAST(:as_of AS date)))`,
-        { approved: SharingKeyStatus.APPROVED, as_of },
-      )
-      .orderBy("so.name", "ASC")
-      .limit(limit)
-      .getRawMany<{ id: number; name: string }>();
+          { approved: SharingKeyStatus.APPROVED, as_of },
+        )
+        .orderBy("so.name", "ASC")
+        .limit(limit)
+        .getRawMany<{ id: number; name: string }>()
+    );
   }
 
   async getAllPublicCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[Community[], number]> {

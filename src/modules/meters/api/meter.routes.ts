@@ -178,6 +178,40 @@ meter_router.put(
   meter_controller.updateMeter.bind(meter_controller),
 );
 // Patch (/data): Patch meter data
+// Patch (/address) : repair a meter's address, touching nothing else.
+//
+// Separate from PUT /meters/, which is a full replace: the repair dialog is fed
+// by the meters LIST, which carries no meter_number / tarif_group /
+// phases_number / reading_frequency, and echoing guessed values back would
+// silently overwrite real configuration.
+meter_router.patch(
+  "/address",
+  /* #swagger.summary = "Repair a meter's address without changing its configuration"
+       #swagger.tags = ['Meters']
+       #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: { $ref: '#/components/schemas/UpdateMeterAddressDTO' }
+                }
+            }
+       }
+       #swagger.responses[200] = { $ref: '#/components/responses/SuccessMessage' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[403] = { $ref: '#/components/responses/Forbidden' }
+       #swagger.security = [{
+            "UserIdChecker": [],
+            "CommunityIdChecker": [],
+            "MinRoleChecker": []
+       }]
+    */
+  idChecker(),
+  communityIdChecker(),
+  roleChecker(Role.GESTIONNAIRE),
+  meter_controller.updateMeterAddress.bind(meter_controller),
+);
+
 meter_router.patch(
   "/data",
   /* #swagger.summary = 'Patch meter data'

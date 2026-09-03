@@ -811,11 +811,7 @@ describe("(Cache Integration) Community Module", () => {
 
     async function getDashboard(orgs: string, community: string, user: string): Promise<request.Response> {
       const { default: app } = await import("../../../src/app.js");
-      return request(app)
-        .get("/communities/dashboard")
-        .set("x-user-id", user)
-        .set("x-community-id", community)
-        .set("x-user-orgs", orgs);
+      return request(app).get("/communities/dashboard").set("x-user-id", user).set("x-community-id", community).set("x-user-orgs", orgs);
     }
 
     it("populates one community-keyed entry and serves the second read from it", async () => {

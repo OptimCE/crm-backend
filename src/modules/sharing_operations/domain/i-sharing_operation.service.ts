@@ -89,10 +89,7 @@ export interface ISharingOperationService {
    * Public list of a community's sharing operations (filters `is_public = true`).
    * Bypasses tenant scope deliberately.
    */
-  getPublicCommunitySharingOperations(
-    community_id: number,
-    query: SharingOperationPartialQuery,
-  ): Promise<[SharingOperationPartialDTO[], Pagination]>;
+  getPublicCommunitySharingOperations(community_id: number, query: SharingOperationPartialQuery): Promise<[SharingOperationPartialDTO[], Pagination]>;
 
   /**
    * Adds an allocation key to a sharing operation (request status).

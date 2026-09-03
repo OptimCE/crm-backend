@@ -5,6 +5,7 @@ import { CreateAddressDTO } from "./address.dtos.js";
 import type { QueryRunner } from "typeorm";
 import { Address } from "./address.models.js";
 import { AddressGeocodeStatus, AddressGeoPrecision } from "./address.types.js";
+import { normaliseHouseNumber } from "./house-number.js";
 //TODO: When an address in an entity is updated, I prefer add a new one. Add a cron job later on to fetch all the address linked to no one and delete them
 @injectable()
 export class AddressRepository implements IAddressRepository {
@@ -19,11 +20,16 @@ export class AddressRepository implements IAddressRepository {
    */
   async addAddress(new_address: CreateAddressDTO, query_runner?: QueryRunner): Promise<Address> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    // Normalise ONCE, here, so the dedup below and the INSERT that follows it
+    // compare and store the same thing. `number` is text since 2026-08-30, so
+    // ` 12 ` and `12` are now different strings where they used to be the same
+    // integer — without this, dedup misses and the row is inserted again.
+    const number = normaliseHouseNumber(new_address.number);
     // Check if address already exist
     let qb = manager.createQueryBuilder(Address, "address");
     qb = qb
       .where("address.street = :street", { street: new_address.street })
-      .andWhere("address.number = :number", { number: new_address.number })
+      .andWhere("address.number = :number", { number })
       .andWhere("address.city = :city", { city: new_address.city })
       .andWhere("address.postcode = :postcode", { postcode: new_address.postcode });
 
@@ -47,9 +53,16 @@ export class AddressRepository implements IAddressRepository {
     const has_pin = new_address.latitude !== undefined && new_address.longitude !== undefined;
     const new_address_model = manager.create(Address, {
       street: new_address.street,
-      number: new_address.number,
+      number,
       city: new_address.city,
       postcode: new_address.postcode,
+      // `supplement` was checked by the dedup above but MISSING here, so an
+      // address with a box number never matched itself on the next write: the
+      // lookup asked for the box, the stored row had none, and a duplicate was
+      // inserted every single time.
+      supplement: new_address.supplement,
+      country: new_address.country ?? "BE",
+      best_address_id: new_address.best_address_id ?? null,
       latitude: has_pin ? new_address.latitude : null,
       longitude: has_pin ? new_address.longitude : null,
       geo_precision: has_pin ? AddressGeoPrecision.MANUAL : null,

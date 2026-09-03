@@ -27,7 +27,7 @@ import {
   testCasesRefuseMember,
   testCasesRefuseManager,
 } from "./me.const.js";
-import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
+import { AUTH_COMMUNITY_1 } from "../../functionals/key/key.const.js";
 
 describe("(Unit) Me Module", () => {
   // --- GET DOCUMENTS ---
@@ -78,7 +78,11 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/me/documents/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get(`/me/documents/${id}`)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -111,7 +115,12 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/me/members").query(query).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get("/me/members")
+          .query(query)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -141,7 +150,11 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/me/members/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get(`/me/members/${id}`)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -168,7 +181,12 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/me/meters").query(query).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get("/me/meters")
+          .query(query)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -198,7 +216,11 @@ describe("(Unit) Me Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get(`/me/meters/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get(`/me/meters/${id}`)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -232,7 +254,7 @@ describe("(Unit) Me Module", () => {
           if (expected_error_code) expect(response.body.error_code).toBe(expected_error_code);
           if (expected_data && status_code === 200) expect(response.body.data).toEqual(expected_data);
           else if (expected_data) {
-            let result:unknown = expected_data as string;
+            let result: unknown = expected_data as string;
             if (response.status !== 200) {
               if (translation_field) {
                 result = i18next.t(expected_data as string, translation_field);

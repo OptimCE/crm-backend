@@ -32,11 +32,7 @@ export interface ISharingOperationRepository {
    * defined fields in `partial` are written. Returns the number of affected
    * rows; 0 means the operation was not found in the caller's community scope.
    */
-  updateSharingOperationFields(
-    id_sharing: number,
-    partial: { name?: string; type?: number },
-    query_runner?: QueryRunner,
-  ): Promise<number>;
+  updateSharingOperationFields(id_sharing: number, partial: { name?: string; type?: number }, query_runner?: QueryRunner): Promise<number>;
   getSharingOperationConsumption(
     id_sharing: number,
     query: SharingOperationConsumptionQuery,
@@ -48,10 +44,7 @@ export interface ISharingOperationRepository {
    * row count. Ordered ascending by month. Returns `[]` when there is no data.
    * `count` is the raw Postgres bigint rendered as a string.
    */
-  getSharingOperationConsumptionCoverage(
-    id_sharing: number,
-    query_runner?: QueryRunner,
-  ): Promise<{ month: string; count: string }[]>;
+  getSharingOperationConsumptionCoverage(id_sharing: number, query_runner?: QueryRunner): Promise<{ month: string; count: string }[]>;
   createSharingOperation(new_sharing_op: CreateSharingOperationDTO, query_runner?: QueryRunner): Promise<SharingOperation>;
   addConsumptions(id_sharing_operation: number, consumptionsToSave: Partial<SharingOpConsumption>[], query_runner?: QueryRunner): Promise<void>;
   getAuthorizedEans(id_sharing_operation: number, query_runner?: QueryRunner): Promise<Set<string>>;

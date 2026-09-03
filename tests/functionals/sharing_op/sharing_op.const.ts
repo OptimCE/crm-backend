@@ -11,12 +11,7 @@ export const existingKeyId1 = 1; // "Key 1" linked to Op 1
 export const existingKeyId2 = 2; // "Key 2" linked to Op 2
 export const existingEAN = "123456789012345678"; // Linked to Op 1
 // The 4 dedicated wind meters seeded on Op 2 (Public Wind Sharing), one per new member
-export const newWindMeterEANs = [
-  "541448200000000001",
-  "541448200000000002",
-  "541448200000000003",
-  "541448200000000004",
-];
+export const newWindMeterEANs = ["541448200000000001", "541448200000000002", "541448200000000003", "541448200000000004"];
 
 export const newSharingOpName = "Functional Op";
 export const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";

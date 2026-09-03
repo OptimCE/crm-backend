@@ -1,11 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { AddressGeoPrecision } from "../../../src/shared/address/address.types.js";
-import {
-  extractGeoJsonPoint,
-  isPlausibleBelgianPoint,
-  precisionFromLabel,
-  round6,
-} from "../../../src/modules/geocoding/infra/geocode.parsing.js";
+import { extractGeoJsonPoint, isPlausibleBelgianPoint, precisionFromLabel, round6 } from "../../../src/modules/geocoding/infra/geocode.parsing.js";
 
 describe("(Unit) isPlausibleBelgianPoint", () => {
   it("accepts a point in Brussels", () => {

@@ -10,6 +10,7 @@ import { Consumer, Iteration } from "../../keys/domain/key.models.js";
 import { SharingOperationKey } from "../../sharing_operations/domain/sharing_operation.models.js";
 import { SharingKeyStatus } from "../../sharing_operations/shared/sharing_operation.types.js";
 import { inject, injectable } from "inversify";
+import { AddressGeoPrecision } from "../../../shared/address/address.types.js";
 import { Member } from "../../members/domain/member.models.js";
 import { MeDocumentPartialQuery, MeMemberPartialQuery, MeMetersPartialQuery } from "../api/me.dtos.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
@@ -130,7 +131,12 @@ export class MeRepository implements IMeRepository {
     { key: "street", apply: (qb, val) => qb.andWhere("address.street LIKE :street", { street: `%${val}%` }) },
     { key: "city", apply: (qb, val) => qb.andWhere("address.city LIKE :city", { city: `%${val}%` }) },
     { key: "postcode", apply: (qb, val) => qb.andWhere("address.postcode = :post", { post: val }) },
-    { key: "address_number", apply: (qb, val) => qb.andWhere("address.address_number = :an", { an: val }) },
+    // The query parameter is `address_number`; the Address property is `number`.
+    // TypeORM passes an unknown property path through verbatim, so
+    // "address.address_number" reached Postgres as a column that does not exist
+    // and turned every filtered request into a 500. Same fix as
+    // meters/infra/meter.repository.ts.
+    { key: "address_number", apply: (qb, val) => qb.andWhere("address.number = :an", { an: val }) },
     { key: "supplement", apply: (qb, val) => qb.andWhere("address.supplement LIKE :supp", { supp: `%${val}%` }) },
 
     // Active Meter Data Filters (Status, Holder, Sharing Op)
@@ -344,7 +350,7 @@ export class MeRepository implements IMeRepository {
    *
    * @returns [rows (up to take+1), total_plottable, total_matching]
    */
-  async getMetersMap(query: MeMetersPartialQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]> {
+  async getMetersMap(query: MeMetersPartialQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number, number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const { user_id } = getContext();
 
@@ -399,7 +405,11 @@ export class MeRepository implements IMeRepository {
 
     const [rows, total_plottable] = await qb.take(take + 1).getManyAndCount();
 
-    return [rows, total_plottable, total_matching];
+    // Counted server-side rather than derived from `rows`: the result is capped,
+    // so a client-side count would silently under-report on a large community.
+    const approximate = await build().andWhere("address.geo_precision >= :approx", { approx: AddressGeoPrecision.MUNICIPALITY }).getCount();
+
+    return [rows, total_plottable, total_matching, approximate];
   }
 
   async getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]> {
@@ -472,42 +482,44 @@ export class MeRepository implements IMeRepository {
       return qb.getRawMany<MeMeterHoldingRow>();
     }
 
-    return qb
-      // `ean` is the FK column behind the `meter` relation, not a mapped property
-      // on MeterData, so it has to come through the join.
-      .innerJoin("md.meter", "mt")
-      .innerJoin("md.member", "mem")
-      .innerJoin("md.sharing_operation", "so")
-      .innerJoin("md.community", "com")
-      .select("mt.EAN", "ean")
-      .addSelect("mem.id", "member_id")
-      .addSelect("mem.name", "member_name")
-      .addSelect("so.id", "operation_id")
-      .addSelect("so.name", "operation_name")
-      .addSelect("so.type", "operation_type")
-      .addSelect("com.id", "community_id")
-      .addSelect("com.name", "community_name")
-      .addSelect("com.logo_url", "community_logo_url")
-      .addSelect("md.start_date", "holding_start_date")
-      .addSelect("md.end_date", "holding_end_date")
-      .where("CAST(:at AS date) BETWEEN md.start_date AND COALESCE(md.end_date, 'infinity'::date)", { at })
-      .andWhere(
-        `EXISTS (
+    return (
+      qb
+        // `ean` is the FK column behind the `meter` relation, not a mapped property
+        // on MeterData, so it has to come through the join.
+        .innerJoin("md.meter", "mt")
+        .innerJoin("md.member", "mem")
+        .innerJoin("md.sharing_operation", "so")
+        .innerJoin("md.community", "com")
+        .select("mt.EAN", "ean")
+        .addSelect("mem.id", "member_id")
+        .addSelect("mem.name", "member_name")
+        .addSelect("so.id", "operation_id")
+        .addSelect("so.name", "operation_name")
+        .addSelect("so.type", "operation_type")
+        .addSelect("com.id", "community_id")
+        .addSelect("com.name", "community_name")
+        .addSelect("com.logo_url", "community_logo_url")
+        .addSelect("md.start_date", "holding_start_date")
+        .addSelect("md.end_date", "holding_end_date")
+        .where("CAST(:at AS date) BETWEEN md.start_date AND COALESCE(md.end_date, 'infinity'::date)", { at })
+        .andWhere(
+          `EXISTS (
             SELECT 1 FROM user_member_link sub_uml
             INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
             WHERE sub_uml.id_member = md.id_member
             AND sub_u.auth_user_id = :contextAuthId
         )`,
-        { contextAuthId: user_id },
-      )
-      .orderBy("com.name", "ASC")
-      .addOrderBy("so.name", "ASC")
-      .addOrderBy("mt.EAN", "ASC")
-      // A cap rather than a page/limit contract: the tile's whole point is "my
-      // share everywhere", so paginating it would fragment the only useful view.
-      // This exists so a pathological account degrades instead of exhausting memory.
-      .limit(limit)
-      .getRawMany<MeMeterHoldingRow>();
+          { contextAuthId: user_id },
+        )
+        .orderBy("com.name", "ASC")
+        .addOrderBy("so.name", "ASC")
+        .addOrderBy("mt.EAN", "ASC")
+        // A cap rather than a page/limit contract: the tile's whole point is "my
+        // share everywhere", so paginating it would fragment the only useful view.
+        // This exists so a pathological account degrades instead of exhausting memory.
+        .limit(limit)
+        .getRawMany<MeMeterHoldingRow>()
+    );
   }
 
   /**
@@ -529,12 +541,7 @@ export class MeRepository implements IMeRepository {
    * on purpose: a reading whose meter row has vanished has no community to
    * attribute it to and must not be silently folded into a total.
    */
-  getOwnEnergyTotals(
-    period_start: string,
-    period_end: string,
-    limit: number,
-    query_runner?: QueryRunner,
-  ): Promise<MeEnergyMeterRow[]> {
+  getOwnEnergyTotals(period_start: string, period_end: string, limit: number, query_runner?: QueryRunner): Promise<MeEnergyMeterRow[]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const { user_id } = getContext();
 
@@ -548,25 +555,26 @@ export class MeRepository implements IMeRepository {
 
     const localDay = `(consumption.timestamp AT TIME ZONE '${CONSUMPTION_TIMEZONE}')::date`;
 
-    return qb
-      .innerJoin("consumption.meter", "mt")
-      .innerJoin("mt.community", "com")
-      .select("mt.EAN", "ean")
-      .addSelect("mt.meter_number", "meter_number")
-      .addSelect("com.id", "community_id")
-      .addSelect("com.name", "community_name")
-      .addSelect("com.logo_url", "community_logo_url")
-      .addSelect("COUNT(consumption.id)", "reading_count")
-      .addSelect("SUM(consumption.gross)", "gross")
-      .addSelect("SUM(consumption.shared)", "shared")
-      .addSelect("SUM(consumption.inj_gross)", "inj_gross")
-      .addSelect("SUM(consumption.inj_shared)", "inj_shared")
-      .where(`${localDay} BETWEEN CAST(:periodStart AS date) AND CAST(:periodEnd AS date)`, {
-        periodStart: period_start,
-        periodEnd: period_end,
-      })
-      .andWhere(
-        `EXISTS (
+    return (
+      qb
+        .innerJoin("consumption.meter", "mt")
+        .innerJoin("mt.community", "com")
+        .select("mt.EAN", "ean")
+        .addSelect("mt.meter_number", "meter_number")
+        .addSelect("com.id", "community_id")
+        .addSelect("com.name", "community_name")
+        .addSelect("com.logo_url", "community_logo_url")
+        .addSelect("COUNT(consumption.id)", "reading_count")
+        .addSelect("SUM(consumption.gross)", "gross")
+        .addSelect("SUM(consumption.shared)", "shared")
+        .addSelect("SUM(consumption.inj_gross)", "inj_gross")
+        .addSelect("SUM(consumption.inj_shared)", "inj_shared")
+        .where(`${localDay} BETWEEN CAST(:periodStart AS date) AND CAST(:periodEnd AS date)`, {
+          periodStart: period_start,
+          periodEnd: period_end,
+        })
+        .andWhere(
+          `EXISTS (
             SELECT 1 FROM meter_data sub_md
             INNER JOIN user_member_link sub_uml ON sub_uml.id_member = sub_md.id_member
             INNER JOIN "app_user" sub_u ON sub_u.id = sub_uml.id_user
@@ -575,20 +583,21 @@ export class MeRepository implements IMeRepository {
             AND ${localDay}
                 BETWEEN sub_md.start_date AND COALESCE(sub_md.end_date, 'infinity'::date)
         )`,
-        { contextAuthId: user_id },
-      )
-      .groupBy("mt.EAN")
-      .addGroupBy("mt.meter_number")
-      .addGroupBy("com.id")
-      .addGroupBy("com.name")
-      .addGroupBy("com.logo_url")
-      .orderBy("com.name", "ASC")
-      .addOrderBy("mt.EAN", "ASC")
-      // A cap, not a pagination contract: "my energy everywhere" is the whole
-      // point, so paging it would fragment the only useful view. This exists so
-      // a pathological account degrades instead of exhausting memory.
-      .limit(limit)
-      .getRawMany<MeEnergyMeterRow>();
+          { contextAuthId: user_id },
+        )
+        .groupBy("mt.EAN")
+        .addGroupBy("mt.meter_number")
+        .addGroupBy("com.id")
+        .addGroupBy("com.name")
+        .addGroupBy("com.logo_url")
+        .orderBy("com.name", "ASC")
+        .addOrderBy("mt.EAN", "ASC")
+        // A cap, not a pagination contract: "my energy everywhere" is the whole
+        // point, so paging it would fragment the only useful view. This exists so
+        // a pathological account degrades instead of exhausting memory.
+        .limit(limit)
+        .getRawMany<MeEnergyMeterRow>()
+    );
   }
 
   getKeysInForce(operation_ids: number[], at: string, query_runner?: QueryRunner): Promise<MeKeyInForceRow[]> {
@@ -626,18 +635,20 @@ export class MeRepository implements IMeRepository {
 
     // Read separately from the consumers so an iteration the caller's EAN is
     // absent from still appears, as a 0 % contribution rather than as a gap.
-    return manager
-      .createQueryBuilder(Iteration, "it")
-      // `id_key` is the FK column behind `allocation_key`, not a mapped property.
-      .innerJoin("it.allocation_key", "ak")
-      .select("ak.id", "key_id")
-      .addSelect("it.id", "iteration_id")
-      .addSelect("it.number", "iteration_number")
-      .addSelect("it.energy_allocated_percentage", "iteration_share")
-      .where("ak.id IN (:...key_ids)", { key_ids })
-      .orderBy("ak.id", "ASC")
-      .addOrderBy("it.number", "ASC")
-      .getRawMany<MeKeyIterationRow>();
+    return (
+      manager
+        .createQueryBuilder(Iteration, "it")
+        // `id_key` is the FK column behind `allocation_key`, not a mapped property.
+        .innerJoin("it.allocation_key", "ak")
+        .select("ak.id", "key_id")
+        .addSelect("it.id", "iteration_id")
+        .addSelect("it.number", "iteration_number")
+        .addSelect("it.energy_allocated_percentage", "iteration_share")
+        .where("ak.id IN (:...key_ids)", { key_ids })
+        .orderBy("ak.id", "ASC")
+        .addOrderBy("it.number", "ASC")
+        .getRawMany<MeKeyIterationRow>()
+    );
   }
 
   getKeyConsumersForEans(key_ids: number[], eans: string[], query_runner?: QueryRunner): Promise<MeKeyConsumerRow[]> {

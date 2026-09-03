@@ -2,5 +2,9 @@
   "backfill": {
     "database": "An error occurred while accessing the geocoding queue",
     "disabled": "Address geocoding is not configured on this instance"
+  },
+  "reconcile": {
+    "database": "An error occurred while accessing the reconciliation queue",
+    "disabled": "Address reconciliation is not configured on this instance"
   }
 }

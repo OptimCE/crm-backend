@@ -10,9 +10,7 @@ interface ConsumptionTimestamps {
   timestamps: string[];
 }
 
-async function seedMeterConsumptions(
-  rows: { timestamp: Date; gross?: number }[],
-): Promise<void> {
+async function seedMeterConsumptions(rows: { timestamp: Date; gross?: number }[]): Promise<void> {
   const { AppDataSource } = await import("../../../src/shared/database/database.connector.js");
   const { MeterConsumption } = await import("../../../src/modules/meters/domain/meter.models.js");
 
@@ -56,10 +54,7 @@ describe("(Functional) Meter consumption Brussels date filters", () => {
   });
 
   it("includes Brussels end-of-day on date_end and excludes next local midnight", async () => {
-    await seedMeterConsumptions([
-      { timestamp: new Date("2025-02-28T22:45:00.000Z") },
-      { timestamp: new Date("2025-02-28T23:00:00.000Z") },
-    ]);
+    await seedMeterConsumptions([{ timestamp: new Date("2025-02-28T22:45:00.000Z") }, { timestamp: new Date("2025-02-28T23:00:00.000Z") }]);
 
     const appModule = await import("../../../src/app.js");
     const app = appModule.default;

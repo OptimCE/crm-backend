@@ -37,10 +37,9 @@ async function seedMidMonthTransfer(): Promise<void> {
     `INSERT INTO app_user (email, first_name, last_name, auth_user_id) VALUES ('member2@test.com', 'Member', 'Two', $1)`,
     [AUTH_USER_MEMBER_2],
   );
-  await AppDataSource.manager.query(
-    `INSERT INTO user_member_link (id_user, id_member) SELECT id, 2 FROM app_user WHERE auth_user_id = $1`,
-    [AUTH_USER_MEMBER_2],
-  );
+  await AppDataSource.manager.query(`INSERT INTO user_member_link (id_user, id_member) SELECT id, 2 FROM app_user WHERE auth_user_id = $1`, [
+    AUTH_USER_MEMBER_2,
+  ]);
   await AppDataSource.manager.query(
     `INSERT INTO app_user (email, first_name, last_name, auth_user_id) VALUES ('member3@test.com', 'Member', 'Three', $1)`,
     [AUTH_USER_BOTH],

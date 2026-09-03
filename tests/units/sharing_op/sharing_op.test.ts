@@ -28,7 +28,7 @@ import {
   testCasesUpdateSharingOperation,
   mockSharingOperationEntity,
 } from "./sharing_op.const.js";
-import {AUTH_COMMUNITY_1} from "../../functionals/key/key.const.js";
+import { AUTH_COMMUNITY_1 } from "../../functionals/key/key.const.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
 import { SharingKeyStatus } from "../../../src/modules/sharing_operations/shared/sharing_operation.types.js";
 

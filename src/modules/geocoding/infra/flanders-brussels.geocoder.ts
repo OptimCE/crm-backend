@@ -37,7 +37,7 @@ export class FlandersBrusselsGeocoder implements IGeocoder {
       url: `${this.baseUrl.replace(/\/+$/, "")}/Location`,
       timeout: this.timeoutMs,
       params: {
-        q: `${request.street} ${String(request.number)}, ${request.postcode} ${request.city}`,
+        q: `${request.street} ${request.number}, ${request.postcode} ${request.city}`,
         c: 1,
       },
     });

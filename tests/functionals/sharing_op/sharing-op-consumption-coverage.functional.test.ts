@@ -102,9 +102,7 @@ describe("(Functional) Sharing operation consumption coverage", () => {
 
   it("scopes to the caller's community (no cross-tenant coverage leakage)", async () => {
     // Seed a row for op 3, which belongs to community 2 (Other Community).
-    await seedSharingOpConsumptions([
-      { timestamp: new Date("2026-05-10T10:00:00.000Z"), opId: otherCommunityOpId, communityId: 2 },
-    ]);
+    await seedSharingOpConsumptions([{ timestamp: new Date("2026-05-10T10:00:00.000Z"), opId: otherCommunityOpId, communityId: 2 }]);
 
     const appModule = await import("../../../src/app.js");
     const app = appModule.default;

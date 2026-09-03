@@ -84,8 +84,7 @@ class Subject {
   }
 }
 
-const dataSourceFor = (runner: QueryRunner): DataSource =>
-  ({ createQueryRunner: () => runner }) as unknown as DataSource;
+const dataSourceFor = (runner: QueryRunner): DataSource => ({ createQueryRunner: () => runner }) as unknown as DataSource;
 
 describe("(Unit) after-commit seam", () => {
   it("runs the effect AFTER the real COMMIT, not merely at some point", async () => {

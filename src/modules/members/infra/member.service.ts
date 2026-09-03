@@ -59,7 +59,11 @@ export class MemberService implements IMemberService {
    * @param query_runner - Database transaction runner.
    * @returns The created specific entity (Individual | Company) or undefined.
    */
-  async sharedAddMember(new_member: CreateMemberDTO, internal_community_id: number, query_runner: QueryRunner): Promise<Individual | Company | undefined> {
+  async sharedAddMember(
+    new_member: CreateMemberDTO,
+    internal_community_id: number,
+    query_runner: QueryRunner,
+  ): Promise<Individual | Company | undefined> {
     // const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     const home_address = await this.address_repository.addAddress(new_member.home_address, query_runner);
     const billing_address = await this.address_repository.addAddress(new_member.billing_address, query_runner);
@@ -291,7 +295,10 @@ export class MemberService implements IMemberService {
     if (patched_member_status.status === MemberStatus.INACTIVE) {
       const active_meters = await this.meter_repository.countActiveMeterDataForMember(patched_member_status.id_member, query_runner);
       if (active_meters > 0) {
-        logger.warn({ operation: "patchMemberStatus", id_member: patched_member_status.id_member }, "Cannot deactivate a member that still has active meters");
+        logger.warn(
+          { operation: "patchMemberStatus", id_member: patched_member_status.id_member },
+          "Cannot deactivate a member that still has active meters",
+        );
         throw new AppError(MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS, 409);
       }
     }

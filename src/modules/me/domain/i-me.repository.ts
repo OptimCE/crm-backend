@@ -91,12 +91,7 @@ export interface IMeRepository {
    * EAN", which would show a former holder the current holder's share.
    */
   getOwnMeterHoldings(at: string, limit: number, query_runner?: QueryRunner): Promise<MeMeterHoldingRow[]>;
-  getOwnEnergyTotals(
-    period_start: string,
-    period_end: string,
-    limit: number,
-    query_runner?: QueryRunner,
-  ): Promise<MeEnergyMeterRow[]>;
+  getOwnEnergyTotals(period_start: string, period_end: string, limit: number, query_runner?: QueryRunner): Promise<MeEnergyMeterRow[]>;
   getKeysInForce(operation_ids: number[], at: string, query_runner?: QueryRunner): Promise<MeKeyInForceRow[]>;
   getKeyIterations(key_ids: number[], query_runner?: QueryRunner): Promise<MeKeyIterationRow[]>;
   /** Consumers of the given keys whose (trimmed) name is one of `eans`. */
@@ -112,7 +107,7 @@ export interface IMeRepository {
    * Member-scoped mirror of the meters map. Same access rule as getMeters.
    * @returns [rows, total_plottable, total_matching]
    */
-  getMetersMap(query: MeMetersPartialQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]>;
+  getMetersMap(query: MeMetersPartialQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number, number]>;
   getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]>;
   getOwnManagersPendingInvitation(query: UserManagerInvitationQuery, query_runner?: QueryRunner): Promise<[GestionnaireInvitation[], number]>;
   getOwnMembersPendingInvitation(query: UserMemberInvitationQuery, query_runner?: QueryRunner): Promise<[UserMemberInvitation[], number]>;

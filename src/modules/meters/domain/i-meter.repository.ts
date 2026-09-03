@@ -1,5 +1,6 @@
 import type { Meter, MeterConsumption, MeterData } from "./meter.models.js";
 import type { DeleteResult, QueryRunner, UpdateResult } from "typeorm";
+import type { CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 import type { CreateMeterDTO, MeterConsumptionQuery, MeterMapQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 
 export interface IMeterRepository {
@@ -18,7 +19,7 @@ export interface IMeterRepository {
    *   detect truncation without a second COUNT.
    * @returns [rows, total_plottable, total_matching]
    */
-  getMetersMap(query: MeterMapQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]>;
+  getMetersMap(query: MeterMapQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number, number]>;
   getMeter(id: string, query_runner?: QueryRunner): Promise<Meter | null>;
   getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]>;
   createMeter(new_meter: CreateMeterDTO, query_runner?: QueryRunner): Promise<Meter>;
@@ -33,10 +34,16 @@ export interface IMeterRepository {
    * old one) is exactly the kind of thing worth making visible at the service
    * boundary rather than leaving buried here.
    */
-  updateMeter(
-    update_meter: UpdateMeterDTO,
-    query_runner?: QueryRunner,
-  ): Promise<{ result: UpdateResult; address_id: number }>;
+  updateMeter(update_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<{ result: UpdateResult; address_id: number }>;
+  /**
+   * Repoint a meter at a new address, touching no other meter field.
+   *
+   * Separate from {@link updateMeter}, which is a REPLACE and also writes
+   * meter_number, tarif_group, phases_number and reading_frequency — none of
+   * which the meters LIST carries. Repairing an address through it would mean
+   * refetching every meter just to echo its configuration back.
+   */
+  updateMeterAddress(EAN: string, new_address: CreateAddressDTO, query_runner?: QueryRunner): Promise<{ result: UpdateResult; address_id: number }>;
   getMeterData(id: number, query_runner?: QueryRunner): Promise<MeterData | null>;
   deleteMeterData(meter_data: MeterData, query_runner?: QueryRunner): Promise<MeterData>;
   activePreviousInactiveMeterData(

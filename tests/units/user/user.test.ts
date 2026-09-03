@@ -3,7 +3,7 @@ import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { expectWithLog, mockAddressRepositoryModule, mockIAMServiceModule, mockUserRepositoryModule } from "../../utils/helper.js";
 import { testCasesGetProfile, testCasesUpdateProfile } from "./user.const.js";
-import {AUTH_COMMUNITY_1} from "../../utils/shared.consts.js";
+import { AUTH_COMMUNITY_1 } from "../../utils/shared.consts.js";
 
 describe("(Unit) User Module", () => {
   useUnitTestDb();
@@ -44,7 +44,12 @@ describe("(Unit) User Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).put("/users/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+      const response = await request(app)
+        .put("/users/")
+        .send(body)
+        .set("x-user-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
