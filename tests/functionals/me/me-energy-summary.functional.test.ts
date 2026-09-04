@@ -23,10 +23,7 @@ async function sql(query: string, params: unknown[] = []): Promise<void> {
 
 async function linkUserToMember(auth_user_id: string, email: string, id_member: number): Promise<void> {
   await sql(`INSERT INTO app_user (email, first_name, last_name, auth_user_id) VALUES ($1, 'Test', 'User', $2)`, [email, auth_user_id]);
-  await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT id, $2 FROM app_user WHERE auth_user_id = $1`, [
-    auth_user_id,
-    id_member,
-  ]);
+  await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT id, $2 FROM app_user WHERE auth_user_id = $1`, [auth_user_id, id_member]);
 }
 
 /**
@@ -127,10 +124,7 @@ describe("(Functional) GET /me/energy-summary", () => {
       await addReading(EAN_ONE, `${MONTH}-05`, 10, 3);
       await addReading(EAN_ONE, `${MONTH}-20`, 7, 2);
 
-      const [first, second] = await Promise.all([
-        getSummary(AUTH_USER_MEMBER_1, { month: MONTH }),
-        getSummary(AUTH_USER_SECOND, { month: MONTH }),
-      ]);
+      const [first, second] = await Promise.all([getSummary(AUTH_USER_MEMBER_1, { month: MONTH }), getSummary(AUTH_USER_SECOND, { month: MONTH })]);
 
       await expectWithLog(first, () => {
         expect(meterFor(first, EAN_ONE)?.totals.gross_kwh).toBe(10);
@@ -239,10 +233,7 @@ describe("(Functional) GET /me/energy-summary", () => {
       await addReading(EAN_ONE, `${MONTH}-05`, 4, 1);
 
       const appModule = await import("../../../src/app.js");
-      const response = await request(appModule.default)
-        .get("/me/energy-summary")
-        .query({ month: MONTH })
-        .set("x-user-id", AUTH_USER_MEMBER_1);
+      const response = await request(appModule.default).get("/me/energy-summary").query({ month: MONTH }).set("x-user-id", AUTH_USER_MEMBER_1);
 
       await expectWithLog(response, () => {
         // The whole point: the user dashboard renders before a community is

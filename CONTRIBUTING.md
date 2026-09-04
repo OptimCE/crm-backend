@@ -55,6 +55,7 @@ For security vulnerabilities, **do not open a public issue**; follow the
    The Husky + lint-staged pre-commit hooks run Prettier and ESLint
    automatically; please don't bypass them. If you change SQL files, lint them
    with `sqlfluff` (see the [README](README.md#sql-linting)).
+
 4. Open a pull request against `main`, describing **what** you changed and
    **why**.
 

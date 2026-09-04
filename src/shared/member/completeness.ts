@@ -8,15 +8,7 @@ import { MemberType } from "../../modules/members/shared/member.types.js";
  * These are the string values a client renders, so they are part of the API
  * contract: each one needs a label key in all four locale files.
  */
-export type MemberMissingField =
-  | "name"
-  | "iban"
-  | "nrn"
-  | "email"
-  | "vat_number"
-  | "home_address"
-  | "billing_address"
-  | "sub_type_row";
+export type MemberMissingField = "name" | "iban" | "nrn" | "email" | "vat_number" | "home_address" | "billing_address" | "sub_type_row";
 
 /**
  * Which fields of `member` are blank.

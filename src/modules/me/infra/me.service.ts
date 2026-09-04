@@ -156,7 +156,7 @@ export class MeService implements IMeService {
 
   async getMetersMap(query: MeMetersPartialQuery): Promise<MeterMapDTO> {
     const cap = METER_MAP_MAX_POINTS;
-    const [values, total_plottable, total_matching] = await this.meRepository.getMetersMap(query, cap);
+    const [values, total_plottable, total_matching, approximate] = await this.meRepository.getMetersMap(query, cap);
 
     const truncated = values.length > cap;
     const points = (truncated ? values.slice(0, cap) : values).map((value) => toMeMeterMapPointDTO(value));
@@ -166,6 +166,7 @@ export class MeService implements IMeService {
       total_matching,
       total_plottable,
       missing_coordinates: Math.max(0, total_matching - total_plottable),
+      approximate,
       truncated,
       cap,
     };

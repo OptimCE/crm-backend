@@ -3,11 +3,13 @@ import { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
 import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
 import { inject, injectable } from "inversify";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
-import { DeepPartial, DeleteResult, In, type QueryRunner, SelectQueryBuilder, UpdateResult } from "typeorm";
+import { DeepPartial, DeleteResult, EntityManager, In, SelectQueryBuilder, type QueryRunner, UpdateResult } from "typeorm";
 import { CreateMeterDTO, MeterConsumptionQuery, MeterMapQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 import { applyFilters, FilterDef } from "../../../shared/database/filters.js";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
 import { Address } from "../../../shared/address/address.models.js";
+import { AddressGeocodeStatus, AddressGeoPrecision } from "../../../shared/address/address.types.js";
+import type { CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
@@ -36,6 +38,25 @@ export class MeterRepository implements IMeterRepository {
     // and turned every filtered request into a 500.
     { key: "address_number", apply: (qb, val) => qb.andWhere("address.number = :an", { an: val }) },
     { key: "supplement", apply: (qb, val) => qb.andWhere("address.supplement LIKE :supp", { supp: `%${val}%` }) },
+    // Whether the meter is USABLY on the map. `false` is the repair queue.
+    //
+    // Deliberately wider than "has a coordinate". The 2026-08-20 migration
+    // seeded a commune centroid for every address whose postcode maps to one
+    // commune, so most rows DO have a latitude — they just all sit stacked on
+    // the centre of their commune. Those are the pins that look authoritative
+    // and are wrong, and a queue keyed on `latitude IS NULL` would never show
+    // a single one of them.
+    {
+      key: "located",
+      apply: (qb, val) =>
+        val
+          ? qb.andWhere("address.latitude IS NOT NULL AND address.geo_precision < :approx", {
+              approx: AddressGeoPrecision.MUNICIPALITY,
+            })
+          : qb.andWhere("address.latitude IS NULL OR address.geo_precision IS NULL OR address.geo_precision >= :approx", {
+              approx: AddressGeoPrecision.MUNICIPALITY,
+            }),
+    },
 
     // Active Meter Data Filters (Status, Holder, Sharing Op)
     // These rely on the 'active_data' join defined in getMetersList
@@ -310,7 +331,7 @@ export class MeterRepository implements IMeterRepository {
    *
    * @returns [rows (up to take), total_plottable, total_matching]
    */
-  async getMetersMap(query: MeterMapQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number]> {
+  async getMetersMap(query: MeterMapQuery, take: number, query_runner?: QueryRunner): Promise<[Meter[], number, number, number]> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const now = appTodayISO();
 
@@ -348,7 +369,11 @@ export class MeterRepository implements IMeterRepository {
     // second COUNT.
     const [rows, total_plottable] = await qb.take(take + 1).getManyAndCount();
 
-    return [rows, total_plottable, total_matching];
+    // Counted server-side rather than derived from `rows`: the result is capped,
+    // so a client-side count would silently under-report on a large community.
+    const approximate = await build().andWhere("address.geo_precision >= :approx", { approx: AddressGeoPrecision.MUNICIPALITY }).getCount();
+
+    return [rows, total_plottable, total_matching, approximate];
   }
 
   async getMeterConsumptions(ean: string, query: MeterConsumptionQuery, query_runner?: QueryRunner): Promise<MeterConsumption[]> {
@@ -381,7 +406,7 @@ export class MeterRepository implements IMeterRepository {
 
     // 1. Create Address
     // Using manager.create allows TypeORM to handle the DTO structure for Address
-    const address = manager.create(Address, meterDto.address);
+    const address = addressWithPin(manager, meterDto.address);
     const savedAddress = await manager.save(address);
 
     // 2. Create Physical Meter
@@ -404,12 +429,9 @@ export class MeterRepository implements IMeterRepository {
     });
   }
 
-  async updateMeter(
-    update_meter: UpdateMeterDTO,
-    query_runner?: QueryRunner,
-  ): Promise<{ result: UpdateResult; address_id: number }> {
+  async updateMeter(update_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<{ result: UpdateResult; address_id: number }> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    const address = manager.create(Address, update_meter.address);
+    const address = addressWithPin(manager, update_meter.address);
     const savedAddress = await manager.save(address);
     const result = await manager.update(
       Meter,
@@ -426,6 +448,27 @@ export class MeterRepository implements IMeterRepository {
     );
     return { result, address_id: savedAddress.id };
   }
+  /**
+   * Repoint a meter at a new address, touching nothing else.
+   *
+   * The full `updateMeter` is a REPLACE: it also writes meter_number,
+   * tarif_group, phases_number and reading_frequency, none of which the list
+   * row carries. Repairing an address through it would mean fetching every
+   * meter first just to echo its configuration back, and any field the caller
+   * got wrong would silently overwrite the real one.
+   */
+  async updateMeterAddress(
+    EAN: string,
+    new_address: CreateAddressDTO,
+    query_runner?: QueryRunner,
+  ): Promise<{ result: UpdateResult; address_id: number }> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const address = addressWithPin(manager, new_address);
+    const savedAddress = await manager.save(address);
+    const result = await manager.update(Meter, { EAN }, { address: savedAddress });
+    return { result, address_id: savedAddress.id };
+  }
+
   async getMeterData(id: number, query_runner?: QueryRunner): Promise<MeterData | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
@@ -484,4 +527,28 @@ export class MeterRepository implements IMeterRepository {
     }
     return sharingOp.community.id;
   }
+}
+
+/**
+ * Build an Address entity from a submitted DTO, stamping a supplied coordinate.
+ *
+ * `manager.create(Address, dto)` copies `latitude`/`longitude` but leaves
+ * `geo_precision` NULL, and a coordinate with no precision is not a usable pin:
+ * the map cannot tell a rooftop from a commune centre, and the repair queue —
+ * which treats NULL precision as "not located" — would hand the meter straight
+ * back to the operator who just fixed it.
+ *
+ * MANUAL, matching `AddressRepository.addAddress`: the user chose this point,
+ * whether by picking it from the register or by hand, and no later batch should
+ * overwrite it.
+ */
+function addressWithPin(manager: EntityManager, dto: CreateAddressDTO): Address {
+  const has_pin = dto.latitude !== undefined && dto.longitude !== undefined;
+  return manager.create(Address, {
+    ...dto,
+    geo_precision: has_pin ? AddressGeoPrecision.MANUAL : null,
+    geo_source: has_pin ? "manual" : null,
+    geocoded_at: has_pin ? new Date() : null,
+    geocode_status: has_pin ? AddressGeocodeStatus.OK : AddressGeocodeStatus.NEVER,
+  });
 }

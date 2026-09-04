@@ -19,7 +19,7 @@ import {
   toMeterDTO,
   toMeterPartialDTO,
 } from "../../../src/modules/me/shared/to_dto.js";
-import {toMemberDTO as toMemberMemberDTO} from "../../../src/modules/members/shared/to_dto.js"
+import { toMemberDTO as toMemberMemberDTO } from "../../../src/modules/members/shared/to_dto.js";
 import { ME_ERRORS } from "../../../src/modules/me/shared/me.errors.js";
 import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors.js";
 import { DOCUMENT_ERRORS } from "../../../src/modules/documents/shared/document.errors.js";
@@ -72,9 +72,7 @@ export const mockMeMemberDTO = toMemberDTO(mockIndividualEntity);
 export const mockMemberPartialDTOJSON = JSON.parse(JSON.stringify(mockMemberPartialDTO));
 // `/me/members` reports completeness; the same member embedded as a meter's
 // holder does not, because that query does not load the rows the check needs.
-export const mockMemberPartialWithCompletenessDTOJSON = JSON.parse(
-  JSON.stringify(toMemberPartialWithCompletenessDTO(mockIndividualEntity)),
-);
+export const mockMemberPartialWithCompletenessDTOJSON = JSON.parse(JSON.stringify(toMemberPartialWithCompletenessDTO(mockIndividualEntity)));
 export const mockMeMemberDTOJSON = JSON.parse(JSON.stringify(mockMeMemberDTO));
 export const mockMemberDTO = toMemberMemberDTO(mockIndividualEntity);
 export const mockMemberDTOJSON = JSON.parse(JSON.stringify(mockMemberDTO));

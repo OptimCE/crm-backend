@@ -10,11 +10,14 @@ import type { AddressGeoPrecision } from "../../../shared/address/address.types.
 export interface GeocodeRequest {
   street: string;
   /**
-   * TODO(IMPLEMENTATION_PLAN.md Appendix A.2 #4): `address.number` is an INT and
-   * cannot hold "12A". When it widens to a string, only this field and the
-   * adapters' `String(request.number)` calls change — they already stringify.
+   * House number as text — `12A`, `12-14`, `1/3` are all real BeSt entries.
+   *
+   * This closes IMPLEMENTATION_PLAN.md Appendix A.2 #4. The old TODO here
+   * predicted that only this field and the adapters' `String(...)` calls would
+   * change; it was wrong by one — `toGeocodeRequest` in geocoding.service.ts
+   * declares the shape a second time and had to move with it.
    */
-  number: number;
+  number: string;
   postcode: string;
   city: string;
   supplement?: string | null;

@@ -165,10 +165,7 @@ export class SharingOperationController {
    * @param _next - Express next middleware.
    */
   @sharing_operationControllerTraceDecorator.traceSpan("createSharingOperation", { url: "/sharing_operations/", method: "post" })
-  @InvalidateCache([
-    cachePattern("sharing-op:list", "community"),
-    cachePattern("communities:public-sharing-operations", "none"),
-  ])
+  @InvalidateCache([cachePattern("sharing-op:list", "community"), cachePattern("communities:public-sharing-operations", "none")])
   async createSharingOperation(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const new_sharing_operations = await validateDto(CreateSharingOperationDTO, req.body);
     await this.sharing_operationService.createSharingOperation(new_sharing_operations);

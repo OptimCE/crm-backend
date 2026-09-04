@@ -71,25 +71,28 @@ describe("(Functional) Sharing Operation Module", () => {
 
   // --- GET METERS ---
   describe("(Functional) Get Meters", () => {
-    it.each(testCasesGetSharingOpMeters)("GET /sharing_operations/:id/meters : $description", async ({ id, query, orgs, status_code, expected_error_code, check_data }) => {
-      const appModule = await import("../../../src/app.js");
-      const app = appModule.default;
+    it.each(testCasesGetSharingOpMeters)(
+      "GET /sharing_operations/:id/meters : $description",
+      async ({ id, query, orgs, status_code, expected_error_code, check_data }) => {
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
 
-      const response = await request(app)
-        .get(`/sharing_operations/${id}/meters`)
-        .query(query)
-        .set("x-user-id", "auth0|admin")
-        .set("x-community-id", AUTH_COMMUNITY_1)
-        .set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get(`/sharing_operations/${id}/meters`)
+          .query(query)
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
-      await expectWithLog(response, () => {
-        expect(response.status).toBe(status_code);
-        expect(response.body.error_code).toBe(expected_error_code);
-        if (check_data) {
-          expect(check_data(response.body.data)).toBe(true);
-        }
-      });
-    });
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (check_data) {
+            expect(check_data(response.body.data)).toBe(true);
+          }
+        });
+      },
+    );
   });
 
   // --- GET METERS AT A GIVEN DATE (AT_DATE snapshot) ---

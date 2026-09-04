@@ -23,6 +23,7 @@ interface MapBody {
   total_matching: number;
   total_plottable: number;
   missing_coordinates: number;
+  approximate: number;
   truncated: boolean;
   cap: number;
 }
@@ -110,6 +111,29 @@ describe("(Functional) Meters Map", () => {
       const points = (response.body.data as MapBody).points;
       const approximate = points.find((point) => point.geo_precision === AddressGeoPrecision.MUNICIPALITY);
       expect(approximate).toBeDefined();
+    });
+  });
+
+  it("GET /meters/map : counts the approximate pins the repair queue will list", async () => {
+    // `approximate` and the `located=false` filter must agree, or the strip's
+    // number and the rows the repair dialog shows drift apart — and the count
+    // would stop moving as an operator works through them.
+    const { default: app } = await import("../../../src/app.js");
+    const response = await get();
+    const body = response.body.data as MapBody;
+
+    const centroidPins = body.points.filter((point) => point.geo_precision === AddressGeoPrecision.MUNICIPALITY).length;
+
+    const queue = await request(app)
+      .get("/meters/?located=false&limit=200")
+      .set("x-user-id", AUTH_USER)
+      .set("x-community-id", AUTH_COMMUNITY_1)
+      .set("x-user-orgs", ORGS_GESTIONNAIRE);
+
+    await expectWithLog(response, () => {
+      expect(body.approximate).toBe(centroidPins);
+      // The queue is BOTH populations: no coordinate at all, plus the centroids.
+      expect((queue.body.data as unknown[]).length).toBe(body.missing_coordinates + body.approximate);
     });
   });
 

@@ -375,13 +375,7 @@ export class PatchRoleUserDTO {
  * `CommunityDetailDTO` exactly so the frontend can derive its i18n key and its
  * "fix this" link from the field name alone.
  */
-export type CommunityLegalField =
-  | "vat_number"
-  | "legal_name"
-  | "iban"
-  | "account_holder_name"
-  | "headquarters_address"
-  | "regulator";
+export type CommunityLegalField = "vat_number" | "legal_name" | "iban" | "account_holder_name" | "headquarters_address" | "regulator";
 
 export class CommunityDashboardMembersDTO {
   @Expose()

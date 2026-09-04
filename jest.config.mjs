@@ -1,14 +1,14 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 const config = {
   // 1. Use the ESM preset
-  preset: 'ts-jest/presets/default-esm',
+  preset: "ts-jest/presets/default-esm",
   // 2. CRITICAL FIX: Tell Jest that .ts files are Modules (ESM)
-  extensionsToTreatAsEsm: ['.ts'],
+  extensionsToTreatAsEsm: [".ts"],
   // Automatically clear mock calls, instances and contexts before every test
   clearMocks: true,
   // Automatically restore mock state between tests
   restoreMocks: true,
-  testEnvironment: 'node',
+  testEnvironment: "node",
 
   // 3. Recommended: Increase timeout for database tests
   testTimeout: 60000,
@@ -17,58 +17,58 @@ const config = {
 
   projects: [
     {
-      displayName: 'unit',
-      preset: 'ts-jest/presets/default-esm',
-      testEnvironment: 'node',
-      testMatch: ['**/tests/units/**/*.test.ts'],
-      setupFiles: ['reflect-metadata'],
+      displayName: "unit",
+      preset: "ts-jest/presets/default-esm",
+      testEnvironment: "node",
+      testMatch: ["**/tests/units/**/*.test.ts"],
+      setupFiles: ["reflect-metadata"],
 
       // 4. Ensure the mapper is here (from previous fix)
       moduleNameMapper: {
-        '^(\\.{1,2}/.*)\\.js$': '$1',
+        "^(\\.{1,2}/.*)\\.js$": "$1",
       },
 
       transform: {
         // 5. Ensure ts-jest knows we are using ESM
-        '^.+\\.ts$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json'}]
+        "^.+\\.ts$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.test.json" }],
       },
     },
     {
-      displayName: 'functional',
-      preset: 'ts-jest/presets/default-esm',
-      testEnvironment: 'node',
-      testMatch: ['**/tests/functionals/**/*.test.ts'],
-      testPathIgnorePatterns: ['/node_modules/', '\\.cache\\.test\\.ts$'],
-      setupFiles: ['reflect-metadata'],
+      displayName: "functional",
+      preset: "ts-jest/presets/default-esm",
+      testEnvironment: "node",
+      testMatch: ["**/tests/functionals/**/*.test.ts"],
+      testPathIgnorePatterns: ["/node_modules/", "\\.cache\\.test\\.ts$"],
+      setupFiles: ["reflect-metadata"],
       maxWorkers: 1,
       globalSetup: "./tests/utils/global.setup.mjs",
       globalTeardown: "./tests/utils/global.teardown.mjs",
       moduleNameMapper: {
-        '^(\\.{1,2}/.*)\\.js$': '$1',
+        "^(\\.{1,2}/.*)\\.js$": "$1",
       },
 
       transform: {
-        '^.+\\.ts$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }]
+        "^.+\\.ts$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.test.json" }],
       },
     },
     {
-      displayName: 'cache',
-      preset: 'ts-jest/presets/default-esm',
-      testEnvironment: 'node',
-      testMatch: ['**/tests/functionals/**/*.cache.test.ts'],
-      setupFiles: ['reflect-metadata'],
+      displayName: "cache",
+      preset: "ts-jest/presets/default-esm",
+      testEnvironment: "node",
+      testMatch: ["**/tests/functionals/**/*.cache.test.ts"],
+      setupFiles: ["reflect-metadata"],
       maxWorkers: 1,
       globalSetup: "./tests/utils/global.setup.mjs",
       globalTeardown: "./tests/utils/global.teardown.mjs",
       moduleNameMapper: {
-        '^(\\.{1,2}/.*)\\.js$': '$1',
+        "^(\\.{1,2}/.*)\\.js$": "$1",
       },
 
       transform: {
-        '^.+\\.ts$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }]
+        "^.+\\.ts$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.test.json" }],
       },
-    }
-  ]
+    },
+  ],
 };
 
 export default config;

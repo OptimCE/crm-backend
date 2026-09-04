@@ -5,16 +5,18 @@ import { Role } from "../../../src/shared/dtos/role.js";
 
 const ORG_A = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 const ORG_B = "a221664e-866e-46f6-9f7b-1087447c579e";
-const ORGS_HEADER =
-  `[orgId:${ORG_A} orgPath:/alpha roles:[ADMIN]],` +
-  `map[orgId:${ORG_B} orgPath:/beta roles:[MEMBER]]`;
+const ORGS_HEADER = `[orgId:${ORG_A} orgPath:/alpha roles:[ADMIN]],` + `map[orgId:${ORG_B} orgPath:/beta roles:[MEMBER]]`;
 
 /** Run the middleware and capture the Context it installed. */
 function withHeaders(headers: Record<string, string>): ReturnType<typeof getContext> {
   let captured!: ReturnType<typeof getContext>;
-  contextMiddleware()({ headers } as unknown as Request, {} as Response, (() => {
-    captured = getContext();
-  }) as NextFunction);
+  contextMiddleware()(
+    { headers } as unknown as Request,
+    {} as Response,
+    (() => {
+      captured = getContext();
+    }) as NextFunction,
+  );
   return captured;
 }
 
@@ -25,12 +27,8 @@ describe("(Unit) contextMiddleware role derivation", () => {
   // identical, and this is what proves it did.
 
   it("resolves the role of the ACTIVE community only", () => {
-    expect(withHeaders({ "x-user-id": "sub-1", "x-community-id": ORG_A, "x-user-orgs": ORGS_HEADER }).role).toBe(
-      Role.ADMIN,
-    );
-    expect(withHeaders({ "x-user-id": "sub-1", "x-community-id": ORG_B, "x-user-orgs": ORGS_HEADER }).role).toBe(
-      Role.MEMBER,
-    );
+    expect(withHeaders({ "x-user-id": "sub-1", "x-community-id": ORG_A, "x-user-orgs": ORGS_HEADER }).role).toBe(Role.ADMIN);
+    expect(withHeaders({ "x-user-id": "sub-1", "x-community-id": ORG_B, "x-user-orgs": ORGS_HEADER }).role).toBe(Role.MEMBER);
   });
 
   it("clears the community and leaves the role unset when x-user-orgs is absent", () => {

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import {
-  buildEnvelope,
-  MAX_ENVELOPE_BYTES,
-  parseEnvelope,
-} from "../../../src/shared/realtime/realtime.envelope.js";
+import { buildEnvelope, MAX_ENVELOPE_BYTES, parseEnvelope } from "../../../src/shared/realtime/realtime.envelope.js";
 import { REALTIME_TOPICS } from "../../../src/shared/realtime/realtime.topics.js";
 
 const valid = {
@@ -38,8 +34,7 @@ describe("(Unit) buildEnvelope", () => {
 });
 
 describe("(Unit) parseEnvelope", () => {
-  const serialize = (over: Record<string, unknown> = {}): string =>
-    JSON.stringify({ ...buildEnvelope(valid), ...over });
+  const serialize = (over: Record<string, unknown> = {}): string => JSON.stringify({ ...buildEnvelope(valid), ...over });
 
   it("accepts what buildEnvelope produced", () => {
     expect(parseEnvelope(serialize())).not.toBeNull();

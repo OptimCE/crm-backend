@@ -44,10 +44,17 @@ EXECUTE FUNCTION update_changetimestamp_column();
 CREATE TABLE IF NOT EXISTS address (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     street VARCHAR(255) NOT NULL,
-    number INT NOT NULL,
+    -- A Belgian house number is not a number: the federal BeSt Address register
+    -- returns 12A, 2B, 12-14, 1/3. See
+    -- database_script/2026-08-30_address_number_country_best.sql.
+    number VARCHAR(32) NOT NULL,
     postcode VARCHAR(255) NOT NULL,
     supplement VARCHAR(255),
     city VARCHAR(255) NOT NULL,
+    country CHAR(2) NOT NULL DEFAULT 'BE',
+    -- The register's stable id for this address, written when a user PICKS it
+    -- from the register rather than typing it.
+    best_address_id VARCHAR(64),
     -- Geolocation. See database_script/2026-08-20_address_geolocation.sql for
     -- the enum meanings: geo_precision 1 MANUAL / 2 ROOFTOP / 3 STREET /
     -- 4 MUNICIPALITY, geocode_status 0 NEVER / 1 OK / 2 NOT_FOUND / 3 ERROR.
@@ -60,6 +67,9 @@ CREATE TABLE IF NOT EXISTS address (
     id_community INT REFERENCES community (id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT current_timestamp,
     updated_at TIMESTAMP DEFAULT current_timestamp,
+    -- An INT NOT NULL column could not be blank; a VARCHAR one can.
+    CONSTRAINT chk_address_number_not_blank CHECK (btrim(number) <> ''),
+    CONSTRAINT chk_address_country CHECK (country ~ '^[A-Z]{2}$'),
     -- A half-set coordinate plots on the equator; keep the pair atomic.
     CONSTRAINT chk_address_geo_pair CHECK (
         (latitude IS NULL) = (longitude IS NULL)
@@ -77,6 +87,14 @@ CREATE TABLE IF NOT EXISTS address (
 -- is empty and free.
 CREATE INDEX idx_address_geocode_queue
 ON address (geocode_status) WHERE geocode_status = 0;
+
+-- Partial, for the same reason: empty until addresses are matched.
+CREATE INDEX idx_address_best_id
+ON address (best_address_id) WHERE best_address_id IS NOT NULL;
+
+-- addAddress dedups on these three on every write and had no index for it.
+CREATE INDEX idx_address_dedup
+ON address (postcode, street, number);
 
 ALTER TABLE community ADD CONSTRAINT fk_community_headquarters_address FOREIGN KEY (
     headquarters_address_id
@@ -690,46 +708,58 @@ INSERT INTO address (
     street, number, postcode, city,
     latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
 ) VALUES (
-    'Main St', 1, '1000', 'Brussels',
+    'Main St', '1', '1000', 'Brussels',
     50.846700, 4.352500, 2, 'test_fixture', current_timestamp, 1
 );
 INSERT INTO address (street, number, postcode, city) VALUES (
-    'Second St', 2, '2000', 'Antwerp'
+    'Second St', '2', '2000', 'Antwerp'
 );
 INSERT INTO address (street, number, postcode, city) VALUES (
-    'Third St', 3, '3000', 'Leuven'
+    'Third St', '3', '3000', 'Leuven'
 );
 INSERT INTO address (street, number, postcode, city) VALUES (
-    'Fourth St', 4, '4000', 'Liege'
+    'Fourth St', '4', '4000', 'Liege'
 );
 -- Home/billing addresses for the wind sharing operation members (ids 5-8)
 INSERT INTO address (
     street, number, postcode, city,
     latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
 ) VALUES (
-    'Wind Alley', 10, '1000', 'Brussels',
+    'Wind Alley', '10', '1000', 'Brussels',
     50.850000, 4.350000, 2, 'test_fixture', current_timestamp, 1
 );
 INSERT INTO address (
     street, number, postcode, city,
     latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
 ) VALUES (
-    'Wind Alley', 12, '1000', 'Brussels',
+    'Wind Alley', '12', '1000', 'Brussels',
     50.850000, 4.350000, 2, 'test_fixture', current_timestamp, 1
 );
 INSERT INTO address (
     street, number, postcode, city,
     latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
 ) VALUES (
-    'Wind Alley', 14, '1000', 'Brussels',
+    'Wind Alley', '14', '1000', 'Brussels',
     50.851200, 4.351500, 2, 'test_fixture', current_timestamp, 1
 );
 INSERT INTO address (
     street, number, postcode, city,
     latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
 ) VALUES (
-    'Wind Alley', 16, '1000', 'Brussels',
+    'Wind Alley', '16', '1000', 'Brussels',
     50.872973, 4.375237, 4, 'municipality_centroid', current_timestamp, 1
+);
+
+-- id 9: the only seeded address whose house number is not an integer. It exists
+-- so the VARCHAR(32) widening is exercised by every functional run rather than
+-- only by the unit tests. Attached to nothing, and already geocoded, so it
+-- neither appears on a map nor enters the backfill queue.
+INSERT INTO address (
+    street, number, postcode, city,
+    latitude, longitude, geo_precision, geo_source, geocoded_at, geocode_status
+) VALUES (
+    'Rue de la Station', '20A', '5000', 'Namur',
+    50.468220, 4.863607, 2, 'test_fixture', current_timestamp, 1
 );
 
 -- Link community headquarters to addresses

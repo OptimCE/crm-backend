@@ -47,11 +47,15 @@ async function runInContext(headers: Record<string, string>, fn: () => Promise<v
   const mw = contextMiddleware();
   const req = { headers } as unknown as Request;
   await new Promise<void>((resolve, reject) => {
-    mw(req, {} as Response, ((): NextFunction => {
-      return ((): void => {
-        fn().then(resolve, reject);
-      }) as unknown as NextFunction;
-    })());
+    mw(
+      req,
+      {} as Response,
+      ((): NextFunction => {
+        return ((): void => {
+          fn().then(resolve, reject);
+        }) as unknown as NextFunction;
+      })(),
+    );
   });
 }
 
@@ -193,9 +197,8 @@ describe("(Functional) Notification wiring", () => {
     it("excludes the actor even when the actor is the linked user", async () => {
       // user 4 (member@test.com) is the linked user of member 1; have user 4 update it.
       const service = await getService<IMemberService>("MemberService");
-      await runInContext(
-        { "x-user-id": "auth0|member", "x-community-id": AUTH_COMMUNITY_1, "x-user-orgs": ORGS_ADMIN },
-        () => service.updateMember({ id: MEMBER_1_ID, name: "Self Update" } as unknown as UpdateMemberDTO),
+      await runInContext({ "x-user-id": "auth0|member", "x-community-id": AUTH_COMMUNITY_1, "x-user-orgs": ORGS_ADMIN }, () =>
+        service.updateMember({ id: MEMBER_1_ID, name: "Self Update" } as unknown as UpdateMemberDTO),
       );
 
       // Guardian mgr1@test.com has no account; linked user 4 is the actor → excluded.

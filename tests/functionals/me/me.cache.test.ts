@@ -163,10 +163,7 @@ describe("(Cache Integration) Me Module", () => {
 
       const { default: app } = await import("../../../src/app.js");
 
-      const response = await request(app)
-        .get("/me/invitations")
-        .set("x-user-id", AUTH_USER_MEMBER)
-        .set("x-user-orgs", ORGS_MEMBER);
+      const response = await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(200);
@@ -188,10 +185,7 @@ describe("(Cache Integration) Me Module", () => {
 
       const { default: app } = await import("../../../src/app.js");
 
-      const response = await request(app)
-        .get("/me/invitations/managers")
-        .set("x-user-id", AUTH_USER_MEMBER)
-        .set("x-user-orgs", ORGS_MEMBER);
+      const response = await request(app).get("/me/invitations/managers").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(200);
@@ -279,18 +273,12 @@ describe("(Cache Integration) Me Module", () => {
       const { MeService } = await import("../../../src/modules/me/infra/me.service.js");
       const spy = jest.spyOn(MeService.prototype, "getOwnMemberPendingInvitation");
 
-      const res1 = await request(app)
-        .get("/me/invitations")
-        .set("x-user-id", AUTH_USER_MEMBER)
-        .set("x-user-orgs", ORGS_MEMBER);
+      const res1 = await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
 
       expect(res1.status).toBe(200);
       expect(spy).toHaveBeenCalledTimes(1);
 
-      const res2 = await request(app)
-        .get("/me/invitations")
-        .set("x-user-id", AUTH_USER_MEMBER)
-        .set("x-user-orgs", ORGS_MEMBER);
+      const res2 = await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
 
       await expectWithLog(res2, () => {
         expect(res2.status).toBe(200);
@@ -372,16 +360,10 @@ describe("(Cache Integration) Me Module", () => {
       const cache = await getCacheService();
       const { default: app } = await import("../../../src/app.js");
 
-      const resMember = await request(app)
-        .get("/me/invitations")
-        .set("x-user-id", AUTH_USER_MEMBER)
-        .set("x-user-orgs", ORGS_MEMBER);
+      const resMember = await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_MEMBER).set("x-user-orgs", ORGS_MEMBER);
       expect(resMember.status).toBe(200);
 
-      const resAdmin = await request(app)
-        .get("/me/invitations")
-        .set("x-user-id", AUTH_USER_ADMIN)
-        .set("x-user-orgs", ORGS_ADMIN);
+      const resAdmin = await request(app).get("/me/invitations").set("x-user-id", AUTH_USER_ADMIN).set("x-user-orgs", ORGS_ADMIN);
       expect(resAdmin.status).toBe(200);
 
       const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-invitations:member-list"));

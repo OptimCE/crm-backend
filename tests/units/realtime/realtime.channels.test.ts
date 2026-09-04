@@ -1,11 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import {
-  CHANNEL_PATTERN,
-  communityChannel,
-  Tier,
-  tiersForRole,
-  userChannel,
-} from "../../../src/shared/realtime/realtime.channels.js";
+import { CHANNEL_PATTERN, communityChannel, Tier, tiersForRole, userChannel } from "../../../src/shared/realtime/realtime.channels.js";
 import { Role } from "../../../src/shared/dtos/role.js";
 
 describe("(Unit) realtime channels", () => {
@@ -19,8 +13,7 @@ describe("(Unit) realtime channels", () => {
   });
 
   it("uses a pattern that matches every channel it can build", () => {
-    const matches = (channel: string): boolean =>
-      new RegExp(`^${CHANNEL_PATTERN.replace(/\*/g, ".*")}$`).test(channel);
+    const matches = (channel: string): boolean => new RegExp(`^${CHANNEL_PATTERN.replace(/\*/g, ".*")}$`).test(channel);
     expect(matches(userChannel(1))).toBe(true);
     expect(matches(communityChannel(1, Tier.MANAGER))).toBe(true);
   });

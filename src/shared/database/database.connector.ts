@@ -9,14 +9,14 @@ import {
   SharingOpConsumption,
   SharingOperation,
   SharingOperationKey,
-  SharingOperationMunicipality
+  SharingOperationMunicipality,
 } from "../../modules/sharing_operations/domain/sharing_operation.models.js";
 import { User, UserMemberLink } from "../../modules/users/domain/user.models.js";
 import { GestionnaireInvitation, UserMemberInvitation } from "../../modules/invitations/domain/invitation.models.js";
 import { Address } from "../address/address.models.js";
-import {Municipality, MunicipalityPostalCode} from "../../modules/municipalities/domain/municipality.models.js";
+import { Municipality, MunicipalityPostalCode } from "../../modules/municipalities/domain/municipality.models.js";
 import { CommunitySubscription } from "../../modules/annexes_services/domain/annexes-services.models.js";
-import {AuditLog} from "../../modules/audit_log/domain/audit-log.models.js";
+import { AuditLog } from "../../modules/audit_log/domain/audit-log.models.js";
 import { Notification, NotificationPreference, OutboundMessage } from "../../modules/notifications/domain/notification.models.js";
 
 const host: string = config.get("database.host");
@@ -66,7 +66,7 @@ export const AppDataSource = new DataSource({
     AuditLog,
     Notification,
     OutboundMessage,
-    NotificationPreference
+    NotificationPreference,
   ],
   logging: logging,
 });

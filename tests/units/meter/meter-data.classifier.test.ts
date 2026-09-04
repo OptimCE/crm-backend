@@ -8,8 +8,7 @@ const YESTERDAY = "2026-08-20";
 const TOMORROW = "2026-08-22";
 
 /** The classifier only reads `start_date` and `end_date`; the rest is irrelevant here. */
-const record = (id: number, start_date: string, end_date: string | null = null): MeterData =>
-  ({ id, start_date, end_date }) as unknown as MeterData;
+const record = (id: number, start_date: string, end_date: string | null = null): MeterData => ({ id, start_date, end_date }) as unknown as MeterData;
 
 /** Identity-ish mapper so buckets can be asserted by id. */
 const toDto = (data: MeterData): MetersDataDTO => ({ id: data.id }) as unknown as MetersDataDTO;
@@ -63,11 +62,7 @@ describe("(Unit) classifyMeterDataByDate", () => {
   });
 
   it("handles a handover pair: predecessor closed yesterday, successor starts today", () => {
-    const { active, history, future } = classifyMeterDataByDate(
-      [record(1, "2026-01-01", YESTERDAY), record(2, TODAY)],
-      toDto,
-      TODAY,
-    );
+    const { active, history, future } = classifyMeterDataByDate([record(1, "2026-01-01", YESTERDAY), record(2, TODAY)], toDto, TODAY);
 
     expect(active?.id).toBe(2);
     expect(ids(history)).toEqual([1]);

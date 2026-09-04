@@ -10,8 +10,10 @@ import type {
   MetersDTO,
   PartialMeterDTO,
   PatchMeterDataDTO,
+  UpdateMeterAddressDTO,
   UpdateMeterDTO,
 } from "../api/meter.dtos.js";
+import type { QueryRunner } from "typeorm";
 import type { Pagination } from "../../../shared/dtos/ApiResponses.js";
 
 /**
@@ -63,6 +65,14 @@ export interface IMeterService {
    * @param updated_meter - DTO for creation.
    */
   updateMeter(updated_meter: UpdateMeterDTO): Promise<void>;
+
+  /**
+   * Repair a meter's address without touching its configuration.
+   *
+   * Re-runs the inline geocoder, so a corrected address reaches the map on the
+   * same request rather than waiting for the next admin backfill.
+   */
+  updateMeterAddress(update: UpdateMeterAddressDTO, query_runner?: QueryRunner): Promise<void>;
   /**
    * Updates meter data configuration.
    * @param patched_meter_data - DTO including EAN and new data.

@@ -106,15 +106,11 @@ export class FakeResponse {
 
   /** Only the `data:` payloads, i.e. topic frames — no comments, no control events. */
   dataFrames(): string[] {
-    return this.frames
-      .filter((frame) => frame.startsWith("id: "))
-      .map((frame) => frame.split("\ndata: ")[1]?.replace(/\n\n$/, "") ?? "");
+    return this.frames.filter((frame) => frame.startsWith("id: ")).map((frame) => frame.split("\ndata: ")[1]?.replace(/\n\n$/, "") ?? "");
   }
 
   controlEvents(): string[] {
-    return this.frames
-      .filter((frame) => frame.startsWith("event: "))
-      .map((frame) => frame.slice("event: ".length).split("\n")[0]);
+    return this.frames.filter((frame) => frame.startsWith("event: ")).map((frame) => frame.slice("event: ".length).split("\n")[0]);
   }
 
   asResponse(): Response {

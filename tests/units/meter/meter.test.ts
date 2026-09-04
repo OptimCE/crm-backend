@@ -30,7 +30,12 @@ describe("(Unit) Meter Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).get("/meters/").query(query).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .get("/meters/")
+          .query(query)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);
@@ -151,7 +156,12 @@ describe("(Unit) Meter Module", () => {
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;
       const i18next = appModule.i18next;
-      const response = await request(app).post("/meters/").send(body).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+      const response = await request(app)
+        .post("/meters/")
+        .send(body)
+        .set("x-user-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", orgs);
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(status_code);
@@ -265,7 +275,11 @@ describe("(Unit) Meter Module", () => {
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
         const i18next = appModule.i18next;
-        const response = await request(app).delete(`/meters/${id}`).set("x-user-id", "1").set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+        const response = await request(app)
+          .delete(`/meters/${id}`)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
         await expectWithLog(response, () => {
           expect(response.status).toBe(status_code);

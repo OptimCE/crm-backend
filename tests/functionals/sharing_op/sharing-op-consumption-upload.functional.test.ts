@@ -10,13 +10,7 @@ import { ORGS_ADMIN } from "../../utils/shared.consts.js";
 const UPLOAD_TIMESTAMP = "2025-02-01 00:00:00";
 
 function buildMinimalConsumptionWorkbook(ean: string): Buffer {
-  const sheetData = [
-    ["", "Prélèvement MWh"],
-    ["", ean],
-    [],
-    [],
-    [UPLOAD_TIMESTAMP, 1.5],
-  ];
+  const sheetData = [["", "Prélèvement MWh"], ["", ean], [], [], [UPLOAD_TIMESTAMP, 1.5]];
 
   const workbook = xlsx.utils.book_new();
   for (const sheetName of ["Brut Rep", "Partagé Rep", "Net Rep"]) {
@@ -62,7 +56,9 @@ describe("(Functional) Sharing operation consumption upload context", () => {
       order: { timestamp: "DESC" },
     });
 
-    const uploadedRow = rows.find((row) => row.timestamp.toISOString().startsWith("2025-01-31") || row.timestamp.toISOString().startsWith("2025-02-01"));
+    const uploadedRow = rows.find(
+      (row) => row.timestamp.toISOString().startsWith("2025-01-31") || row.timestamp.toISOString().startsWith("2025-02-01"),
+    );
     expect(uploadedRow).toBeDefined();
     expect(uploadedRow!.community.id).toBe(1);
     expect(uploadedRow!.community.id).not.toBe(3);

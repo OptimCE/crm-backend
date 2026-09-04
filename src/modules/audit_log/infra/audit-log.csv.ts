@@ -1,16 +1,6 @@
 import type { AuditLog } from "../domain/audit-log.models.js";
 
-export const AUDIT_LOG_CSV_COLUMNS = [
-  "id",
-  "timestamp",
-  "action",
-  "source",
-  "entity_type",
-  "entity_id",
-  "user_id",
-  "user_email",
-  "payload",
-] as const;
+export const AUDIT_LOG_CSV_COLUMNS = ["id", "timestamp", "action", "source", "entity_type", "entity_id", "user_id", "user_email", "payload"] as const;
 
 /**
  * RFC 4180 field escape: wrap in double-quotes if the value contains a

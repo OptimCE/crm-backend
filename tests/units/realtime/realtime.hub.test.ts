@@ -8,9 +8,7 @@ import { FakeRedis, FakeRequest, FakeResponse } from "./realtime.fakes.js";
 import logger from "../../../src/shared/monitor/logger.js";
 
 const frame = (topic = REALTIME_TOPICS.GENERATION_FINISHED, communityId: number | null = 12): string =>
-  JSON.stringify(
-    buildEnvelope({ topic, ref: { kind: "generation", id: "418" }, scope: { community_id: communityId } }),
-  );
+  JSON.stringify(buildEnvelope({ topic, ref: { kind: "generation", id: "418" }, scope: { community_id: communityId } }));
 
 describe("(Unit) RedisRealtimeHub", () => {
   let cmd: FakeRedis;

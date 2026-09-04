@@ -77,11 +77,7 @@ export class AnnexesServicesService implements IAnnexesServicesService {
     const active = await this.annexesRepository.findActiveByCommunity(internal_community_id);
     const subscribedFeatures = new Set(active.map((sub) => sub.feature));
     return this.filterByRole(role).map((entry) =>
-      plainToInstance(
-        CommunityAnnexDTO,
-        { ...entry, subscribed: subscribedFeatures.has(entry.feature) },
-        { excludeExtraneousValues: true },
-      ),
+      plainToInstance(CommunityAnnexDTO, { ...entry, subscribed: subscribedFeatures.has(entry.feature) }, { excludeExtraneousValues: true }),
     );
   }
 
@@ -120,10 +116,7 @@ export class AnnexesServicesService implements IAnnexesServicesService {
         query_runner,
       );
     }
-    logger.info(
-      { operation: "annexes_services:subscribe", feature, id_community: internal_community_id },
-      "Community subscribed to feature",
-    );
+    logger.info({ operation: "annexes_services:subscribe", feature, id_community: internal_community_id }, "Community subscribed to feature");
   }
 
   @Transactional()
@@ -132,10 +125,7 @@ export class AnnexesServicesService implements IAnnexesServicesService {
     const internal_community_id = await this.authContext.getInternalCommunityId();
     const existing = await this.annexesRepository.findByCommunityAndFeature(internal_community_id, feature, query_runner);
     if (existing === null || !existing.is_active) {
-      logger.info(
-        { operation: "annexes_services:unsubscribe", feature, id_community: internal_community_id },
-        "Community not subscribed to feature",
-      );
+      logger.info({ operation: "annexes_services:unsubscribe", feature, id_community: internal_community_id }, "Community not subscribed to feature");
       throw new AppError(ANNEXES_SERVICES_ERRORS.SUBSCRIPTION.NOT_SUBSCRIBED, 403);
     }
     await this.annexesRepository.setActive(existing.id, false, query_runner);
@@ -148,10 +138,7 @@ export class AnnexesServicesService implements IAnnexesServicesService {
       },
       query_runner,
     );
-    logger.info(
-      { operation: "annexes_services:unsubscribe", feature, id_community: internal_community_id },
-      "Community unsubscribed from feature",
-    );
+    logger.info({ operation: "annexes_services:unsubscribe", feature, id_community: internal_community_id }, "Community unsubscribed from feature");
   }
 
   private requireFeatureInCatalog(feature: string): void {

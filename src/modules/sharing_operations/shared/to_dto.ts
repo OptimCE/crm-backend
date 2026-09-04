@@ -1,4 +1,9 @@
-import type { SharingOpConsumption, SharingOperation, SharingOperationKey, SharingOperationMunicipality } from "../domain/sharing_operation.models.js";
+import type {
+  SharingOpConsumption,
+  SharingOperation,
+  SharingOperationKey,
+  SharingOperationMunicipality,
+} from "../domain/sharing_operation.models.js";
 import {
   SharingOpConsumptionCoverageDTO,
   SharingOpConsumptionDTO,

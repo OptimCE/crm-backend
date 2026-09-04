@@ -39,7 +39,7 @@ export class WalloniaIcarGeocoder implements IGeocoder {
       timeout: this.timeoutMs,
       params: {
         street: request.street,
-        house: String(request.number),
+        house: request.number,
         zone: request.postcode,
         city: request.city,
         crs: "EPSG:4326",

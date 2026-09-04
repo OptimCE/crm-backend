@@ -1,8 +1,22 @@
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
-import { Expose, Type } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
 import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 import { MembersPartialDTO } from "../../members/api/member.dtos.js";
-import { IsBoolean, IsDate, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, Min, ValidateNested } from "class-validator";
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  Min,
+  ValidateNested,
+} from "class-validator";
+import { HOUSE_NUMBER_PATTERN } from "../../../shared/address/house-number.js";
 import { SharingOperationPartialDTO } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
@@ -32,12 +46,34 @@ export class MeterPartialQuery extends PaginationQuery {
 
   /**
    * Filter by address number.
+   *
+   * Text, because `address.number` is text: `?address_number=12A` is a legitimate
+   * query.
    */
-  @Type(() => Number)
-  @Min(1, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.MIN_1))
-  @IsInt(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @Type(() => String)
+  @IsString(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(32, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(HOUSE_NUMBER_PATTERN, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsOptional()
-  address_number?: number;
+  address_number?: string;
+
+  /**
+   * Restrict to meters that ARE (true) or are NOT (false) usably on the map.
+   *
+   * `false` is the repair queue, and it means more than "no coordinate": an
+   * address pinned to its commune centroid has a latitude but is not usefully
+   * located. Those are the majority on an existing database, because the
+   * 2026-08-20 migration seeded a centroid for every unambiguous postcode.
+   *
+   * A filter on the ordinary meters list rather than a bespoke `/unlocated`
+   * endpoint: it inherits the pagination, community scoping and sort that
+   * already exist, and can become a list filter chip without a second path.
+   */
+  @Expose()
+  @Transform(({ value }) => (value === undefined ? undefined : value === "true" || value === true))
+  @IsBoolean(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.BOOLEAN))
+  @IsOptional()
+  located?: boolean;
 
   /**
    * Filter by city name.
@@ -509,6 +545,26 @@ export class CreateMeterDTO {
   initial_data!: CreateMeterDataDTO;
 }
 
+/**
+ * Body of `PATCH /meters/address` — the repair flow's write.
+ *
+ * Deliberately NOT reusing UpdateMeterDTO: that one is a full replace and also
+ * carries meter_number, tarif_group, phases_number and reading_frequency. A
+ * repair dialog fed by the meters LIST does not have those, and echoing guessed
+ * values back would silently overwrite real configuration.
+ */
+export class UpdateMeterAddressDTO {
+  @Expose()
+  @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
+  EAN!: string;
+
+  @Expose()
+  @ValidateNested()
+  @Type(() => CreateAddressDTO)
+  address!: CreateAddressDTO;
+}
+
 export class UpdateMeterDTO {
   /**
    * EAN Code (Unique Identifier).
@@ -722,6 +778,13 @@ export class MeterMapDTO {
   /** total_matching - total_plottable. Surfaced so the UI can prompt a backfill. */
   @Expose()
   missing_coordinates!: number;
+  /**
+   * Of the plottable ones, how many sit on a commune centroid rather than a
+   * building. They ARE drawn (styled as approximate), so they are not
+   * "missing" — but they are what the repair flow exists to improve.
+   */
+  @Expose()
+  approximate!: number;
   /** True when `cap` cut the result short. */
   @Expose()
   truncated!: boolean;

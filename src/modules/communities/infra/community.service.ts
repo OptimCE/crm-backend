@@ -182,13 +182,13 @@ export class CommunityService implements ICommunityService {
     try {
       new_community_model = await this.community_repository.addCommunity(new_community, org_id, query_runner);
       await this.auditLogService.log(
-          {
-            action: AUDIT_ACTIONS.COMMUNITY_CREATED,
-            entity_type: "community",
-            entity_id: String(new_community_model.id),
-            payload: { name: new_community.name, regulator: new_community.regulator },
-          },
-          query_runner,
+        {
+          action: AUDIT_ACTIONS.COMMUNITY_CREATED,
+          entity_type: "community",
+          entity_id: String(new_community_model.id),
+          payload: { name: new_community.name, regulator: new_community.regulator },
+        },
+        query_runner,
       );
     } catch (err) {
       logger.error({ operation: "addCommunity", error: err }, "An exception occurred while creating a new community in the database");
@@ -280,9 +280,7 @@ export class CommunityService implements ICommunityService {
             ...(updated_community.account_holder_name !== undefined ? ["account_holder_name"] : []),
           ],
           ...(updated_community.name !== undefined ? { name: updated_community.name } : {}),
-          ...(updated_community.regulator !== undefined
-            ? { old_regulator: previous_regulator, new_regulator: updated_community.regulator }
-            : {}),
+          ...(updated_community.regulator !== undefined ? { old_regulator: previous_regulator, new_regulator: updated_community.regulator } : {}),
         },
       },
       query_runner,

@@ -8,6 +8,7 @@ export function toAddressDTO(address: Address): AddressDTO {
     street: address.street,
     postcode: address.postcode,
     supplement: address.supplement,
+    country: address.country,
     id: address.id,
     latitude: address.latitude,
     longitude: address.longitude,

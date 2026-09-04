@@ -14,12 +14,7 @@ function makePostalCode(postal_code: string, nis_code: number): MunicipalityPost
   };
 }
 
-function makeMunicipality(
-  nis_code: number,
-  fr_name: string,
-  nl_name: string | null,
-  postal_codes: string[],
-): Municipality {
+function makeMunicipality(nis_code: number, fr_name: string, nl_name: string | null, postal_codes: string[]): Municipality {
   return {
     nis_code,
     fr_name,

@@ -1,7 +1,8 @@
 import { Expose, Transform, Type } from "class-transformer";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
-import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, Min } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, Min } from "class-validator";
+import { HOUSE_NUMBER_PATTERN } from "../../../shared/address/house-number.js";
 import { KeyPartialDTO } from "../../keys/api/key.dtos.js";
 import { HasMimeType, IsFile, MaxFileSize } from "../../../shared/dtos/file.validators.js";
 import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js";
@@ -90,12 +91,16 @@ export class SharingOperationMetersQuery extends PaginationQuery {
 
   /**
    * Filter by address number.
+   *
+   * Text, because `address.number` is text: `?address_number=12A` is a legitimate
+   * query.
    */
-  @Type(() => Number)
-  @Min(1, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.MIN_1))
-  @IsInt(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
+  @Type(() => String)
+  @IsString(withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(32, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(HOUSE_NUMBER_PATTERN, withError(SHARING_OPERATION_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsOptional()
-  address_number?: number;
+  address_number?: string;
 
   /**
    * Filter by city name.

@@ -15,11 +15,7 @@ export class AnnexesServicesRepository implements IAnnexesServicesRepository {
     });
   }
 
-  async findByCommunityAndFeature(
-    internal_community_id: number,
-    feature: string,
-    query_runner?: QueryRunner,
-  ): Promise<CommunitySubscription | null> {
+  async findByCommunityAndFeature(internal_community_id: number, feature: string, query_runner?: QueryRunner): Promise<CommunitySubscription | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     return manager.findOne(CommunitySubscription, {
       where: { id_community: internal_community_id, feature },

@@ -15,9 +15,12 @@ async function sql(query: string, params: unknown[] = []): Promise<void> {
 }
 
 async function linkUserToAllMembersOfCommunity1(auth_user_id: string): Promise<void> {
-  await sql(`INSERT INTO user_member_link (id_user, id_member) SELECT u.id, m.id FROM app_user u, member m
+  await sql(
+    `INSERT INTO user_member_link (id_user, id_member) SELECT u.id, m.id FROM app_user u, member m
              WHERE u.auth_user_id = $1 AND m.id_community = 1
-             AND NOT EXISTS (SELECT 1 FROM user_member_link l WHERE l.id_user = u.id AND l.id_member = m.id)`, [auth_user_id]);
+             AND NOT EXISTS (SELECT 1 FROM user_member_link l WHERE l.id_user = u.id AND l.id_member = m.id)`,
+    [auth_user_id],
+  );
 }
 
 async function getMyMembers(user: string): Promise<request.Response> {
