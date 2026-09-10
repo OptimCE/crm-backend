@@ -36,6 +36,20 @@ function municipalityRepo(matches: Partial<Municipality>[] = []): IMunicipalityR
   } as unknown as IMunicipalityRepository;
 }
 
+/** A commune with the postcodes it actually serves, for the street-row fill. */
+function commune(nis: number, ...postcodes: string[]): Partial<Municipality> {
+  return { nis_code: nis, postal_codes: postcodes.map((postal_code) => ({ postal_code })) } as Partial<Municipality>;
+}
+
+/** A repo whose `findManyByNisCodes` answers, unlike the default stub's `[]`. */
+function repoWithCommunes(...communes: Partial<Municipality>[]): IMunicipalityRepository {
+  const repo = municipalityRepo();
+  (repo.findManyByNisCodes as jest.Mock<IMunicipalityRepository["findManyByNisCodes"]>).mockImplementation(
+    async (nis_codes: number[]) => communes.filter((c) => nis_codes.includes(c.nis_code as number)) as Municipality[],
+  );
+  return repo;
+}
+
 describe("(Unit) BestAddressSuggester", () => {
   let client: ClientStub;
   let suggester: BestAddressSuggester;
@@ -200,5 +214,91 @@ describe("(Unit) BestAddressSuggester", () => {
     const rows = await suggester.suggest("rue a 2 5000", 5, "fr");
 
     expect(rows.map((r) => r.number)).toEqual(["1", "2", "10"]);
+  });
+
+  describe("street-row postcode, from the commune", () => {
+    // `/streets` returns no postcode, and asking the register for a street's
+    // postcodes means listing every address on it - the unbounded query the
+    // two-stage design exists to avoid. The local table answers it for free.
+
+    it("fills the postcode when the commune has exactly ONE", async () => {
+      const repo = repoWithCommunes(commune(92094, "5000"));
+      suggester = new BestAddressSuggester(client as unknown as BestAddressClient, repo);
+      client.searchStreets.mockResolvedValue([street("s1", "Place de la Station")]);
+
+      const rows = await suggester.suggest("place de la station", 5, "fr");
+
+      expect(rows[0].kind).toBe("street");
+      expect(rows[0].postcode).toBe("5000");
+      // And it reaches the label, so the row reads like an address row.
+      expect(rows[0].label).toBe("Place de la Station, 5000 Namur");
+    });
+
+    it("leaves the postcode blank when the commune has SEVERAL", async () => {
+      // 1000 and 1040 both serve Bruxelles. Picking one would write a postcode
+      // that is plausible and wrong; the user types a house number instead.
+      const repo = repoWithCommunes(commune(21004, "1000", "1040", "1050"));
+      suggester = new BestAddressSuggester(client as unknown as BestAddressClient, repo);
+      client.searchStreets.mockResolvedValue([street("s1", "Rue de la Loi", "Bruxelles", 21004)]);
+
+      const rows = await suggester.suggest("rue de la loi", 5, "fr");
+
+      expect(rows[0].postcode).toBe("");
+      expect(rows[0].label).toBe("Rue de la Loi, Bruxelles");
+    });
+
+    it("prefers the postcode the user typed over the commune lookup", async () => {
+      const repo = repoWithCommunes(commune(92094, "5000"));
+      suggester = new BestAddressSuggester(client as unknown as BestAddressClient, repo);
+      client.searchStreets.mockResolvedValue([street("s1", "Place de la Station")]);
+
+      const rows = await suggester.suggest("place de la station 5100", 5, "fr");
+
+      expect(rows[0].postcode).toBe("5100");
+      // The lookup is skipped entirely - there is nothing left to resolve.
+      expect(repo.findManyByNisCodes).not.toHaveBeenCalled();
+    });
+
+    it("resolves the whole page in ONE query, with the NIS codes deduplicated", async () => {
+      const repo = repoWithCommunes(commune(92094, "5000"), commune(21004, "1000", "1040"));
+      suggester = new BestAddressSuggester(client as unknown as BestAddressClient, repo);
+      client.searchStreets.mockResolvedValue([
+        street("s1", "Rue A", "Namur", 92094),
+        street("s2", "Rue B", "Namur", 92094),
+        street("s3", "Rue C", "Bruxelles", 21004),
+      ]);
+
+      const rows = await suggester.suggest("rue", 5, "fr");
+
+      expect(repo.findManyByNisCodes).toHaveBeenCalledTimes(1);
+      expect((repo.findManyByNisCodes as jest.Mock).mock.calls[0][0]).toEqual([92094, 21004]);
+      expect(rows.map((r) => r.postcode)).toEqual(["5000", "5000", ""]);
+    });
+
+    it("degrades to a blank postcode when the lookup throws", async () => {
+      // Suggestions are advisory: a failed lookup means rows without a postcode,
+      // exactly as before this existed - never a failed request.
+      const repo = municipalityRepo();
+      (repo.findManyByNisCodes as jest.Mock).mockRejectedValue(new Error("db down"));
+      suggester = new BestAddressSuggester(client as unknown as BestAddressClient, repo);
+      client.searchStreets.mockResolvedValue([street("s1", "Place de la Station")]);
+
+      const rows = await suggester.suggest("place de la station", 5, "fr");
+
+      expect(rows).toHaveLength(1);
+      expect(rows[0].postcode).toBe("");
+    });
+
+    it("does not fill an ADDRESS row from the commune - it has the register's own", async () => {
+      const repo = repoWithCommunes(commune(92094, "9999"));
+      suggester = new BestAddressSuggester(client as unknown as BestAddressClient, repo);
+      client.searchStreets.mockResolvedValue([street("s1", "Place de la Station")]);
+      client.addressesOfStreet.mockResolvedValue([address("12")]);
+
+      const rows = await suggester.suggest("place de la station 12", 5, "fr");
+
+      expect(rows[0].kind).toBe("address");
+      expect(rows[0].postcode).toBe("5000");
+    });
   });
 });

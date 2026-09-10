@@ -64,7 +64,59 @@ export class BestAddressSuggester implements IAddressSuggester {
       }
     }
 
-    return ranked.slice(0, limit).map((street) => this.toStreetSuggestion(street, lang, parsed.postcode));
+    const rows = ranked.slice(0, limit);
+    const postcodes = await this.postcodesByNis(rows, parsed.postcode);
+    return rows.map((street) => this.toStreetSuggestion(street, lang, parsed.postcode ?? postcodes.get(street.nisCode ?? -1)));
+  }
+
+  /**
+   * Postcode per NIS code, but ONLY where the commune has exactly one.
+   *
+   * A street row carries no postcode of its own: `/streets` does not return one,
+   * and the register cannot be asked for a street's postcodes without listing
+   * every address on it — which is precisely the unbounded `/addresses` query
+   * the two-stage design exists to avoid (see {@link BestAddressClient}). The
+   * local `municipality_postal_code` table answers it for free instead, because
+   * the street row already carries `nisCode` and the register indexes on the
+   * same code.
+   *
+   * **Exactly one, or nothing.** Most Belgian communes have a single postcode,
+   * so this fills the common case. Where a commune has several — Bruxelles,
+   * Liege, Namur — the answer is genuinely unknowable from the street alone, and
+   * picking one would write a postcode that is plausible and wrong. The user
+   * types a house number instead, which returns address rows carrying the
+   * register's own postcode. Same rule migration 010 applies to centroids.
+   *
+   * Returns an empty map when the caller already parsed a postcode out of the
+   * query, so the lookup is skipped entirely in that case.
+   */
+  private async postcodesByNis(streets: BestStreet[], typedPostcode?: string): Promise<Map<number, string>> {
+    const resolved = new Map<number, string>();
+    if (typedPostcode) {
+      return resolved;
+    }
+
+    const nisCodes = [...new Set(streets.map((s) => s.nisCode).filter((code): code is number => typeof code === "number"))];
+    if (nisCodes.length === 0) {
+      return resolved;
+    }
+
+    try {
+      // One batched query for every row on the page, not one per row.
+      const municipalities = await this.municipalityRepository.findManyByNisCodes(nisCodes);
+      for (const municipality of municipalities) {
+        const codes = [...new Set((municipality.postal_codes ?? []).map((pc) => pc.postal_code))];
+        if (codes.length === 1) {
+          resolved.set(municipality.nis_code, codes[0]);
+        }
+      }
+    } catch {
+      // Suggestions are advisory. A failed lookup means rows without a
+      // postcode, exactly as before this existed - never a failed request.
+      return new Map<number, string>();
+    }
+
+    return resolved;
   }
 
   /**
