@@ -310,7 +310,8 @@ export const testCasesGetCommunityById = [
   {
     description: "Success - Returns null logo_presigned_url and bank/legal fields when community has no logo",
     id: 2, // Other Community has logo_url = NULL and seeded bank/legal info
-    orgs: ORGS_ADMIN,
+    // The caller must belong to the community it reads (see community-scope.functional.test.ts).
+    orgs: `${ORGS_ADMIN},map[orgId:2 orgPath:/org2 roles:[ADMIN]]`,
     status_code: 200,
     expected_error_code: SUCCESS,
     check_data: (data: unknown): boolean => {

@@ -31,7 +31,8 @@
   },
   "validation": {
     "wrong_type": {
-      "member_type": "Le champ '{{field}}' doit être du type 'MemberType'"
+      "member_type": "Le champ '{{field}}' doit être du type 'MemberType'",
+      "member_status": "Le champ '{{field}}' doit être du type 'MemberStatus'"
     }
   }
 }

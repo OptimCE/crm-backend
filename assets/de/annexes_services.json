@@ -1,0 +1,11 @@
+{
+  "catalog": {
+    "load_failed": "Der Katalog der Zusatzdienste konnte nicht geladen werden",
+    "invalid_format": "Der Katalog der Zusatzdienste ist ungültig"
+  },
+  "subscription": {
+    "feature_not_found": "Dieser Zusatzdienst existiert nicht oder ist nicht verfügbar",
+    "already_subscribed": "Die Gemeinschaft hat diesen Zusatzdienst bereits abonniert",
+    "not_subscribed": "Die Gemeinschaft hat diesen Zusatzdienst nicht abonniert"
+  }
+}

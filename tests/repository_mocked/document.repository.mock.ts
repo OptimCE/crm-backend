@@ -5,7 +5,6 @@ export function createMockDocumentRepository(): jest.Mocked<IDocumentRepository>
   return {
     deleteDocument: jest.fn(),
     getDocumentById: jest.fn(),
-    getDocumentByIdNIdMember: jest.fn(),
     getDocuments: jest.fn(),
     saveDocument: jest.fn(),
   };

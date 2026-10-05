@@ -31,7 +31,8 @@
   },
   "validation": {
     "wrong_type": {
-      "member_type": "Het veld '{{field}}' moet van het type 'MemberType' zijn"
+      "member_type": "Het veld '{{field}}' moet van het type 'MemberType' zijn",
+      "member_status": "Het veld '{{field}}' moet van het type 'MemberStatus' zijn"
     }
   }
 }

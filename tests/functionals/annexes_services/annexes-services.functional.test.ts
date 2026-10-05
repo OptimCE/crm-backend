@@ -17,6 +17,7 @@ import {
 interface CatalogEntry {
   feature: string;
   subscribed: boolean;
+  unsubscribeWarningKey?: string;
 }
 
 describe("(Functional) Annexes Services Module", () => {
@@ -162,6 +163,32 @@ describe("(Functional) Annexes Services Module", () => {
         .set("x-user-orgs", ORGS_ADMIN);
       const afterEntry = (afterUnsub.body.data as CatalogEntry[]).find((e) => e.feature === KNOWN_FEATURE);
       expect(afterEntry?.subscribed).toBe(false);
+    });
+  });
+
+  describe("(Functional) Catalog", () => {
+    // End to end through the real controller, so a DTO without `@Expose()` on
+    // the field (stripped by `excludeExtraneousValues`) fails here, not in the UI.
+    it("exposes unsubscribeWarningKey for live-data only", async () => {
+      const appModule = await import("../../../src/app.js");
+      const app = appModule.default;
+
+      const response = await request(app)
+        .get("/annexes-services/")
+        .set("x-user-id", "auth0|admin")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_ADMIN);
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(200);
+        const entries = response.body.data as CatalogEntry[];
+        const liveData = entries.find((e) => e.feature === "live-data");
+        expect(liveData?.unsubscribeWarningKey).toBe("ANNEXES_SERVICES.LIVE_DATA.UNSUBSCRIBE_WARNING");
+        expect(entries.filter((e) => e.unsubscribeWarningKey !== undefined).map((e) => e.feature)).toEqual(["live-data"]);
+        // Absent from the wire, not `null`: the frontend only tests truthiness,
+        // but an old client must see exactly the shape it saw before.
+        expect(entries.find((e) => e.feature === KNOWN_FEATURE)).not.toHaveProperty("unsubscribeWarningKey");
+      });
     });
   });
 

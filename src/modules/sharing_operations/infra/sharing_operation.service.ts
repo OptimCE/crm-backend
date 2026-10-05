@@ -44,6 +44,7 @@ import { SHARING_OPERATION_ERRORS } from "../shared/sharing_operation.errors.js"
 import { MEMBER_ERRORS } from "../../members/shared/member.errors.js";
 import { SharingKeyStatus } from "../shared/sharing_operation.types.js";
 import { MeterDataStatus } from "../../meters/shared/meter.types.js";
+import { EAN_PATTERN } from "../../meters/shared/ean.js";
 import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { toMeterPartialDTO } from "../../meters/shared/to_dto.js";
@@ -107,6 +108,11 @@ export class SharingOperationService implements ISharingOperationService {
       logger.error({ operation: "addConsumptionDataToSharing" }, "No meter authorized to be added");
       throw new AppError(SHARING_OPERATION_ERRORS.ADD_CONSUMPTION_DATA.NO_METER_AUTHORIZED, 400);
     }
+    // Every data column we could NOT import, with the reason. Collected across
+    // all three sheets and reported: an EAN column that is silently dropped is
+    // a whole meter's month of consumption vanishing behind a 200.
+    const droppedColumns: { sheet: string; header: string; ean: string | null; reason: string }[] = [];
+
     // Data Structures
     const parsedSheets: Record<
       string,
@@ -158,16 +164,29 @@ export class SharingOperationService implements ISharingOperationService {
       if (rows.length < 2) continue;
 
       const headers: string[] = rows[0] as string[];
-      const eans = rows[1] as (string | number | null)[];
+      const eanCells = this.readEanRow(sheet);
 
       // Map columns to EANs and Types
       const columnMap = headers
         .map((header, index) => {
           const type = header.includes("Prélèvement") ? "consumption" : header.includes("Injection") ? "injection" : null;
-          // Check if EAN is present AND is authorized for this sharing operation
-          const ean = eans[index] ? String(eans[index]).trim() : null;
+          if (!type) return null; // not a data column at all — nothing to report
 
-          return type && ean && authorizedEansSet.has(ean) ? { index, ean: ean, type } : null;
+          const cell = eanCells[index] ?? { text: null, numeric: false };
+          const ean = cell.text;
+          if (ean && authorizedEansSet.has(ean)) {
+            return { index, ean, type };
+          }
+
+          // Four distinct problems with four different fixes, so they are told
+          // apart rather than all becoming "column missing".
+          droppedColumns.push({
+            sheet: sheetName,
+            header,
+            ean,
+            reason: !ean ? "missing_ean" : cell.numeric ? "numeric_ean_cell" : EAN_PATTERN.test(ean) ? "unauthorized_ean" : "malformed_ean",
+          });
+          return null;
         })
         .filter((item): item is { index: number; ean: string; type: string } => item !== null);
 
@@ -276,6 +295,33 @@ export class SharingOperationService implements ISharingOperationService {
       inj_shared: agg.inj_shared,
     }));
 
+    // 3a-bis. Report what did not make it in, BEFORE anything is written.
+    //
+    // A numeric EAN cell is a broken workbook, not bad data: Excel stored the
+    // EAN as a double, so its low digits are already gone and no column in that
+    // file can be trusted. Importing the subset that happens to still match
+    // would be a silent partial import of billing-grade data, so the whole
+    // upload is refused. `addConsumptionDataToSharing` is @Transactional, so
+    // nothing is persisted. The operator's fix is ten seconds in Excel.
+    const numericEanColumns = droppedColumns.filter((column) => column.reason === "numeric_ean_cell");
+    if (numericEanColumns.length > 0) {
+      logger.error(
+        { operation: "addConsumptionDataToSharing", id_sharing_operation: dto.id_sharing_operation, numericEanColumns },
+        "EAN row is stored as numbers; 18-digit EANs have already lost precision in the file",
+      );
+      throw new AppError(SHARING_OPERATION_ERRORS.ADD_CONSUMPTION_DATA.EAN_CELL_NOT_TEXT, 400);
+    }
+
+    // Everything else is reported, never fatal: a real RESA workbook covers
+    // meters outside this operation, and refusing on that would block every
+    // legitimate import.
+    if (droppedColumns.length > 0) {
+      logger.warn(
+        { operation: "addConsumptionDataToSharing", id_sharing_operation: dto.id_sharing_operation, droppedColumns },
+        "Consumption columns dropped",
+      );
+    }
+
     // 3b. Meter Consumption
     const meterConsumptionsToSave: (Partial<MeterConsumption> & { ean: string })[] = [];
     for (const [ean, timeMap] of meterMap.entries()) {
@@ -328,6 +374,52 @@ export class SharingOperationService implements ISharingOperationService {
    * @returns Parsed Date object.
    * @throws AppError if date format is invalid.
    */
+  /**
+   * Read the EAN header row (sheet row 2) from the CELLS, keeping their type.
+   *
+   * NOT from `sheet_to_json`, and this is the whole point. SheetJS returns a
+   * numeric cell as a JS number, and an 18-digit EAN is far past
+   * Number.MAX_SAFE_INTEGER: `541448200000000001` arrives as
+   * `541448200000000000`. That matched no authorized EAN, so the column was
+   * dropped in silence and a whole meter's month of consumption disappeared
+   * from an upload that still returned 200.
+   *
+   * There is no lossless recovery. `.w` is derived from the already-rounded
+   * `.v` and renders General-formatted big numbers as "5.41448E+17", so
+   * `raw: false` is worse, not better — and it would also stringify column A,
+   * which `parseExcelDate` needs as a numeric serial. The digits are gone
+   * inside the file. So the type is carried out of here and the caller rejects
+   * the workbook instead of guessing.
+   *
+   * Indices are relative to the sheet range's first column, matching
+   * `sheet_to_json`'s own `hdr[C] = C - r.s.c`, so they line up with
+   * `headers[index]` even when the range does not start at A1.
+   */
+  private readEanRow(sheet: xlsx.WorkSheet): { text: string | null; numeric: boolean }[] {
+    const ref = sheet["!ref"] as string | undefined;
+    if (!ref) return [];
+
+    const range = xlsx.utils.decode_range(ref);
+    const row = range.s.r + 1;
+    const cells: { text: string | null; numeric: boolean }[] = [];
+
+    for (let column = range.s.c; column <= range.e.c; column++) {
+      const cell = sheet[xlsx.utils.encode_cell({ r: row, c: column })] as xlsx.CellObject | undefined;
+      if (!cell || cell.v === undefined || cell.v === null) {
+        cells.push({ text: null, numeric: false });
+      } else if (cell.t === "n" && typeof cell.v === "number") {
+        // Already wrong in the file; rendered without an exponent only so the
+        // error message names something the operator can recognise.
+        cells.push({ text: Number.isFinite(cell.v) ? cell.v.toFixed(0) : null, numeric: true });
+      } else {
+        const text = String(cell.v).trim();
+        cells.push({ text: text || null, numeric: false });
+      }
+    }
+
+    return cells;
+  }
+
   private parseExcelDate(date: string | number): Date {
     if (typeof date === "number") {
       // Excel dates are days since 1900-01-01. JS is ms since 1970.
@@ -727,6 +819,14 @@ export class SharingOperationService implements ISharingOperationService {
     if (!sharingOp) {
       logger.error({ operation: "patchKeyStatus" }, `Sharing Operation with Id (${id_sharing}) was not found`);
       throw new AppError(SHARING_OPERATION_ERRORS.PATCH_KEY_STATUS.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+
+    // 2. The key must be one of the caller's own (the lookup is community-scoped): approving another
+    // community's key would link it to this operation and expose its name and description.
+    const key = await this.keyRepository.getKeyById(id_key, query_runner);
+    if (!key) {
+      logger.warn({ operation: "patchKeyStatus", id_key }, "Allocation key not found or not accessible");
+      throw new AppError(SHARING_OPERATION_ERRORS.PATCH_KEY_STATUS.ALLOCATION_KEY_NOT_FOUND, 400);
     }
 
     const newStartDate = new Date(date);

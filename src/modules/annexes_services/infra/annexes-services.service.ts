@@ -1,7 +1,5 @@
 import { inject, injectable } from "inversify";
 import { plainToInstance } from "class-transformer";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type { QueryRunner } from "typeorm";
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
@@ -12,64 +10,30 @@ import { Transactional } from "../../../shared/transactional/transaction.uow.js"
 import type { IAuthContextRepository } from "../../../shared/context/i-authcontext.repository.js";
 import type { IAnnexesServicesRepository } from "../domain/i-annexes-services.repository.js";
 import type { IAnnexesServicesService } from "../domain/i-annexes-services.service.js";
-import type { AnnexCatalogEntry, AnnexCatalogFile } from "../domain/annexes-services.types.js";
+import type { AnnexCatalog, AnnexCatalogEntry } from "../domain/annexes-services.types.js";
 import { CommunityAnnexDTO } from "../api/annexes-services.dtos.js";
 import { ANNEXES_SERVICES_ERRORS } from "../shared/annexes-services.errors.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 
-const CATALOG_PATH = resolve(process.cwd(), "config", "annexes-services.json");
-
 /**
- * Loads `config/annexes-services.json` once, freezes the result, and serves
- * read-only views of the catalog. The catalog is process-static; reload requires
- * a service restart.
+ * Serves the annex catalog as this deployment resolved it, injected as
+ * "AnnexCatalog" (see `shared/annexes-catalog.ts`): the listing and new
+ * subscriptions see only the ENABLED entries, unsubscribe sees every entry in
+ * the file. The catalog is process-static; reload requires a service restart.
+ *
+ * Disabling an annex does not revoke existing subscribers - the annex services
+ * gate on the `community_subscription` row, not on this catalog.
  */
 @injectable()
 export class AnnexesServicesService implements IAnnexesServicesService {
-  private readonly catalog: ReadonlyArray<AnnexCatalogEntry>;
-
   constructor(
     @inject("AnnexesServicesRepository") private readonly annexesRepository: IAnnexesServicesRepository,
     @inject("AuthContext") private readonly authContext: IAuthContextRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
-  ) {
-    this.catalog = AnnexesServicesService.loadCatalog();
-    logger.info({ operation: "annexes_services:catalog_loaded", count: this.catalog.length }, "Annex services catalog loaded");
-  }
-
-  private static loadCatalog(): ReadonlyArray<AnnexCatalogEntry> {
-    let raw: string;
-    try {
-      raw = readFileSync(CATALOG_PATH, "utf-8");
-    } catch (err) {
-      logger.error({ operation: "annexes_services:catalog_read", error: err, path: CATALOG_PATH }, "Failed to read annexes-services catalog");
-      throw new AppError(ANNEXES_SERVICES_ERRORS.CATALOG.LOAD_FAILED, 500);
-    }
-    let parsed: AnnexCatalogFile;
-    try {
-      parsed = JSON.parse(raw) as AnnexCatalogFile;
-    } catch (err) {
-      logger.error({ operation: "annexes_services:catalog_parse", error: err }, "Failed to parse annexes-services catalog JSON");
-      throw new AppError(ANNEXES_SERVICES_ERRORS.CATALOG.LOAD_FAILED, 500);
-    }
-    if (!parsed || !Array.isArray(parsed.modules)) {
-      logger.error({ operation: "annexes_services:catalog_validate" }, "annexes-services catalog must define a `modules` array");
-      throw new AppError(ANNEXES_SERVICES_ERRORS.CATALOG.INVALID_FORMAT, 500);
-    }
-    const knownRoles = new Set<string>(Object.keys(ROLE_HIERARCHY));
-    for (const entry of parsed.modules) {
-      if (!knownRoles.has(entry.minRole)) {
-        logger.error(
-          { operation: "annexes_services:catalog_validate", feature: entry.feature, minRole: entry.minRole },
-          "Catalog entry has unknown minRole",
-        );
-        throw new AppError(ANNEXES_SERVICES_ERRORS.CATALOG.INVALID_FORMAT, 500);
-      }
-    }
-    return Object.freeze(parsed.modules.map((m) => Object.freeze({ ...m })));
-  }
+    @inject("AnnexCatalog") private readonly catalog: AnnexCatalog,
+  ) {}
 
   async getCommunityServices(): Promise<CommunityAnnexDTO[]> {
     const role = this.requireRole();
@@ -83,7 +47,11 @@ export class AnnexesServicesService implements IAnnexesServicesService {
 
   @Transactional()
   async subscribe(feature: string, query_runner?: QueryRunner): Promise<void> {
-    this.requireFeatureInCatalog(feature);
+    if (this.isDisabled(feature)) {
+      // Same 404 as an unknown name on the wire; the log is what tells them apart.
+      logger.info({ operation: "annexes_services:subscribe", feature, reason: "hidden" }, "Feature is disabled in this deployment");
+    }
+    this.requireFeatureInCatalog(this.catalog.enabled, feature);
     const internal_community_id = await this.authContext.getInternalCommunityId();
     const existing = await this.annexesRepository.findByCommunityAndFeature(internal_community_id, feature, query_runner);
     if (existing !== null) {
@@ -121,7 +89,10 @@ export class AnnexesServicesService implements IAnnexesServicesService {
 
   @Transactional()
   async unsubscribe(feature: string, query_runner?: QueryRunner): Promise<void> {
-    this.requireFeatureInCatalog(feature);
+    // Every entry in the file, enabled or not: a community that subscribed before
+    // the annex was disabled must still be able to leave, and leaving is what ends
+    // its access (the annex keeps serving an active subscription row).
+    this.requireFeatureInCatalog(this.catalog.all, feature);
     const internal_community_id = await this.authContext.getInternalCommunityId();
     const existing = await this.annexesRepository.findByCommunityAndFeature(internal_community_id, feature, query_runner);
     if (existing === null || !existing.is_active) {
@@ -141,10 +112,15 @@ export class AnnexesServicesService implements IAnnexesServicesService {
     logger.info({ operation: "annexes_services:unsubscribe", feature, id_community: internal_community_id }, "Community unsubscribed from feature");
   }
 
-  private requireFeatureInCatalog(feature: string): void {
-    if (!this.catalog.some((entry) => entry.feature === feature)) {
+  private requireFeatureInCatalog(entries: ReadonlyArray<AnnexCatalogEntry>, feature: string): void {
+    if (!entries.some((entry) => entry.feature === feature)) {
       throw new AppError(ANNEXES_SERVICES_ERRORS.SUBSCRIPTION.FEATURE_NOT_FOUND, 404);
     }
+  }
+
+  /** In the catalog file, but switched off for this deployment. */
+  private isDisabled(feature: string): boolean {
+    return this.catalog.all.some((entry) => entry.feature === feature) && !this.catalog.enabled.some((entry) => entry.feature === feature);
   }
 
   private requireRole(): Role {
@@ -157,6 +133,6 @@ export class AnnexesServicesService implements IAnnexesServicesService {
 
   private filterByRole(role: Role): AnnexCatalogEntry[] {
     const userLevel = ROLE_HIERARCHY[role];
-    return this.catalog.filter((entry) => userLevel >= ROLE_HIERARCHY[entry.minRole]);
+    return this.catalog.enabled.filter((entry) => userLevel >= ROLE_HIERARCHY[entry.minRole]);
   }
 }

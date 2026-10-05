@@ -163,30 +163,35 @@ describe("(Unit) Member Module", () => {
   describe("(Unit) Update Member", () => {
     useUnitTestDb();
 
-    it.each(testCasesUpdateMember)("PUT /members/ : $description", async ({ body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
-      if (mocks?.memberRepo) await mockMemberRepositoryModule(mocks.memberRepo);
-      if (mocks?.addressRepo) await mockAddressRepositoryModule(mocks.addressRepo);
+    it.each(testCasesUpdateMember)(
+      "PUT /members/ : $description",
+      async ({ body, status_code, expected_error_code, expected_data, expected_not_called, mocks, orgs }) => {
+        if (mocks?.memberRepo) await mockMemberRepositoryModule(mocks.memberRepo);
+        if (mocks?.addressRepo) await mockAddressRepositoryModule(mocks.addressRepo);
+        if (mocks?.meterRepo) await mockMeterRepositoryModule(mocks.meterRepo);
 
-      const appModule = await import("../../../src/app.js");
-      const app = appModule.default;
-      const i18next = appModule.i18next;
-      const response = await request(app)
-        .put("/members/")
-        .send(body)
-        .set("x-user-id", "1")
-        .set("x-community-id", AUTH_COMMUNITY_1)
-        .set("x-user-orgs", orgs);
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
+        const i18next = appModule.i18next;
+        const response = await request(app)
+          .put("/members/")
+          .send(body)
+          .set("x-user-id", "1")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
-      await expectWithLog(response, () => {
-        expect(response.status).toBe(status_code);
-        expect(response.body.error_code).toBe(expected_error_code);
-        let result = expected_data;
-        if (response.status !== 200) {
-          result = i18next.t(expected_data);
-        }
-        expect(response.body.data).toEqual(result);
-      });
-    });
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          let result = expected_data;
+          if (response.status !== 200) {
+            result = i18next.t(expected_data);
+          }
+          expect(response.body.data).toEqual(result);
+        });
+        for (const write of expected_not_called ?? []) expect(write).not.toHaveBeenCalled();
+      },
+    );
   });
 
   // --- PATCH MEMBER STATUS ---

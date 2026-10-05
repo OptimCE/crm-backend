@@ -17,6 +17,7 @@ import {
   ValidateNested,
 } from "class-validator";
 import { HOUSE_NUMBER_PATTERN } from "../../../shared/address/house-number.js";
+import { EAN_PATTERN, normaliseEan } from "../shared/ean.js";
 import { SharingOperationPartialDTO } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
@@ -479,11 +480,21 @@ export class CreateMeterDTO {
   // ========================================================================
 
   /**
-   * EAN Code (Unique Identifier).
+   * EAN Code (Unique Identifier). Exactly 18 digits.
+   *
+   * The ONLY position in the API that enforces the format, because it is the
+   * only one that mints a new EAN. Every other `EAN` on this surface identifies
+   * a meter that already exists, and a pattern there would make a legacy or odd
+   * EAN uneditable, undeactivatable and undeletable — see ../shared/ean.ts.
+   *
+   * `@Transform` runs during `plainToInstance`, before class-validator, so a
+   * pasted value with surrounding whitespace is normalised rather than rejected.
    */
   @Expose()
+  @Transform(({ value }) => (typeof value === "string" ? normaliseEan(value) : value))
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
+  @Matches(EAN_PATTERN, withError(METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT))
   EAN!: string;
 
   /**
@@ -554,6 +565,13 @@ export class CreateMeterDTO {
  * values back would silently overwrite real configuration.
  */
 export class UpdateMeterAddressDTO {
+  /**
+   * EAN of the meter to repoint.
+   *
+   * Deliberately NOT format-checked: this EAN identifies a meter that already
+   * exists. A pattern here would make a legacy or odd EAN unmanageable. See
+   * ../shared/ean.ts.
+   */
   @Expose()
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsNotEmpty(withError(METER_ERRORS.GENERIC_VALIDATION.EMPTY))
@@ -568,6 +586,10 @@ export class UpdateMeterAddressDTO {
 export class UpdateMeterDTO {
   /**
    * EAN Code (Unique Identifier).
+   *
+   * Deliberately NOT format-checked: this EAN identifies a meter that already
+   * exists. A pattern here would make a legacy or odd EAN unmanageable. See
+   * ../shared/ean.ts.
    */
   @Expose()
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
@@ -627,6 +649,10 @@ export class UpdateMeterDTO {
 export class PatchMeterDataDTO extends CreateMeterDataDTO {
   /**
    * EAN Code of the meter to update.
+   *
+   * Deliberately NOT format-checked: this EAN identifies a meter that already
+   * exists. A pattern here would make a legacy or odd EAN unmanageable. See
+   * ../shared/ean.ts.
    */
   @Expose()
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
@@ -642,6 +668,10 @@ export class PatchMeterDataDTO extends CreateMeterDataDTO {
 export class DeactivateMeterDTO {
   /**
    * EAN Code of the meter to deactivate.
+   *
+   * Deliberately NOT format-checked: this EAN identifies a meter that already
+   * exists. A pattern here would make a legacy or odd EAN unmanageable. See
+   * ../shared/ean.ts.
    */
   @Expose()
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))

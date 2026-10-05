@@ -45,14 +45,6 @@ export class DocumentRepository implements IDocumentRepository {
     return null;
   }
 
-  getDocumentByIdNIdMember(document_id: number, member_id: string, query_runner?: QueryRunner): Promise<Document | null> {
-    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
-    let qb = manager.createQueryBuilder(Document, "document");
-    withCommunityScope(qb, "document");
-    qb = qb.andWhere("document.id = :id", { id: document_id });
-    qb = qb.andWhere("document.id_member = :id", { id: member_id });
-    return qb.getOne();
-  }
   getDocumentById(document_id: number, query_runner?: QueryRunner): Promise<Document | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     let qb = manager.createQueryBuilder(Document, "document");

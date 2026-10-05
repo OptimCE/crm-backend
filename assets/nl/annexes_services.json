@@ -1,0 +1,11 @@
+{
+  "catalog": {
+    "load_failed": "De catalogus van de annexdiensten kon niet worden geladen",
+    "invalid_format": "De catalogus van de annexdiensten is ongeldig"
+  },
+  "subscription": {
+    "feature_not_found": "Deze annexdienst bestaat niet of is niet beschikbaar",
+    "already_subscribed": "De gemeenschap is al geabonneerd op deze annexdienst",
+    "not_subscribed": "De gemeenschap is niet geabonneerd op deze annexdienst"
+  }
+}

@@ -116,7 +116,11 @@ export class CommunityService implements ICommunityService {
 
   async getCommunityById(id: number): Promise<CommunityDetailDTO> {
     const result = await this.community_repository.getCommunityById(id);
-    if (!result) {
+    // Only its own members may read a community's record (bank and legal details included); anyone
+    // else gets the same 404 as for a community that does not exist. Membership is taken from the
+    // gateway-verified token orgs, the same source the role checks use.
+    const { orgs } = getContext();
+    if (!result || !orgs?.some((org) => org.orgId === result.community.auth_community_id)) {
       throw new AppError(COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND, 404);
     }
 
@@ -561,6 +565,17 @@ export class CommunityService implements ICommunityService {
     // Update the user role
     let updated_result: CommunityUser;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+    // Only an admin hands out the admin role or changes an admin's role: the route admits managers,
+    // who would otherwise be able to create admins or demote the community's own.
+    if (getContext().role !== Role.ADMIN) {
+      const is_admin_change =
+        patched_role.new_role === Role.ADMIN ||
+        (await this.community_repository.getCommunityUserRole(patched_role.id_user, internal_community_id, query_runner)) === Role.ADMIN;
+      if (is_admin_change) {
+        logger.warn({ operation: "patchRoleUser", id_user: patched_role.id_user }, "Only an admin can grant or change the admin role");
+        throw new AppError(COMMUNITY_ERRORS.UNAUTHORIZED, 403);
+      }
+    }
     try {
       updated_result = await this.updateUserRole(patched_role.id_user, internal_community_id, patched_role.new_role, query_runner!);
     } catch (err) {

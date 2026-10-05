@@ -72,6 +72,8 @@ export const MeterResponses = {
               EAN: "541448800000000000",
               meter_number: "12345678",
               status: 1, // Active
+              // Holder of the window in force; absent when that window has none.
+              holder: { id: 4, name: "Dupont SPRL", member_type: 2, status: 1 },
               address: {
                 street: "Rue de la Gare",
                 number: "10",

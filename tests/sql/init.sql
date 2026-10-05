@@ -253,7 +253,10 @@ CREATE TABLE IF NOT EXISTS meter (
     reading_frequency INT NOT NULL CHECK (reading_frequency IN (1, 2)),
     created_at TIMESTAMP DEFAULT current_timestamp,
     updated_at TIMESTAMP DEFAULT current_timestamp,
-    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE
+    id_community INT NOT NULL REFERENCES community (id) ON DELETE CASCADE,
+    -- A Belgian EAN is exactly 18 digits. See
+    -- database_script/2026-09-22_meter_ean_18_digits.sql.
+    CONSTRAINT chk_meter_ean_18_digits CHECK (ean ~ '^[0-9]{18}$')
 );
 CREATE INDEX idx_meter_community ON meter (id_community);
 

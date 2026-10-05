@@ -1,5 +1,6 @@
 {
   "add_consumption_data": {
+    "ean_cell_not_text": "De EAN-rij van het bestand is opgeslagen als getallen, waardoor Excel de laatste cijfers van de EAN's al heeft afgerond. Er is niets geïmporteerd: voer de EAN's in als tekst en upload het bestand opnieuw",
     "database_add": "Er is een fout opgetreden bij het toevoegen van de verbruiksgegevens aan de database",
     "no_meter_authorized": "Geen geldige meter gevonden"
   },
@@ -17,6 +18,7 @@
     "database_add": "Er is een fout opgetreden bij het toevoegen van de meter aan de deeloperatie in de database"
   },
   "create_sharing_operation": {
+    "unknown_municipality": "Een of meer gemeenten zijn onbekend",
     "database_add": "Er is een fout opgetreden bij het toevoegen van de deeloperatie aan de database"
   },
   "get_sharing_operation": {
@@ -24,7 +26,8 @@
   },
   "patch_key_status": {
     "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
-    "database_update": "Er is een fout opgetreden bij het bijwerken van de status gekoppeld aan de deeloperatie in de database"
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de status gekoppeld aan de deeloperatie in de database",
+    "allocation_key_not_found": "De verdeelsleutel kon niet worden gevonden"
   },
   "patch_meter_status": {
     "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
@@ -37,6 +40,9 @@
     "database_delete": "Er is een fout opgetreden bij het verwijderen van de deeloperatie uit de database"
   },
   "delete_meter_from_sharing": {
+    "date_required": "Een verwijderingsdatum is vereist",
+    "hard_delete_not_future": "De deelname van de meter aan de deeloperatie is al begonnen en kan niet meer worden verwijderd: haal de meter er in plaats daarvan vanaf een datum uit",
+    "database_delete": "Er is een fout opgetreden bij het verwijderen van de meter uit de deeloperatie in de database",
     "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
     "meter_not_in_community": "Een of meer meters behoren niet tot de gemeenschap",
     "latest_meter_data_not_found": "Geen geldige meterinformatie gevonden",
@@ -45,6 +51,24 @@
   },
   "get_sharing_operation_consumption": {
     "no_consumption_found": "Geen verbruik gevonden tussen deze twee datums"
+  },
+  "update_municipalities": {
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
+    "unknown_municipality": "Een of meer gemeenten zijn onbekend",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de gemeenten van de deeloperatie in de database",
+    "municipalities_required_for_public": "Een openbare deeloperatie moet minstens één gemeente behouden"
+  },
+  "update_sharing_operation": {
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
+    "unknown_municipality": "Een of meer gemeenten zijn onbekend",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de deeloperatie in de database",
+    "no_fields_to_update": "Er is geen veld opgegeven om bij te werken",
+    "municipalities_required_for_public": "Een openbare deeloperatie moet minstens één gemeente behouden"
+  },
+  "patch_visibility": {
+    "sharing_operation_not_found": "De deeloperatie kon niet worden gevonden",
+    "database_update": "Er is een fout opgetreden bij het bijwerken van de zichtbaarheid van de deeloperatie in de database",
+    "municipalities_required": "Voeg minstens één gemeente toe voordat u de deeloperatie openbaar maakt"
   },
   "validation": {
     "wrong_type": {

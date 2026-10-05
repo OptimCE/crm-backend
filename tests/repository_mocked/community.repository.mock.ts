@@ -17,6 +17,7 @@ export function createMockCommunityRepository(): jest.Mocked<ICommunityRepositor
     getOperationsWithoutValidKey: jest.fn(),
     getUsers: jest.fn(),
     patchRoleUser: jest.fn(),
+    getCommunityUserRole: jest.fn(),
     updateCommunity: jest.fn(),
   };
 }

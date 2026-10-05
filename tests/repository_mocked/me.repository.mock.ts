@@ -12,6 +12,7 @@ export function createMockMeRepository(): jest.Mocked<IMeRepository> {
     getMetersMap: jest.fn(),
     getMeterConsumptions: jest.fn(),
     getOwnMeterHoldings: jest.fn(),
+    getOwnEnergyTotals: jest.fn(),
     getKeysInForce: jest.fn(),
     getKeyIterations: jest.fn(),
     getKeyConsumersForEans: jest.fn(),

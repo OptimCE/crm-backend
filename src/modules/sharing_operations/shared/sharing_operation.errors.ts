@@ -5,6 +5,11 @@ export const SHARING_OPERATION_ERRORS = {
   ADD_CONSUMPTION_DATA: {
     DATABASE_ADD: new LocalError(70000, "sharing_operation:add_consumption_data.database_add"),
     NO_METER_AUTHORIZED: new LocalError(70001, "sharing_operation:add_consumption_data.no_meter_authorized"),
+    // 70040: next free in this module's operational block (70000-70039 taken;
+    // the 75xxx block is validation). NOTE, pre-existing and deliberately not
+    // fixed here: 70001 above is ALSO used by
+    // PARSE_EXCEL_DATA.INVALID_DATE_FORMAT.
+    EAN_CELL_NOT_TEXT: new LocalError(70040, "sharing_operation:add_consumption_data.ean_cell_not_text"),
   },
   PARSE_EXCEL_DATA: {
     INVALID_DATE_FORMAT: new LocalError(70001, "sharing_operation:parse_excel_data.invalid_date_format"),
@@ -42,6 +47,8 @@ export const SHARING_OPERATION_ERRORS = {
   PATCH_KEY_STATUS: {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70010, "sharing_operation:patch_key_status.sharing_operation_not_found"),
     DATABASE_UPDATE: new LocalError(70011, "sharing_operation:patch_key_status.database_update"),
+    // 70041-70049 left free for the consumption-upload codes being added next to 70040.
+    ALLOCATION_KEY_NOT_FOUND: new LocalError(70050, "sharing_operation:patch_key_status.allocation_key_not_found"),
   },
   PATCH_METER_STATUS: {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70012, "sharing_operation:patch_meter_status.sharing_operation_not_found"),

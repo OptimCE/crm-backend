@@ -113,6 +113,14 @@ export class DocumentService implements IDocumentService {
    */
   @Transactional()
   async uploadDocument(upload_data: UploadDocumentDTO, query_runner?: QueryRunner): Promise<void> {
+    // The member must be one of the caller's community (the lookup is scoped). Checked before the
+    // upload so a refused request leaves nothing behind in storage.
+    const member = await this.memberRepository.getMember(upload_data.id_member, query_runner);
+    if (!member) {
+      logger.warn({ operation: "uploadDocument", id_member: upload_data.id_member }, "Member not found in the caller's community");
+      throw new AppError(DOCUMENT_ERRORS.UPLOAD_DOCUMENT.MEMBER_NOT_FOUND, 400);
+    }
+
     // Upload to storage service
     let result: UploadedDocument;
     try {

@@ -1,5 +1,6 @@
 {
   "add_consumption_data": {
+    "ean_cell_not_text": "The EAN row of the file is stored as numbers, so Excel has already rounded off the last digits of the EANs. Nothing was imported: enter the EANs as text and upload the file again",
     "database_add": "An error occurred while adding the consumption data to the database",
     "no_meter_authorized": "No valid meter was found"
   },
@@ -17,6 +18,7 @@
     "database_add": "An error occurred while adding the meter to the sharing operation in the database"
   },
   "create_sharing_operation": {
+    "unknown_municipality": "One or more municipalities are unknown",
     "database_add": "An error occurred while adding the sharing operation to the database"
   },
   "get_sharing_operation": {
@@ -24,7 +26,8 @@
   },
   "patch_key_status": {
     "sharing_operation_not_found": "The sharing operation could not be found",
-    "database_update": "An error occurred while updating the status associated with the sharing operation in the database"
+    "database_update": "An error occurred while updating the status associated with the sharing operation in the database",
+    "allocation_key_not_found": "The allocation key could not be found"
   },
   "patch_meter_status": {
     "sharing_operation_not_found": "The sharing operation could not be found",
@@ -37,6 +40,9 @@
     "database_delete": "An error occurred while deleting the sharing operation from the database"
   },
   "delete_meter_from_sharing": {
+    "date_required": "A removal date is required",
+    "hard_delete_not_future": "The meter's participation in the sharing operation has already started, so it can no longer be deleted: remove the meter from a date instead",
+    "database_delete": "An error occurred while removing the meter from the sharing operation in the database",
     "sharing_operation_not_found": "The sharing operation could not be found",
     "meter_not_in_community": "One or more meters do not belong to the community",
     "latest_meter_data_not_found": "No valid meter information was found",
@@ -45,6 +51,24 @@
   },
   "get_sharing_operation_consumption": {
     "no_consumption_found": "No consumption found between these two dates"
+  },
+  "update_municipalities": {
+    "sharing_operation_not_found": "The sharing operation could not be found",
+    "unknown_municipality": "One or more municipalities are unknown",
+    "database_update": "An error occurred while updating the municipalities of the sharing operation in the database",
+    "municipalities_required_for_public": "A public sharing operation must keep at least one municipality"
+  },
+  "update_sharing_operation": {
+    "sharing_operation_not_found": "The sharing operation could not be found",
+    "unknown_municipality": "One or more municipalities are unknown",
+    "database_update": "An error occurred while updating the sharing operation in the database",
+    "no_fields_to_update": "No field to update was provided",
+    "municipalities_required_for_public": "A public sharing operation must keep at least one municipality"
+  },
+  "patch_visibility": {
+    "sharing_operation_not_found": "The sharing operation could not be found",
+    "database_update": "An error occurred while updating the visibility of the sharing operation in the database",
+    "municipalities_required": "Add at least one municipality before making the sharing operation public"
   },
   "validation": {
     "wrong_type": {

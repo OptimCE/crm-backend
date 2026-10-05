@@ -30,7 +30,7 @@ export class MemberPartialQuery extends PaginationQuery {
    * Filter by member status (e.g., ACTIVE, INACTIVE).
    */
   @Type(() => Number)
-  @IsEnum(MemberType, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_TYPE))
+  @IsEnum(MemberStatus, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_STATUS))
   @IsOptional()
   status?: MemberStatus;
 
@@ -270,7 +270,7 @@ export class CreateMemberDTO {
    */
   @Expose()
   @Type(() => Number)
-  @IsEnum(MemberType, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_TYPE))
+  @IsEnum(MemberStatus, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_STATUS))
   @IsNotEmpty(withError(MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY))
   status!: MemberStatus;
 
@@ -410,7 +410,7 @@ export class UpdateMemberDTO {
    */
   @Expose()
   @Type(() => Number)
-  @IsEnum(MemberType, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_TYPE))
+  @IsEnum(MemberStatus, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_STATUS))
   @IsOptional()
   status?: MemberStatus;
 
@@ -528,7 +528,7 @@ export class PatchMemberStatusDTO {
    * New status.
    */
   @Expose()
-  @IsEnum(MemberType, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_TYPE))
+  @IsEnum(MemberStatus, withError(MEMBER_ERRORS.VALIDATION.WRONG_TYPE.MEMBER_STATUS))
   @IsNotEmpty(withError(MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY))
   status!: MemberStatus;
 }

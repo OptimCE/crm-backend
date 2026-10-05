@@ -23,6 +23,17 @@ import {
 } from "./member.dtos.js";
 const memberControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
+/**
+ * The meter views that name a meter's holder (the member's name and status). A rename, a status
+ * change or a deletion must clear them too, or the old holder stays on them until the TTL expires.
+ */
+const METER_VIEWS_NAMING_HOLDER = [
+  cachePattern("meters:list", "community"),
+  cachePattern("meters:map", "community"),
+  cachePattern("meters:detail", "community"),
+  cachePattern("sharing-op:meters", "community"),
+];
+
 @injectable()
 export class MemberController {
   constructor(@inject("MemberService") private member_service: IMemberService) {}
@@ -93,7 +104,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("addMember", { url: "/members/", method: "put" })
-  @InvalidateCache([cachePattern("members:list", "community"), cachePattern("members:detail", "community")])
+  @InvalidateCache([cachePattern("members:list", "community"), cachePattern("members:detail", "community"), ...METER_VIEWS_NAMING_HOLDER])
   async updateMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const updated_member: UpdateMemberDTO = await validateDto(UpdateMemberDTO, req.body);
     await this.member_service.updateMember(updated_member);
@@ -108,7 +119,7 @@ export class MemberController {
    * @param _next - Express next middleware.
    */
   @memberControllerTraceDecorator.traceSpan("patchMemberStatus", { url: "/members/status", method: "patch" })
-  @InvalidateCache([cachePattern("members:list", "community"), cachePattern("members:detail", "community")])
+  @InvalidateCache([cachePattern("members:list", "community"), cachePattern("members:detail", "community"), ...METER_VIEWS_NAMING_HOLDER])
   async patchMemberStatus(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const patched_member_status: PatchMemberStatusDTO = await validateDto(PatchMemberStatusDTO, req.body);
     await this.member_service.patchMemberStatus(patched_member_status);
@@ -142,6 +153,7 @@ export class MemberController {
     cachePattern("members:list", "community"),
     cachePattern("members:detail", "community"),
     cachePattern("members:link", "community"),
+    ...METER_VIEWS_NAMING_HOLDER,
   ])
   async deleteMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.member_service.deleteMember(+req.params.id_member);

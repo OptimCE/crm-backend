@@ -1,5 +1,6 @@
 {
   "add_consumption_data": {
+    "ean_cell_not_text": "Die EAN-Zeile der Datei ist als Zahlen gespeichert, daher hat Excel die letzten Ziffern der EANs bereits gerundet. Es wurde nichts importiert: Geben Sie die EANs als Text ein und laden Sie die Datei erneut hoch",
     "database_add": "Beim Hinzufügen der Verbrauchsdaten zur Datenbank ist ein Fehler aufgetreten",
     "no_meter_authorized": "Kein gültiger Zähler gefunden"
   },
@@ -17,6 +18,7 @@
     "database_add": "Beim Hinzufügen des Zählers zur Teilungsoperation in der Datenbank ist ein Fehler aufgetreten"
   },
   "create_sharing_operation": {
+    "unknown_municipality": "Eine oder mehrere Gemeinden sind unbekannt",
     "database_add": "Beim Hinzufügen der Teilungsoperation zur Datenbank ist ein Fehler aufgetreten"
   },
   "get_sharing_operation": {
@@ -24,7 +26,8 @@
   },
   "patch_key_status": {
     "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
-    "database_update": "Beim Aktualisieren des mit der Teilungsoperation verknüpften Status in der Datenbank ist ein Fehler aufgetreten"
+    "database_update": "Beim Aktualisieren des mit der Teilungsoperation verknüpften Status in der Datenbank ist ein Fehler aufgetreten",
+    "allocation_key_not_found": "Der Verteilungsschlüssel konnte nicht gefunden werden"
   },
   "patch_meter_status": {
     "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
@@ -37,6 +40,9 @@
     "database_delete": "Beim Löschen der Teilungsoperation aus der Datenbank ist ein Fehler aufgetreten"
   },
   "delete_meter_from_sharing": {
+    "date_required": "Ein Entfernungsdatum ist erforderlich",
+    "hard_delete_not_future": "Die Teilnahme des Zählers an der Teilungsoperation hat bereits begonnen und kann nicht mehr gelöscht werden: Entfernen Sie den Zähler stattdessen ab einem Datum",
+    "database_delete": "Beim Entfernen des Zählers aus der Teilungsoperation in der Datenbank ist ein Fehler aufgetreten",
     "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
     "meter_not_in_community": "Ein oder mehrere Zähler gehören nicht zur Gemeinschaft",
     "latest_meter_data_not_found": "Keine gültigen Zählerinformationen gefunden",
@@ -45,6 +51,24 @@
   },
   "get_sharing_operation_consumption": {
     "no_consumption_found": "Kein Verbrauch zwischen diesen beiden Daten gefunden"
+  },
+  "update_municipalities": {
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "unknown_municipality": "Eine oder mehrere Gemeinden sind unbekannt",
+    "database_update": "Beim Aktualisieren der Gemeinden der Teilungsoperation in der Datenbank ist ein Fehler aufgetreten",
+    "municipalities_required_for_public": "Eine öffentliche Teilungsoperation muss mindestens eine Gemeinde behalten"
+  },
+  "update_sharing_operation": {
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "unknown_municipality": "Eine oder mehrere Gemeinden sind unbekannt",
+    "database_update": "Beim Aktualisieren der Teilungsoperation in der Datenbank ist ein Fehler aufgetreten",
+    "no_fields_to_update": "Es wurde kein zu aktualisierendes Feld angegeben",
+    "municipalities_required_for_public": "Eine öffentliche Teilungsoperation muss mindestens eine Gemeinde behalten"
+  },
+  "patch_visibility": {
+    "sharing_operation_not_found": "Die Teilungsoperation konnte nicht gefunden werden",
+    "database_update": "Beim Aktualisieren der Sichtbarkeit der Teilungsoperation in der Datenbank ist ein Fehler aufgetreten",
+    "municipalities_required": "Fügen Sie mindestens eine Gemeinde hinzu, bevor Sie die Teilungsoperation öffentlich machen"
   },
   "validation": {
     "wrong_type": {

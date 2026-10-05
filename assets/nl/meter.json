@@ -6,6 +6,11 @@
   "delete_meter": {
     "database_delete": "Er is een fout opgetreden bij het verwijderen van de meter uit de database"
   },
+  "delete_meter_data": {
+    "not_found": "Metergegevens niet gevonden",
+    "delete_database": "Er is een fout opgetreden bij het verwijderen van de metergegevens uit de database",
+    "update_database": "Er is een fout opgetreden bij het bijwerken van de metergegevens in de database"
+  },
   "download_meter_consumptions": {
     "no_consumptions": "Geen verbruiksgegevens gevonden",
     "download_name": "verbruiksgegevens"
@@ -15,7 +20,10 @@
     "database_update": "Er is een fout opgetreden bij het bijwerken van de metergegevens in de database"
   },
   "add_meter_data": {
-    "conflict_config_already_existing": "Er bestaan al metergegevens voor deze periode"
+    "conflict_config_already_existing": "Er bestaan al metergegevens voor deze periode",
+    "meter_not_found": "Meter niet gevonden",
+    "member_not_found": "Lid niet gevonden",
+    "sharing_operation_not_found": "Deeloperatie niet gevonden"
   },
   "get_meter": {
     "meter_not_found": "Meter niet gevonden"
@@ -24,7 +32,12 @@
     "database_update": "Er is een fout opgetreden bij het bijwerken van de metergegevens in de database"
   },
   "validation": {
+    "create_meter": {
+      "phase_number_min_1": "Het aantal fasen moet minstens 1 zijn",
+      "ean_format": "De EAN moet precies 18 cijfers bevatten"
+    },
     "wrong_type": {
+      "sharing_operation_meter_query_type": "Het veld '{{field}}' moet van het type 'SharingOperationMeterQueryType' zijn",
       "meter_data_status": "Het veld '{{field}}' moet van het type 'MeterDataStatus' zijn",
       "meter_rate": "Het veld '{{field}}' moet van het type 'MeterRate' zijn",
       "client_type": "Het veld '{{field}}' moet van het type 'ClientType' zijn",

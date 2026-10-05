@@ -341,6 +341,16 @@ export class MemberService implements IMemberService {
       throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.MEMBER_NOT_FOUND, 400);
     }
 
+    // 2. Same integrity guard as patchMemberStatus, checked before any write. Only a change
+    // TO INACTIVE is refused: PENDING is never blocked, and re-sending INACTIVE is not a change.
+    if (update_dto.status === MemberStatus.INACTIVE && member.status !== MemberStatus.INACTIVE) {
+      const active_meters = await this.meter_repository.countActiveMeterDataForMember(update_dto.id, query_runner);
+      if (active_meters > 0) {
+        logger.warn({ operation: "updateMember", id_member: update_dto.id }, "Cannot deactivate a member that still has active meters");
+        throw new AppError(MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS, 409);
+      }
+    }
+
     if (update_dto.name) member.name = update_dto.name;
     if (update_dto.status) member.status = update_dto.status;
     if (update_dto.iban) member.IBAN = update_dto.iban;

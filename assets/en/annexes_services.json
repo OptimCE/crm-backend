@@ -1,0 +1,11 @@
+{
+  "catalog": {
+    "load_failed": "The annex service catalogue could not be loaded",
+    "invalid_format": "The annex service catalogue is invalid"
+  },
+  "subscription": {
+    "feature_not_found": "This annex service does not exist or is not available",
+    "already_subscribed": "The community is already subscribed to this annex service",
+    "not_subscribed": "The community is not subscribed to this annex service"
+  }
+}

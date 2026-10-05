@@ -8,7 +8,8 @@
   },
   "upload_document": {
     "storage_service_upload": "Une erreur est survenue lors de l'upload du document auprès du service de stockage",
-    "database_upload": "Une erreur est survenue lors de l'ajout du nouveau document dans la base de données"
+    "database_upload": "Une erreur est survenue lors de l'ajout du nouveau document dans la base de données",
+    "member_not_found": "Le membre est introuvable"
   },
   "validation": {
     "upload_document": {

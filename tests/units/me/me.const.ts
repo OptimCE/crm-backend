@@ -5,6 +5,7 @@ import type { Member } from "../../../src/modules/members/domain/member.models.j
 import type { Document } from "../../../src/modules/documents/domain/document.models.js";
 import type { Meter } from "../../../src/modules/meters/domain/meter.models.js";
 import type { Address } from "../../../src/shared/address/address.models.js";
+import { AddressGeocodeStatus } from "../../../src/shared/address/address.types.js";
 import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 import type { User } from "../../../src/modules/users/domain/user.models.js";
 import type { GestionnaireInvitation, UserMemberInvitation } from "../../../src/modules/invitations/domain/invitation.models.js";
@@ -30,12 +31,21 @@ import { mockIndividualEntity as mockMemberIndividualEntity } from "../member/me
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 
-const mockAddress = {
+const mockAddress: Address = {
   id: 1,
   street: "Main St",
-  number: 1,
+  number: "1",
   city: "Brussels",
   postcode: "1000",
+  country: "BE",
+  best_address_id: null,
+  latitude: null,
+  longitude: null,
+  geo_precision: null,
+  geo_source: null,
+  geocoded_at: null,
+  geocode_status: AddressGeocodeStatus.NEVER,
+  community: null,
   created_at: mockDate,
   updated_at: mockDate,
 };
@@ -51,8 +61,8 @@ export const mockIndividualEntity: Member = {
   member_type: MemberType.INDIVIDUAL,
   created_at: mockDate,
   updated_at: mockDate,
-  home_address: mockAddress as Address,
-  billing_address: mockAddress as Address,
+  home_address: mockAddress,
+  billing_address: mockAddress,
   community: mockCommunity as Community,
   individual_details: {
     id: 1,
@@ -104,7 +114,7 @@ export const mockMeterEntity: Meter = {
   reading_frequency: ReadingFrequency.MONTHLY,
   created_at: mockDate,
   updated_at: mockDate,
-  address: mockAddress as Address,
+  address: mockAddress,
   community: mockCommunity as Community,
   meter_data: [
     {

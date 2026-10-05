@@ -1,0 +1,5 @@
+{
+  "export": {
+    "too_large": "Zu viele Einträge zum Exportieren: Schränken Sie die Filter ein und versuchen Sie es erneut"
+  }
+}

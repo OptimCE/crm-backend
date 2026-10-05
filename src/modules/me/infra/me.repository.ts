@@ -747,7 +747,8 @@ export class MeRepository implements IMeRepository {
       .leftJoinAndSelect("member.company_details", "company")
       .leftJoinAndSelect("company.manager", "comp_manager");
 
-    qb.where("invitation.id = :id", { id });
+    // andWhere, not where: `.where()` would replace the user condition the scope added above.
+    qb.andWhere("invitation.id = :id", { id });
 
     // 3. Execute and Extract
     const invitation = await qb.getOne();

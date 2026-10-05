@@ -31,7 +31,8 @@
   },
   "validation": {
     "wrong_type": {
-      "member_type": "The field '{{field}}' must be of type 'MemberType'"
+      "member_type": "The field '{{field}}' must be of type 'MemberType'",
+      "member_status": "The field '{{field}}' must be of type 'MemberStatus'"
     }
   }
 }
