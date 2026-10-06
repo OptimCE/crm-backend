@@ -8,7 +8,8 @@
   },
   "upload_document": {
     "storage_service_upload": "An error occurred while uploading the document to the storage service",
-    "database_upload": "An error occurred while adding the new document to the database"
+    "database_upload": "An error occurred while adding the new document to the database",
+    "member_not_found": "The member could not be found"
   },
   "validation": {
     "upload_document": {

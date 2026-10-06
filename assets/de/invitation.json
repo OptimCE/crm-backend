@@ -9,7 +9,7 @@
     "delete_invitation_failed": "Beim Löschen der Einladung ist ein Fehler aufgetreten"
   },
   "accept_invitation_member": {
-    "invitation_manager_not_found": "Die Einladung konnte nicht gefunden werden",
+    "invitation_member_not_found": "Die Einladung konnte nicht gefunden werden",
     "mismatch_user_id": "Diese Einladung ist nicht an Sie gerichtet",
     "database_save_user_member_link": "Beim Hinzufügen der Mitgliederverknüpfung in der Datenbank ist ein Fehler aufgetreten",
     "database_save_user_community": "Beim Hinzufügen zur Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
@@ -17,7 +17,7 @@
     "delete_invitation_failed": "Beim Löschen der Einladung ist ein Fehler aufgetreten"
   },
   "accept_invitation_member_encoded": {
-    "invitation_manager_not_found": "Die Einladung konnte nicht gefunden werden",
+    "invitation_member_not_found": "Die Einladung konnte nicht gefunden werden",
     "mismatch_user_id": "Diese Einladung ist nicht an Sie gerichtet",
     "database_save_user_member_link": "Beim Hinzufügen der Mitgliederverknüpfung in der Datenbank ist ein Fehler aufgetreten",
     "database_save_user_community": "Beim Hinzufügen zur Gemeinschaft in der Datenbank ist ein Fehler aufgetreten",
@@ -42,6 +42,9 @@
   },
   "invite_user_to_become_member": {
     "database_save": "Beim Speichern der Einladung in der Datenbank ist ein Fehler aufgetreten"
+  },
+  "get_own_member_invitation_by_id": {
+    "not_found": "Die Einladung konnte nicht gefunden werden"
   },
   "validation": {
     "user_member_invitation_query": {

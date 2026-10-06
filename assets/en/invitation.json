@@ -9,7 +9,7 @@
     "delete_invitation_failed": "An error occurred while deleting the invitation"
   },
   "accept_invitation_member": {
-    "invitation_manager_not_found": "The invitation could not be found",
+    "invitation_member_not_found": "The invitation could not be found",
     "mismatch_user_id": "This invitation is not addressed to you",
     "database_save_user_member_link": "An error occurred while adding the member link in the database",
     "database_save_user_community": "An error occurred while adding to the community in the database",
@@ -17,7 +17,7 @@
     "delete_invitation_failed": "An error occurred while deleting the invitation"
   },
   "accept_invitation_member_encoded": {
-    "invitation_manager_not_found": "The invitation could not be found",
+    "invitation_member_not_found": "The invitation could not be found",
     "mismatch_user_id": "This invitation is not addressed to you",
     "database_save_user_member_link": "An error occurred while adding the member link in the database",
     "database_save_user_community": "An error occurred while adding to the community in the database",
@@ -42,6 +42,9 @@
   },
   "invite_user_to_become_member": {
     "database_save": "An error occurred while saving the invitation to the database"
+  },
+  "get_own_member_invitation_by_id": {
+    "not_found": "The invitation could not be found"
   },
   "validation": {
     "user_member_invitation_query": {

@@ -6,6 +6,8 @@ import type { CreateMeterDTO, MeterConsumptionQuery, MeterMapQuery, MeterPartial
 export interface IMeterRepository {
   addMeterConsumptions(id_sharing: number, consumptions: (Partial<MeterConsumption> & { ean: string })[], query_runner?: QueryRunner): Promise<void>;
   addMeterData(ean: string, new_data: Partial<MeterData>, query_runner?: QueryRunner): Promise<MeterData>;
+  /** Whether the EAN exists in ANY community (EANs are globally unique); for duplicate checks only. */
+  isEanRegistered(ean: string, query_runner?: QueryRunner): Promise<boolean>;
   areMetersInCommunity(eans: string[], query_runner?: QueryRunner): Promise<boolean>;
   getLastMeterData(ean: string, query_runner?: QueryRunner): Promise<MeterData | null>;
   countActiveMeterDataForMember(memberId: number, query_runner?: QueryRunner): Promise<number>;

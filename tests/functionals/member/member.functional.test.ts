@@ -120,23 +120,32 @@ describe("(Functional) Member Module", () => {
 
   // --- UPDATE MEMBER ---
   describe("(Functional) Update Member", () => {
-    it.each(testCasesUpdateMember)("PUT /members/ : $description", async ({ body, orgs, status_code, expected_error_code, expected_data }) => {
-      const appModule = await import("../../../src/app.js");
-      const app = appModule.default;
+    it.each(testCasesUpdateMember)(
+      "PUT /members/ : $description",
+      async ({ body, orgs, status_code, expected_error_code, expected_data, expected_member }) => {
+        const appModule = await import("../../../src/app.js");
+        const app = appModule.default;
 
-      const response = await request(app)
-        .put("/members/")
-        .send(body)
-        .set("x-user-id", "auth0|admin")
-        .set("x-community-id", AUTH_COMMUNITY_1)
-        .set("x-user-orgs", orgs);
+        const response = await request(app)
+          .put("/members/")
+          .send(body)
+          .set("x-user-id", "auth0|admin")
+          .set("x-community-id", AUTH_COMMUNITY_1)
+          .set("x-user-orgs", orgs);
 
-      await expectWithLog(response, () => {
-        expect(response.status).toBe(status_code);
-        expect(response.body.error_code).toBe(expected_error_code);
-        if (expected_data) expect(response.body.data).toBe(expected_data);
-      });
-    });
+        await expectWithLog(response, () => {
+          expect(response.status).toBe(status_code);
+          expect(response.body.error_code).toBe(expected_error_code);
+          if (expected_data) expect(response.body.data).toBe(expected_data);
+        });
+
+        if (expected_member) {
+          const { AppDataSource } = await import("../../../src/shared/database/database.connector.js");
+          const rows = await AppDataSource.manager.query("SELECT name, status FROM member WHERE id = $1", [body.id]);
+          expect(rows).toEqual([expected_member]);
+        }
+      },
+    );
   });
 
   // --- PATCH MEMBER STATUS ---

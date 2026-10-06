@@ -403,6 +403,12 @@ export class CommunityRepository implements ICommunityRepository {
     return qb.skip(skip).take(take).getManyAndCount();
   }
 
+  async getCommunityUserRole(id_user: number, id_community: number, query_runner?: QueryRunner): Promise<Role | null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const communityUser = await manager.findOne(CommunityUser, { where: { id_user, id_community } });
+    return communityUser?.role ?? null;
+  }
+
   async patchRoleUser(id_user: number, id_community: number, new_role: Role, query_runner?: QueryRunner): Promise<CommunityUser> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 

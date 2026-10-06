@@ -15,7 +15,7 @@ import {
   testCasesPatchMeterData,
 } from "./meter.const.js";
 import { AUTH_COMMUNITY_1, ORGS_ADMIN } from "../../utils/shared.consts.js";
-import { MeterDataStatus } from "../../../src/modules/meters/shared/meter.types.js";
+import { ClientType, MeterDataStatus, MeterRate } from "../../../src/modules/meters/shared/meter.types.js";
 
 describe("(Unit) Meter Module", () => {
   // --- GET METERS LIST ---
@@ -205,6 +205,59 @@ describe("(Unit) Meter Module", () => {
         });
       },
     );
+
+    const patchBody = {
+      EAN: "123",
+      start_date: "2024-02-01",
+      status: MeterDataStatus.ACTIVE,
+      rate: MeterRate.SIMPLE,
+      client_type: ClientType.RESIDENTIAL,
+      member_id: 1,
+    };
+
+    async function patchWith(
+      body: Record<string, unknown>,
+      latestSharingOperation: { id: number } | null,
+    ): Promise<{ response: request.Response; addMeterData: jest.Mock; getLastMeterData: jest.Mock }> {
+      const addMeterData = jest.fn(() => Promise.resolve({ id: 1 }));
+      const getLastMeterData = jest.fn(() => Promise.resolve({ sharing_operation: latestSharingOperation }));
+      await mockMeterRepositoryModule({
+        getMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
+        getLastMeterData,
+        addMeterData,
+      });
+
+      const appModule = await import("../../../src/app.js");
+      const response = await request(appModule.default)
+        .patch("/meters/data")
+        .send(body)
+        .set("x-user-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_ADMIN);
+      return { response, addMeterData, getLastMeterData };
+    }
+
+    it("PATCH /meters/data : keeps the current sharing operation when none is sent", async () => {
+      const { response, addMeterData, getLastMeterData } = await patchWith(patchBody, { id: 7 });
+
+      expect(response.status).toBe(200);
+      expect(getLastMeterData).toHaveBeenCalledWith("123", expect.anything());
+      expect(addMeterData).toHaveBeenCalledWith("123", expect.objectContaining({ sharing_operation: { id: 7 } }), expect.anything());
+    });
+
+    it("PATCH /meters/data : moves the meter to the sharing operation it is given", async () => {
+      const { response, addMeterData } = await patchWith({ ...patchBody, sharing_operation_id: 2 }, { id: 7 });
+
+      expect(response.status).toBe(200);
+      expect(addMeterData).toHaveBeenCalledWith("123", expect.objectContaining({ sharing_operation: { id: 2 } }), expect.anything());
+    });
+
+    it("PATCH /meters/data : removes the meter from its sharing operation on an explicit null", async () => {
+      const { response, addMeterData } = await patchWith({ ...patchBody, sharing_operation_id: null }, { id: 7 });
+
+      expect(response.status).toBe(200);
+      expect(addMeterData).toHaveBeenCalledWith("123", expect.objectContaining({ sharing_operation: null }), expect.anything());
+    });
   });
 
   // --- DEACTIVATE METER ---
@@ -257,7 +310,7 @@ describe("(Unit) Meter Module", () => {
       expect(response.status).toBe(200);
       expect(addMeterData).toHaveBeenCalledWith(
         "123",
-        expect.objectContaining({ start_date: "2024-02-01", status: MeterDataStatus.INACTIVE }),
+        expect.objectContaining({ start_date: "2024-02-01", status: MeterDataStatus.INACTIVE, sharing_operation: null }),
         expect.anything(),
       );
     });

@@ -8,7 +8,8 @@
   },
   "upload_document": {
     "storage_service_upload": "Er is een fout opgetreden bij het uploaden van het document naar de opslagservice",
-    "database_upload": "Er is een fout opgetreden bij het toevoegen van het nieuwe document aan de database"
+    "database_upload": "Er is een fout opgetreden bij het toevoegen van het nieuwe document aan de database",
+    "member_not_found": "Het lid kon niet worden gevonden"
   },
   "validation": {
     "upload_document": {

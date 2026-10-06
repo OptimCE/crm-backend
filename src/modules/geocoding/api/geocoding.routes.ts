@@ -3,16 +3,18 @@ import { lazyController } from "../../../container/lazy-controller.js";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { communityIdChecker } from "../../../shared/middlewares/community.check.middleware.js";
 import { roleChecker } from "../../../shared/middlewares/role.middleware.js";
+import { operatorChecker } from "../../../shared/middlewares/operator.middleware.js";
 import { Role } from "../../../shared/dtos/role.js";
 import { GeocodingController } from "./geocoding.controller.js";
 
 export const geocoding_routes = express.Router();
 const geocoding_controller = lazyController<GeocodingController>(GeocodingController);
 
-// Post (/backfill) : Resolve a batch of never-geocoded addresses.
+// Post (/backfill) : Resolve a batch of never-geocoded addresses — of EVERY community, so it is
+// limited to the platform operators named in GEOCODING_BACKFILL_OPERATORS on top of the ADMIN role.
 geocoding_routes.post(
   "/backfill",
-  /* #swagger.summary = 'Geocode a batch of addresses that have never been attempted'
+  /* #swagger.summary = 'Geocode a batch of addresses that have never been attempted (platform operators only)'
        #swagger.tags = ['Geocoding']
        #swagger.requestBody = {
             required: false,
@@ -36,6 +38,7 @@ geocoding_routes.post(
   idChecker(),
   communityIdChecker(),
   roleChecker(Role.ADMIN),
+  operatorChecker("geocoding.backfill_operators"),
   geocoding_controller.runBackfill.bind(geocoding_controller),
 );
 

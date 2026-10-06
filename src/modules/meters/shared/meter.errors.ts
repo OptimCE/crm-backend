@@ -4,14 +4,14 @@ export const METER_ERRORS = {
   ...GLOBAL_ERRORS,
 
   ADD_METER: {
-    ALREADY_EXIST: new LocalError(60000, "meter.add_meter.already_exist"),
-    DATABASE_ADD: new LocalError(60001, "meter.add_meter.database_add"),
+    ALREADY_EXIST: new LocalError(60000, "meter:add_meter.already_exist"),
+    DATABASE_ADD: new LocalError(60001, "meter:add_meter.database_add"),
   },
   DELETE_METER: {
     DATABASE_DELETE: new LocalError(60002, "meter:delete_meter.database_delete"),
   },
   DOWNLOAD_METER_CONSUMPTIONS: {
-    NO_CONSUMPTIONS: new LocalError(60003, "meter:download_meter_consumptions:no_consumptions"),
+    NO_CONSUMPTIONS: new LocalError(60003, "meter:download_meter_consumptions.no_consumptions"),
   },
   PATCH_METER_DATA: {
     METER_NOT_FOUND: new LocalError(60004, "meter:patch_meter_data.meter_not_found"),
@@ -19,6 +19,10 @@ export const METER_ERRORS = {
   },
   ADD_METER_DATA: {
     CONFLICT_CONFIG_ALREADY_EXISTING: new LocalError(60006, "meter:add_meter_data.conflict_config_already_existing"),
+    // 60010/60011 are skipped: DELETE_METER_DATA below was meant to use them (see the note further down).
+    METER_NOT_FOUND: new LocalError(60012, "meter:add_meter_data.meter_not_found"),
+    MEMBER_NOT_FOUND: new LocalError(60013, "meter:add_meter_data.member_not_found"),
+    SHARING_OPERATION_NOT_FOUND: new LocalError(60014, "meter:add_meter_data.sharing_operation_not_found"),
   },
   GET_METER: {
     METER_NOT_FOUND: new LocalError(60007, "meter:get_meter.meter_not_found"),
@@ -44,6 +48,12 @@ export const METER_ERRORS = {
     },
     CREATE_METER: {
       PHASE_NUMBER_MIN_1: new LocalError(65007, "meter:validation.create_meter.phase_number_min_1"),
+      // 65008 is the next free code in this module's 65xxx validation block.
+      // NOTE, pre-existing and deliberately not fixed here (both are API
+      // contract changes): 65007 above is ALSO used by
+      // VALIDATION.WRONG_TYPE.SHARING_OPERATION_METER_QUERY_TYPE, and
+      // DELETE_METER_DATA uses 600010/600011 where 60010/60011 were meant.
+      EAN_FORMAT: new LocalError(65008, "meter:validation.create_meter.ean_format"),
     },
   },
 };

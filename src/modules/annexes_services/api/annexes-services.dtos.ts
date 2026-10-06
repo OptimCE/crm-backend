@@ -29,6 +29,14 @@ export class AnnexCatalogEntryDTO {
 
   @Expose()
   unsubscribePath!: string;
+
+  /**
+   * Optional; see `AnnexCatalogEntry.unsubscribeWarningKey`. The `@Expose()` is
+   * load-bearing: the service maps with `excludeExtraneousValues: true`, which
+   * silently strips any field not exposed here.
+   */
+  @Expose()
+  unsubscribeWarningKey?: string;
 }
 
 /**

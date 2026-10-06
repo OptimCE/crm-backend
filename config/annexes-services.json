@@ -49,6 +49,18 @@
       "frontendRoute": "/administrative-document",
       "subscribePath": "/annexes-services/administrative-document/subscribe",
       "unsubscribePath": "/annexes-services/administrative-document/unsubscribe"
+    },
+    {
+      "feature": "live-data",
+      "displayKey": "ANNEXES_SERVICES.LIVE_DATA.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.LIVE_DATA.DESCRIPTION",
+      "icon": "pi pi-bolt",
+      "minRole": "MEMBER",
+      "frontendRoute": "/live-data",
+      "subscribePath": "/annexes-services/live-data/subscribe",
+      "unsubscribePath": "/annexes-services/live-data/unsubscribe",
+      "unsubscribeWarningKey": "ANNEXES_SERVICES.LIVE_DATA.UNSUBSCRIBE_WARNING",
+      "defaultEnabled": false
     }
   ]
 }

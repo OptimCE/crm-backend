@@ -1,6 +1,7 @@
 import type { IMeterRepository } from "../domain/i-meter.repository.js";
 import { Meter, MeterConsumption, MeterData } from "../domain/meter.models.js";
 import { SharingOperation } from "../../sharing_operations/domain/sharing_operation.models.js";
+import { Member } from "../../members/domain/member.models.js";
 import { inject, injectable } from "inversify";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import { DeepPartial, DeleteResult, EntityManager, In, SelectQueryBuilder, type QueryRunner, UpdateResult } from "typeorm";
@@ -154,6 +155,10 @@ export class MeterRepository implements IMeterRepository {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
 
+    // 0. The configuration is written for the caller's community, so everything it points at
+    // must belong to that community too.
+    await this.assertReferencesInCommunity(ean, new_data, internal_community_id, manager);
+
     // 1. Fetch the latest configuration for this meter to handle continuity
     const latestMeterData = await manager.findOne(MeterData, {
       where: { meter: { EAN: ean } },
@@ -192,6 +197,8 @@ export class MeterRepository implements IMeterRepository {
     // 2. Create new MeterData entry
     // We inherit technical specs from the previous entry to maintain continuity
     // unless they are explicitly overridden in 'new_data'.
+    // The holder is inherited only when it is absent: an explicit `null` clears it.
+    const member = new_data.member !== undefined ? new_data.member : await this.getHolder(latestMeterData, manager);
     const meterData = manager.create(MeterData, {
       ...new_data, // properties from DTO (e.g. sharing_operation, start_date)
       meter: { EAN: ean },
@@ -206,7 +213,7 @@ export class MeterRepository implements IMeterRepository {
       amperage: new_data.amperage ?? latestMeterData?.amperage,
       rate: new_data.rate ?? latestMeterData?.rate,
       client_type: new_data.client_type ?? latestMeterData?.client_type,
-      member: new_data.member ?? latestMeterData?.member,
+      member,
       injection_status: new_data.injection_status ?? latestMeterData?.injection_status,
       production_chain: new_data.production_chain ?? latestMeterData?.production_chain,
       total_generating_capacity: new_data.total_generating_capacity ?? latestMeterData?.total_generating_capacity,
@@ -214,6 +221,55 @@ export class MeterRepository implements IMeterRepository {
     });
 
     return await manager.save(meterData);
+  }
+
+  /**
+   * Refuses a configuration that reaches outside the caller's community: a meter, holder or sharing
+   * operation of another community. This is the single writer of meter data, so the check covers
+   * every endpoint that writes one; each reports "not found" so it doesn't reveal what exists elsewhere.
+   */
+  private async assertReferencesInCommunity(
+    ean: string,
+    new_data: DeepPartial<MeterData>,
+    community_id: number,
+    manager: EntityManager,
+  ): Promise<void> {
+    if (!(await manager.exists(Meter, { where: { EAN: ean, community: { id: community_id } } }))) {
+      logger.warn({ operation: "addMeterData", ean }, "Meter not found in the caller's community");
+      throw new AppError(METER_ERRORS.ADD_METER_DATA.METER_NOT_FOUND, 400);
+    }
+    const member_id = new_data.member?.id;
+    if (member_id && !(await manager.exists(Member, { where: { id: member_id, community: { id: community_id } } }))) {
+      logger.warn({ operation: "addMeterData", ean, member_id }, "Member not found in the caller's community");
+      throw new AppError(METER_ERRORS.ADD_METER_DATA.MEMBER_NOT_FOUND, 400);
+    }
+    const sharing_operation_id = new_data.sharing_operation?.id;
+    if (sharing_operation_id && !(await manager.exists(SharingOperation, { where: { id: sharing_operation_id, community: { id: community_id } } }))) {
+      logger.warn({ operation: "addMeterData", ean, sharing_operation_id }, "Sharing operation not found in the caller's community");
+      throw new AppError(METER_ERRORS.ADD_METER_DATA.SHARING_OPERATION_NOT_FOUND, 400);
+    }
+  }
+
+  /**
+   * The holder of a configuration, loaded on its own. `addMeterData` fetches the latest row without
+   * relations on purpose: its same-day branch merges into that row, and TypeORM's merge ignores an
+   * explicit `null` for a relation that is already loaded (so a holder could no longer be cleared).
+   */
+  private async getHolder(meterData: MeterData | null, manager: EntityManager): Promise<Member | null> {
+    if (!meterData) return null;
+    const withHolder = await manager.findOne(MeterData, { where: { id: meterData.id }, relations: { member: true } });
+    return withHolder?.member ?? null;
+  }
+
+  /**
+   * Whether an EAN is already registered, in ANY community — deliberately unscoped: the EAN is the
+   * meter table's primary key, so a meter can exist only once platform-wide. Creating a meter must
+   * be refused when another community holds it; otherwise `save()` would load that row by its key
+   * and silently move it (and its whole history) into the caller's community.
+   */
+  async isEanRegistered(ean: string, query_runner?: QueryRunner): Promise<boolean> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    return manager.exists(Meter, { where: { EAN: ean } });
   }
 
   async areMetersInCommunity(eans: string[], query_runner?: QueryRunner): Promise<boolean> {
@@ -238,7 +294,7 @@ export class MeterRepository implements IMeterRepository {
     return manager.findOne(MeterData, {
       where: { meter: { EAN: ean }, community: { id: internal_community_id } },
       order: { start_date: "DESC" },
-      relations: ["sharing_operation"],
+      relations: ["sharing_operation", "member"],
     });
   }
 
@@ -246,13 +302,17 @@ export class MeterRepository implements IMeterRepository {
    * Counts the meter configurations of a member that are currently "active": their record is
    * effective now (start_date <= now < end_date) and their status is anything other than INACTIVE.
    * Used to block member deactivation/deletion while live meters are still attached.
+   * Counted within the caller's community only, so the answer reveals nothing about another
+   * community's members.
    */
   async countActiveMeterDataForMember(memberId: number, query_runner?: QueryRunner): Promise<number> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     const now = appTodayISO();
     return manager
       .createQueryBuilder(MeterData, "md")
       .where("md.member = :memberId", { memberId })
+      .andWhere("md.community = :community_id", { community_id: internal_community_id })
       .andWhere("md.status != :inactive", { inactive: MeterDataStatus.INACTIVE })
       .andWhere("md.start_date <= :now", { now })
       .andWhere("(md.end_date IS NULL OR md.end_date >= :now)", { now })
@@ -265,8 +325,9 @@ export class MeterRepository implements IMeterRepository {
 
     withCommunityScope(qb, "meter");
 
+    // andWhere, not where: `.where()` would replace the community condition the scope just added.
     qb = qb
-      .where("meter.EAN = :ean", { ean: id })
+      .andWhere("meter.EAN = :ean", { ean: id })
       .leftJoinAndSelect("meter.address", "address")
       // Fetch ALL meter data history for the detail view
       .leftJoinAndSelect("meter.meter_data", "meter_data")
@@ -305,6 +366,12 @@ export class MeterRepository implements IMeterRepository {
         `,
       { now },
     );
+    // The holder of the window in force, for the list's Holder column and the
+    // live-data device picker. Many-to-one on a window already joined: at most
+    // one row per window, so neither the page nor the count moves. Same alias as
+    // getMetersMap. A join only, never a .where(): withCommunityScope's
+    // condition must stay in the WHERE.
+    qb.leftJoinAndSelect("active_data.member", "holder");
     // 3. Apply Filters
     qb = applyFilters(this.meterFilters, qb, query);
     // 4. Pagination
@@ -358,8 +425,8 @@ export class MeterRepository implements IMeterRepository {
     const total_matching = await build().getCount();
 
     const qb = build();
-    // The popup labels the holder and the operation, so unlike getMetersList
-    // these two relations are selected explicitly.
+    // The popup labels the holder and the operation. The holder is joined
+    // exactly as in getMetersList; the operation is selected only here.
     qb.leftJoinAndSelect("active_data.member", "holder");
     qb.leftJoinAndSelect("active_data.sharing_operation", "operation");
     qb.andWhere("address.latitude IS NOT NULL");
@@ -424,19 +491,23 @@ export class MeterRepository implements IMeterRepository {
 
   async deleteMeter(id: string, query_runner?: QueryRunner): Promise<DeleteResult> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     return manager.delete(Meter, {
       EAN: id,
+      community: { id: internal_community_id },
     });
   }
 
   async updateMeter(update_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<{ result: UpdateResult; address_id: number }> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     const address = addressWithPin(manager, update_meter.address);
     const savedAddress = await manager.save(address);
     const result = await manager.update(
       Meter,
       {
         EAN: update_meter.EAN,
+        community: { id: internal_community_id },
       },
       {
         address: savedAddress,
@@ -463,17 +534,19 @@ export class MeterRepository implements IMeterRepository {
     query_runner?: QueryRunner,
   ): Promise<{ result: UpdateResult; address_id: number }> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
     const address = addressWithPin(manager, new_address);
     const savedAddress = await manager.save(address);
-    const result = await manager.update(Meter, { EAN }, { address: savedAddress });
+    const result = await manager.update(Meter, { EAN, community: { id: internal_community_id } }, { address: savedAddress });
     return { result, address_id: savedAddress.id };
   }
 
   async getMeterData(id: number, query_runner?: QueryRunner): Promise<MeterData | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
 
     return manager.findOne(MeterData, {
-      where: { id },
+      where: { id, community: { id: internal_community_id } },
       relations: ["meter"], // Essential because your service accesses latest_meter_data.meter.EAN
     });
   }

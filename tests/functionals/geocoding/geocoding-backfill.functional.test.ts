@@ -3,13 +3,14 @@ import request from "supertest";
 import { useFunctionalTestDb } from "../../utils/test.functional.wrapper.js";
 import { expectWithLog } from "../../utils/helper.js";
 import { container } from "../../../src/container/di-container.js";
-import { SUCCESS } from "../../../src/shared/errors/errors.js";
+import { GLOBAL_ERRORS, SUCCESS } from "../../../src/shared/errors/errors.js";
 import { AddressGeoPrecision } from "../../../src/shared/address/address.types.js";
 import { GEOCODER_TOKENS } from "../../../src/modules/geocoding/domain/geocoding.types.js";
 import type { IGeocoder } from "../../../src/modules/geocoding/domain/i-geocoder.js";
 import { AUTH_COMMUNITY_1, ORGS_ADMIN, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 
-const AUTH_USER = "auth0|admin";
+const AUTH_USER = "auth0|admin"; // listed in config/test.cjs geocoding.backfill_operators
+const NOT_AN_OPERATOR = "f298d22b-4e19-4150-a4d4-f852c60163b3"; // the demo user, ADMIN of community 1
 
 /**
  * Binds a stand-in for the full chain.
@@ -126,6 +127,20 @@ describe("(Functional) Geocoding Backfill", () => {
       const response = await post({}, ORGS_MEMBER);
 
       expect(response.status).toBe(403);
+    });
+
+    // The backfill acts on every community at once, so an ADMIN role proves nothing: anyone can
+    // create a community and become its ADMIN. Only the configured operators may run it.
+    it("rejects an ADMIN who is not a backfill operator, without calling the geocoder", async () => {
+      const geocode = jest.fn(async () => null);
+      await bindFullChain(geocode);
+      const response = await post({}, ORGS_ADMIN, NOT_AN_OPERATOR);
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(403);
+        expect(response.body.error_code).toBe(GLOBAL_ERRORS.UNAUTHORIZED.errorCode);
+      });
+      expect(geocode).not.toHaveBeenCalled();
     });
   });
 });

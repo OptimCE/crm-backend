@@ -9,7 +9,7 @@
     "delete_invitation_failed": "Une erreur est survenue lors de la suppression de l'invitation"
   },
   "accept_invitation_member": {
-    "invitation_manager_not_found": "L'invitation est introuvable",
+    "invitation_member_not_found": "L'invitation est introuvable",
     "mismatch_user_id": "L'invitation ne vous est pas adressée",
     "database_save_user_member_link": "Une erreur est survenue lors de l'ajout du lien avec le membre dans la base de données",
     "database_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté dans la base de données",
@@ -17,7 +17,7 @@
     "delete_invitation_failed": "Une erreur est survenue lors de la suppression de l'invitation"
   },
   "accept_invitation_member_encoded": {
-    "invitation_manager_not_found": "L'invitation est introuvable",
+    "invitation_member_not_found": "L'invitation est introuvable",
     "mismatch_user_id": "L'invitation ne vous est pas adressée",
     "database_save_user_member_link": "Une erreur est survenue lors de l'ajout du lien avec le membre dans la base de données",
     "database_save_user_community": "Une erreur est survenue lors de l'ajout dans la communauté dans la base de données",
@@ -42,6 +42,9 @@
   },
   "invite_user_to_become_member": {
     "database_save": "Une erreur est survenue lors de l'ajout de l'invitation dans la base de données"
+  },
+  "get_own_member_invitation_by_id": {
+    "not_found": "L'invitation est introuvable"
   },
   "validation": {
     "user_member_invitation_query": {

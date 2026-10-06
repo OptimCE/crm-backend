@@ -320,7 +320,7 @@ export class MeService implements IMeService {
       );
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MANAGER.IAM_SERVICE_SAVE_UPDATE, 400);
     }
-    const result = await this.meRepository.deleteGestionnaireInvitation(invitation.id);
+    const result = await this.meRepository.deleteGestionnaireInvitation(invitation.id, query_runner);
     if (result.affected !== 1) {
       logger.error({ operation: "acceptInvitationManager" }, "An error happend while deleting the user invitation at the end");
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MANAGER.DELETE_INVITATION_FAILED, 400);
@@ -378,7 +378,7 @@ export class MeService implements IMeService {
     } else {
       logger.info({ operation: "acceptInvitationMember" }, "The user is already part of this community");
     }
-    const result = await this.meRepository.deleteUserMemberInvitation(invitation.id);
+    const result = await this.meRepository.deleteUserMemberInvitation(invitation.id, query_runner);
     if (result.affected !== 1) {
       logger.error({ operation: "acceptInvitationMember" }, "An error happend while deleting the user invitation at the end");
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MEMBER.DELETE_INVITATION_FAILED, 400);
@@ -451,7 +451,7 @@ export class MeService implements IMeService {
     } else {
       logger.info({ operation: "acceptInvitationMemberWEncoded" }, "The user is already part of this community");
     }
-    const result = await this.meRepository.deleteUserMemberInvitation(invitation.id);
+    const result = await this.meRepository.deleteUserMemberInvitation(invitation.id, query_runner);
     if (result.affected !== 1) {
       logger.error({ operation: "acceptInvitationMember" }, "An error happend while deleting the user invitation at the end");
       throw new AppError(ME_ERRORS.ACCEPT_INVITATION_MEMBER.DELETE_INVITATION_FAILED, 400);

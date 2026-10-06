@@ -301,6 +301,8 @@ describe("(Unit) Sharing Operation Module", () => {
       "PATCH /sharing_operations/key : $description",
       async ({ body, status_code, expected_error_code, expected_data, mocks, orgs }) => {
         if (mocks?.sharingOpRepo) await mockSharingOperationRepositoryModule(mocks.sharingOpRepo);
+        // The key is the caller's own unless a case says otherwise.
+        await mockKeyRepositoryModule(mocks?.keyRepo ?? { getKeyById: jest.fn(() => Promise.resolve({ id: 10 })) });
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;
@@ -336,6 +338,7 @@ describe("(Unit) Sharing Operation Module", () => {
         closeSpecificKeyEntry,
         addSharingKeyEntry,
       });
+      await mockKeyRepositoryModule({ getKeyById: jest.fn(() => Promise.resolve({ id: 10 })) });
 
       const appModule = await import("../../../src/app.js");
       const app = appModule.default;

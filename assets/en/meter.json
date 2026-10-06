@@ -6,6 +6,11 @@
   "delete_meter": {
     "database_delete": "An error occurred while deleting the meter from the database"
   },
+  "delete_meter_data": {
+    "not_found": "Meter data not found",
+    "delete_database": "An error occurred while deleting the meter data from the database",
+    "update_database": "An error occurred while updating the meter data in the database"
+  },
   "download_meter_consumptions": {
     "no_consumptions": "No consumption data was found",
     "download_name": "consumptions"
@@ -15,7 +20,10 @@
     "database_update": "An error occurred while updating the meter data in the database"
   },
   "add_meter_data": {
-    "conflict_config_already_existing": "Meter data already exists for this period"
+    "conflict_config_already_existing": "Meter data already exists for this period",
+    "meter_not_found": "Meter not found",
+    "member_not_found": "Member not found",
+    "sharing_operation_not_found": "Sharing operation not found"
   },
   "get_meter": {
     "meter_not_found": "Meter not found"
@@ -24,7 +32,12 @@
     "database_update": "An error occurred while updating the meter data in the database"
   },
   "validation": {
+    "create_meter": {
+      "phase_number_min_1": "The number of phases must be at least 1",
+      "ean_format": "The EAN must be exactly 18 digits"
+    },
     "wrong_type": {
+      "sharing_operation_meter_query_type": "The field '{{field}}' must be of type 'SharingOperationMeterQueryType'",
       "meter_data_status": "The field '{{field}}' must be of type 'MeterDataStatus'",
       "meter_rate": "The field '{{field}}' must be of type 'MeterRate'",
       "client_type": "The field '{{field}}' must be of type 'ClientType'",

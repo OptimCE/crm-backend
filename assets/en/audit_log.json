@@ -1,0 +1,5 @@
+{
+  "export": {
+    "too_large": "Too many entries to export: narrow the filters and try again"
+  }
+}

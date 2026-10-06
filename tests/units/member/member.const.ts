@@ -6,17 +6,27 @@ import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors
 import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
 import type { Address } from "../../../src/shared/address/address.models.js";
+import { AddressGeocodeStatus } from "../../../src/shared/address/address.types.js";
 import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 
-const mockAddress = {
+const mockAddress: Address = {
   id: 1,
   street: "Main St",
-  number: 1,
+  number: "1",
   city: "Brussels",
   postcode: "1000",
+  country: "BE",
+  best_address_id: null,
+  latitude: null,
+  longitude: null,
+  geo_precision: null,
+  geo_source: null,
+  geocoded_at: null,
+  geocode_status: AddressGeocodeStatus.NEVER,
+  community: null,
   created_at: mockDate,
   updated_at: mockDate,
 };
@@ -31,8 +41,8 @@ export const mockIndividualEntity: Member = {
   member_type: MemberType.INDIVIDUAL,
   created_at: mockDate,
   updated_at: mockDate,
-  home_address: mockAddress as Address,
-  billing_address: mockAddress as Address,
+  home_address: mockAddress,
+  billing_address: mockAddress,
   community: mockCommunity as Community,
   individual_details: {
     id: 1,
@@ -302,6 +312,10 @@ export const testCasesAddMember = [
 ];
 
 // 5. Update Member
+// The active-meters guard must refuse INACTIVE before any address or member write.
+const updateDeactivateAddAddress = jest.fn(() => Promise.resolve(mockAddress));
+const updateDeactivateSaveMember = jest.fn(() => Promise.resolve(mockIndividualEntity));
+
 export const testCasesUpdateMember = [
   {
     description: "Success",
@@ -329,6 +343,85 @@ export const testCasesUpdateMember = [
     mocks: {
       memberRepo: {
         getFullMember: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+  {
+    description: "Fail (Deactivate with active meters)",
+    body: {
+      id: 1,
+      status: MemberStatus.INACTIVE,
+      home_address: { street: "New St", number: "2", city: "Brussels", postcode: "1000" },
+    },
+    status_code: 409,
+    orgs: ORGS_ADMIN,
+    expected_error_code: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.errorCode,
+    expected_data: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.message,
+    expected_not_called: [updateDeactivateAddAddress, updateDeactivateSaveMember],
+    mocks: {
+      memberRepo: {
+        getFullMember: jest.fn(() => Promise.resolve({ ...mockIndividualEntity })),
+        saveMember: updateDeactivateSaveMember,
+      },
+      addressRepo: { addAddress: updateDeactivateAddAddress },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(1)),
+      },
+    },
+  },
+  {
+    description: "Success (Deactivate without active meters)",
+    body: { id: 1, status: MemberStatus.INACTIVE },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      memberRepo: {
+        getFullMember: jest.fn(() => Promise.resolve({ ...mockIndividualEntity })),
+        saveMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
+        saveIndividual: jest.fn(() => Promise.resolve({})),
+      },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(0)),
+      },
+    },
+  },
+  {
+    // Only INACTIVE is blocked by active meters; PENDING ("Put on hold") is not.
+    description: "Success (PENDING with active meters)",
+    body: { id: 1, status: MemberStatus.PENDING },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      memberRepo: {
+        getFullMember: jest.fn(() => Promise.resolve({ ...mockIndividualEntity })),
+        saveMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
+        saveIndividual: jest.fn(() => Promise.resolve({})),
+      },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(1)),
+      },
+    },
+  },
+  {
+    // The edit dialog re-sends the current status: an already-INACTIVE member stays editable.
+    description: "Success (Already INACTIVE, status unchanged, with active meters)",
+    body: { id: 1, name: "Updated Name", status: MemberStatus.INACTIVE },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      memberRepo: {
+        getFullMember: jest.fn(() => Promise.resolve({ ...mockIndividualEntity, status: MemberStatus.INACTIVE })),
+        saveMember: jest.fn(() => Promise.resolve(mockIndividualEntity)),
+        saveIndividual: jest.fn(() => Promise.resolve({})),
+      },
+      meterRepo: {
+        countActiveMeterDataForMember: jest.fn(() => Promise.resolve(1)),
       },
     },
   },

@@ -51,6 +51,8 @@ module.exports = {
   // property of the test config rather than an accident of the guard.
   geocoding: {
     mode: "OFF",
+    // The backfill's functional tests authenticate as this user; any other ADMIN must be refused.
+    backfill_operators: ["auth0|admin"],
   },
   // ---- Realtime SSE fan-out -------------------------------------------
   // HARDCODED off, not env-driven: it makes "the ticket endpoint 503s when the
@@ -68,5 +70,18 @@ module.exports = {
     max_connections_per_user: 4,
     max_connections: 2000,
     mint_per_minute: 30,
+  },
+  // ---- Annex catalogue ------------------------------------------------
+  // HARDCODED, not read from ANNEX_CATALOG_ENABLE / _DISABLE: the
+  // functional suite asserts on the real catalogue, so a variable exported in
+  // a developer's shell must not reshape it. Unit tests exercise the overrides
+  // through resolveAnnexCatalog() directly.
+  //
+  // live-data ships `"defaultEnabled": false`, and the functional Catalog test
+  // asserts it is served, so the suite opts it in the way the dev stack does
+  // (ANNEX_CATALOG_ENABLE=live-data in the monorepo .env.dev).
+  annex_catalog: {
+    enable: ["live-data"],
+    disable: [],
   },
 };

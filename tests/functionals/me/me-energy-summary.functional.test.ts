@@ -5,6 +5,7 @@ import { expectWithLog } from "../../utils/helper.js";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
 import { AUTH_COMMUNITY_1, ORGS_MEMBER } from "../../utils/shared.consts.js";
 import type { MeEnergyMeterDTO, MeEnergySummaryDTO } from "../../../src/modules/me/api/me.dtos.js";
+import { appTodayISO } from "../../../src/shared/utils/date.utils.js";
 
 /** Seeded, holds EAN_ONE since 2024-01-01 with no end date. */
 const AUTH_USER_MEMBER_1 = "auth0|member";
@@ -163,8 +164,9 @@ describe("(Functional) GET /me/energy-summary", () => {
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(200);
-        const today = new Date();
-        const firstOfThisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+        // Belgian calendar, like the service — a host-local month is still the
+        // previous one for up to two hours after Brussels midnight on the 1st.
+        const firstOfThisMonth = `${appTodayISO().slice(0, 7)}-01`;
         // A partial month is not comparable to anything: a member opening the
         // app on the 2nd would read two days of data as a collapse in usage.
         expect(body(response).period.end < firstOfThisMonth).toBe(true);

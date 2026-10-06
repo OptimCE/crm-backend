@@ -1,4 +1,5 @@
 import { inject, injectable } from "inversify";
+import { normaliseEan } from "../../meters/shared/ean.js";
 import type { ISharingOperationRepository } from "../domain/i-sharing_operation.repository.js";
 import { AppDataSource } from "../../../shared/database/database.connector.js";
 import {
@@ -103,8 +104,10 @@ export class SharingOperationRepository implements ISharingOperationRepository {
 
     withCommunityScope(qb, "sharing_op");
 
+    // andWhere, not where: `.where()` would replace the community condition the scope just added,
+    // and every service method that uses this lookup as its access check would pass for any community.
     qb = qb
-      .where("sharing_op.id = :id", { id: id_sharing })
+      .andWhere("sharing_op.id = :id", { id: id_sharing })
       // Load the parent community so the DTO can surface its (read-only) regulator.
       .leftJoinAndSelect("sharing_op.community", "community")
       // Now we can use leftJoinAndSelect because we added the relation to the model
@@ -339,7 +342,10 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     eans.forEach((row) => {
       // Check for likely keys
       const val = row.meter_data_ean || row.ean || Object.values(row)[0];
-      if (val) set.add(String(val));
+      // normaliseEan, not bare String(): the workbook side trims its EANs, and
+      // a set built without trimming can never match a stored EAN that carries
+      // stray whitespace. Both sides go through the same normaliser.
+      if (val) set.add(normaliseEan(String(val)));
     });
 
     return set;
@@ -498,6 +504,13 @@ export class SharingOperationRepository implements ISharingOperationRepository {
 
     // 2. Inner-join the MeterData record we want to expose for this row.
     qb.innerJoinAndSelect("meter.meter_data", "active_data");
+
+    // The holder of that record, for the Holder column of the operation's meter
+    // tables and the import dialog. Many-to-one on a record already joined: at
+    // most one row per record, so neither the page nor the count moves. Same
+    // alias as MeterRepository.getMetersList. A join only, never a .where():
+    // withCommunityScope's condition must stay in the WHERE.
+    qb.leftJoinAndSelect("active_data.member", "holder");
 
     // 3. Apply Temporal Logic + Sharing Operation ID
     qb.where("active_data.id_sharing_operation = :id_sharing", { id_sharing });

@@ -172,6 +172,33 @@ export const testCasesUpdateMember = [
     expected_error_code: SUCCESS,
     expected_data: "success",
   },
+  {
+    // existingIndividualId has an ACTIVE meter in the seed → PUT applies the same guard as
+    // PATCH /members/status, and nothing of the update is saved (the name stays too).
+    description: "Blocked - Deactivate member with active meters (409)",
+    body: {
+      id: existingIndividualId,
+      name: "Deactivated Member One",
+      status: MemberStatus.INACTIVE,
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 409,
+    expected_error_code: MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS.errorCode,
+    expected_member: { name: "Member One", status: MemberStatus.ACTIVE },
+  },
+  {
+    // Only INACTIVE is blocked by active meters; PENDING ("Put on hold") is not.
+    description: "Success - Put member with active meters on hold (PENDING)",
+    body: {
+      id: existingIndividualId,
+      status: MemberStatus.PENDING,
+    },
+    orgs: ORGS_ADMIN,
+    status_code: 200,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    expected_member: { name: "Member One", status: MemberStatus.PENDING },
+  },
 ];
 
 // 6. Patch Status

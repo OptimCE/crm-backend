@@ -233,6 +233,25 @@ export const testCasesUpload = [
       },
     },
   },
+  {
+    description: "Fail (Member not in the caller's community)",
+    id_user: 1,
+    id_community: AUTH_COMMUNITY_1,
+    orgs: ORGS_GESTIONNAIRE,
+    field_member: "3",
+    file_name: "test.pdf",
+    status_code: 400,
+    expected_error_code: DOCUMENT_ERRORS.UPLOAD_DOCUMENT.MEMBER_NOT_FOUND.errorCode,
+    expected_data: DOCUMENT_ERRORS.UPLOAD_DOCUMENT.MEMBER_NOT_FOUND.message,
+    mocks: {
+      memberRepo: {
+        getMember: jest.fn(() => Promise.resolve(null)),
+      },
+      storageService: {
+        uploadDocument: jest.fn(() => Promise.reject(new Error("must not be reached"))),
+      },
+    },
+  },
 ];
 
 export const testCasesDelete = [

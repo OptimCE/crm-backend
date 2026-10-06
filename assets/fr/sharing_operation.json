@@ -1,5 +1,6 @@
 {
   "add_consumption_data": {
+    "ean_cell_not_text": "La ligne des EAN du fichier est enregistrée sous forme de nombres : Excel a donc déjà arrondi les derniers chiffres des EAN. Rien n'a été importé : saisissez les EAN sous forme de texte et importez de nouveau le fichier",
     "database_add": "Une erreur est survenue lors de l'ajout des données de consommation dans la base de données",
     "no_meter_authorized": "Aucun compteurs valide n'a été trouvé"
   },
@@ -17,6 +18,7 @@
     "database_add": "Une erreur est survenue lors de l'ajout du compteur à l'opération de partage dans la base de données"
   },
   "create_sharing_operation": {
+    "unknown_municipality": "Une ou plusieurs communes sont inconnues",
     "database_add": "Une erreur est survenue lors de l'ajout de l'opération de partage dans la base de données"
   },
   "get_sharing_operation": {
@@ -24,7 +26,8 @@
   },
   "patch_key_status": {
     "sharing_operation_not_found": "L'opération de partage est introuvable",
-    "database_update": "Une erreur est survenue lors de la mise à jour du statut associé à l'opération de partage dans la base de données"
+    "database_update": "Une erreur est survenue lors de la mise à jour du statut associé à l'opération de partage dans la base de données",
+    "allocation_key_not_found": "La clé de répartition est introuvable"
   },
   "patch_meter_status": {
     "sharing_operation_not_found": "L'opération de partage est introuvable",
@@ -37,6 +40,9 @@
     "database_delete": "Une erreur est survenue lors de la suppression de l'opération de partage dans la base de données"
   },
   "delete_meter_from_sharing": {
+    "date_required": "Une date de retrait est requise",
+    "hard_delete_not_future": "La participation du compteur à l'opération de partage a déjà commencé : elle ne peut plus être supprimée, retirez plutôt le compteur à partir d'une date",
+    "database_delete": "Une erreur est survenue lors du retrait du compteur de l'opération de partage dans la base de données",
     "sharing_operation_not_found": "L'opération de partage est introuvable",
     "meter_not_in_community": "Un ou plusieurs compteurs n'appartiennent pas à la communauté",
     "latest_meter_data_not_found": "Aucune information du compteur valide n'a été trouvé",
@@ -45,6 +51,24 @@
   },
   "get_sharing_operation_consumption": {
     "no_consumption_found": "Aucune consommation trouvée entre ces deux dates"
+  },
+  "update_municipalities": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "unknown_municipality": "Une ou plusieurs communes sont inconnues",
+    "database_update": "Une erreur est survenue lors de la mise à jour des communes de l'opération de partage dans la base de données",
+    "municipalities_required_for_public": "Une opération de partage publique doit conserver au moins une commune"
+  },
+  "update_sharing_operation": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "unknown_municipality": "Une ou plusieurs communes sont inconnues",
+    "database_update": "Une erreur est survenue lors de la mise à jour de l'opération de partage dans la base de données",
+    "no_fields_to_update": "Aucun champ à mettre à jour n'a été fourni",
+    "municipalities_required_for_public": "Une opération de partage publique doit conserver au moins une commune"
+  },
+  "patch_visibility": {
+    "sharing_operation_not_found": "L'opération de partage est introuvable",
+    "database_update": "Une erreur est survenue lors de la mise à jour de la visibilité de l'opération de partage dans la base de données",
+    "municipalities_required": "Ajoutez au moins une commune avant de rendre l'opération de partage publique"
   },
   "validation": {
     "wrong_type": {

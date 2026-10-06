@@ -1,4 +1,4 @@
-import { expect, it } from "@jest/globals";
+import { expect, it, jest } from "@jest/globals";
 import request from "supertest";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { testCasesDelete, testCasesDownload, testCasesGetDocuments, testCasesUpload } from "./document.const.js";
@@ -89,10 +89,11 @@ describe("(Unit) Document Module", () => {
       async ({ id_user, id_community, orgs, field_member, file_name, status_code, expected_error_code, expected_data, mocks }) => {
         if (mocks?.documentRepo) await mockDocumentRepositoryModule(mocks.documentRepo);
         if (mocks?.storageService) await mockStorageServiceModule(mocks.storageService);
-        // uploadDocument resolves the notification audience through MemberRepository.
-        // Unit tests seed no data, so the real repository would query a table that
-        // isn't there; the mock defaults to "no audience", making the fan-out a no-op.
-        await mockMemberRepositoryModule({});
+        // uploadDocument checks the member and resolves the notification audience through
+        // MemberRepository. Unit tests seed no data, so the real repository would query a table
+        // that isn't there; the mock finds the member (unless a case says otherwise) and defaults
+        // to "no audience", making the fan-out a no-op.
+        await mockMemberRepositoryModule(mocks?.memberRepo ?? { getMember: jest.fn(() => Promise.resolve({ id: 1 })) });
 
         const appModule = await import("../../../src/app.js");
         const app = appModule.default;

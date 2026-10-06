@@ -186,6 +186,79 @@ tracing/logging enabled:
 npm run trace
 ```
 
+## Annex catalogue
+
+`config/annexes-services.json` lists the annex modules (algorithm, simulation,
+news, billing, …) that communities can subscribe to. `GET /annexes-services`
+serves it, and it is the only place the frontend learns which annexes exist. The
+file is baked into the image, so every deployment ships the same one. Each
+entry has `feature`, `displayKey`, `descriptionKey`, `icon`, `minRole`,
+`frontendRoute`, `subscribePath` and `unsubscribePath`, plus two optional
+fields:
+
+- `unsubscribeWarningKey`: an extra i18n sentence for the unsubscribe
+  confirmation dialog.
+- `defaultEnabled` (boolean, absent = `true`): whether a deployment serves the
+  module when no variable below names it. Ship a new annex whose service is not
+  deployed everywhere yet with `"defaultEnabled": false`. `live-data` ships this
+  way: the monorepo dev stack opts it in with `ANNEX_CATALOG_ENABLE=live-data`
+  in `.env.dev`, and `config/test.cjs` does the same for the test suites.
+
+Each deployment then picks its own set with two variables:
+
+| Variable                | Effect                                                                                   |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| `ANNEX_CATALOG_ENABLE`  | Comma-separated features to serve even though their entry says `"defaultEnabled": false` |
+| `ANNEX_CATALOG_DISABLE` | Comma-separated features to hide. Wins over `ANNEX_CATALOG_ENABLE`                       |
+
+An entry is served when it is not in `ANNEX_CATALOG_DISABLE` and either its
+`defaultEnabled` is not `false` or it is in `ANNEX_CATALOG_ENABLE`. Names are
+exact `feature` values (case-sensitive), surrounding spaces are ignored, and an
+empty variable means none. With neither variable set, every entry whose
+`defaultEnabled` is not `false` is served.
+
+- **Only name features that are in the image you run.** A name that is not a
+  `feature` of the file refuses the boot: a typo in `ANNEX_CATALOG_DISABLE`
+  would otherwise leave the annex on. The log line has `operation`
+  `annexes_services:catalog_overrides` and lists the unknown names. In
+  production this is a container restart loop; in the dev stack (`tsx watch`)
+  the container stays up and only the log shows it. So set a variable in the
+  same deploy as the image that adds the entry, drop it in the deploy that
+  removes the entry, and remember that rolling back to an older image can
+  invalidate a name already set. To keep an annex that is not deployed yet off,
+  use `"defaultEnabled": false` in the file. Do not set `ANNEX_CATALOG_DISABLE`
+  in advance.
+- **Startup log.** At startup the service logs once, with `operation`
+  `annexes_services:catalog_loaded`, the `enabled` and `disabled` features. That
+  log, not the file, tells you what a deployment exposes.
+- **Forwarding.** A variable only reaches the process if the deployment's
+  compose file lists it under crm-backend's `environment:`
+  (`- ANNEX_CATALOG_ENABLE=${ANNEX_CATALOG_ENABLE:-}`, same for `_DISABLE`). An
+  `.env` value with no such line is silently ignored: the startup log then
+  shows `overrides: { enable: [], disable: [] }`. The monorepo
+  `docker-compose.dev.yml` forwards both; check any other deployment's compose
+  file before relying on them.
+- **Applying a change.** Both variables are read once at boot. Recreate the
+  container (`docker compose up -d crm-backend`, or
+  `./docker-stack.sh restart -s crm-backend` in the monorepo):
+  `docker compose restart` keeps the old environment.
+
+**What disabling does.** The annex disappears from `GET /annexes-services`, so
+the frontend shows no card, navbar link or dashboard tile for it, even to
+communities already subscribed. For news, billing, live-data and
+administrative-document, the route guard also sends those users back home. The
+algorithm and simulation pages still open from a direct URL. A new subscription
+gets `404 FEATURE_NOT_FOUND`, and the log says `reason: "hidden"`. Unsubscribe
+still accepts every feature in the file.
+
+**What disabling does not do.** It does not revoke communities that are already
+subscribed. The annex services check the `community_subscription` row, never
+this catalogue, so they keep answering those communities, and live-data keeps
+ingesting their telemetry. To end that access, either undeploy the annex
+service, or have each subscribed community's ADMIN call
+`POST /annexes-services/<feature>/unsubscribe`. The UI has no card to do it from
+while the annex is hidden.
+
 ## Project Structure (selection)
 
 - `src/` — TypeScript source code (domain modules under `src/modules/`, shared

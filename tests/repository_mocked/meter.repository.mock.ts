@@ -6,6 +6,7 @@ export function createMockMeterRepository(): jest.Mocked<IMeterRepository> {
     addMeterConsumptions: jest.fn(),
     addMeterData: jest.fn(),
     areMetersInCommunity: jest.fn(),
+    isEanRegistered: jest.fn(),
     createMeter: jest.fn(),
     deleteMeter: jest.fn(),
     getLastMeterData: jest.fn(),
@@ -17,6 +18,7 @@ export function createMockMeterRepository(): jest.Mocked<IMeterRepository> {
     deleteMeterData: jest.fn(),
     getMeterData: jest.fn(),
     updateMeter: jest.fn(),
+    updateMeterAddress: jest.fn(),
     getMetersMap: jest.fn(),
   };
 }

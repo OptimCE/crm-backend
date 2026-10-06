@@ -20,6 +20,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import logger from "./shared/monitor/logger.js";
 import { getRegulators } from "./modules/communities/shared/regulator.js";
+import { getAnnexCatalog } from "./modules/annexes_services/shared/annexes-catalog.js";
+import { I18N_NAMESPACES } from "./shared/utils/i18n-namespaces.js";
 
 // 1. Recreate __filename and __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +37,11 @@ const startServer = async (): Promise<void> => {
   try {
     // Fail fast if the shared regulator registry is missing/misconfigured.
     getRegulators();
+    // Same for the annex catalog and its per-deployment overrides
+    // (ANNEX_CATALOG_ENABLE / ANNEX_CATALOG_DISABLE): an unknown feature name
+    // refuses the boot instead of silently leaving an annex on. Also logs, once,
+    // which annexes this deployment exposes.
+    getAnnexCatalog();
 
     // Await the initialization of i18next
 
@@ -45,22 +52,8 @@ const startServer = async (): Promise<void> => {
         backend: {
           loadPath: path.join(__dirname, "../assets/{{lng}}/{{ns}}.json"),
         },
-        // "municipality" was missing even though MUNICIPALITY_ERRORS has used the
-        // "municipality:" prefix since it was introduced — its messages were
-        // silently rendering as raw keys.
-        ns: [
-          "global_error",
-          "community",
-          "document",
-          "geocoding",
-          "invitation",
-          "key",
-          "member",
-          "meter",
-          "municipality",
-          "sharing_operation",
-          "user",
-        ],
+        // A namespace missing from this list renders its messages as raw keys.
+        ns: [...I18N_NAMESPACES],
         defaultNS: "translation",
         fallbackLng: "en",
         preload: ["en", "fr", "nl"],

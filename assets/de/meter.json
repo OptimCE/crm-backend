@@ -6,6 +6,11 @@
   "delete_meter": {
     "database_delete": "Beim Löschen des Zählers aus der Datenbank ist ein Fehler aufgetreten"
   },
+  "delete_meter_data": {
+    "not_found": "Zählerdaten nicht gefunden",
+    "delete_database": "Beim Löschen der Zählerdaten aus der Datenbank ist ein Fehler aufgetreten",
+    "update_database": "Beim Aktualisieren der Zählerdaten in der Datenbank ist ein Fehler aufgetreten"
+  },
   "download_meter_consumptions": {
     "no_consumptions": "Keine Verbrauchsdaten gefunden",
     "download_name": "Verbrauchsdaten"
@@ -15,7 +20,10 @@
     "database_update": "Beim Aktualisieren der Zählerdaten in der Datenbank ist ein Fehler aufgetreten"
   },
   "add_meter_data": {
-    "conflict_config_already_existing": "Für diesen Zeitraum sind bereits Zählerdaten vorhanden"
+    "conflict_config_already_existing": "Für diesen Zeitraum sind bereits Zählerdaten vorhanden",
+    "meter_not_found": "Zähler nicht gefunden",
+    "member_not_found": "Mitglied nicht gefunden",
+    "sharing_operation_not_found": "Teilungsoperation nicht gefunden"
   },
   "get_meter": {
     "meter_not_found": "Zähler nicht gefunden"
@@ -24,7 +32,12 @@
     "database_update": "Beim Aktualisieren der Zählerdaten in der Datenbank ist ein Fehler aufgetreten"
   },
   "validation": {
+    "create_meter": {
+      "phase_number_min_1": "Die Anzahl der Phasen muss mindestens 1 betragen",
+      "ean_format": "Der EAN muss genau 18 Ziffern enthalten"
+    },
     "wrong_type": {
+      "sharing_operation_meter_query_type": "Das Feld '{{field}}' muss vom Typ 'SharingOperationMeterQueryType' sein",
       "meter_data_status": "Das Feld '{{field}}' muss vom Typ 'MeterDataStatus' sein",
       "meter_rate": "Das Feld '{{field}}' muss vom Typ 'MeterRate' sein",
       "client_type": "Das Feld '{{field}}' muss vom Typ 'ClientType' sein",

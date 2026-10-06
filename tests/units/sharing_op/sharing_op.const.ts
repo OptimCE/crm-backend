@@ -502,6 +502,23 @@ export const testCasesPatchKey = [
     },
   },
   {
+    description: "Fail (Allocation key not found in the caller's community)",
+    body: { id_key: 10, id_sharing: 1, status: SharingKeyStatus.APPROVED, date: "2024-02-01" },
+    status_code: 400,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SHARING_OPERATION_ERRORS.PATCH_KEY_STATUS.ALLOCATION_KEY_NOT_FOUND.errorCode,
+    expected_data: SHARING_OPERATION_ERRORS.PATCH_KEY_STATUS.ALLOCATION_KEY_NOT_FOUND.message,
+    mocks: {
+      sharingOpRepo: {
+        getSharingOperationById: jest.fn(() => Promise.resolve(mockSharingOperationEntity)),
+        addSharingKeyEntry: jest.fn(() => Promise.resolve({})),
+      },
+      keyRepo: {
+        getKeyById: jest.fn(() => Promise.resolve(null)),
+      },
+    },
+  },
+  {
     description: "Fail (patch key)",
     body: { id_key: 10, id_sharing: 1, status: SharingKeyStatus.APPROVED, date: "2024-02-01" },
     status_code: 400,
@@ -796,7 +813,7 @@ export const testCasesDeleteMeter = [
 
 const mockMeterEntity = {
   id: 1,
-  EAN: "1234567890123",
+  EAN: "541448200000000001",
   meter_number: "METER-001",
   address: {
     street: "Test St",
@@ -815,7 +832,7 @@ const mockMeterEntity = {
 // Expected DTO for Meter (Simulating result of toMeterPartialDTO)
 // Note: dates are usually serialized to strings in HTTP response
 const mockMeterDTO = {
-  EAN: "1234567890123",
+  EAN: "541448200000000001",
   meter_number: "METER-001",
   address: {
     street: "Test St",

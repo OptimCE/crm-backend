@@ -8,7 +8,8 @@
   },
   "upload_document": {
     "storage_service_upload": "Beim Hochladen des Dokuments zum Speicherdienst ist ein Fehler aufgetreten",
-    "database_upload": "Beim Hinzufügen des neuen Dokuments zur Datenbank ist ein Fehler aufgetreten"
+    "database_upload": "Beim Hinzufügen des neuen Dokuments zur Datenbank ist ein Fehler aufgetreten",
+    "member_not_found": "Das Mitglied konnte nicht gefunden werden"
   },
   "validation": {
     "upload_document": {

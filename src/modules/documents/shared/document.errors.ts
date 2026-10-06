@@ -12,6 +12,7 @@ export const DOCUMENT_ERRORS = {
   UPLOAD_DOCUMENT: {
     STORAGE_SERVICE_UPLOAD: new LocalError(20003, "document:upload_document.storage_service_upload"),
     DATABASE_UPLOAD: new LocalError(20004, "document:upload_document.database_upload"),
+    MEMBER_NOT_FOUND: new LocalError(20005, "document:upload_document.member_not_found"),
   },
   VALIDATION: {
     UPLOAD_DOCUMENT: {

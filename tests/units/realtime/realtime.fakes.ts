@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import type { Request, Response } from "express";
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 
 /**
  * A Redis stand-in good enough to exercise the hub's whole surface: pub/sub

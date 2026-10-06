@@ -8,16 +8,28 @@ import { ClientType, MeterDataStatus, MeterRate, ReadingFrequency, TarifGroup } 
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
 import type { Community } from "../../../src/modules/communities/domain/community.models.js";
 import type { Address } from "../../../src/shared/address/address.models.js";
+import { AddressGeocodeStatus } from "../../../src/shared/address/address.types.js";
+import type { Member } from "../../../src/modules/members/domain/member.models.js";
+import { MemberStatus, MemberType } from "../../../src/modules/members/shared/member.types.js";
 
 // --- Mock Data ---
 export const mockDate = new Date("2024-01-01T12:00:00.000Z");
 
-const mockAddress = {
+const mockAddress: Address = {
   id: 1,
   street: "Main St",
-  number: 1,
+  number: "1",
   city: "Brussels",
   postcode: "1000",
+  country: "BE",
+  best_address_id: null,
+  latitude: null,
+  longitude: null,
+  geo_precision: null,
+  geo_source: null,
+  geocoded_at: null,
+  geocode_status: AddressGeocodeStatus.NEVER,
+  community: null,
   created_at: mockDate,
   updated_at: mockDate,
 };
@@ -32,7 +44,7 @@ export const mockMeterEntity: Meter = {
   reading_frequency: ReadingFrequency.MONTHLY,
   created_at: mockDate,
   updated_at: mockDate,
-  address: mockAddress as Address,
+  address: mockAddress,
   community: mockCommunity as Community,
   meter_data: [
     {
@@ -65,6 +77,23 @@ export const mockMeterPartialDTO = toMeterPartialDTO(mockMeterEntity);
 // JSON compatible
 export const mockMeterDTOJSON = JSON.parse(JSON.stringify(mockMeterDTO));
 export const mockMeterPartialDTOJSON = JSON.parse(JSON.stringify(mockMeterPartialDTO));
+
+// The holder as getMetersList loads it: every column of `member`, IBAN included.
+// The list must still expose only the partial member (id, name, type, status).
+const mockHolder = {
+  id: 4,
+  name: "Wind Producer Alpha",
+  IBAN: "BE1000000001",
+  status: MemberStatus.ACTIVE,
+  member_type: MemberType.INDIVIDUAL,
+  created_at: mockDate,
+  updated_at: mockDate,
+} as Member;
+
+const mockMeterEntityWithHolder: Meter = {
+  ...mockMeterEntity,
+  meter_data: [{ ...mockMeterEntity.meter_data[0], member: mockHolder }],
+};
 
 export const mockConsumptions = [
   {
@@ -102,6 +131,23 @@ export const testCasesGetMetersList = [
     mocks: {
       meterRepo: {
         getMetersList: jest.fn(() => Promise.resolve([[mockMeterEntity], 1])),
+      },
+    },
+  },
+  {
+    // toEqual rejects extra keys, so this also proves the IBAN never leaves.
+    description: "Success - exposes the current holder as a partial member (no IBAN)",
+    query: {},
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: [
+      { ...mockMeterPartialDTOJSON, holder: { id: 4, name: "Wind Producer Alpha", member_type: MemberType.INDIVIDUAL, status: MemberStatus.ACTIVE } },
+    ],
+    expected_pagination: { page: 1, limit: 10, total: 1, total_pages: 1 },
+    mocks: {
+      meterRepo: {
+        getMetersList: jest.fn(() => Promise.resolve([[mockMeterEntityWithHolder], 1])),
       },
     },
   },
@@ -246,7 +292,7 @@ export const testCasesAddMeter = [
   {
     description: "Success",
     body: {
-      EAN: "123",
+      EAN: "541448200000000001",
       meter_number: "M1",
       phases_number: 1,
       tarif_group: TarifGroup.LOW_TENSION,
@@ -265,7 +311,7 @@ export const testCasesAddMeter = [
     expected_data: "success",
     mocks: {
       meterRepo: {
-        getMeter: jest.fn(() => Promise.resolve(null)),
+        isEanRegistered: jest.fn(() => Promise.resolve(false)),
         createMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
         addMeterData: jest.fn(() => Promise.resolve({})),
       },
@@ -274,7 +320,7 @@ export const testCasesAddMeter = [
   {
     description: "Fail (Duplicate EAN)",
     body: {
-      EAN: "123",
+      EAN: "541448200000000001",
       meter_number: "M1",
       phases_number: 1,
       tarif_group: TarifGroup.LOW_TENSION,
@@ -293,14 +339,14 @@ export const testCasesAddMeter = [
     expected_data: METER_ERRORS.ADD_METER.ALREADY_EXIST.message,
     mocks: {
       meterRepo: {
-        getMeter: jest.fn(() => Promise.resolve(mockMeterEntity)), // Exists
+        isEanRegistered: jest.fn(() => Promise.resolve(true)), // Exists (in any community)
       },
     },
   },
   {
     description: "Fail (DB Error)",
     body: {
-      EAN: "123",
+      EAN: "541448200000000001",
       meter_number: "M1",
       phases_number: 1,
       tarif_group: TarifGroup.LOW_TENSION,
@@ -319,8 +365,146 @@ export const testCasesAddMeter = [
     expected_data: METER_ERRORS.ADD_METER.DATABASE_ADD.message,
     mocks: {
       meterRepo: {
-        getMeter: jest.fn(() => Promise.resolve(null)),
+        isEanRegistered: jest.fn(() => Promise.resolve(false)),
         createMeter: jest.fn(() => Promise.reject(new Error("Fail"))),
+      },
+    },
+  },
+  {
+    description: "Fail (EAN 13 digits - the old, wrong rule)",
+    body: {
+      EAN: "1234567890123",
+      meter_number: "M1",
+      phases_number: 1,
+      tarif_group: TarifGroup.LOW_TENSION,
+      reading_frequency: ReadingFrequency.MONTHLY,
+      address: { street: "S", number: "1", city: "C", postcode: "1000" },
+      initial_data: {
+        start_date: "2024-01-01",
+        status: MeterDataStatus.ACTIVE,
+        rate: MeterRate.SIMPLE,
+        client_type: ClientType.RESIDENTIAL,
+      },
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.errorCode,
+    expected_data: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.message,
+    mocks: {},
+  },
+  {
+    description: "Fail (EAN 17 digits)",
+    body: {
+      EAN: "54144820000000001",
+      meter_number: "M1",
+      phases_number: 1,
+      tarif_group: TarifGroup.LOW_TENSION,
+      reading_frequency: ReadingFrequency.MONTHLY,
+      address: { street: "S", number: "1", city: "C", postcode: "1000" },
+      initial_data: {
+        start_date: "2024-01-01",
+        status: MeterDataStatus.ACTIVE,
+        rate: MeterRate.SIMPLE,
+        client_type: ClientType.RESIDENTIAL,
+      },
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.errorCode,
+    expected_data: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.message,
+    mocks: {},
+  },
+  {
+    description: "Fail (EAN 19 digits)",
+    body: {
+      EAN: "5414482000000000011",
+      meter_number: "M1",
+      phases_number: 1,
+      tarif_group: TarifGroup.LOW_TENSION,
+      reading_frequency: ReadingFrequency.MONTHLY,
+      address: { street: "S", number: "1", city: "C", postcode: "1000" },
+      initial_data: {
+        start_date: "2024-01-01",
+        status: MeterDataStatus.ACTIVE,
+        rate: MeterRate.SIMPLE,
+        client_type: ClientType.RESIDENTIAL,
+      },
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.errorCode,
+    expected_data: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.message,
+    mocks: {},
+  },
+  {
+    description: "Fail (EAN with a letter)",
+    body: {
+      EAN: "12345678901234567A",
+      meter_number: "M1",
+      phases_number: 1,
+      tarif_group: TarifGroup.LOW_TENSION,
+      reading_frequency: ReadingFrequency.MONTHLY,
+      address: { street: "S", number: "1", city: "C", postcode: "1000" },
+      initial_data: {
+        start_date: "2024-01-01",
+        status: MeterDataStatus.ACTIVE,
+        rate: MeterRate.SIMPLE,
+        client_type: ClientType.RESIDENTIAL,
+      },
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.errorCode,
+    expected_data: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.message,
+    mocks: {},
+  },
+  {
+    description: "Fail (EAN too short)",
+    body: {
+      EAN: "123",
+      meter_number: "M1",
+      phases_number: 1,
+      tarif_group: TarifGroup.LOW_TENSION,
+      reading_frequency: ReadingFrequency.MONTHLY,
+      address: { street: "S", number: "1", city: "C", postcode: "1000" },
+      initial_data: {
+        start_date: "2024-01-01",
+        status: MeterDataStatus.ACTIVE,
+        rate: MeterRate.SIMPLE,
+        client_type: ClientType.RESIDENTIAL,
+      },
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.errorCode,
+    expected_data: METER_ERRORS.VALIDATION.CREATE_METER.EAN_FORMAT.message,
+    mocks: {},
+  },
+  {
+    description: "Success (EAN with surrounding whitespace is normalised, not rejected)",
+    body: {
+      EAN: "  541448200000000001  ",
+      meter_number: "M1",
+      phases_number: 1,
+      tarif_group: TarifGroup.LOW_TENSION,
+      reading_frequency: ReadingFrequency.MONTHLY,
+      address: { street: "S", number: "1", city: "C", postcode: "1000" },
+      initial_data: {
+        start_date: "2024-01-01",
+        status: MeterDataStatus.ACTIVE,
+        rate: MeterRate.SIMPLE,
+        client_type: ClientType.RESIDENTIAL,
+      },
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      meterRepo: {
+        isEanRegistered: jest.fn(() => Promise.resolve(false)),
+        createMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
+        addMeterData: jest.fn(() => Promise.resolve({})),
       },
     },
   },

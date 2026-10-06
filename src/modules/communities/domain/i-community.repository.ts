@@ -79,6 +79,8 @@ export interface ICommunityRepository {
   addUserCommunity(id_user: number, id_community: number, role: Role, query_runner?: QueryRunner): Promise<CommunityUser>;
   deleteUserCommunity(id_user: number, internal_community_id: number, query_runner?: QueryRunner): Promise<CommunityUser>;
   patchRoleUser(id_user: number, id_community: number, new_role: Role, query_runner?: QueryRunner): Promise<CommunityUser>;
+  /** The user's current role in the community, or null when they are not part of it. */
+  getCommunityUserRole(id_user: number, id_community: number, query_runner?: QueryRunner): Promise<Role | null>;
   updateCommunity(
     id_community: number,
     community_details: UpdateCommunityDTO & { headquarters_address_id?: number | null; logo_url?: string | null },

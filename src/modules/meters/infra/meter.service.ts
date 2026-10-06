@@ -18,7 +18,7 @@ import {
   UpdateMeterDTO,
 } from "../api/meter.dtos.js";
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
-import { Meter } from "../domain/meter.models.js";
+import { Meter, MeterData } from "../domain/meter.models.js";
 import { toMeterConsumptionDTO, toMeterDTO, toMeterMapPointDTO, toMeterPartialDTO } from "../shared/to_dto.js";
 import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
@@ -56,10 +56,9 @@ export class MeterService implements IMeterService {
    */
   @Transactional()
   async addMeter(new_meter: CreateMeterDTO, query_runner?: QueryRunner): Promise<void> {
-    // 1. Check if meter exists (EAN Uniqueness)
-    // We use query_runner to ensure we see uncommitted changes if any, though likely not needed for this check
-    const existing = await this.meterRepository.getMeter(new_meter.EAN, query_runner);
-    if (existing) {
+    // 1. Check if meter exists (EAN Uniqueness) — in ANY community: the EAN is globally unique, and a
+    // community-scoped lookup would let `createMeter` take over another community's meter.
+    if (await this.meterRepository.isEanRegistered(new_meter.EAN, query_runner)) {
       logger.warn({ operation: "addMeter", ean: new_meter.EAN }, "Meter already exists");
       throw new AppError(METER_ERRORS.ADD_METER.ALREADY_EXIST, 409);
     }
@@ -260,6 +259,10 @@ export class MeterService implements IMeterService {
     }
 
     try {
+      // The configuration being replaced: it supplies the sharing operation to keep and the holder
+      // the audit entry records the change from.
+      const previous = await this.meterRepository.getLastMeterData(patched_meter_data.EAN, query_runner);
+      const member_id = patched_meter_data.member_id || null;
       const result = await this.meterRepository.addMeterData(
         patched_meter_data.EAN,
         {
@@ -275,8 +278,8 @@ export class MeterService implements IMeterService {
           injection_status: patched_meter_data.injection_status,
           production_chain: patched_meter_data.production_chain,
           total_generating_capacity: patched_meter_data.total_generating_capacity,
-          member: patched_meter_data.member_id ? ({ id: patched_meter_data.member_id } as Member) : null,
-          sharing_operation: patched_meter_data.sharing_operation_id ? ({ id: patched_meter_data.sharing_operation_id } as SharingOperation) : null,
+          member: member_id ? ({ id: member_id } as Member) : null,
+          sharing_operation: this.resolvePatchedSharingOperation(patched_meter_data, previous),
         },
         query_runner,
       );
@@ -292,6 +295,8 @@ export class MeterService implements IMeterService {
             status: patched_meter_data.status ?? null,
             rate: patched_meter_data.rate ?? null,
             client_type: patched_meter_data.client_type ?? null,
+            previous_member_id: previous?.member?.id ?? null,
+            member_id,
             changed_fields: (Object.keys(patched_meter_data) as (keyof PatchMeterDataDTO)[]).filter(
               (k) => k !== "EAN" && patched_meter_data[k] !== undefined,
             ),
@@ -309,9 +314,23 @@ export class MeterService implements IMeterService {
   }
 
   /**
+   * The sharing operation the patched configuration belongs to. An omitted `sharing_operation_id`
+   * keeps the meter in its current operation: the update dialog never sends one (membership is
+   * managed by the sharing-operation endpoints), and mapping "omitted" to "none" silently dropped
+   * the meter from its operation on every save. An explicit `null` still removes it.
+   */
+  private resolvePatchedSharingOperation(patched_meter_data: PatchMeterDataDTO, previous: MeterData | null): SharingOperation | null {
+    if (patched_meter_data.sharing_operation_id === undefined) {
+      return previous?.sharing_operation ?? null;
+    }
+    return patched_meter_data.sharing_operation_id ? ({ id: patched_meter_data.sharing_operation_id } as SharingOperation) : null;
+  }
+
+  /**
    * Deactivates a meter by appending an INACTIVE MeterData record starting on the given date.
-   * The remaining configuration (rate, client type, holder, …) is inherited from the current
-   * record by the repository, which also closes the previously open record.
+   * The meter leaves its sharing operation — the same state the operation's own "remove meter"
+   * flow writes. The remaining configuration (rate, client type, holder, …) is inherited from the
+   * current record by the repository, which also closes the previously open record.
    * @param deactivate_meter - DTO including EAN and effective date.
    * @param query_runner - Database transaction runner.
    * @throws AppError if meter not found or DB error.
@@ -330,6 +349,7 @@ export class MeterService implements IMeterService {
         {
           start_date: deactivate_meter.date,
           status: MeterDataStatus.INACTIVE,
+          sharing_operation: null,
         },
         query_runner,
       );

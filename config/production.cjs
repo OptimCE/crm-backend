@@ -88,6 +88,13 @@ module.exports = {
     // Hard ceiling on one backfill batch, so a typo cannot start an
     // hours-long run against a free public service.
     batch_max: process.env.GEOCODING_BATCH_MAX ? parseInt(process.env.GEOCODING_BATCH_MAX) : 1000,
+    // Keycloak user ids (comma-separated) allowed to run POST /geocoding/backfill. The
+    // backfill touches every community's addresses, so an ADMIN role is not enough -
+    // anyone can create a community and become its ADMIN. Empty = nobody may run it.
+    backfill_operators: (process.env.GEOCODING_BACKFILL_OPERATORS || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean),
   },
   // ---- Realtime SSE fan-out -------------------------------------------
   // A SEPARATE key from cache_service, deliberately. Pointing cache_service at
@@ -115,5 +122,24 @@ module.exports = {
     max_connections_per_user: process.env.REALTIME_MAX_CONNECTIONS_PER_USER ? parseInt(process.env.REALTIME_MAX_CONNECTIONS_PER_USER) : 4,
     max_connections: process.env.REALTIME_MAX_CONNECTIONS ? parseInt(process.env.REALTIME_MAX_CONNECTIONS) : 2000,
     mint_per_minute: process.env.REALTIME_MINT_PER_MINUTE ? parseInt(process.env.REALTIME_MINT_PER_MINUTE) : 30,
+  },
+  // ---- Annex catalogue ------------------------------------------------
+  // Per-deployment switches over config/annexes-services.json, which is baked
+  // into the image and shared by every deployment. Comma-separated feature
+  // names; empty = none. An entry is served when it is NOT in `disable` and
+  // either its `defaultEnabled` is not false or it is in `enable` - disable
+  // wins. A name that is not a catalogue feature refuses the boot, so a typo
+  // cannot silently leave an annex on. Hiding an annex does NOT revoke the
+  // communities already subscribed to it: the annexes check the subscription
+  // row, not this list. See README "Annex catalogue".
+  annex_catalog: {
+    enable: (process.env.ANNEX_CATALOG_ENABLE || "")
+      .split(",")
+      .map((feature) => feature.trim())
+      .filter(Boolean),
+    disable: (process.env.ANNEX_CATALOG_DISABLE || "")
+      .split(",")
+      .map((feature) => feature.trim())
+      .filter(Boolean),
   },
 };

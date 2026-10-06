@@ -75,6 +75,8 @@ import { AnnexesServicesRepository } from "../modules/annexes_services/infra/ann
 import type { IAnnexesServicesService } from "../modules/annexes_services/domain/i-annexes-services.service.js";
 import { AnnexesServicesService } from "../modules/annexes_services/infra/annexes-services.service.js";
 import { AnnexesServicesController } from "../modules/annexes_services/api/annexes-services.controller.js";
+import type { AnnexCatalog } from "../modules/annexes_services/domain/annexes-services.types.js";
+import { getAnnexCatalog } from "../modules/annexes_services/shared/annexes-catalog.js";
 import type { IAuditLogRepository } from "../modules/audit_log/domain/i-audit-log.repository.js";
 import { AuditLogRepository } from "../modules/audit_log/infra/audit-log.repository.js";
 import type { IAuditLogService } from "../modules/audit_log/domain/i-audit-log.service.js";
@@ -172,6 +174,9 @@ container.bind<ISharingOperationService>("SharingOperationService").to(SharingOp
 container.bind<IMunicipalityService>("MunicipalityService").to(MunicipalityService);
 container.bind<IUserService>("UserService").to(UserService);
 container.bind<IAnnexesServicesService>("AnnexesServicesService").to(AnnexesServicesService);
+// Resolved per request like every transient here, but getAnnexCatalog() is memoised:
+// the file is read and the overrides applied once, at boot (see app.ts startServer).
+container.bind<AnnexCatalog>("AnnexCatalog").toDynamicValue(() => getAnnexCatalog());
 container.bind<IAuditLogService>("AuditLogService").to(AuditLogService);
 container.bind<INotificationService>("NotificationService").to(NotificationService);
 // The only writer of `outbound_message`. Bound separately from NotificationService

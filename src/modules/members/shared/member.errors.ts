@@ -35,6 +35,7 @@ export const MEMBER_ERRORS = {
   VALIDATION: {
     WRONG_TYPE: {
       MEMBER_TYPE: new LocalError(55000, "member:validation.wrong_type.member_type"),
+      MEMBER_STATUS: new LocalError(55001, "member:validation.wrong_type.member_status"),
     },
   },
 };
