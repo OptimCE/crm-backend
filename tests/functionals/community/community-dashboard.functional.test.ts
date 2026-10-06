@@ -5,6 +5,7 @@ import { expectWithLog } from "../../utils/helper.js";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
 import { AUTH_COMMUNITY_1, ORGS_GESTIONNAIRE, ORGS_MEMBER } from "../../utils/shared.consts.js";
 import type { CommunityDashboardDTO } from "../../../src/modules/communities/api/community.dtos.js";
+import { appTodayISO } from "../../../src/shared/utils/date.utils.js";
 
 const AUTH_USER_MANAGER = "auth0|manager";
 const AUTH_COMMUNITY_2 = "2";
@@ -177,11 +178,14 @@ describe("(Functional) GET /communities/dashboard", () => {
     });
 
     it("treats end_date as the last day held, not as already expired", async () => {
-      const today = new Date();
-      const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-      await sql(`UPDATE meter_data SET end_date = $1 WHERE ean = '123456789012345678'`, [iso]);
+      // The service's "today" is the Belgian calendar, not the host's: a process
+      // running in UTC is still on yesterday for up to two hours after Brussels
+      // midnight, and would close the holding a day early itself.
+      const today = appTodayISO();
+      await sql(`UPDATE meter_data SET end_date = $1 WHERE ean = '123456789012345678'`, [today]);
 
       const data = body(await getDashboard());
+      expect(data.as_of).toBe(today);
       // `end_date > today` would drop it a day early — addMeterData closes a
       // holding with `next_start - 1 day`, so today is still held.
       expect(data.meters.active).toBe(6);
