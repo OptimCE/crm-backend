@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import { SUCCESS } from "../../../src/shared/errors/errors.js";
-import type { AllocationKey, Iteration } from "../../../src/modules/keys/domain/key.models.js";
+import type { AllocationKey, Consumer, Iteration } from "../../../src/modules/keys/domain/key.models.js";
 import { toKeyDTO, toKeyPartialDTO } from "../../../src/modules/keys/shared/to_dto.js";
 import { KEY_ERRORS } from "../../../src/modules/keys/shared/key.errors.js";
 import { ORGS_ADMIN } from "../../utils/shared.consts.js";
@@ -37,6 +37,38 @@ export const mockAllocKeyEntity: AllocationKey = {
           updated_at: mockDate,
         },
       ],
+    },
+  ],
+};
+
+const mockConsumer = (id: number, name: string, energy_allocated_percentage: number): Consumer => ({
+  id,
+  name,
+  energy_allocated_percentage,
+  iteration: {} as Iteration,
+  community: {} as Community,
+  created_at: mockDate,
+  updated_at: mockDate,
+});
+
+// Shares whose `* 100` carries floating-point noise (0.29 * 100 = 28.999999999999996),
+// a PRORATA consumer (-1) and shares that need the 4-decimal cap (1/7, 6/7).
+export const mockAllocKeyEntityFractionalShares: AllocationKey = {
+  ...mockAllocKeyEntity,
+  iterations: [
+    {
+      ...mockAllocKeyEntity.iterations[0],
+      id: 1,
+      number: 1,
+      energy_allocated_percentage: 0.29,
+      consumers: [mockConsumer(1, "Consumer A", 0.07), mockConsumer(2, "Consumer B", 0.57), mockConsumer(3, "Consumer C", -1)],
+    },
+    {
+      ...mockAllocKeyEntity.iterations[0],
+      id: 2,
+      number: 2,
+      energy_allocated_percentage: 0.71,
+      consumers: [mockConsumer(4, "Consumer D", 1 / 7), mockConsumer(5, "Consumer E", 6 / 7)],
     },
   ],
 };
@@ -160,10 +192,31 @@ export const testCasesDownloadKey = [
     orgs: ORGS_ADMIN,
     expected_error_code: SUCCESS,
     expected_data: mockKeyDTOJSON,
+    // Rows of the "Clef de répartition" sheet: [iteration n°, iteration %, consumer, consumer %]
+    expected_rows: [["1", "100%", "Consumer 1", "100%"]],
     // Note: Controller calls service.getKey(id) -> same as getKey logic currently
     mocks: {
       keyRepo: {
         getKeyById: jest.fn(() => Promise.resolve(mockAllocKeyEntity)),
+      },
+    },
+  },
+  {
+    description: "Success (share labels without floating-point noise)",
+    id: 1,
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_rows: [
+      ["1", "29%", "Consumer A", "7%"],
+      ["1", "29%", "Consumer B", "57%"],
+      ["1", "29%", "Consumer C", "PRORATA"],
+      ["2", "71%", "Consumer D", "14.2857%"],
+      ["2", "71%", "Consumer E", "85.7143%"],
+    ],
+    mocks: {
+      keyRepo: {
+        getKeyById: jest.fn(() => Promise.resolve(mockAllocKeyEntityFractionalShares)),
       },
     },
   },

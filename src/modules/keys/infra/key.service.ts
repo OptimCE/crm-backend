@@ -64,6 +64,17 @@ export class KeyService implements IKeyService {
     });
   }
   /**
+   * Formats a share (fraction of 1) as a percentage label, e.g. 0.29 -> "29%".
+   * Rounding to 4 decimals drops the floating-point noise of `share * 100`
+   * (0.29 * 100 = 28.999999999999996) and keeps up to four decimals (1/7 -> "14.2857%"),
+   * like the frontend's `formatShare` (crm-frontend allocation_key/key-shares.ts).
+   * @param share - Share between 0 and 1.
+   * @returns Percentage label.
+   */
+  private formatShare(share: number): string {
+    return `${Number((share * 100).toFixed(4))}%`;
+  }
+  /**
    * Generates an Excel file for the key distribution simulation.
    * @param key_id - ID of the key.
    * @returns Workbook object (ExcelJS).
@@ -105,14 +116,14 @@ export class KeyService implements IKeyService {
       worksheet.mergeCells("C1:D1");
       key.iterations.forEach((iteration) => {
         iteration.consumers.forEach((consumer) => {
-          let vp_percentage_consumer = consumer.energy_allocated_percentage * 100 + "%";
+          let vp_percentage_consumer = this.formatShare(consumer.energy_allocated_percentage);
           if (consumer.energy_allocated_percentage === -1) {
             vp_percentage_consumer = "PRORATA";
           }
 
           worksheet.addRow({
             number: iteration.number,
-            va_percentage: iteration.energy_allocated_percentage * 100 + "%",
+            va_percentage: this.formatShare(iteration.energy_allocated_percentage),
             name: consumer.name,
             vp_percentage: vp_percentage_consumer,
           });
