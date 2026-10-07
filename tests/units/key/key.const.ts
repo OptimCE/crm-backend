@@ -248,8 +248,34 @@ export const testCasesDownloadKey = [
   },
 ];
 
+// Iterations are numbered from 1, as the frontend and allocation-key-generation number them: a
+// 3-iteration key ends on number 3.
+const threeIterations = [
+  { number: 1, energy_allocated_percentage: 0.5, consumers: [{ name: "C1", energy_allocated_percentage: 1 }] },
+  { number: 2, energy_allocated_percentage: 0.3, consumers: [{ name: "C1", energy_allocated_percentage: 1 }] },
+  { number: 3, energy_allocated_percentage: 0.2, consumers: [{ name: "C1", energy_allocated_percentage: 1 }] },
+];
+
 // 4. Add Key
 export const testCasesAddKey = [
+  {
+    description: "Success (3 iterations, numbered 1 to 3)",
+    body: {
+      name: "New Key",
+      description: "Desc",
+      iterations: threeIterations,
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      keyRepo: {
+        createKey: jest.fn(() => Promise.resolve(mockAllocKeyEntity)),
+        createChildren: jest.fn(() => Promise.resolve(true)),
+      },
+    },
+  },
   {
     description: "Success",
     body: {
@@ -273,6 +299,32 @@ export const testCasesAddKey = [
         createChildren: jest.fn(() => Promise.resolve(true)),
       },
     },
+  },
+  {
+    description: "Fail (Validation Error - Iteration number 0, numbering starts at 1)",
+    body: {
+      name: "Fail Key",
+      description: "Desc",
+      iterations: [{ number: 0, energy_allocated_percentage: 1, consumers: [{ name: "C1", energy_allocated_percentage: 1 }] }],
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MIN_1.errorCode,
+    expected_data: KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MIN_1.message,
+    mocks: {},
+  },
+  {
+    description: "Fail (Validation Error - Iteration number 4, at most 3 iterations)",
+    body: {
+      name: "Fail Key",
+      description: "Desc",
+      iterations: [...threeIterations.slice(0, 2), { ...threeIterations[2], number: 4 }],
+    },
+    status_code: 422,
+    orgs: ORGS_ADMIN,
+    expected_error_code: KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MAX_3.errorCode,
+    expected_data: KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MAX_3.message,
+    mocks: {},
   },
   {
     description: "Fail (Validation Error - Invalid Sum)",
@@ -338,6 +390,27 @@ export const testCasesAddKey = [
 
 // 5. Update Key
 export const testCasesUpdateKey = [
+  {
+    description: "Success (3 iterations, numbered 1 to 3)",
+    body: {
+      id: 1,
+      name: "Updated Key",
+      description: "Updated Desc",
+      iterations: threeIterations,
+    },
+    status_code: 200,
+    orgs: ORGS_ADMIN,
+    expected_error_code: SUCCESS,
+    expected_data: "success",
+    mocks: {
+      keyRepo: {
+        getKeyById: jest.fn(() => Promise.resolve(mockAllocKeyEntity)),
+        updateKey: jest.fn(() => Promise.resolve(mockAllocKeyEntity)),
+        deleteChildren: jest.fn(() => Promise.resolve(true)),
+        createChildren: jest.fn(() => Promise.resolve(true)),
+      },
+    },
+  },
   {
     description: "Success",
     body: {

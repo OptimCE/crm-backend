@@ -28,8 +28,8 @@ export const KEY_ERRORS = {
       ENERGY_ALLOCATED_PERCENTAGE_MAX_1: new LocalError(45001, "key:validation.create_consumer.energy_allocated_percentage_max_1"),
     },
     CREATE_ITERATION: {
-      NUMBER_WRONG_MIN_0: new LocalError(45002, "key:validation.create_iteration.number_min_0"),
-      NUMBER_WRONG_MAX_2: new LocalError(45003, "key:validation.create_iteration.number_max_2"),
+      NUMBER_WRONG_MIN_1: new LocalError(45002, "key:validation.create_iteration.number_min_1"),
+      NUMBER_WRONG_MAX_3: new LocalError(45003, "key:validation.create_iteration.number_max_3"),
       ENERGY_ALLOCATED_PERCENTAGE_MIN_0: new LocalError(45004, "key:validation.create_iteration.energy_allocated_percentage_min_0"),
       CONSUMER_SUM_1: new LocalError(45005, "key:validation.create_iteration.consumer_sum_1"),
     },

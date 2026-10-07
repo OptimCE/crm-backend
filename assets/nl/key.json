@@ -31,8 +31,8 @@
       "energy_allocated_percentage_max_1": "Het veld 'energy_allocated_percentage' is ongeldig, de maximumwaarde is 1"
     },
     "create_iteration": {
-      "number_min_0": "Het veld 'number' is ongeldig, de minimumwaarde is 0",
-      "number_max_2": "Het veld 'number' is ongeldig, de maximumwaarde is 2",
+      "number_min_1": "Het veld 'number' is ongeldig, de minimumwaarde is 1",
+      "number_max_3": "Het veld 'number' is ongeldig, de maximumwaarde is 3",
       "energy_allocated_percentage_min_0": "Het veld 'energy_allocated_percentage' is ongeldig, de minimumwaarde is 0",
       "consumer_sum_1": "De som van 'energy_allocated_percentage' van de consumenten moet gelijk zijn aan 1"
     },
