@@ -38,6 +38,23 @@ import { MeterConsumptionDTO, MeterConsumptionQuery, MeterMapDTO, pickMeterFilte
 import { Pagination } from "../../../shared/dtos/ApiResponses.js";
 const userControllerTraceDecorator = new TraceDecorator(config.get("microservice_name"));
 
+/**
+ * The cached /me reads that go through the user's member links. Accepting a
+ * member invitation adds a link, so all of them change at once. The per-id
+ * member and meter reads are left out: they answer 400 for a member or meter
+ * that is not linked yet, and an error is never cached.
+ */
+const LINKED_MEMBER_READS = [
+  cachePattern("me-members:list", "user"),
+  cachePattern("me-meters:list", "user"),
+  cachePattern("me-meters:map", "user"),
+  // Answers an empty series, not an error, for a meter that is not linked yet.
+  cachePattern("me-meters:consumptions", "user"),
+  cachePattern("me-documents:list", "user"),
+  cachePattern("me-allocation-shares:list", "user"),
+  cachePattern("me-energy-summary:list", "user"),
+];
+
 @injectable()
 export class MeController {
   constructor(@inject("MeService") private readonly meService: IMeService) {}
@@ -180,6 +197,7 @@ export class MeController {
     cachePattern("me-invitations:member-list", "user"),
     cachePattern("me-invitations:member", "user"),
     cachePattern("invitations:member-list", "none"),
+    ...LINKED_MEMBER_READS,
   ])
   async acceptInvitationMember(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const accept_invitation: AcceptInvitationDTO = await validateDto(AcceptInvitationDTO, req.body);
@@ -193,6 +211,7 @@ export class MeController {
     cachePattern("me-invitations:member-list", "user"),
     cachePattern("me-invitations:member", "user"),
     cachePattern("invitations:member-list", "none"),
+    ...LINKED_MEMBER_READS,
   ])
   async acceptInvitationMemberWEncoded(req: Request, res: Response, _next: NextFunction): Promise<void> {
     const accept_invitation: AcceptInvitationWEncodedDTO = await validateDto(AcceptInvitationWEncodedDTO, req.body);

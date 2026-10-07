@@ -1,10 +1,25 @@
-import { expect, it, jest } from "@jest/globals";
+import { afterAll, beforeEach, expect, it, jest } from "@jest/globals";
 import request from "supertest";
 import { useFunctionalTestDb } from "../../utils/test.functional.wrapper.js";
-import { expectWithLog } from "../../utils/helper.js";
+import { expectWithLog, mockStorageServiceModule } from "../../utils/helper.js";
+import { createMockStorageService } from "../../external_mocking/storage_service.mock.js";
+import { startFakeKeycloak } from "../../external_mocking/keycloak.fake.js";
+
+// config/test.cjs reads IAM_BASE_URL when `config` is first imported (by the DB connector, in
+// the first beforeEach), so the fake must be listening, and the variable set, before then.
+const keycloak = await startFakeKeycloak(["optimce-realm"]);
+process.env.IAM_BASE_URL = keycloak.baseUrl;
 
 describe("(Functional) Health Module", () => {
   useFunctionalTestDb();
+
+  beforeEach(() => {
+    keycloak.realms.add("optimce-realm");
+  });
+
+  afterAll(async () => {
+    await keycloak.close();
+  });
 
   // --- GET /health/db ---
   describe("(Functional) DB Health", () => {
@@ -27,7 +42,7 @@ describe("(Functional) Health Module", () => {
       const dbModule = await import("../../../src/shared/database/database.connector.js");
       const querySpy = jest.spyOn(dbModule.AppDataSource, "query");
 
-      const service = new HealthService();
+      const service = new HealthService(createMockStorageService());
       const r1 = await service.checkDb();
       expect(r1.status).toBe("ok");
       const callsAfterFirst = querySpy.mock.calls.length;
@@ -44,56 +59,93 @@ describe("(Functional) Health Module", () => {
 
   // --- GET /health (aggregated) ---
   describe("(Functional) Aggregated Health", () => {
-    it("GET /health : returns a HealthReport with the three checks", async () => {
+    it("GET /health : answers 200 ok when the database, the document store and Keycloak all answer", async () => {
+      // Until 2026-10-06 this answered 503 on every stack, the dev one included, with all
+      // three dependencies up (see tests/units/health/health.service.test.ts).
+      await mockStorageServiceModule({ ping: jest.fn(() => Promise.resolve()) });
       const { default: app } = await import("../../../src/app.js");
 
       const response = await request(app).get("/health/");
 
       await expectWithLog(response, () => {
-        // status will be 503 because document + keycloak external services aren't running in the test env
-        expect([200, 503]).toContain(response.status);
-        expect(response.body).toHaveProperty("status");
-        expect(response.body).toHaveProperty("timestamp");
-        expect(response.body).toHaveProperty("checks.db");
-        expect(response.body).toHaveProperty("checks.document");
-        expect(response.body).toHaveProperty("checks.keycloak");
-        // DB part should be ok against the real Docker Postgres
-        expect(response.body.checks.db.status).toBe("ok");
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+          status: "ok",
+          checks: { db: { status: "ok" }, document: { status: "ok" }, keycloak: { status: "ok" } },
+        });
+        expect(typeof response.body.timestamp).toBe("string");
+      });
+    });
+
+    it("GET /health : answers 503 and names the failing check when one dependency is down", async () => {
+      await mockStorageServiceModule({ ping: jest.fn(() => Promise.reject(new Error("HeadBucket crm-files: HTTP 404"))) });
+      const { default: app } = await import("../../../src/app.js");
+
+      const response = await request(app).get("/health/");
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(503);
+        expect(response.body).toMatchObject({
+          status: "unhealthy",
+          checks: {
+            db: { status: "ok" },
+            document: { status: "unhealthy", error: "HeadBucket crm-files: HTTP 404" },
+            keycloak: { status: "ok" },
+          },
+        });
       });
     });
   });
 
-  // --- GET /health/document — external service unreachable ---
+  // --- GET /health/document ---
   describe("(Functional) Documents Health", () => {
-    it("GET /health/document : returns 503 unhealthy when docs service is not running", async () => {
+    it("GET /health/document : answers 200 when the storage adapter reaches its bucket", async () => {
+      await mockStorageServiceModule({ ping: jest.fn(() => Promise.resolve()) });
       const { default: app } = await import("../../../src/app.js");
 
       const response = await request(app).get("/health/document");
 
       await expectWithLog(response, () => {
-        // No documents service running in test → unhealthy
-        expect([200, 503]).toContain(response.status);
-        if (response.status === 503) {
-          expect(response.body.status).toBe("unhealthy");
-          expect(typeof response.body.error).toBe("string");
-        }
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe("ok");
+      });
+    });
+
+    it("GET /health/document : answers 503 with the adapter's reason when it cannot", async () => {
+      await mockStorageServiceModule({ ping: jest.fn(() => Promise.reject(new Error("connect ECONNREFUSED 10.0.0.5:9000"))) });
+      const { default: app } = await import("../../../src/app.js");
+
+      const response = await request(app).get("/health/document");
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(503);
+        expect(response.body).toMatchObject({ status: "unhealthy", error: "connect ECONNREFUSED 10.0.0.5:9000" });
       });
     });
   });
 
-  // --- GET /health/keycloak — external service unreachable ---
+  // --- GET /health/keycloak ---
   describe("(Functional) Keycloak Health", () => {
-    it("GET /health/keycloak : returns 503 unhealthy when keycloak is not running", async () => {
+    it("GET /health/keycloak : answers 200 when Keycloak serves the configured realm", async () => {
       const { default: app } = await import("../../../src/app.js");
 
       const response = await request(app).get("/health/keycloak");
 
       await expectWithLog(response, () => {
-        expect([200, 503]).toContain(response.status);
-        if (response.status === 503) {
-          expect(response.body.status).toBe("unhealthy");
-          expect(typeof response.body.error).toBe("string");
-        }
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe("ok");
+      });
+    });
+
+    it("GET /health/keycloak : answers 503 when the realm does not exist", async () => {
+      keycloak.realms.delete("optimce-realm");
+      const { default: app } = await import("../../../src/app.js");
+
+      const response = await request(app).get("/health/keycloak");
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(503);
+        expect(response.body).toMatchObject({ status: "unhealthy", error: "HTTP 404" });
       });
     });
   });

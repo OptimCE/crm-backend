@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 import config from "config";
@@ -78,6 +78,28 @@ export class S3StorageService implements IStorageService {
     } catch (err) {
       logger.error({ operation: "deleteDocument", error: err }, "Failed to delete document from S3");
       throw new AppError(GLOBAL_ERRORS.EXCEPTION, 400);
+    }
+  }
+
+  async ping(timeoutMs: number): Promise<void> {
+    try {
+      // HeadBucket proves what an upload needs - the endpoint answers, accepts the
+      // credentials and holds the bucket - and touches no document.
+      await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }), { abortSignal: AbortSignal.timeout(timeoutMs) });
+    } catch (err) {
+      // A HEAD reply has no body, so the SDK reports a missing bucket (404) and a refused
+      // credential (403) alike as message "UnknownError" (measured against MinIO): the
+      // status is the useful part. An abort can only be the deadline above.
+      const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
+      let reason: string;
+      if (status !== undefined) {
+        reason = `HTTP ${status}`;
+      } else if (err instanceof Error && err.name === "AbortError") {
+        reason = `no answer within ${timeoutMs} ms`;
+      } else {
+        reason = err instanceof Error ? err.message : "Unknown error";
+      }
+      throw new Error(`HeadBucket ${this.bucket}: ${reason}`, { cause: err });
     }
   }
 }

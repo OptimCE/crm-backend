@@ -6,5 +6,6 @@ export function createMockStorageService(): jest.Mocked<IStorageService> {
     deleteDocument: jest.fn(),
     getDocumentUrl: jest.fn(),
     uploadDocument: jest.fn(),
+    ping: jest.fn(),
   };
 }

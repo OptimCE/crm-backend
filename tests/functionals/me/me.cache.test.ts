@@ -3,10 +3,11 @@ import request from "supertest";
 import { useFunctionalCacheTestDb } from "../../utils/test.functional.cached.wrapper.js";
 import { expectWithLog, mockStorageServiceModule } from "../../utils/helper.js";
 import type { ICacheService } from "../../../src/shared/cache/i-cache.service.js";
-import { ORGS_MEMBER, ORGS_ADMIN } from "../../utils/shared.consts.js";
+import { ORGS_MEMBER, ORGS_ADMIN, ORGS_GESTIONNAIRE } from "../../utils/shared.consts.js";
 
 const AUTH_USER_MEMBER = "auth0|member";
 const AUTH_USER_ADMIN = "auth0|admin";
+const AUTH_USER_MANAGER = "auth0|manager";
 const AUTH_COMMUNITY_1 = "2c8a0ea5-d597-49d6-ae12-4dceb9e9a018";
 
 /** Filter cache keys to only me-prefixed entries */
@@ -540,6 +541,106 @@ describe("(Cache Integration) Me Module", () => {
 
       const keys = meKeys(cache.keys() as string[]).filter((k) => k.includes("me-energy-summary"));
       expect(new Set(keys).size).toBe(2);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Scenario 7 — Accepting a member invitation
+  // Every read below goes through the user's member links, and accepting adds
+  // one, so the accepting user's cached answers are all stale at once.
+  // ────────────────────────────────────────────────────────────────────────────
+  describe("Invalidation on accepting a member invitation", () => {
+    // Seeded invitation 1 is for member 2, which holds this meter. The tests
+    // address it to user 3 (auth0|manager), who represents no member yet.
+    const INVITATION_ID = 1;
+    const MEMBER_2_EAN = "987654321098765432";
+    const LINKED_READS = [
+      "/me/members",
+      "/me/meters",
+      "/me/meters/map",
+      // Answers an empty series, not an error, for a meter the user does not own.
+      `/me/meters/${MEMBER_2_EAN}/consumptions`,
+      "/me/documents",
+      "/me/allocation-shares",
+      "/me/energy-summary",
+    ];
+    // What the self-encode wizard sends for a company.
+    const ENCODED_COMPANY = {
+      NRN: "0123456749",
+      name: "Encoded Company SRL",
+      first_name: "",
+      member_type: 2,
+      status: 1,
+      iban: "BE68539007547034",
+      email: "",
+      phone_number: "",
+      social_rate: false,
+      vat_number: "BE0123456749",
+      home_address: { id: -1, street: "Rue de la Loi", number: "16", postcode: "1000", supplement: "", city: "Bruxelles" },
+      billing_address: { id: -1, street: "Rue de la Loi", number: "16", postcode: "1000", supplement: "", city: "Bruxelles" },
+      manager: { NRN: "85.07.30-033.28", name: "Claire", surname: "Martin", email: "claire.martin@example.com", phone_number: "0470123456" },
+    };
+
+    async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+      const { AppDataSource } = await import("../../../src/shared/database/database.connector.js");
+      return AppDataSource.manager.query(sql, params);
+    }
+
+    async function getAs(user: string, orgs: string, path: string): Promise<request.Response> {
+      const { default: app } = await import("../../../src/app.js");
+      return request(app).get(path).set("x-user-id", user).set("x-community-id", AUTH_COMMUNITY_1).set("x-user-orgs", orgs);
+    }
+
+    async function acceptAs(user: string, path: string, body: object): Promise<request.Response> {
+      const { default: app } = await import("../../../src/app.js");
+      return request(app).post(path).send(body).set("x-user-id", user);
+    }
+
+    /** The manager's cached /me answers, invitations aside: the accept always dropped those. */
+    function managerKeys(cache: ICacheService): string[] {
+      return meKeys(cache.keys() as string[]).filter((k) => k.includes(`u:${AUTH_USER_MANAGER}:`) && !k.startsWith("me-invitations"));
+    }
+
+    async function warmManagerReads(cache: ICacheService): Promise<void> {
+      for (const path of LINKED_READS) {
+        const response = await getAs(AUTH_USER_MANAGER, ORGS_GESTIONNAIRE, path);
+        await expectWithLog(response, () => expect(response.status).toBe(200));
+      }
+      expect(managerKeys(cache)).toHaveLength(LINKED_READS.length);
+    }
+
+    it("drops the accepting user's linked reads, so the member and its meter show at once", async () => {
+      await query(`UPDATE user_member_invitation SET id_user = 3 WHERE id = $1`, [INVITATION_ID]);
+      const cache = await getCacheService();
+      await warmManagerReads(cache);
+      // The invalidation is per user: another user's entry must survive it.
+      expect((await getAs(AUTH_USER_MEMBER, ORGS_MEMBER, "/me/members")).status).toBe(200);
+
+      const accepted = await acceptAs(AUTH_USER_MANAGER, "/me/invitations/accept", { invitation_id: INVITATION_ID });
+      await expectWithLog(accepted, () => expect(accepted.status).toBe(200));
+
+      expect(managerKeys(cache)).toEqual([]);
+      expect(meKeys(cache.keys() as string[]).filter((k) => k.includes(`u:${AUTH_USER_MEMBER}:`))).toHaveLength(1);
+      const members = await getAs(AUTH_USER_MANAGER, ORGS_GESTIONNAIRE, "/me/members");
+      expect((members.body.data as { id: number }[]).map((m) => m.id)).toEqual([2]);
+      const meters = await getAs(AUTH_USER_MANAGER, ORGS_GESTIONNAIRE, "/me/meters");
+      expect((meters.body.data as { EAN: string }[]).map((m) => m.EAN)).toContain(MEMBER_2_EAN);
+    });
+
+    it("drops them on the encoded accept too, so the member it creates shows at once", async () => {
+      const [{ id }] = await query<{ id: number }>(
+        `INSERT INTO user_member_invitation (member_id, member_name, user_email, id_user, to_be_encoded, id_community)
+         VALUES (NULL, NULL, 'manager@test.com', 3, TRUE, 1) RETURNING id`,
+      );
+      const cache = await getCacheService();
+      await warmManagerReads(cache);
+
+      const accepted = await acceptAs(AUTH_USER_MANAGER, "/me/invitations/accept/encoded", { invitation_id: id, member: ENCODED_COMPANY });
+      await expectWithLog(accepted, () => expect(accepted.status).toBe(200));
+
+      expect(managerKeys(cache)).toEqual([]);
+      const members = await getAs(AUTH_USER_MANAGER, ORGS_GESTIONNAIRE, "/me/members");
+      expect((members.body.data as { name: string }[]).map((m) => m.name)).toEqual([ENCODED_COMPANY.name]);
     });
   });
 });
