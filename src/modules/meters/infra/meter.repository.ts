@@ -8,6 +8,7 @@ import { DeepPartial, DeleteResult, EntityManager, In, SelectQueryBuilder, type 
 import { CreateMeterDTO, MeterConsumptionQuery, MeterMapQuery, MeterPartialQuery, UpdateMeterDTO } from "../api/meter.dtos.js";
 import { applyFilters, FilterDef } from "../../../shared/database/filters.js";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
+import { CONSUMPTION_WRITE_CHUNK_SIZE, lockConsumptionImport, readingColumns, timeWindow } from "../../../shared/database/consumption-import.js";
 import { Address } from "../../../shared/address/address.models.js";
 import { AddressGeocodeStatus, AddressGeoPrecision } from "../../../shared/address/address.types.js";
 import type { CreateAddressDTO } from "../../../shared/address/address.dtos.js";
@@ -95,6 +96,21 @@ export class MeterRepository implements IMeterRepository {
       },
     },
   ];
+  /**
+   * Upsert one import's per-meter readings: one row per (EAN, timestamp), whose
+   * values, operation and community are those of the latest import.
+   *
+   * Set-based. This used to be find-then-`manager.save()` in chunks of 1000,
+   * which builds a TypeORM subject per row and sends one UPDATE per changed row:
+   * a one-month, five-meter RESA file (~15,000 rows) took ~3 s to import and
+   * ~10 s to re-import with corrected values, past the gateway's 3 s cap, so the
+   * SPA reported a failure for an import that had been saved. Now: one lookup of
+   * the rows already stored in the file's time window, then one UPDATE (by id)
+   * and one INSERT per chunk.
+   *
+   * Re-imports stay idempotent, also when two imports overlap (see
+   * `lockConsumptionImport`). A key that already holds two rows has both updated.
+   */
   async addMeterConsumptions(
     id_sharing: number,
     consumptions: (Partial<MeterConsumption> & { ean: string })[],
@@ -102,53 +118,70 @@ export class MeterRepository implements IMeterRepository {
   ): Promise<void> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const communityId = await this.getSharingOperationCommunityId(id_sharing, manager);
+    if (consumptions.length === 0) return;
+    await lockConsumptionImport(manager, communityId);
 
-    const chunkSize = 1000;
-    for (let i = 0; i < consumptions.length; i += chunkSize) {
-      const chunk = consumptions.slice(i, i + chunkSize);
-      const eans = chunk.map((c) => c.ean);
-      const timestamps = chunk.map((c) => c.timestamp);
+    // 1. Rows already stored for these meters in the file's time window.
+    const times = consumptions.map((c) => new Date(c.timestamp!).getTime());
+    const [from, to] = timeWindow(times);
+    const existing: { id: number; ean: string; timestamp: Date }[] = await manager.query(
+      `SELECT id, ean, "timestamp" FROM meter_consumption
+       WHERE ean = ANY($1::varchar[]) AND "timestamp" BETWEEN $2::timestamptz AND $3::timestamptz`,
+      [Array.from(new Set(consumptions.map((c) => c.ean))), from, to],
+    );
+    const idsByKey = new Map<string, number[]>();
+    for (const row of existing) {
+      const key = `${row.ean}_${new Date(row.timestamp).getTime()}`;
+      const ids = idsByKey.get(key);
+      if (ids) ids.push(row.id);
+      else idsByKey.set(key, [row.id]);
+    }
 
-      // 1. Find existing entries to override
-      const existingEntries = await manager.find(MeterConsumption, {
-        where: {
-          meter: { EAN: In(eans) },
-          timestamp: In(timestamps),
-        },
-        relations: ["meter"],
-      });
+    // 2. Update the rows that exist, insert the others.
+    const updates: { id: number; reading: (typeof consumptions)[number] }[] = [];
+    const inserts: { time: number; reading: (typeof consumptions)[number] }[] = [];
+    consumptions.forEach((reading, index) => {
+      const ids = idsByKey.get(`${reading.ean}_${times[index]}`);
+      if (ids) {
+        ids.forEach((id) => updates.push({ id, reading }));
+      } else {
+        inserts.push({ time: times[index], reading });
+      }
+    });
 
-      const existingMap = new Map<string, MeterConsumption>();
-      existingEntries.forEach((e) => {
-        if (e.meter) {
-          existingMap.set(`${e.meter.EAN}_${new Date(e.timestamp).getTime()}`, e);
-        }
-      });
-
-      // 2. Prepare entities (Update existing OR Create new)
-      const entitiesToSave = chunk.map((item) => {
-        const key = `${item.ean}_${new Date(item.timestamp!).getTime()}`;
-        const existing = existingMap.get(key);
-
-        if (existing) {
-          // Update existing
-          return manager.merge(MeterConsumption, existing, {
-            ...item,
-            sharing_operation: { id: id_sharing },
-            community: { id: communityId },
-          });
-        } else {
-          // Create new
-          return manager.create(MeterConsumption, {
-            ...item,
-            meter: { EAN: item.ean },
-            sharing_operation: { id: id_sharing },
-            community: { id: communityId },
-          });
-        }
-      });
-
-      await manager.save(entitiesToSave);
+    // A row that already holds the file's values is left alone, so re-sending
+    // the same file (the usual retry) costs a lookup instead of a rewrite.
+    for (let i = 0; i < updates.length; i += CONSUMPTION_WRITE_CHUNK_SIZE) {
+      const chunk = updates.slice(i, i + CONSUMPTION_WRITE_CHUNK_SIZE);
+      await manager.query(
+        `UPDATE meter_consumption AS mc
+         SET gross = v.gross, net = v.net, shared = v.shared,
+             inj_gross = v.inj_gross, inj_net = v.inj_net, inj_shared = v.inj_shared,
+             id_sharing_operation = $8::int, id_community = $9::int
+         FROM unnest($1::int[], $2::float8[], $3::float8[], $4::float8[], $5::float8[], $6::float8[], $7::float8[])
+           AS v(id, gross, net, shared, inj_gross, inj_net, inj_shared)
+         WHERE mc.id = v.id
+           AND (mc.gross, mc.net, mc.shared, mc.inj_gross, mc.inj_net, mc.inj_shared, mc.id_sharing_operation, mc.id_community)
+               IS DISTINCT FROM (v.gross, v.net, v.shared, v.inj_gross, v.inj_net, v.inj_shared, $8::int, $9::int)`,
+        [chunk.map((u) => u.id), ...readingColumns(chunk.map((u) => u.reading)), id_sharing, communityId],
+      );
+    }
+    for (let i = 0; i < inserts.length; i += CONSUMPTION_WRITE_CHUNK_SIZE) {
+      const chunk = inserts.slice(i, i + CONSUMPTION_WRITE_CHUNK_SIZE);
+      await manager.query(
+        `INSERT INTO meter_consumption
+           (ean, "timestamp", gross, net, shared, inj_gross, inj_net, inj_shared, id_sharing_operation, id_community)
+         SELECT v.ean, v.ts, v.gross, v.net, v.shared, v.inj_gross, v.inj_net, v.inj_shared, $9::int, $10::int
+         FROM unnest($1::varchar[], $2::timestamptz[], $3::float8[], $4::float8[], $5::float8[], $6::float8[], $7::float8[], $8::float8[])
+           AS v(ean, ts, gross, net, shared, inj_gross, inj_net, inj_shared)`,
+        [
+          chunk.map((c) => c.reading.ean),
+          chunk.map((c) => new Date(c.time).toISOString()),
+          ...readingColumns(chunk.map((c) => c.reading)),
+          id_sharing,
+          communityId,
+        ],
+      );
     }
   }
   async addMeterData(ean: string, new_data: DeepPartial<MeterData>, query_runner?: QueryRunner): Promise<MeterData> {

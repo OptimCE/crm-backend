@@ -12,6 +12,7 @@ import {
 import { SharingOpConsumption, SharingOperation, SharingOperationKey, SharingOperationMunicipality } from "../domain/sharing_operation.models.js";
 import { DeleteResult, In, type QueryRunner, SelectQueryBuilder } from "typeorm";
 import { withCommunityScope } from "../../../shared/database/withCommunity.js";
+import { CONSUMPTION_WRITE_CHUNK_SIZE, lockConsumptionImport, readingColumns, timeWindow } from "../../../shared/database/consumption-import.js";
 import { applyFilters, applySorts, FilterDef, SortDef } from "../../../shared/database/filters.js";
 import { Meter, MeterData } from "../../meters/domain/meter.models.js";
 import { CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
@@ -286,44 +287,70 @@ export class SharingOperationRepository implements ISharingOperationRepository {
     return saved;
   }
 
+  /**
+   * Upsert one import's operation-wide totals: one row per (operation,
+   * timestamp), holding the latest import's values. Set-based for the reason
+   * given on `MeterRepository.addMeterConsumptions`, which runs next in the
+   * same transaction and under the same `lockConsumptionImport`.
+   */
   async addConsumptions(id_sharing: number, consumptions: Partial<SharingOpConsumption>[], query_runner?: QueryRunner): Promise<void> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+    if (consumptions.length === 0) return;
+    await lockConsumptionImport(manager, internal_community_id);
 
-    const chunkSize = 1000;
-    for (let i = 0; i < consumptions.length; i += chunkSize) {
-      const chunk = consumptions.slice(i, i + chunkSize);
-      const timestamps = chunk.map((c) => c.timestamp);
+    // 1. Rows already stored for this operation in the file's time window.
+    const times = consumptions.map((c) => new Date(c.timestamp!).getTime());
+    const [from, to] = timeWindow(times);
+    const existing: { id: number; timestamp: Date }[] = await manager.query(
+      `SELECT id, "timestamp" FROM sharing_op_consumption
+       WHERE id_sharing_operation = $1::int AND "timestamp" BETWEEN $2::timestamptz AND $3::timestamptz`,
+      [id_sharing, from, to],
+    );
+    const idsByTime = new Map<number, number[]>();
+    for (const row of existing) {
+      const time = new Date(row.timestamp).getTime();
+      const ids = idsByTime.get(time);
+      if (ids) ids.push(row.id);
+      else idsByTime.set(time, [row.id]);
+    }
 
-      // 1. Find existing entries to override
-      const existingEntries = await manager.find(SharingOpConsumption, {
-        where: {
-          sharing_operation: { id: id_sharing },
-          timestamp: In(timestamps),
-        },
-      });
+    // 2. Update the rows that exist, insert the others.
+    const updates: { id: number; reading: Partial<SharingOpConsumption> }[] = [];
+    const inserts: { time: number; reading: Partial<SharingOpConsumption> }[] = [];
+    consumptions.forEach((reading, index) => {
+      const ids = idsByTime.get(times[index]);
+      if (ids) {
+        ids.forEach((id) => updates.push({ id, reading }));
+      } else {
+        inserts.push({ time: times[index], reading });
+      }
+    });
 
-      // Map for O(1) lookup
-      const existingMap = new Map<number, SharingOpConsumption>();
-      existingEntries.forEach((e) => existingMap.set(new Date(e.timestamp).getTime(), e));
-
-      // 2. Prepare entities (Update existing OR Create new)
-      const entitiesToSave = chunk.map((item) => {
-        const itemTime = new Date(item.timestamp!).getTime();
-        const existing = existingMap.get(itemTime);
-
-        if (existing) {
-          return manager.merge(SharingOpConsumption, existing, item);
-        } else {
-          return manager.create(SharingOpConsumption, {
-            ...item,
-            sharing_operation: { id: id_sharing },
-            community: { id: internal_community_id },
-          });
-        }
-      });
-
-      await manager.save(entitiesToSave);
+    for (let i = 0; i < updates.length; i += CONSUMPTION_WRITE_CHUNK_SIZE) {
+      const chunk = updates.slice(i, i + CONSUMPTION_WRITE_CHUNK_SIZE);
+      await manager.query(
+        `UPDATE sharing_op_consumption AS soc
+         SET gross = v.gross, net = v.net, shared = v.shared,
+             inj_gross = v.inj_gross, inj_net = v.inj_net, inj_shared = v.inj_shared
+         FROM unnest($1::int[], $2::float8[], $3::float8[], $4::float8[], $5::float8[], $6::float8[], $7::float8[])
+           AS v(id, gross, net, shared, inj_gross, inj_net, inj_shared)
+         WHERE soc.id = v.id
+           AND (soc.gross, soc.net, soc.shared, soc.inj_gross, soc.inj_net, soc.inj_shared)
+               IS DISTINCT FROM (v.gross, v.net, v.shared, v.inj_gross, v.inj_net, v.inj_shared)`,
+        [chunk.map((u) => u.id), ...readingColumns(chunk.map((u) => u.reading))],
+      );
+    }
+    for (let i = 0; i < inserts.length; i += CONSUMPTION_WRITE_CHUNK_SIZE) {
+      const chunk = inserts.slice(i, i + CONSUMPTION_WRITE_CHUNK_SIZE);
+      await manager.query(
+        `INSERT INTO sharing_op_consumption
+           (id_sharing_operation, "timestamp", gross, net, shared, inj_gross, inj_net, inj_shared, id_community)
+         SELECT $8::int, v.ts, v.gross, v.net, v.shared, v.inj_gross, v.inj_net, v.inj_shared, $9::int
+         FROM unnest($1::timestamptz[], $2::float8[], $3::float8[], $4::float8[], $5::float8[], $6::float8[], $7::float8[])
+           AS v(ts, gross, net, shared, inj_gross, inj_net, inj_shared)`,
+        [chunk.map((c) => new Date(c.time).toISOString()), ...readingColumns(chunk.map((c) => c.reading)), id_sharing, internal_community_id],
+      );
     }
   }
 

@@ -87,7 +87,8 @@ export class MemberService implements IMemberService {
         phone_number: new_member.manager.phone_number,
         community: { id: internal_community_id },
       });
-      manager = await this.member_repository.saveManager(new_manager);
+      // On `query_runner`, like every other write here: a failed creation must not leave an orphaned manager.
+      manager = await this.member_repository.saveManager(new_manager, query_runner);
       if (!manager) {
         logger.error({ operation: "sharedAddMember" }, "Error while saving new guardian to the database");
         throw new AppError(MEMBER_ERRORS.ADD_MEMBER.DATABASE_ADD, 400);
@@ -418,7 +419,7 @@ export class MemberService implements IMemberService {
       if (update_dto.phone_number !== undefined) ind.phone_number = update_dto.phone_number || null;
 
       if (update_dto.manager) {
-        let manager: Manager | null = null;
+        let manager: Manager;
         if (ind.manager) {
           // Update
           if (update_dto.manager.email) {
@@ -436,9 +437,11 @@ export class MemberService implements IMemberService {
           if (update_dto.manager.phone_number) {
             ind.manager.phone_number = update_dto.manager.phone_number;
           }
+          // Keep the SAME row: leaving this null used to unlink the guardian.
+          manager = ind.manager;
         } else {
           // Create
-          const new_manager = query_runner.manager.create(Manager, {
+          manager = query_runner.manager.create(Manager, {
             NRN: update_dto.manager.NRN,
             email: update_dto.manager.email,
             name: update_dto.manager.name,
@@ -446,13 +449,15 @@ export class MemberService implements IMemberService {
             phone_number: update_dto.manager.phone_number,
             community: { id: member.community.id },
           });
-          manager = await this.member_repository.saveManager(new_manager);
-          if (!manager) {
-            logger.error({ operation: "updateMember" }, "Error while updating guardian to the database");
-            throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.DATABASE_SAVE_MEMBER, 400);
-          }
         }
-        ind.manager = manager;
+        // The relation has no cascade, so saving the individual alone would drop the guardian's
+        // edits. Save it on `query_runner`: a later failure must roll it back too.
+        try {
+          ind.manager = await this.member_repository.saveManager(manager, query_runner);
+        } catch (err) {
+          logger.error({ operation: "updateMember", error: err }, "Error while updating guardian to the database");
+          throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.DATABASE_SAVE_MEMBER, 400);
+        }
       }
       try {
         await this.member_repository.saveIndividual(ind, query_runner);
@@ -466,7 +471,7 @@ export class MemberService implements IMemberService {
       if (update_dto.vat_number) comp.vat_number = update_dto.vat_number;
 
       if (update_dto.manager) {
-        let manager: Manager | null = null;
+        let manager: Manager;
         if (comp.manager) {
           // Update
           if (update_dto.manager.email) {
@@ -484,9 +489,11 @@ export class MemberService implements IMemberService {
           if (update_dto.manager.phone_number) {
             comp.manager.phone_number = update_dto.manager.phone_number;
           }
+          // Keep the SAME row: leaving this null broke every edit (company.id_manager is NOT NULL).
+          manager = comp.manager;
         } else {
           // Create
-          const new_manager = query_runner.manager.create(Manager, {
+          manager = query_runner.manager.create(Manager, {
             NRN: update_dto.manager.NRN,
             email: update_dto.manager.email,
             name: update_dto.manager.name,
@@ -494,13 +501,14 @@ export class MemberService implements IMemberService {
             phone_number: update_dto.manager.phone_number,
             community: { id: member.community.id },
           });
-          manager = await this.member_repository.saveManager(new_manager);
-          if (!manager) {
-            logger.error({ operation: "updateMember" }, "Error while updating guardian to the database");
-            throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.DATABASE_SAVE_COMPANY, 400);
-          }
         }
-        comp.manager = manager!;
+        // Same as for an individual: no cascade, so save the representative itself, on `query_runner`.
+        try {
+          comp.manager = await this.member_repository.saveManager(manager, query_runner);
+        } catch (err) {
+          logger.error({ operation: "updateMember", error: err }, "Error while updating guardian to the database");
+          throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.DATABASE_SAVE_COMPANY, 400);
+        }
       }
 
       try {

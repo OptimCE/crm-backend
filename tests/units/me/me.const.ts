@@ -1186,6 +1186,37 @@ export const testCasesAcceptEncoded = [
     },
   },
   {
+    // Seen live 2026-10-06: the self-registration wizard sent a company's name in `first_name` and
+    // `name: ''`. The empty field is inside the nested `member`, which used to answer
+    // 422 "An unexpected error occurred" (error_code 1) instead of the field's own error.
+    description: "POST /me/invitations/accept/encoded Fail (Validation - company member with an empty name)",
+    endpoint: "/me/invitations/accept/encoded",
+    id_user: 10,
+    id_community: 1,
+    orgs: ORGS_MEMBER,
+    query: {
+      invitation_id: 1,
+      member: {
+        name: "",
+        first_name: "TestCorp",
+        member_type: MemberType.COMPANY,
+        status: MemberStatus.ACTIVE,
+        email: "",
+        iban: "BE1234567890",
+        NRN: "0123456789",
+        phone_number: "123456789",
+        social_rate: false,
+        vat_number: "BE0123456789",
+        home_address: { street: "Rue", number: 1, city: "City", postcode: "1000" },
+        billing_address: { street: "Rue", number: 1, city: "City", postcode: "1000" },
+        manager: { NRN: "85073003328", name: "Ada", surname: "Lovelace", email: "ada@testcorp.be", phone_number: "123456789" },
+      },
+    },
+    status_code: 422,
+    expected_error_code: MEMBER_ERRORS.GENERIC_VALIDATION.EMPTY.errorCode,
+    mocks: {},
+  },
+  {
     description: "POST /me/invitations/accept/encoded Fail (User Mismatch)",
     endpoint: "/me/invitations/accept/encoded",
     id_user: 99,

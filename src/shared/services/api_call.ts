@@ -17,6 +17,19 @@ export async function call<T>(requestConfig: AxiosRequestConfig, headersInput: R
   const response = await axios(configWithHeaders);
   return response.data as T;
 }
+
+/**
+ * Makes an HTTP request and returns only its status code. Every other function here
+ * returns the response body, so a caller cannot tell a 404 page from a 200 with them.
+ *
+ * @param requestConfig - Axios request configuration
+ * @returns Promise resolving to the HTTP status code, whatever it is; rejects only when no answer arrives
+ */
+export async function callForStatus(requestConfig: AxiosRequestConfig): Promise<number> {
+  const response = await axios({ ...requestConfig, validateStatus: (): boolean => true });
+  return response.status;
+}
+
 /**
  * Makes an HTTP request with OpenTelemetry tracing headers and custom certificate
  * @template T - The expected type of the response data

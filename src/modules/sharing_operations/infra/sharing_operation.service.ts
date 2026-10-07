@@ -96,9 +96,13 @@ export class SharingOperationService implements ISharingOperationService {
     }
 
     // 1. Parse the Excel File
+    // Only the three sheets read below, and without the formatted text (`.w`)
+    // of every cell: nothing here reads it (`sheet_to_json` returns raw `.v`
+    // values, `readEanRow` reads `.v`/`.t`), and formatting ~50,000 cells cost
+    // a quarter to a third of the parse time of a one-month file.
     const buffer = dto.file.buffer;
-    const workbook = xlsx.read(buffer, { type: "buffer" });
     const sheetNames = ["Brut Rep", "Partagé Rep", "Net Rep"];
+    const workbook = xlsx.read(buffer, { type: "buffer", sheets: sheetNames, cellText: false, cellHTML: false });
 
     // 1.5 Get Authorized EANs for this Sharing Operation
     // We fetch the list of EANs that have a MeterData entry linked to this Sharing Operation (Active or Historic)
@@ -345,6 +349,9 @@ export class SharingOperationService implements ISharingOperationService {
     }
 
     // 4. Save to Repository
+    // Both writes are upserts taken under the community's consumption-import
+    // lock (`lockConsumptionImport`): an upload that overlaps a running one, e.g.
+    // a retry after a gateway timeout, waits for it and then updates its rows.
     try {
       // Save global aggregation
       await this.sharing_operationRepository.addConsumptions(dto.id_sharing_operation, consumptionsToSave, query_runner);

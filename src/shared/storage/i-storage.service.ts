@@ -24,4 +24,12 @@ export interface IStorageService {
    * @param key - The storage key/path of the document to delete.
    */
   deleteDocument(key: string): Promise<void>;
+
+  /**
+   * Checks that the provider answers and holds the configured bucket, without reading or
+   * writing a document. Used by GET /health.
+   * @param timeoutMs - How long to wait for an answer.
+   * @throws Error naming the reason when it does not.
+   */
+  ping(timeoutMs: number): Promise<void>;
 }

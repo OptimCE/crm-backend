@@ -463,10 +463,12 @@ export class UpdateMemberDTO {
   NRN?: string;
 
   /**
-   * Update email.
+   * Update email. An empty string means "not sent", as updateMember already treats it: the
+   * member wizard sends one for a company, which has no email of its own.
    */
   @Expose()
   @IsEmail({}, withError(MEMBER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL))
+  @ValidateIf((o) => o.email !== "")
   @IsOptional()
   email?: string;
 
