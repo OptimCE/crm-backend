@@ -139,12 +139,12 @@ export class CreateConsumerDTO {
  */
 export class CreateIterationDTO {
   /**
-   * Iteration number (0, 1, or 2).
+   * Iteration number (1, 2, or 3), as the frontend and allocation-key-generation number them.
    */
   @Expose()
   @Type(() => Number)
-  @Min(0, withError(KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MIN_0))
-  @Max(2, withError(KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MAX_2))
+  @Min(1, withError(KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MIN_1))
+  @Max(3, withError(KEY_ERRORS.VALIDATION.CREATE_ITERATION.NUMBER_WRONG_MAX_3))
   @IsInt(withError(KEY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
   @IsNotEmpty(withError(KEY_ERRORS.GENERIC_VALIDATION.EMPTY))
   number!: number;

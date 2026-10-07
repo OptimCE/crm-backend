@@ -457,8 +457,8 @@ export const MeResponses = {
                 is_prorata: false,
                 effective_share: 0.4,
                 iterations: [
-                  { iteration_id: 1, iteration_number: 0, iteration_share: 0.6, consumer_share: 0.5, is_prorata: false, contribution: 0.3 },
-                  { iteration_id: 2, iteration_number: 1, iteration_share: 0.4, consumer_share: 0.25, is_prorata: false, contribution: 0.1 },
+                  { iteration_id: 1, iteration_number: 1, iteration_share: 0.6, consumer_share: 0.5, is_prorata: false, contribution: 0.3 },
+                  { iteration_id: 2, iteration_number: 2, iteration_share: 0.4, consumer_share: 0.25, is_prorata: false, contribution: 0.1 },
                 ],
               },
               {
@@ -473,7 +473,7 @@ export const MeResponses = {
                 match_basis: "ean_consumer_name",
                 is_prorata: true,
                 effective_share: null,
-                iterations: [{ iteration_id: 3, iteration_number: 0, iteration_share: 1, consumer_share: -1, is_prorata: true, contribution: null }],
+                iterations: [{ iteration_id: 3, iteration_number: 1, iteration_share: 1, consumer_share: -1, is_prorata: true, contribution: null }],
               },
               {
                 community: { id: 2, name: "Second Community", logo_url: null },
@@ -487,7 +487,7 @@ export const MeResponses = {
                 match_basis: null,
                 is_prorata: false,
                 effective_share: null,
-                iterations: [{ iteration_id: 4, iteration_number: 0, iteration_share: 1, consumer_share: null, is_prorata: false, contribution: 0 }],
+                iterations: [{ iteration_id: 4, iteration_number: 1, iteration_share: 1, consumer_share: null, is_prorata: false, contribution: 0 }],
               },
             ],
           },

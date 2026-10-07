@@ -31,8 +31,8 @@
       "energy_allocated_percentage_max_1": "Le champ 'energy_allocated_percentage' est incorrect, la valeur maximale est 1"
     },
     "create_iteration": {
-      "number_min_0": "Le champ 'number' est incorrect, la valeur minimale est 0",
-      "number_max_2": "Le champ 'number' est incorrect, la valeur maximale est 2",
+      "number_min_1": "Le champ 'number' est incorrect, la valeur minimale est 1",
+      "number_max_3": "Le champ 'number' est incorrect, la valeur maximale est 3",
       "energy_allocated_percentage_min_0": "Le champ 'energy_allocated_percentage' est incorrect, la valeur minimale est 0",
       "consumer_sum_1": "La somme des 'energy_allocated_percentage' des consommateurs doit être égale à 1"
     },

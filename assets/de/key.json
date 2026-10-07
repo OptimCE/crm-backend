@@ -31,8 +31,8 @@
       "energy_allocated_percentage_max_1": "Das Feld 'energy_allocated_percentage' ist ungültig, der Höchstwert ist 1"
     },
     "create_iteration": {
-      "number_min_0": "Das Feld 'number' ist ungültig, der Mindestwert ist 0",
-      "number_max_2": "Das Feld 'number' ist ungültig, der Höchstwert ist 2",
+      "number_min_1": "Das Feld 'number' ist ungültig, der Mindestwert ist 1",
+      "number_max_3": "Das Feld 'number' ist ungültig, der Höchstwert ist 3",
       "energy_allocated_percentage_min_0": "Das Feld 'energy_allocated_percentage' ist ungültig, der Mindestwert ist 0",
       "consumer_sum_1": "Die Summe der 'energy_allocated_percentage' der Verbraucher muss gleich 1 sein"
     },
