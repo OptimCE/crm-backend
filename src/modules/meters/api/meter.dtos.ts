@@ -422,24 +422,27 @@ export class CreateMeterDataDTO {
   grd?: string;
 
   // --- Production / Injection Fields ---
+  // There is no "none" member: a meter without production (a consumer) stores `null`.
+  // On PATCH an absent field keeps the current value and an explicit `null` clears it,
+  // which is how a producer is switched to "no production" (`@IsOptional` lets `null` through).
 
   /**
-   * Injection status.
+   * Injection status. `null` = no injection (a consumer); omitted on PATCH = unchanged.
    */
   @Expose()
   @Type(() => Number)
   @IsEnum(InjectionStatus, withError(METER_ERRORS.VALIDATION.WRONG_TYPE.INJECTION_STATUS))
   @IsOptional()
-  injection_status?: InjectionStatus;
+  injection_status?: InjectionStatus | null;
 
   /**
-   * Production chain type.
+   * Production chain type. `null` = no production; omitted on PATCH = unchanged.
    */
   @Expose()
   @Type(() => Number)
   @IsEnum(ProductionChain, withError(METER_ERRORS.VALIDATION.WRONG_TYPE.PRODUCTION_CHAIN))
   @IsOptional()
-  production_chain?: ProductionChain;
+  production_chain?: ProductionChain | null;
 
   /**
    * Total generating capacity.

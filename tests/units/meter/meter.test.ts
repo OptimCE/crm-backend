@@ -15,7 +15,8 @@ import {
   testCasesPatchMeterData,
 } from "./meter.const.js";
 import { AUTH_COMMUNITY_1, ORGS_ADMIN } from "../../utils/shared.consts.js";
-import { ClientType, MeterDataStatus, MeterRate } from "../../../src/modules/meters/shared/meter.types.js";
+import { ClientType, InjectionStatus, MeterDataStatus, MeterRate, ProductionChain } from "../../../src/modules/meters/shared/meter.types.js";
+import { METER_ERRORS } from "../../../src/modules/meters/shared/meter.errors.js";
 
 describe("(Unit) Meter Module", () => {
   // --- GET METERS LIST ---
@@ -257,6 +258,54 @@ describe("(Unit) Meter Module", () => {
 
       expect(response.status).toBe(200);
       expect(addMeterData).toHaveBeenCalledWith("123", expect.objectContaining({ sharing_operation: null }), expect.anything());
+    });
+
+    // "No production" is stored as null. The repository clears a field it is handed as null and
+    // carries an undefined one over from the previous window, so the two must not be conflated here.
+    it("PATCH /meters/data : hands an explicit null injection status and production chain to the repository", async () => {
+      const { response, addMeterData } = await patchWith({ ...patchBody, injection_status: null, production_chain: null }, { id: 7 });
+
+      expect(response.status).toBe(200);
+      expect(addMeterData).toHaveBeenCalledWith(
+        "123",
+        expect.objectContaining({ injection_status: null, production_chain: null }),
+        expect.anything(),
+      );
+    });
+
+    it("PATCH /meters/data : leaves an omitted injection status and production chain undefined", async () => {
+      const { response, addMeterData } = await patchWith(patchBody, { id: 7 });
+
+      expect(response.status).toBe(200);
+      const sent = (addMeterData.mock.calls[0] as unknown[])[1] as Record<string, unknown>;
+      expect(sent.injection_status).toBeUndefined();
+      expect(sent.production_chain).toBeUndefined();
+    });
+
+    it("PATCH /meters/data : hands a real injection status and production chain over as numbers", async () => {
+      const { response, addMeterData } = await patchWith(
+        { ...patchBody, injection_status: InjectionStatus.INJECTION_OWNER, production_chain: ProductionChain.WIND },
+        { id: 7 },
+      );
+
+      expect(response.status).toBe(200);
+      expect(addMeterData).toHaveBeenCalledWith(
+        "123",
+        expect.objectContaining({ injection_status: InjectionStatus.INJECTION_OWNER, production_chain: ProductionChain.WIND }),
+        expect.anything(),
+      );
+    });
+
+    // The frontend's "Aucun" options are 5 and 8; they must travel as null, never as these numbers.
+    it.each([
+      { field: "injection_status", value: 5, error: METER_ERRORS.VALIDATION.WRONG_TYPE.INJECTION_STATUS },
+      { field: "production_chain", value: 8, error: METER_ERRORS.VALIDATION.WRONG_TYPE.PRODUCTION_CHAIN },
+    ])("PATCH /meters/data : rejects the frontend-only NONE value of $field ($value)", async ({ field, value, error }) => {
+      const { response, addMeterData } = await patchWith({ ...patchBody, [field]: value }, { id: 7 });
+
+      expect(response.status).toBe(422);
+      expect(response.body.error_code).toBe(error.errorCode);
+      expect(addMeterData).not.toHaveBeenCalled();
     });
   });
 

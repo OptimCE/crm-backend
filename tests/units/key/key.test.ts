@@ -1,5 +1,6 @@
 import { expect, it } from "@jest/globals";
 import request from "supertest";
+import ExcelJS from "exceljs";
 import { useUnitTestDb } from "../../utils/test.unit.wrapper.js";
 import { expectWithLog, mockKeyRepositoryModule } from "../../utils/helper.js";
 import { testCasesAddKey, testCasesDeleteKey, testCasesDownloadKey, testCasesGetKey, testCasesGetKeysList, testCasesUpdateKey } from "./key.const.js";
@@ -73,7 +74,7 @@ describe("(Unit) Key Module", () => {
 
     it.each(testCasesDownloadKey)(
       "GET /keys/:id/download : $description",
-      async ({ id, status_code, expected_error_code, expected_data, mocks, orgs }) => {
+      async ({ id, status_code, expected_error_code, expected_data, expected_rows, mocks, orgs }) => {
         if (mocks?.keyRepo) await mockKeyRepositoryModule(mocks.keyRepo);
 
         const appModule = await import("../../../src/app.js");
@@ -107,7 +108,7 @@ describe("(Unit) Key Module", () => {
           .buffer(true)
           .parse(smartParser);
 
-        await expectWithLog(response, () => {
+        await expectWithLog(response, async () => {
           expect(response.status).toBe(status_code);
           if (response.status === 200) {
             expect(response.headers["content-type"]).toContain("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -115,6 +116,13 @@ describe("(Unit) Key Module", () => {
             expect(response.headers["content-disposition"]).toMatch(/^attachment;\s*filename=".+\.xlsx"$/i);
             expect(Buffer.isBuffer(response.body)).toBe(true);
             expect(response.body.length).toBeGreaterThan(0);
+            if (expected_rows) {
+              const workbook = await new ExcelJS.Workbook().xlsx.load(response.body);
+              const worksheet = workbook.getWorksheet("Clef de répartition")!;
+              // Rows 1-2 hold the grouped and per-column headers; the data starts on row 3.
+              const rows = worksheet.getRows(3, worksheet.rowCount - 2)!.map((row) => [1, 2, 3, 4].map((col) => row.getCell(col).text));
+              expect(rows).toEqual(expected_rows);
+            }
           } else {
             expect(response.body.error_code).toBe(expected_error_code);
             const result = i18next.t(expected_data);

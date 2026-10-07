@@ -232,6 +232,10 @@ export class MeterRepository implements IMeterRepository {
     // unless they are explicitly overridden in 'new_data'.
     // The holder is inherited only when it is absent: an explicit `null` clears it.
     const member = new_data.member !== undefined ? new_data.member : await this.getHolder(latestMeterData, manager);
+    // Same rule for the production fields: `null` is how a meter is switched to "no production"
+    // (a consumer), so `??` would carry the old injection status / chain over to the new window.
+    const injection_status = new_data.injection_status !== undefined ? new_data.injection_status : latestMeterData?.injection_status;
+    const production_chain = new_data.production_chain !== undefined ? new_data.production_chain : latestMeterData?.production_chain;
     const meterData = manager.create(MeterData, {
       ...new_data, // properties from DTO (e.g. sharing_operation, start_date)
       meter: { EAN: ean },
@@ -247,8 +251,8 @@ export class MeterRepository implements IMeterRepository {
       rate: new_data.rate ?? latestMeterData?.rate,
       client_type: new_data.client_type ?? latestMeterData?.client_type,
       member,
-      injection_status: new_data.injection_status ?? latestMeterData?.injection_status,
-      production_chain: new_data.production_chain ?? latestMeterData?.production_chain,
+      injection_status,
+      production_chain,
       total_generating_capacity: new_data.total_generating_capacity ?? latestMeterData?.total_generating_capacity,
       grd: new_data.grd ?? latestMeterData?.grd,
     });
