@@ -43,6 +43,7 @@ EXECUTE FUNCTION update_changetimestamp_column();
 CREATE TABLE IF NOT EXISTS municipality_postal_code (
     postal_code VARCHAR(10) NOT NULL,
     nis_code    INT NOT NULL REFERENCES municipality (nis_code) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT current_timestamp,
     PRIMARY KEY (postal_code, nis_code)
 );
 CREATE INDEX IF NOT EXISTS idx_municipality_postal_code_nis

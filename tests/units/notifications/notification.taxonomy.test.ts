@@ -19,6 +19,8 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       NEWS_POLL_PUBLISHED: "news_poll.published",
       INVOICE_ISSUED: "invoice.issued",
       INVOICE_OVERDUE: "invoice.overdue",
+      CREDIT_NOTE_ISSUED: "credit_note.issued",
+      PRODUCER_STATEMENT_ISSUED: "producer_statement.issued",
       BILLING_RUN_COMPLETED: "billing_run.completed",
       ADMIN_DEADLINE_DUE_SOON: "admin_deadline.due_soon",
       ADMIN_DEADLINE_MISSED: "admin_deadline.missed",
@@ -34,6 +36,7 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       "admin_deadline",
       "admin_dossier",
       "billing_run",
+      "credit_note",
       "document",
       "invoice",
       "manager_invitation",
@@ -41,6 +44,7 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       "member_invitation",
       "news_poll",
       "news_post",
+      "producer_statement",
     ]);
     expect(NOTIFICATION_TYPE_PREFIXES).not.toContain("");
   });
