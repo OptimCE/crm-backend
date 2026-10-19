@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsDate,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -18,6 +19,7 @@ import {
 } from "class-validator";
 import { HOUSE_NUMBER_PATTERN } from "../../../shared/address/house-number.js";
 import { EAN_PATTERN, normaliseEan } from "../shared/ean.js";
+import { normaliseGrd } from "../shared/grd.js";
 import { SharingOperationPartialDTO } from "../../sharing_operations/api/sharing_operation.dtos.js";
 import { METER_ERRORS } from "../shared/meter.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
@@ -248,6 +250,12 @@ export class MetersDataDTO {
   member?: MembersPartialDTO;
   @Expose()
   grd!: string;
+  /** `auto` (prefilled from the address and kept), `manual`, or null when the origin is unknown. */
+  @Expose()
+  grd_source!: string | null;
+  /** The belgian-dso-map release an `auto` grd came from. */
+  @Expose()
+  grd_data_version!: string | null;
   @Expose()
   sharing_operation?: SharingOperationPartialDTO;
 }
@@ -414,12 +422,42 @@ export class CreateMeterDataDTO {
   amperage?: number;
 
   /**
-   * GRD (DSO) identifier.
+   * GRD (DSO) identifier: an operator's stable id (`ores`, `fluvius-imewo`).
+   *
+   * A legacy display name ("ORES", "Fluvius Imewo") is rewritten to its id
+   * before validation; anything else is kept as sent — free text, deliberately
+   * no `@IsIn`, see ../shared/grd.ts. 64 characters is far above any id and
+   * well inside the column, so an over-long value is a 422 rather than a
+   * Postgres 22001 surfacing as a 500.
+   */
+  @Expose()
+  @Transform(({ value }) => (typeof value === "string" ? normaliseGrd(value) : value))
+  @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(64, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  grd?: string;
+
+  /**
+   * Who chose `grd`: `auto` when the form kept the value dso-lookup prefilled,
+   * `manual` otherwise. Only read alongside `grd` — sent without it, it is
+   * ignored and the stored provenance is kept (MeterRepository.addMeterData).
+   */
+  @Expose()
+  @IsIn(["auto", "manual"], withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  grd_source?: "auto" | "manual" | null;
+
+  /**
+   * The belgian-dso-map release an `auto` grd came from: `YYYY.MM.N`, with a
+   * `-draft` suffix accepted because dev runs on draft data and a refusal here
+   * would block meter creation there.
    */
   @Expose()
   @IsString(withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @Matches(/^\d{4}\.\d{2}\.\d+(-draft)?$/, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(32, withError(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsOptional()
-  grd?: string;
+  grd_data_version?: string | null;
 
   // --- Production / Injection Fields ---
   // There is no "none" member: a meter without production (a consumer) stores `null`.

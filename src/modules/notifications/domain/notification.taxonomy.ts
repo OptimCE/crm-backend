@@ -30,6 +30,8 @@ export const NOTIFICATION_TYPES = {
   // billing
   INVOICE_ISSUED: "invoice.issued",
   INVOICE_OVERDUE: "invoice.overdue",
+  CREDIT_NOTE_ISSUED: "credit_note.issued",
+  PRODUCER_STATEMENT_ISSUED: "producer_statement.issued",
   BILLING_RUN_COMPLETED: "billing_run.completed",
   // administrative-document
   ADMIN_DEADLINE_DUE_SOON: "admin_deadline.due_soon",

@@ -200,6 +200,18 @@ export class MeterRepository implements IMeterRepository {
 
     const newStart = new_data.start_date as string;
 
+    // grd_source and grd_data_version describe the grd next to them, so the three move as one:
+    // a grd that is sent brings its own provenance (none sent = null, "origin unknown"), and a
+    // grd that is not sent leaves the stored provenance alone. Settled here, BEFORE the same-day
+    // merge below: merge() copies every key that is not undefined, so a provenance sent without a
+    // grd would otherwise relabel a value it does not describe.
+    const grd_sent = new_data.grd !== undefined;
+    new_data = {
+      ...new_data,
+      grd_source: grd_sent ? (new_data.grd_source ?? null) : undefined,
+      grd_data_version: grd_sent ? (new_data.grd_data_version ?? null) : undefined,
+    } as DeepPartial<MeterData>;
+
     if (latestMeterData) {
       const latestStart = latestMeterData.start_date;
 
@@ -236,6 +248,9 @@ export class MeterRepository implements IMeterRepository {
     // (a consumer), so `??` would carry the old injection status / chain over to the new window.
     const injection_status = new_data.injection_status !== undefined ? new_data.injection_status : latestMeterData?.injection_status;
     const production_chain = new_data.production_chain !== undefined ? new_data.production_chain : latestMeterData?.production_chain;
+    // grd itself keeps its `??` (an explicit null does not clear it on a new window), and its
+    // provenance follows it: whenever the previous grd is carried over, so are its source and version.
+    const inherits_grd = new_data.grd === undefined || new_data.grd === null;
     const meterData = manager.create(MeterData, {
       ...new_data, // properties from DTO (e.g. sharing_operation, start_date)
       meter: { EAN: ean },
@@ -255,6 +270,8 @@ export class MeterRepository implements IMeterRepository {
       production_chain,
       total_generating_capacity: new_data.total_generating_capacity ?? latestMeterData?.total_generating_capacity,
       grd: new_data.grd ?? latestMeterData?.grd,
+      grd_source: inherits_grd ? (latestMeterData?.grd_source ?? null) : new_data.grd_source,
+      grd_data_version: inherits_grd ? (latestMeterData?.grd_data_version ?? null) : new_data.grd_data_version,
     });
 
     return await manager.save(meterData);

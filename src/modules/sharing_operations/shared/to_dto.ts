@@ -15,6 +15,7 @@ import { toKeyPartialDTO } from "../../keys/shared/to_dto.js";
 import { SharingKeyStatus } from "./sharing_operation.types.js";
 import { toMunicipalityPartialDTO } from "../../municipalities/shared/to_dto.js";
 import type { MunicipalityPartialDTO } from "../../municipalities/api/municipality.dtos.js";
+import { appTodayISO } from "../../../shared/utils/date.utils.js";
 
 function municipalitiesFromLinks(links: SharingOperationMunicipality[] | undefined): MunicipalityPartialDTO[] {
   if (!links) return [];
@@ -44,7 +45,42 @@ export function toSharingOperationKeyDTO(entity: SharingOperationKey): SharingOp
   return dto;
 }
 
-export function toSharingOperation(value: SharingOperation): SharingOperationDTO {
+/** Latest start wins, then the highest id — the same tie-break as the "keys in force" query in `me`. */
+function isMoreRecent(candidate: SharingOperationKey, current: SharingOperationKey): boolean {
+  return candidate.start_date > current.start_date || (candidate.start_date === current.start_date && candidate.id > current.id);
+}
+
+/**
+ * Picks, among all of an operation's key rows, the key in force on `today` and the proposal
+ * still awaiting a decision.
+ *
+ * Rows are never updated into their next state. Approving a proposal closes its PENDING row
+ * (`end_date` set, status left at PENDING) and inserts a new APPROVED row starting on the decision
+ * date, after closing the APPROVED row it replaces. So status alone says nothing about the present:
+ * - current: APPROVED and `start_date <= today <= end_date` (both bounds inclusive, an open
+ *   `end_date` never ends). A key approved for a later date is not current yet: the key it replaces
+ *   stays in force until the day before.
+ * - waiting: PENDING with no `end_date`. A closed PENDING row is a proposal that was decided.
+ *
+ * The same predicates as the community dashboard counters (`operations_without_valid_key`,
+ * `operations_with_pending_key`). Comparisons are on `YYYY-MM-DD` strings; pass `appTodayISO()`.
+ */
+export function selectOperationKeys(keys: SharingOperationKey[], today: string): { current?: SharingOperationKey; waiting?: SharingOperationKey } {
+  let current: SharingOperationKey | undefined;
+  let waiting: SharingOperationKey | undefined;
+
+  for (const row of keys) {
+    if (row.status === SharingKeyStatus.APPROVED && row.start_date <= today && (!row.end_date || row.end_date >= today)) {
+      if (!current || isMoreRecent(row, current)) current = row;
+    } else if (row.status === SharingKeyStatus.PENDING && !row.end_date) {
+      if (!waiting || isMoreRecent(row, waiting)) waiting = row;
+    }
+  }
+
+  return { current, waiting };
+}
+
+export function toSharingOperation(value: SharingOperation, today: string = appTodayISO()): SharingOperationDTO {
   const dto = new SharingOperationDTO();
 
   // Map parent fields (from SharingOperationPartialDTO)
@@ -57,18 +93,9 @@ export function toSharingOperation(value: SharingOperation): SharingOperationDTO
   dto.municipalities = municipalitiesFromLinks(value.municipalities);
 
   // Safety check if keys are not loaded
-  const keys = value.keys || [];
-
-  let activeKeyFound = false;
-  for (const keyEntity of keys) {
-    const keyDto = toSharingOperationKeyDTO(keyEntity);
-    if (keyEntity.status === SharingKeyStatus.PENDING) {
-      dto.key_waiting_approval = keyDto;
-    } else if (keyEntity.status === SharingKeyStatus.APPROVED && !activeKeyFound) {
-      dto.key = keyDto;
-      activeKeyFound = true;
-    }
-  }
+  const { current, waiting } = selectOperationKeys(value.keys || [], today);
+  if (current) dto.key = toSharingOperationKeyDTO(current);
+  if (waiting) dto.key_waiting_approval = toSharingOperationKeyDTO(waiting);
 
   return dto;
 }

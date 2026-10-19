@@ -99,6 +99,21 @@ module.exports = {
       .map((id) => id.trim())
       .filter(Boolean),
   },
+  // ---- DSO lookup (GRD prefill) ---------------------------------------
+  // The internal `dso-lookup` service: which DSO runs the network at an
+  // address, read from the belgian-dso-map data release. It prefills the GRD
+  // of a meter form and is NEVER on the POST /meters path.
+  // EMPTY BY DEFAULT and that is the switch: with no URL the client is
+  // unbound, GET /dso/resolve answers `status: "unavailable"`, GET
+  // /dso/operators answers [], and the meter form keeps its static list.
+  // In dev the `dso-lookup` container runs on the `backend` network and
+  // docker-compose.dev.yml points at it. Not an annex: never list it in
+  // ANNEX_CATALOG_*.
+  dso_lookup: {
+    base_url: process.env.DSO_LOOKUP_URL || "",
+    // Per call. Two sequential calls must fit inside KrakenD's 3000 ms cap.
+    timeout_ms: process.env.DSO_LOOKUP_TIMEOUT_MS ? parseInt(process.env.DSO_LOOKUP_TIMEOUT_MS) : 1000,
+  },
   // ---- Realtime SSE fan-out -------------------------------------------
   // A SEPARATE key from cache_service, deliberately. Pointing cache_service at
   // this Redis would ALSO switch on the dormant HTTP response cache across

@@ -419,6 +419,11 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       .execute();
   }
 
+  /**
+   * Rejects the open proposal of this key. Only a PENDING row can be rejected: the same key may
+   * also have an open APPROVED row (it is the key in force, or was re-proposed), and rejecting
+   * the proposal must not end it.
+   */
   async rejectSpecificKeyEntry(id_sharing: number, id_key: number, end_date: Date, query_runner?: QueryRunner): Promise<void> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
@@ -428,6 +433,7 @@ export class SharingOperationRepository implements ISharingOperationRepository {
       .set({ end_date: end_date.toISOString().split("T")[0], status: SharingKeyStatus.REJECTED })
       .where("sharing_operation = :id_sharing", { id_sharing })
       .andWhere("allocation_key = :id_key", { id_key })
+      .andWhere("status = :status", { status: SharingKeyStatus.PENDING })
       .andWhere("end_date IS NULL") // Only close currently open entries
       .execute();
   }

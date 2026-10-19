@@ -286,6 +286,7 @@ EXECUTE FUNCTION update_changetimestamp_column();
 CREATE TABLE IF NOT EXISTS municipality_postal_code (
     postal_code VARCHAR(10) NOT NULL,
     nis_code    INT NOT NULL REFERENCES municipality (nis_code) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT current_timestamp,
     PRIMARY KEY (postal_code, nis_code)
 );
 CREATE INDEX idx_municipality_postal_code_nis ON municipality_postal_code (
@@ -369,7 +370,12 @@ CREATE TABLE IF NOT EXISTS meter_data (
     injection_status INT CHECK (injection_status IN (1, 2, 3, 4)), -- 1: Autoproducteur propriétaire; 2: Autorpoducteur droit de jouissance; 3: Injection pure propriétaire; 4: Injection pure droit de jouissance
     production_chain INT CHECK (production_chain IN (1, 2, 3, 4, 5, 6, 7)), -- 1: Photovoltaique; 2: éolien; 3: hydroélectrique; 4: biomasse solide ; 5 : biogaz; 6: cogénération fossile; 7: autre
     total_generating_capacity FLOAT,
+    -- The DSO's stable id from the belgian-dso-map release ('ores', 'fluvius-imewo', 'elia'). Free text: no CHECK.
     grd VARCHAR(255),
+    -- Who chose grd: 'auto' (prefilled from the address by dso-lookup) or 'manual'. NULL = origin unknown.
+    grd_source VARCHAR(16),
+    -- The belgian-dso-map release an 'auto' grd came from ('2026.10.0'; '-draft' suffix in dev).
+    grd_data_version VARCHAR(32),
     -- TODO: Is that the right way ?
     id_sharing_operation INT REFERENCES sharing_operation (
         id

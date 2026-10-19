@@ -274,12 +274,13 @@ export class SharingOperationDTO extends SharingOperationPartialDTO {
   @Expose()
   community_regulator?: string;
   /**
-   * Current active key.
+   * The APPROVED key in force today (Brussels calendar day), if any. A key approved for a later
+   * date only appears here from that date on.
    */
   @Expose()
   key!: SharingOperationKeyDTO;
   /**
-   * Key waiting for approval, if any.
+   * The open proposal (PENDING, not yet approved or rejected), if any.
    */
   @Expose()
   key_waiting_approval!: SharingOperationKeyDTO;

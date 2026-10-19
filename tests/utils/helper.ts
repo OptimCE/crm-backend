@@ -142,6 +142,7 @@ export async function tearDownCache(): Promise<void> {
 type ApiCallMocks = {
   call: jest.Mock;
   callForStatus: jest.Mock;
+  callForResponse: jest.Mock;
   callWithTracingHeaders: jest.Mock;
   callWithTracingHeadersCertificate: jest.Mock;
 };
@@ -150,6 +151,7 @@ export function mockApiCall(overrides: Partial<Record<string, jest.Mock>> = {}):
   const defaultMocks = {
     call: jest.fn(),
     callForStatus: jest.fn(),
+    callForResponse: jest.fn(),
     callWithTracingHeaders: jest.fn(),
     callWithTracingHeadersCertificate: jest.fn(),
   };

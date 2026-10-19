@@ -45,6 +45,16 @@ export interface BestAddress {
   municipalityNames: Record<string, string>;
   nisCode?: number;
   postcode: string;
+  /**
+   * `postalInfo.name` — the postal locality ("Burcht"). Only Flanders fills it,
+   * so it is `{}` in Wallonia and Brussels.
+   */
+  postNames: Record<string, string>;
+  /**
+   * `hasPartOfMunicipality` — the former commune ("Flawinne"). Wallonia only;
+   * `{}` elsewhere, and `{}` too if the box ignores the embed.
+   */
+  partOfMunicipalityNames: Record<string, string>;
   latitude?: number;
   longitude?: number;
 }
@@ -124,11 +134,19 @@ export class BestAddressClient {
    *
    * An indexed lookup rather than a search — this is the half of the two-stage
    * strategy that is allowed to touch `/addresses`.
+   *
+   * `partOfMunicipalities` is embedded for the GRD prefill: in a commune whose
+   * sections have different DSOs (Namur, Baarle-Hertog), the section is what
+   * decides, and Wallonia names it nowhere else. The spec says `/addresses`
+   * accepts that embed; it has NOT yet been measured against the running box —
+   * neither the href resolution nor the added latency. Should it fail, the names
+   * come back empty and the prefill asks the user to choose the section, which
+   * is the right answer anyway.
    */
   async addressesOfStreet(streetId: string, houseNumber?: string): Promise<BestAddress[]> {
     const params: Record<string, string> = {
       streetId,
-      embed: "streets,municipalities,postalInfos",
+      embed: "streets,municipalities,postalInfos,partOfMunicipalities",
       firstOfBuilding: "true",
     };
     if (houseNumber) {
@@ -147,6 +165,7 @@ export class BestAddressClient {
       const street = resolve(embedded, asRecord(item?.["hasStreetName"]));
       const municipality = resolve(embedded, asRecord(item?.["hasMunicipality"]));
       const postal = resolve(embedded, asRecord(item?.["hasPostalInfo"]));
+      const part = resolve(embedded, asRecord(item?.["hasPartOfMunicipality"]));
       const point = readWgs84(item?.["addressPosition"]);
 
       return [
@@ -160,6 +179,8 @@ export class BestAddressClient {
           // Wallonia leaves postalInfo.name empty, so the CITY comes from the
           // municipality and only the CODE from here.
           postcode: typeof postal?.["postCode"] === "string" ? postal["postCode"] : "",
+          postNames: names(postal?.["name"]),
+          partOfMunicipalityNames: names(part?.["name"]),
           latitude: point?.latitude,
           longitude: point?.longitude,
         },

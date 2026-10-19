@@ -17,6 +17,8 @@ function address(houseNumber: string, located = true): BestAddress {
     municipalityNames: { fr: "Namur", nl: "Namen" },
     nisCode: 92094,
     postcode: "5000",
+    postNames: {},
+    partOfMunicipalityNames: {},
     latitude: located ? 50.468219 : undefined,
     longitude: located ? 4.863607 : undefined,
   };
@@ -299,6 +301,63 @@ describe("(Unit) BestAddressSuggester", () => {
 
       expect(rows[0].kind).toBe("address");
       expect(rows[0].postcode).toBe("5000");
+    });
+  });
+
+  describe("post_name, for the GRD prefill", () => {
+    it("carries the Flemish postal name on an address row", async () => {
+      client.searchStreets.mockResolvedValue([street("s1", "Kerkstraat", "Zwijndrecht", 11056)]);
+      client.addressesOfStreet.mockResolvedValue([{ ...address("1"), postNames: { nl: "Burcht" } }]);
+
+      const rows = await suggester.suggest("kerkstraat 1 2070", 5, "nl");
+
+      expect(rows[0].post_name).toBe("Burcht");
+    });
+
+    it("falls back to the Walloon part of municipality when there is no postal name", async () => {
+      // Wallonia leaves postalInfo.name empty: the section is only named by
+      // hasPartOfMunicipality.
+      client.searchStreets.mockResolvedValue([street("s1", "Rue de la Gare")]);
+      client.addressesOfStreet.mockResolvedValue([{ ...address("3"), partOfMunicipalityNames: { fr: "Flawinne" } }]);
+
+      const rows = await suggester.suggest("rue de la gare 3 5020", 5, "fr");
+
+      expect(rows[0].post_name).toBe("Flawinne");
+    });
+
+    it("prefers the postal name over the part of municipality when both exist", async () => {
+      client.searchStreets.mockResolvedValue([street("s1", "Rue A")]);
+      client.addressesOfStreet.mockResolvedValue([{ ...address("3"), postNames: { fr: "Postal" }, partOfMunicipalityNames: { fr: "Part" } }]);
+
+      const rows = await suggester.suggest("rue a 3 5000", 5, "fr");
+
+      expect(rows[0].post_name).toBe("Postal");
+    });
+
+    it("uses the caller's language, then French", async () => {
+      client.searchStreets.mockResolvedValue([street("s1", "Rue A")]);
+      client.addressesOfStreet.mockResolvedValue([{ ...address("3"), partOfMunicipalityNames: { fr: "Bévercé", de: "Bewerze" } }]);
+
+      expect((await suggester.suggest("rue a 3 4960", 5, "de"))[0].post_name).toBe("Bewerze");
+      expect((await suggester.suggest("rue a 3 4960", 5, "nl"))[0].post_name).toBe("Bévercé");
+    });
+
+    it("is absent when the register names neither (Brussels, or the embed was ignored)", async () => {
+      client.searchStreets.mockResolvedValue([street("s1", "Place de la Station")]);
+      client.addressesOfStreet.mockResolvedValue([address("20A")]);
+
+      const rows = await suggester.suggest("place de la station 20A 5000", 5, "fr");
+
+      expect(rows[0].post_name).toBeUndefined();
+    });
+
+    it("is never set on a street row: a street can span sections", async () => {
+      client.searchStreets.mockResolvedValue([street("s1", "Place de la Station")]);
+
+      const rows = await suggester.suggest("place de la station 5000", 5, "fr");
+
+      expect(rows[0].kind).toBe("street");
+      expect(rows[0].post_name).toBeUndefined();
     });
   });
 });

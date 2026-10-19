@@ -127,6 +127,9 @@ export class AddressSuggestionDTO {
   best_address_id?: string;
   @Expose()
   nis_code?: number;
+  /** Flemish postal name, else Walloon part of municipality. Address rows only. */
+  @Expose()
+  post_name?: string;
 }
 
 /**

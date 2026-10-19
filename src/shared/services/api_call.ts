@@ -31,6 +31,27 @@ export async function callForStatus(requestConfig: AxiosRequestConfig): Promise<
 }
 
 /**
+ * Makes an HTTP request and returns its status code AND its body.
+ *
+ * `call()` never throws on a 4xx/5xx, so an error page comes back looking like
+ * data, and `callForStatus()` drops the body. A client that must tell "the
+ * service answered" from "the service answered with an error" needs both.
+ *
+ * @template T - The expected type of the body on success
+ * @param requestConfig - Axios request configuration
+ * @param headersInput - Additional headers to include in the request
+ * @returns Promise resolving to `{ status, data }` whatever the status; rejects only when no answer arrives
+ */
+export async function callForResponse<T>(
+  requestConfig: AxiosRequestConfig,
+  headersInput: Record<string, string> = {},
+): Promise<{ status: number; data: T }> {
+  const headers = { ...requestConfig.headers, ...headersInput };
+  const response = await axios({ ...requestConfig, headers, validateStatus: (): boolean => true });
+  return { status: response.status, data: response.data as T };
+}
+
+/**
  * Makes an HTTP request with OpenTelemetry tracing headers and custom certificate
  * @template T - The expected type of the response data
  * @param certificate - SSL certificate to use for HTTPS requests

@@ -95,6 +95,10 @@ import type { IGeocodingService } from "../modules/geocoding/domain/i-geocoding.
 import { GeocodingService } from "../modules/geocoding/infra/geocoding.service.js";
 import { GeocodingController } from "../modules/geocoding/api/geocoding.controller.js";
 import { initializeGeocodingService } from "./factory/geocoding.factory.js";
+import type { IDsoService } from "../modules/dso/domain/i-dso.service.js";
+import { DsoService } from "../modules/dso/infra/dso.service.js";
+import { DsoController } from "../modules/dso/api/dso.controller.js";
+import { initializeDsoLookup } from "./factory/dso.factory.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -107,6 +111,11 @@ if (process.env.NODE_ENV !== "test") {
 
   // Cache Service
   initializeCacheService();
+
+  // The internal dso-lookup client (GRD prefill). Binds nothing when DSO_LOOKUP_URL
+  // is empty. Here and NOT inside initializeGeocodingService(), which returns early
+  // under geocoding.mode=OFF - a switch that has nothing to do with this feature.
+  initializeDsoLookup();
 }
 
 // Repository and shared-context bindings are idempotent to avoid duplicate binding errors.
@@ -184,6 +193,7 @@ container.bind<INotificationService>("NotificationService").to(NotificationServi
 // notification contract test rebinds "NotificationService" to a bare spy.
 container.bind<IOutboundService>("OutboundService").to(OutboundService);
 container.bind<IGeocodingService>("GeocodingService").to(GeocodingService);
+container.bind<IDsoService>("DsoService").to(DsoService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -200,6 +210,7 @@ container.bind<AnnexesServicesController>(AnnexesServicesController).toSelf();
 container.bind<AuditLogController>(AuditLogController).toSelf();
 container.bind<NotificationController>(NotificationController).toSelf();
 container.bind<GeocodingController>(GeocodingController).toSelf();
+container.bind<DsoController>(DsoController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);

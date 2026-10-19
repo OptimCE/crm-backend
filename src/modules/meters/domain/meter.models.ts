@@ -177,10 +177,26 @@ export class MeterData {
   total_generating_capacity!: number | null;
 
   /**
-   * GRD (DSO) identifier.
+   * GRD (DSO) identifier: the operator's stable id (`ores`, `fluvius-imewo`, `elia`),
+   * see ../shared/grd.ts. Free text — legacy rows may still hold a display name.
    */
   @Column({ type: "varchar", length: 255, nullable: true })
   grd!: string | null;
+
+  /**
+   * Who chose `grd`: `auto` (prefilled from the address by dso-lookup and kept)
+   * or `manual`. Null for a value that predates the prefill — its origin is
+   * unknown. Travels with `grd`: see MeterRepository.addMeterData.
+   */
+  @Column({ name: "grd_source", type: "varchar", length: 16, nullable: true })
+  grd_source!: string | null;
+
+  /**
+   * The belgian-dso-map release an `auto` grd came from (`2026.10.0`,
+   * `2026.10.0-draft` in dev). Null otherwise. Travels with `grd`.
+   */
+  @Column({ name: "grd_data_version", type: "varchar", length: 32, nullable: true })
+  grd_data_version!: string | null;
 
   /**
    * Associated sharing operation details.
