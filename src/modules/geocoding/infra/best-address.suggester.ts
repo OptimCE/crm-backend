@@ -225,8 +225,20 @@ export class BestAddressSuggester implements IAddressSuggester {
       precision: located ? AddressGeoPrecision.ROOFTOP : undefined,
       best_address_id: address.id,
       nis_code: address.nisCode,
+      post_name: postName(address, lang),
     };
   }
+}
+
+/**
+ * The name of the locality within the commune: the Flemish postal name, else the
+ * Walloon part of municipality, else nothing (Brussels, or the embed failed).
+ *
+ * This is what lets the GRD prefill pick a section without asking. Address rows
+ * only — a street spans sections, so street rows carry none.
+ */
+function postName(address: BestAddress, lang: string): string | undefined {
+  return pickName(address.postNames, lang) || pickName(address.partOfMunicipalityNames, lang) || undefined;
 }
 
 /**

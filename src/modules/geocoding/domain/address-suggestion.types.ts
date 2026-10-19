@@ -47,6 +47,13 @@ export interface AddressSuggestion {
    * joins to existing reference data with no name matching.
    */
   nis_code?: number;
+  /**
+   * The locality within the commune, on address rows only: the postal name in
+   * Flanders ("Burcht"), the part of municipality in Wallonia ("Flawinne"), in
+   * the caller's language with a French fallback. Feeds the GRD prefill, which
+   * needs the section where a commune's sections have different DSOs.
+   */
+  post_name?: string;
 }
 
 /** What a query was understood to mean. */

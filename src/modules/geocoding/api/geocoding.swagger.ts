@@ -55,6 +55,7 @@ export const GeocodingResponses = {
               precision: 2,
               best_address_id: "geodata.wallonie.be/id/Address/1948446/2",
               nis_code: 92094,
+              post_name: "Namur",
             },
           ],
         },

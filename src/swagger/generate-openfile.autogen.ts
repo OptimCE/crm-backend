@@ -17,6 +17,7 @@ import { AuditLogResponses } from "../modules/audit_log/api/audit-log.swagger.js
 import { NotificationResponses } from "../modules/notifications/api/notification.swagger.js";
 import { MunicipalityParameters, MunicipalityResponses } from "../modules/municipalities/api/municipality.swagger.js";
 import { GeocodingParameters, GeocodingResponses } from "../modules/geocoding/api/geocoding.swagger.js";
+import { DsoParameters, DsoResponses } from "../modules/dso/api/dso.swagger.js";
 interface TsSchemas {
   definitions: Record<string, unknown>;
 }
@@ -97,6 +98,7 @@ const doc = {
       ...MeParameters,
       ...MunicipalityParameters,
       ...GeocodingParameters,
+      ...DsoParameters,
     },
 
     // 3. MERGE RESPONSES
@@ -115,6 +117,7 @@ const doc = {
       ...NotificationResponses,
       ...MunicipalityResponses,
       ...GeocodingResponses,
+      ...DsoResponses,
       // ...GenericGlobalResponses
     },
 

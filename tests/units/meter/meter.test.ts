@@ -176,6 +176,38 @@ describe("(Unit) Meter Module", () => {
     });
   });
 
+  // --- ADD METER: GRD prefill provenance ---
+  describe("(Unit) Add Meter - GRD", () => {
+    useUnitTestDb();
+
+    it("POST /meters/ : hands a prefilled GRD to the repository with its source and data version", async () => {
+      const addMeterData = jest.fn(() => Promise.resolve({}));
+      await mockMeterRepositoryModule({
+        isEanRegistered: jest.fn(() => Promise.resolve(false)),
+        createMeter: jest.fn(() => Promise.resolve(mockMeterEntity)),
+        addMeterData,
+      });
+
+      const appModule = await import("../../../src/app.js");
+      const response = await request(appModule.default)
+        .post("/meters/")
+        .send({
+          ...testCasesAddMeter[0].body,
+          initial_data: { ...testCasesAddMeter[0].body.initial_data, grd: "ORES", grd_source: "auto", grd_data_version: "2026.10.0-draft" },
+        })
+        .set("x-user-id", "1")
+        .set("x-community-id", AUTH_COMMUNITY_1)
+        .set("x-user-orgs", ORGS_ADMIN);
+
+      await expectWithLog(response, () => expect(response.status).toBe(200));
+      expect(addMeterData).toHaveBeenCalledWith(
+        "541448200000000001",
+        expect.objectContaining({ grd: "ores", grd_source: "auto", grd_data_version: "2026.10.0-draft" }),
+        expect.anything(),
+      );
+    });
+  });
+
   // --- PATCH METER DATA ---
   describe("(Unit) Patch Meter Data", () => {
     useUnitTestDb();
@@ -305,6 +337,37 @@ describe("(Unit) Meter Module", () => {
 
       expect(response.status).toBe(422);
       expect(response.body.error_code).toBe(error.errorCode);
+      expect(addMeterData).not.toHaveBeenCalled();
+    });
+
+    // meter_data.grd stores stable ids. A legacy display name from an older build is rewritten on
+    // the way in, and the provenance travels to the repository next to the grd it describes.
+    it("PATCH /meters/data : stores a legacy GRD name as its id, with its provenance", async () => {
+      const { response, addMeterData } = await patchWith({ ...patchBody, grd: "Fluvius Midden-Vlaanderen", grd_source: "manual" }, { id: 7 });
+
+      expect(response.status).toBe(200);
+      expect(addMeterData).toHaveBeenCalledWith(
+        "123",
+        expect.objectContaining({ grd: "fluvius-midden-vlaanderen", grd_source: "manual", grd_data_version: undefined }),
+        expect.anything(),
+      );
+    });
+
+    it("PATCH /meters/data : leaves grd and its provenance undefined when grd is omitted", async () => {
+      const { response, addMeterData } = await patchWith(patchBody, { id: 7 });
+
+      expect(response.status).toBe(200);
+      const sent = (addMeterData.mock.calls[0] as unknown[])[1] as Record<string, unknown>;
+      expect(sent.grd).toBeUndefined();
+      expect(sent.grd_source).toBeUndefined();
+      expect(sent.grd_data_version).toBeUndefined();
+    });
+
+    it("PATCH /meters/data : rejects an unknown grd_source", async () => {
+      const { response, addMeterData } = await patchWith({ ...patchBody, grd: "ores", grd_source: "guessed" }, { id: 7 });
+
+      expect(response.status).toBe(422);
+      expect(response.body.error_code).toBe(METER_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING.errorCode);
       expect(addMeterData).not.toHaveBeenCalled();
     });
   });

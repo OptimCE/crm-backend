@@ -20,11 +20,13 @@ const BASE = "http://best-address:8080/belgianAddress/v2";
 const STREET_HREF = "/belgianAddress/v2/streets/geodata.wallonie.be%2Fid%2FStreetname%2F7753485%2F223";
 const MUNI_HREF = "/belgianAddress/v2/municipalities/geodata.wallonie.be%2Fid%2FMunicipality%2F92094%2F7";
 const POSTAL_HREF = "/belgianAddress/v2/postalInfos/geodata.wallonie.be%2Fid%2FPostalInfo%2F5000%2F1";
+const PART_HREF = "/belgianAddress/v2/partOfMunicipalities/geodata.wallonie.be%2Fid%2FPartOfMunicipality%2F92094-5%2F1";
 
 const EMBEDDED = {
   [STREET_HREF]: { href: STREET_HREF, id: "…/Streetname/7753485/223", name: { fr: "Place de la Station" } },
   [MUNI_HREF]: { href: MUNI_HREF, id: "…/Municipality/92094/7", name: { fr: "Namur", nl: "Namen", de: "Namur" }, nisCode: "92094" },
   [POSTAL_HREF]: { href: POSTAL_HREF, id: "…/PostalInfo/5000/1", name: {}, postCode: "5000" },
+  [PART_HREF]: { href: PART_HREF, id: "…/PartOfMunicipality/92094-5/1", name: { fr: "Flawinne" } },
 };
 
 function addressItem(houseNumber: string, wgs84: unknown): unknown {
@@ -205,6 +207,52 @@ describe("(Unit) BestAddressClient", () => {
       const [address] = await client.addressesOfStreet("street-id");
 
       expect(address.latitude).toBeUndefined();
+    });
+
+    it("embeds partOfMunicipalities, which names the Walloon section", async () => {
+      // NOT yet measured against the running box: the spec says /addresses
+      // accepts it. If the box ignores it, the names come back empty (below).
+      call.mockResolvedValue({ items: [], embedded: {} });
+
+      await client.addressesOfStreet("street-id");
+
+      expect(String(lastRequest().params["embed"]).split(",")).toEqual(["streets", "municipalities", "postalInfos", "partOfMunicipalities"]);
+    });
+
+    it("reads the part of municipality through the embedded map", async () => {
+      const item = { ...(addressItem("3", undefined) as object), hasPartOfMunicipality: { href: PART_HREF } };
+      call.mockResolvedValue({ items: [item], embedded: EMBEDDED });
+
+      const [address] = await client.addressesOfStreet("street-id");
+
+      expect(address.partOfMunicipalityNames).toEqual({ fr: "Flawinne" });
+      // Wallonia: an empty postal name stays empty, it does not borrow anything.
+      expect(address.postNames).toEqual({});
+    });
+
+    it("reads the Flemish postal name", async () => {
+      const postal = "/belgianAddress/v2/postalInfos/Burcht";
+      call.mockResolvedValue({
+        items: [{ ...(addressItem("1", undefined) as object), hasPostalInfo: { href: postal } }],
+        embedded: { ...EMBEDDED, [postal]: { href: postal, name: { nl: "Burcht" }, postCode: "2070" } },
+      });
+
+      const [address] = await client.addressesOfStreet("street-id");
+
+      expect(address.postNames).toEqual({ nl: "Burcht" });
+      expect(address.postcode).toBe("2070");
+      expect(address.partOfMunicipalityNames).toEqual({});
+    });
+
+    it("leaves both names empty when the box did not embed them", async () => {
+      // Graceful degradation: the GRD prefill then asks for the section.
+      const item = { ...(addressItem("3", undefined) as object), hasPartOfMunicipality: { href: PART_HREF } };
+      call.mockResolvedValue({ items: [item], embedded: {} });
+
+      const [address] = await client.addressesOfStreet("street-id");
+
+      expect(address.partOfMunicipalityNames).toEqual({});
+      expect(address.postNames).toEqual({});
     });
 
     it("keeps a box number when the register has one", async () => {

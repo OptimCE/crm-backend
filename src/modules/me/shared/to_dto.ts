@@ -144,6 +144,8 @@ function toMetersDataDTO(data: MeterData): MetersDataDTO {
   dto.production_chain = data.production_chain!;
   dto.totalGenerating_capacity = data.total_generating_capacity || 0;
   dto.grd = data.grd || "";
+  dto.grd_source = data.grd_source ?? null;
+  dto.grd_data_version = data.grd_data_version ?? null;
 
   if (data.member) {
     dto.member = toMemberPartialDTO(data.member);

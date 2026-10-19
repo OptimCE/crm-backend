@@ -16,6 +16,8 @@ function address(houseNumber: string, latitude?: number, longitude?: number): Be
     municipalityNames: { fr: "Bruxelles" },
     nisCode: 21004,
     postcode: "1000",
+    postNames: {},
+    partOfMunicipalityNames: {},
     latitude,
     longitude,
   };
