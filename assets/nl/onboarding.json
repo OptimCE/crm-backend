@@ -1,0 +1,9 @@
+{
+  "validation": {
+    "tour_key": "Deze kennismakingsrondleiding bestaat niet",
+    "outcome": "Het antwoord op de kennismakingsrondleiding is ongeldig",
+    "tour_version": "De versie van de kennismakingsrondleiding is ongeldig"
+  },
+  "transition_forbidden": "Dit antwoord kan niet meer op deze manier worden gewijzigd",
+  "database": "Er is een fout opgetreden bij het opslaan van het antwoord op de kennismakingsrondleiding"
+}

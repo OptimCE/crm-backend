@@ -1,0 +1,9 @@
+{
+  "validation": {
+    "tour_key": "This onboarding tour does not exist",
+    "outcome": "The answer to the onboarding tour is invalid",
+    "tour_version": "The onboarding tour version is invalid"
+  },
+  "transition_forbidden": "This answer can no longer be changed this way",
+  "database": "An error occurred while saving the answer to the onboarding tour"
+}

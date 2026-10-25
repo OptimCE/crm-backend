@@ -22,6 +22,7 @@ export const I18N_NAMESPACES = [
   "meter",
   "municipality",
   "notification",
+  "onboarding",
   "sharing_operation",
   "user",
 ] as const;

@@ -1,0 +1,9 @@
+{
+  "validation": {
+    "tour_key": "Ce tour d'accueil n'existe pas",
+    "outcome": "La réponse au tour d'accueil est invalide",
+    "tour_version": "La version du tour d'accueil est invalide"
+  },
+  "transition_forbidden": "Cette réponse ne peut plus être modifiée ainsi",
+  "database": "Une erreur est survenue lors de l'enregistrement de la réponse au tour d'accueil"
+}

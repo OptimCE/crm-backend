@@ -15,6 +15,7 @@ import { MEMBER_ERRORS } from "../../../src/modules/members/shared/member.errors
 import { METER_ERRORS } from "../../../src/modules/meters/shared/meter.errors.js";
 import { MUNICIPALITY_ERRORS } from "../../../src/modules/municipalities/shared/municipality.errors.js";
 import { NOTIFICATION_ERRORS } from "../../../src/modules/notifications/shared/notification.errors.js";
+import { ONBOARDING_ERRORS } from "../../../src/modules/onboarding/shared/onboarding.errors.js";
 import { REALTIME_ERRORS } from "../../../src/modules/realtime/shared/realtime.errors.js";
 import { SHARING_OPERATION_ERRORS } from "../../../src/modules/sharing_operations/shared/sharing_operation.errors.js";
 import { USER_ERRORS } from "../../../src/modules/users/shared/user.errors.js";
@@ -50,6 +51,7 @@ const REGISTRIES: Record<string, object> = {
   "modules/meters/shared/meter.errors.ts": METER_ERRORS,
   "modules/municipalities/shared/municipality.errors.ts": MUNICIPALITY_ERRORS,
   "modules/notifications/shared/notification.errors.ts": NOTIFICATION_ERRORS,
+  "modules/onboarding/shared/onboarding.errors.ts": ONBOARDING_ERRORS,
   "modules/realtime/shared/realtime.errors.ts": REALTIME_ERRORS,
   "modules/sharing_operations/shared/sharing_operation.errors.ts": SHARING_OPERATION_ERRORS,
   "modules/users/shared/user.errors.ts": USER_ERRORS,

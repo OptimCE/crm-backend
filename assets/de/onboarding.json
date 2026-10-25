@@ -1,0 +1,9 @@
+{
+  "validation": {
+    "tour_key": "Diese Einführungstour existiert nicht",
+    "outcome": "Die Antwort auf die Einführungstour ist ungültig",
+    "tour_version": "Die Version der Einführungstour ist ungültig"
+  },
+  "transition_forbidden": "Diese Antwort kann so nicht mehr geändert werden",
+  "database": "Beim Speichern der Antwort auf die Einführungstour ist ein Fehler aufgetreten"
+}
