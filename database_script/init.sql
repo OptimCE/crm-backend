@@ -679,3 +679,18 @@ CREATE TABLE IF NOT EXISTS notification_preference (
 
     PRIMARY KEY (id_user, type_prefix, channel)
 );
+
+-- Which in-app onboarding tours a user was offered (one row per user and tour).
+-- No row = never offered; any row = already offered. tour_key is validated by
+-- the API (ONBOARDING_TOUR_KEYS), not here, so a new tour needs no migration.
+-- See database_script/2026-10-25_user_onboarding.sql.
+CREATE TABLE IF NOT EXISTS user_onboarding (
+    id_user      INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    tour_key     VARCHAR(64) NOT NULL,
+    outcome      VARCHAR(16) NOT NULL
+                 CHECK (outcome IN ('dismissed', 'started', 'completed', 'abandoned', 'backfilled')),
+    tour_version VARCHAR(128),
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id_user, tour_key)
+);
