@@ -664,6 +664,20 @@ CREATE TABLE IF NOT EXISTS notification_preference (
     PRIMARY KEY (id_user, type_prefix, channel)
 );
 
+-- Which in-app onboarding tours a user was offered. Mirrors
+-- database_script/2026-10-25_user_onboarding.sql; its backfill is replayed at
+-- the end of this file, after the seed users exist.
+CREATE TABLE IF NOT EXISTS user_onboarding (
+    id_user      INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    tour_key     VARCHAR(64) NOT NULL,
+    outcome      VARCHAR(16) NOT NULL
+                 CHECK (outcome IN ('dismissed', 'started', 'completed', 'abandoned', 'backfilled')),
+    tour_version VARCHAR(128),
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id_user, tour_key)
+);
+
 -- --- MOCK DATA ---
 
 -- 1. Communities
@@ -1315,3 +1329,26 @@ ALTER TABLE sharing_operation ALTER COLUMN id RESTART WITH 10;
 ALTER TABLE iteration ALTER COLUMN id RESTART WITH 10;
 ALTER TABLE consumer ALTER COLUMN id RESTART WITH 10;
 
+-- 20. Onboarding backfill — the same four INSERTs as
+-- database_script/2026-10-25_user_onboarding.sql, so every seeded user has
+-- already "seen" the tours they are eligible to, as after the migration.
+-- user-onboarding-migration.functional.test.ts checks both stay equal.
+INSERT INTO user_onboarding (id_user, tour_key, outcome)
+SELECT u.id, 'welcome', 'backfilled' FROM app_user u
+ON CONFLICT DO NOTHING;
+INSERT INTO user_onboarding (id_user, tour_key, outcome)
+SELECT DISTINCT cu.id_user, 'community_admin', 'backfilled'
+FROM community_user cu WHERE cu.role = 'ADMIN'
+ON CONFLICT DO NOTHING;
+INSERT INTO user_onboarding (id_user, tour_key, outcome)
+SELECT DISTINCT cu.id_user, 'community_manager', 'backfilled'
+FROM community_user cu WHERE cu.role = 'MANAGER'
+ON CONFLICT DO NOTHING;
+INSERT INTO user_onboarding (id_user, tour_key, outcome)
+SELECT cu.id_user, 'community_member', 'backfilled'
+FROM community_user cu WHERE cu.role = 'MEMBER'
+UNION
+SELECT uml.id_user, 'community_member', 'backfilled'
+FROM user_member_link uml JOIN member m ON m.id = uml.id_member
+WHERE m.status = 1
+ON CONFLICT DO NOTHING;

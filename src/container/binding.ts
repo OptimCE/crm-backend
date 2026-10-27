@@ -99,6 +99,11 @@ import type { IDsoService } from "../modules/dso/domain/i-dso.service.js";
 import { DsoService } from "../modules/dso/infra/dso.service.js";
 import { DsoController } from "../modules/dso/api/dso.controller.js";
 import { initializeDsoLookup } from "./factory/dso.factory.js";
+import type { IOnboardingRepository } from "../modules/onboarding/domain/i-onboarding.repository.js";
+import { OnboardingRepository } from "../modules/onboarding/infra/onboarding.repository.js";
+import type { IOnboardingService } from "../modules/onboarding/domain/i-onboarding.service.js";
+import { OnboardingService } from "../modules/onboarding/infra/onboarding.service.js";
+import { OnboardingController } from "../modules/onboarding/api/onboarding.controller.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -167,6 +172,9 @@ if (!container.isBound("AuditLogRepository")) {
 if (!container.isBound("NotificationRepository")) {
   container.bind<INotificationRepository>("NotificationRepository").to(NotificationRepository);
 }
+if (!container.isBound("OnboardingRepository")) {
+  container.bind<IOnboardingRepository>("OnboardingRepository").to(OnboardingRepository);
+}
 if (!container.isBound("OutboundRepository")) {
   container.bind<IOutboundRepository>("OutboundRepository").to(OutboundRepository);
 }
@@ -194,6 +202,7 @@ container.bind<INotificationService>("NotificationService").to(NotificationServi
 container.bind<IOutboundService>("OutboundService").to(OutboundService);
 container.bind<IGeocodingService>("GeocodingService").to(GeocodingService);
 container.bind<IDsoService>("DsoService").to(DsoService);
+container.bind<IOnboardingService>("OnboardingService").to(OnboardingService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -211,6 +220,7 @@ container.bind<AuditLogController>(AuditLogController).toSelf();
 container.bind<NotificationController>(NotificationController).toSelf();
 container.bind<GeocodingController>(GeocodingController).toSelf();
 container.bind<DsoController>(DsoController).toSelf();
+container.bind<OnboardingController>(OnboardingController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);

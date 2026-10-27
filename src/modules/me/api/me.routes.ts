@@ -2,9 +2,11 @@ import express from "express";
 import { idChecker } from "../../../shared/middlewares/user.check.middleware.js";
 import { lazyController } from "../../../container/lazy-controller.js";
 import { MeController } from "./me.controller.js";
+import { OnboardingController } from "../../onboarding/api/onboarding.controller.js";
 
 export const me_routes = express.Router();
 const me_controller = lazyController<MeController>(MeController);
+const onboarding_controller = lazyController<OnboardingController>(OnboardingController);
 
 // GET /documents -> Fetch all documents related to this user
 me_routes.get(
@@ -357,4 +359,42 @@ me_routes.delete(
       */
   idChecker(),
   me_controller.refuseManagerInvitation.bind(me_controller),
+);
+
+// GET /onboarding -> The current user's answers to the onboarding tour offers
+me_routes.get(
+  "/onboarding",
+  /* #swagger.summary = 'Retrieve the current user's onboarding tour states'
+       #swagger.tags = ['Me']
+       #swagger.description = 'One entry per tour already offered; an absent tour was never offered. Empty for a user with no CRM profile yet.'
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+       #swagger.responses[200] = { $ref: '#/components/responses/OnboardingStatesSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+    */
+  idChecker(),
+  onboarding_controller.getStates.bind(onboarding_controller),
+);
+
+// PUT /onboarding/:tour_key -> Record the answer to one onboarding tour offer (idempotent)
+me_routes.put(
+  "/onboarding/:tour_key",
+  /* #swagger.summary = 'Record the current user's answer to an onboarding tour offer'
+       #swagger.tags = ['Me']
+       #swagger.description = 'Idempotent upsert. A first answer is dismissed or started; a started tour then becomes completed or abandoned. Any other change is refused with 409.'
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+       #swagger.parameters['tour_key'] = { $ref: '#/components/parameters/OnboardingTourKey' }
+       #swagger.requestBody = { required: true, content: { "application/json": { schema: { $ref: '#/components/schemas/UpdateOnboardingStateDTO' } } } }
+       #swagger.responses[200] = { $ref: '#/components/responses/OnboardingStateSuccess' }
+       #swagger.responses[400] = { $ref: '#/components/responses/BadRequest' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[409] = { description: 'The transition is not allowed (e.g. completed back to started)' }
+       #swagger.responses[422] = { description: 'Unknown tour_key or outcome' }
+    */
+  idChecker(),
+  onboarding_controller.setState.bind(onboarding_controller),
 );
