@@ -19,12 +19,16 @@ import { SHARING_OPERATION_ERRORS } from "../../sharing_operations/shared/sharin
 import logger from "../../../shared/monitor/logger.js";
 import { MeterDataStatus } from "../shared/meter.types.js";
 import { addDaysISO, appTodayISO, CONSUMPTION_TIMEZONE, toCalendarDateString } from "../../../shared/utils/date.utils.js";
+import type { IOutboxWriter } from "../../../shared/outbox/i-outbox.writer.js";
+import type { MeterMembershipReason } from "../../../shared/outbox/core-events.js";
+import { membershipEvents } from "../shared/membership-events.js";
 
 @injectable()
 export class MeterRepository implements IMeterRepository {
   constructor(
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuthContext") private readonly authContext: IAuthContextRepository,
+    @inject("OutboxWriter") private readonly outbox: IOutboxWriter,
   ) {}
   meterFilters: FilterDef<Meter>[] = [
     { key: "EAN", apply: (qb, val) => qb.andWhere("meter.EAN LIKE :ean", { ean: `%${val}%` }) },
@@ -197,6 +201,10 @@ export class MeterRepository implements IMeterRepository {
       where: { meter: { EAN: ean } },
       order: { start_date: "DESC" },
     });
+    // What the meter belonged to before this write: the membership events are the difference.
+    // Read on a SEPARATE instance: with the relation loaded on latestMeterData, the same-day merge
+    // below no longer applies an explicit `sharing_operation: null` (deactivation kept the meter in).
+    const operationBefore = await this.operationOf(latestMeterData, manager);
 
     const newStart = new_data.start_date as string;
 
@@ -228,7 +236,11 @@ export class MeterRepository implements IMeterRepository {
       if (latestStart === newStart) {
         // Merge the new data into the existing one
         const updated = manager.merge(MeterData, latestMeterData, new_data);
-        return await manager.save(updated);
+        const saved = await manager.save(updated);
+        // An omitted operation leaves the stored one untouched in a merge.
+        const operationAfter = new_data.sharing_operation === undefined ? operationBefore : (saved.sharing_operation?.id ?? null);
+        await this.recordMembership(internal_community_id, operationBefore, operationAfter, saved, ean, "configuration", query_runner);
+        return saved;
       }
 
       // Case 3: Configuration exists in the past -> Close it
@@ -274,7 +286,74 @@ export class MeterRepository implements IMeterRepository {
       grd_data_version: inherits_grd ? (latestMeterData?.grd_data_version ?? null) : new_data.grd_data_version,
     });
 
-    return await manager.save(meterData);
+    const saved = await manager.save(meterData);
+    // The operation is NOT inherited (new_data is spread as-is): every caller states it.
+    await this.recordMembership(
+      internal_community_id,
+      operationBefore,
+      saved.sharing_operation?.id ?? null,
+      saved,
+      ean,
+      "configuration",
+      query_runner,
+    );
+    return saved;
+  }
+
+  /**
+   * Re-derives the membership after the latest configuration of a meter was deleted (a scheduled
+   * change undone, with or without reopening its predecessor) and records the difference.
+   * `deleted` must carry its `sharing_operation` relation.
+   */
+  async recordMembershipAfterDeletion(deleted: MeterData, ean: string, query_runner?: QueryRunner): Promise<void> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+    const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
+    const latest = await manager.findOne(MeterData, {
+      where: { meter: { EAN: ean } },
+      order: { start_date: "DESC" },
+      relations: { sharing_operation: true, member: true },
+    });
+    // A predecessor left closed before the deleted start no longer covers it: the meter is in no
+    // operation from that date on.
+    const covers = latest !== null && (latest.end_date === null || latest.end_date >= deleted.start_date);
+    const operationAfter = covers ? (latest.sharing_operation?.id ?? null) : null;
+    await this.recordMembership(
+      internal_community_id,
+      deleted.sharing_operation?.id ?? null,
+      operationAfter,
+      { ...(latest ?? deleted), start_date: deleted.start_date } as MeterData,
+      ean,
+      "configuration_deleted",
+      query_runner,
+    );
+  }
+
+  private async recordMembership(
+    id_community: number,
+    before: number | null,
+    after: number | null,
+    row: MeterData,
+    ean: string,
+    reason: MeterMembershipReason,
+    query_runner?: QueryRunner,
+  ): Promise<void> {
+    const events = membershipEvents(
+      id_community,
+      before,
+      after,
+      {
+        ean,
+        effective_date: row.start_date,
+        id_member: row.member?.id ?? null,
+        grd: row.grd ?? null,
+        injection_status: row.injection_status ?? null,
+        status: row.status ?? null,
+      },
+      reason,
+    );
+    for (const event of events) {
+      await this.outbox.append(event, query_runner);
+    }
   }
 
   /**
@@ -309,6 +388,12 @@ export class MeterRepository implements IMeterRepository {
    * relations on purpose: its same-day branch merges into that row, and TypeORM's merge ignores an
    * explicit `null` for a relation that is already loaded (so a holder could no longer be cleared).
    */
+  private async operationOf(meterData: MeterData | null, manager: EntityManager): Promise<number | null> {
+    if (!meterData) return null;
+    const withOperation = await manager.findOne(MeterData, { where: { id: meterData.id }, relations: { sharing_operation: true } });
+    return withOperation?.sharing_operation?.id ?? null;
+  }
+
   private async getHolder(meterData: MeterData | null, manager: EntityManager): Promise<Member | null> {
     if (!meterData) return null;
     const withHolder = await manager.findOne(MeterData, { where: { id: meterData.id }, relations: { member: true } });
@@ -546,10 +631,29 @@ export class MeterRepository implements IMeterRepository {
   async deleteMeter(id: string, query_runner?: QueryRunner): Promise<DeleteResult> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
     const internal_community_id = await this.authContext.getInternalCommunityId(query_runner);
-    return manager.delete(Meter, {
+    // The configuration history goes with the meter (ON DELETE CASCADE): if it was in an operation,
+    // that operation loses it today.
+    const latest = await manager.findOne(MeterData, {
+      where: { meter: { EAN: id }, community: { id: internal_community_id } },
+      order: { start_date: "DESC" },
+      relations: { sharing_operation: true, member: true },
+    });
+    const result = await manager.delete(Meter, {
       EAN: id,
       community: { id: internal_community_id },
     });
+    if (result.affected === 1 && latest?.sharing_operation) {
+      await this.recordMembership(
+        internal_community_id,
+        latest.sharing_operation.id,
+        null,
+        { ...latest, start_date: appTodayISO() } as MeterData,
+        id,
+        "meter_deleted",
+        query_runner,
+      );
+    }
+    return result;
   }
 
   async updateMeter(update_meter: UpdateMeterDTO, query_runner?: QueryRunner): Promise<{ result: UpdateResult; address_id: number }> {
@@ -601,7 +705,9 @@ export class MeterRepository implements IMeterRepository {
 
     return manager.findOne(MeterData, {
       where: { id, community: { id: internal_community_id } },
-      relations: ["meter"], // Essential because your service accesses latest_meter_data.meter.EAN
+      // meter: the service reads latest_meter_data.meter.EAN; sharing_operation: deleting the row
+      // can take the meter out of its operation, which is recorded as a membership event.
+      relations: ["meter", "sharing_operation"],
     });
   }
   async activePreviousInactiveMeterData(

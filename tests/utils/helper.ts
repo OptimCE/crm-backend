@@ -33,6 +33,7 @@ import type { QueryRunner } from "typeorm";
 import type { Response } from "supertest";
 import { InMemoryCacheService } from "../../src/shared/cache/implementations/in-memory.cache.service.js";
 import type { ICacheService } from "../../src/shared/cache/i-cache.service.js";
+import type { IOutboxWriter } from "../../src/shared/outbox/i-outbox.writer.js";
 
 export const expectWithLog = async (response: Response, assertionCallback: () => void | Promise<void>): Promise<void> => {
   try {
@@ -96,6 +97,14 @@ export async function initiliazeDbMock(): Promise<void> {
   } else {
     container.bind("AppDataSource").toConstantValue(mockDataSource);
   }
+  // The mocked query runner has no real transaction, which the real writer refuses on purpose.
+  await mockOutboxWriterModule({});
+}
+
+export async function mockOutboxWriterModule(overrides: { [K in keyof IOutboxWriter]?: jest.Mock }): Promise<jest.Mocked<IOutboxWriter>> {
+  const mock: jest.Mocked<IOutboxWriter> = { append: jest.fn(async () => undefined) };
+  Object.assign(mock, overrides);
+  return await mockModule<IOutboxWriter>(mock, "OutboxWriter");
 }
 
 export async function resetDb(): Promise<void> {

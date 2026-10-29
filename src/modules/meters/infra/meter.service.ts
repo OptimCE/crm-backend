@@ -403,6 +403,7 @@ export class MeterService implements IMeterService {
         throw new AppError(METER_ERRORS.DELETE_METER_DATA.UPDATE_DATABASE, 400);
       }
     }
+    await this.meterRepository.recordMembershipAfterDeletion(latest_meter_data, latest_meter_data.meter.EAN, query_runner);
     await this.auditLogService.log(
       {
         action: AUDIT_ACTIONS.METER_DATA_DELETED,

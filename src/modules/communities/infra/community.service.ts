@@ -41,6 +41,8 @@ import type { IStorageService } from "../../../shared/storage/i-storage.service.
 import type { IAddressRepository } from "../../../shared/address/i-address.repository.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
+import type { IOutboxWriter } from "../../../shared/outbox/i-outbox.writer.js";
+import { CORE_EVENTS } from "../../../shared/outbox/core-events.js";
 /**
  * Implementation of the Community Service.
  * Manages community creation, updates, membership, and IAM synchronization.
@@ -64,6 +66,7 @@ export class CommunityService implements ICommunityService {
     @inject("StorageService") private storage_service: IStorageService,
     @inject("AddressRepository") private address_repository: IAddressRepository,
     @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
+    @inject("OutboxWriter") private readonly outbox: IOutboxWriter,
   ) {}
 
   async getAllPublicCommunities(query: CommunityQueryDTO): Promise<[PublicCommunityDTO[], Pagination]> {
@@ -191,6 +194,16 @@ export class CommunityService implements ICommunityService {
           entity_type: "community",
           entity_id: String(new_community_model.id),
           payload: { name: new_community.name, regulator: new_community.regulator },
+        },
+        query_runner,
+      );
+      await this.outbox.append(
+        {
+          id_community: new_community_model.id,
+          aggregate_type: "community",
+          aggregate_id: new_community_model.id,
+          event_type: CORE_EVENTS.COMMUNITY_CREATED,
+          payload: { id_community: new_community_model.id, name: new_community.name, regulator: new_community_model.regulator },
         },
         query_runner,
       );

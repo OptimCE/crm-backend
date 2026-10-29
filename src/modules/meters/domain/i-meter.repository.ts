@@ -54,4 +54,10 @@ export interface IMeterRepository {
     previous_end_date?: string | null,
     query_runner?: QueryRunner,
   ): Promise<UpdateResult>;
+  /**
+   * Records the operation membership change caused by deleting a meter's latest configuration
+   * (in the outbox, on the caller's transaction). Call it AFTER the predecessor was reopened, if
+   * it was. `deleted` must carry its `sharing_operation` relation.
+   */
+  recordMembershipAfterDeletion(deleted: MeterData, ean: string, query_runner?: QueryRunner): Promise<void>;
 }

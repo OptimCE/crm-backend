@@ -694,3 +694,25 @@ CREATE TABLE IF NOT EXISTS user_onboarding (
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id_user, tour_key)
 );
+
+-- Transactional outbox of the core's domain events (shared/outbox/core-events.ts).
+-- A row is written IN THE SAME TRANSACTION as the CRM change it describes;
+-- crm-outbox-relay publishes it on core.evt.<event_type> with event_id as
+-- Nats-Msg-Id (JetStream drops a republished duplicate), then stamps
+-- published_at. No FK on id_community: the event outlives what it describes.
+-- See database_script/2026-10-29_outbox_event.sql.
+CREATE TABLE IF NOT EXISTS outbox_event (
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    event_id       UUID NOT NULL UNIQUE,
+    id_community   INT NOT NULL,
+    aggregate_type VARCHAR(32) NOT NULL,
+    aggregate_id   VARCHAR(64) NOT NULL,
+    event_type     VARCHAR(64) NOT NULL,
+    payload        JSONB NOT NULL DEFAULT '{}'::jsonb,
+    occurred_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    published_at   TIMESTAMPTZ,
+    attempts       SMALLINT NOT NULL DEFAULT 0,
+    last_error     TEXT
+);
+-- The relay's claim query. Partial so the index stays the size of the backlog.
+CREATE INDEX IF NOT EXISTS ix_outbox_event_unpublished ON outbox_event (id) WHERE published_at IS NULL;

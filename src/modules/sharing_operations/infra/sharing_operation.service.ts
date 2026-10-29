@@ -49,9 +49,11 @@ import { isAppErrorLike } from "../../../shared/errors/isAppError.js";
 import { PartialMeterDTO } from "../../meters/api/meter.dtos.js";
 import { toMeterPartialDTO } from "../../meters/shared/to_dto.js";
 import { KeyPartialQuery } from "../../keys/api/key.dtos.js";
-import { appTodayISO } from "../../../shared/utils/date.utils.js";
+import { appTodayISO, toCalendarDateString } from "../../../shared/utils/date.utils.js";
 import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.service.js";
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
+import type { IOutboxWriter } from "../../../shared/outbox/i-outbox.writer.js";
+import { CORE_EVENTS } from "../../../shared/outbox/core-events.js";
 
 @injectable()
 export class SharingOperationService implements ISharingOperationService {
@@ -62,6 +64,7 @@ export class SharingOperationService implements ISharingOperationService {
     @inject("MunicipalityRepository") private municipalityRepository: IMunicipalityRepository,
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private auditLogService: IAuditLogService,
+    @inject("OutboxWriter") private readonly outbox: IOutboxWriter,
   ) {}
 
   /**
@@ -575,6 +578,16 @@ export class SharingOperationService implements ISharingOperationService {
         },
         query_runner,
       );
+      await this.outbox.append(
+        {
+          id_community: created.community.id,
+          aggregate_type: "operation",
+          aggregate_id: created.id,
+          event_type: CORE_EVENTS.OPERATION_CREATED,
+          payload: { id_sharing_operation: created.id, name: new_sharing_operations.name, type: new_sharing_operations.type },
+        },
+        query_runner,
+      );
     } catch (err) {
       if (isAppErrorLike(err)) {
         throw err;
@@ -875,6 +888,19 @@ export class SharingOperationService implements ISharingOperationService {
           },
           query_runner,
         );
+        // Approval is when a key is applied to the operation. A proposal (PENDING) or a rejection
+        // changes nothing the regulator knows about, and a simulation never comes through here.
+        await this.outbox.append(
+          {
+            id_community: sharingOp.community.id,
+            aggregate_type: "operation",
+            aggregate_id: id_sharing,
+            event_type: CORE_EVENTS.OPERATION_KEY_ASSIGNED,
+            // `date` arrives as a Date built from a bare YYYY-MM-DD (UTC midnight).
+            payload: { id_sharing_operation: id_sharing, id_key, key_name: key.name ?? null, start_date: toCalendarDateString(newStartDate) },
+          },
+          query_runner,
+        );
         return;
       }
     } catch (err) {
@@ -1009,10 +1035,24 @@ export class SharingOperationService implements ISharingOperationService {
    */
   @Transactional()
   async deleteSharingOperation(id_sharing: number, query_runner?: QueryRunner): Promise<void> {
+    // Read before the delete: the event needs the community, and the meters' link is nulled by it.
+    const sharingOp = await this.sharing_operationRepository.getSharingOperationById(id_sharing, query_runner);
     const delete_result = await this.sharing_operationRepository.deleteSharingOperation(id_sharing, query_runner);
     if (delete_result.affected !== 1) {
       logger.error({ operation: "deleteSharingOperation" }, "The deletion failed");
       throw new AppError(SHARING_OPERATION_ERRORS.DELETE_SHARING_OPERATION.DATABASE_DELETE, 400);
+    }
+    if (sharingOp) {
+      await this.outbox.append(
+        {
+          id_community: sharingOp.community.id,
+          aggregate_type: "operation",
+          aggregate_id: id_sharing,
+          event_type: CORE_EVENTS.OPERATION_DELETED,
+          payload: { id_sharing_operation: id_sharing, name: sharingOp.name },
+        },
+        query_runner,
+      );
     }
     await this.auditLogService.log(
       {
@@ -1095,6 +1135,7 @@ export class SharingOperationService implements ISharingOperationService {
       }
       // Reopen the predecessor (if it was closed by this future row's creation).
       await this.meterRepository.activePreviousInactiveMeterData(id_meter, previousStartDate, previousEndDate, query_runner);
+      await this.meterRepository.recordMembershipAfterDeletion(latestMeterData, id_meter, query_runner);
       await this.auditLogService.log(
         {
           action: AUDIT_ACTIONS.METER_DATA_DELETED,

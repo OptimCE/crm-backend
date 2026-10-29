@@ -33,6 +33,8 @@ import type { INotificationService } from "../../notifications/domain/i-notifica
 import { NOTIFICATION_TYPES } from "../../notifications/domain/notification.taxonomy.js";
 import { NotificationCategory, NotificationChannel } from "../../notifications/shared/notification.types.js";
 import type { IMeterRepository } from "../../meters/domain/i-meter.repository.js";
+import type { IOutboxWriter } from "../../../shared/outbox/i-outbox.writer.js";
+import { memberEvent } from "../shared/member-events.js";
 
 /**
  * Service implementation for managing members.
@@ -49,7 +51,30 @@ export class MemberService implements IMemberService {
     @inject("AuditLogService") private auditLogService: IAuditLogService,
     @inject("NotificationService") private notificationService: INotificationService,
     @inject("MeterRepository") private meter_repository: IMeterRepository,
+    @inject("OutboxWriter") private readonly outbox: IOutboxWriter,
   ) {}
+
+  /**
+   * Records a member entering or leaving the community, on the caller's transaction. The community
+   * is resolved only when there is something to record.
+   */
+  private async recordMemberStatus(
+    id_community: number | null,
+    id_member: number,
+    before: MemberStatus | null,
+    after: MemberStatus | null,
+    member_type: number | null,
+    query_runner?: QueryRunner,
+  ): Promise<void> {
+    if (memberEvent(0, id_member, before, after, member_type) === null) {
+      return;
+    }
+    const community = id_community ?? (await this.authContext.getInternalCommunityId(query_runner));
+    const event = memberEvent(community, id_member, before, after, member_type);
+    if (event) {
+      await this.outbox.append(event, query_runner);
+    }
+  }
 
   /**
    * Internal shared logic to add a member.
@@ -77,6 +102,7 @@ export class MemberService implements IMemberService {
       community: { id: internal_community_id },
     });
     const saved_member = await this.member_repository.saveMember(member_model, query_runner);
+    await this.recordMemberStatus(internal_community_id, saved_member.id, null, new_member.status, new_member.member_type, query_runner);
     let manager: Manager | undefined = undefined;
     if (new_member.manager) {
       const new_manager = query_runner.manager.create(Manager, {
@@ -171,10 +197,14 @@ export class MemberService implements IMemberService {
       throw new AppError(MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS, 409);
     }
     try {
+      const existing = await this.member_repository.getMember(id_member, query_runner);
       const deleted_result: DeleteResult = await this.member_repository.deleteMember(id_member, query_runner);
       if (deleted_result.affected !== 1) {
         logger.error({ operation: "deleteMemberLink" }, "The deletion of member failed, affected is not equal to one");
         throw new AppError(MEMBER_ERRORS.DELETE_MEMBER.DATABASE_DELETE, 400);
+      }
+      if (existing) {
+        await this.recordMemberStatus(null, id_member, existing.status, null, existing.member_type, query_runner);
       }
       await this.auditLogService.log(
         {
@@ -303,9 +333,11 @@ export class MemberService implements IMemberService {
         throw new AppError(MEMBER_ERRORS.INTEGRITY.MEMBER_HAS_ACTIVE_METERS, 409);
       }
     }
+    const status_before = value.status;
     value.status = patched_member_status.status;
     try {
       await this.member_repository.saveMember(value, query_runner);
+      await this.recordMemberStatus(null, value.id, status_before, value.status, value.member_type, query_runner);
       await this.auditLogService.log(
         {
           action: AUDIT_ACTIONS.MEMBER_UPDATED,
@@ -352,6 +384,7 @@ export class MemberService implements IMemberService {
       }
     }
 
+    const status_before = member.status;
     if (update_dto.name) member.name = update_dto.name;
     if (update_dto.status) member.status = update_dto.status;
     if (update_dto.iban) member.IBAN = update_dto.iban;
@@ -397,6 +430,7 @@ export class MemberService implements IMemberService {
     // 5. Save Base Member (Update links to addresses and base fields)
     try {
       await this.member_repository.saveMember(member, query_runner);
+      await this.recordMemberStatus(member.community?.id ?? null, member.id, status_before, member.status, member.member_type, query_runner);
     } catch (err) {
       logger.error({ operation: "updateMember", error: err }, `An error occured while saving/updating the member`);
       throw new AppError(MEMBER_ERRORS.UPDATE_MEMBER.DATABASE_SAVE_MEMBER, 400);

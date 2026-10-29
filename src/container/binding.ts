@@ -104,6 +104,8 @@ import { OnboardingRepository } from "../modules/onboarding/infra/onboarding.rep
 import type { IOnboardingService } from "../modules/onboarding/domain/i-onboarding.service.js";
 import { OnboardingService } from "../modules/onboarding/infra/onboarding.service.js";
 import { OnboardingController } from "../modules/onboarding/api/onboarding.controller.js";
+import type { IOutboxWriter } from "../shared/outbox/i-outbox.writer.js";
+import { OutboxWriter } from "../shared/outbox/outbox.writer.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -174,6 +176,9 @@ if (!container.isBound("NotificationRepository")) {
 }
 if (!container.isBound("OnboardingRepository")) {
   container.bind<IOnboardingRepository>("OnboardingRepository").to(OnboardingRepository);
+}
+if (!container.isBound("OutboxWriter")) {
+  container.bind<IOutboxWriter>("OutboxWriter").to(OutboxWriter);
 }
 if (!container.isBound("OutboundRepository")) {
   container.bind<IOutboundRepository>("OutboundRepository").to(OutboundRepository);
