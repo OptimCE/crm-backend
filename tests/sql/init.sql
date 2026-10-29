@@ -700,6 +700,55 @@ CREATE TABLE IF NOT EXISTS outbox_event (
 -- The relay's claim query. Partial so the index stays the size of the backlog.
 CREATE INDEX IF NOT EXISTS ix_outbox_event_unpublished ON outbox_event (id) WHERE published_at IS NULL;
 
+-- The regulatory status of an operation's meters and keys: what the GRD and the
+-- regulator have authorised, as opposed to meter_data / sharing_operation_key,
+-- which say what the CRM wants. One row = one episode of a subject (a meter's
+-- EAN, or a key id) in an operation, opened by one dossier of the
+-- administrative annexe. No row = not tracked (module inactive).
+--
+-- WRITTEN BY THE ANNEXE ONLY, through the four effect columns
+-- (regulatory_status, valid_from, valid_to, regulatory_ref): its DB role has
+-- INSERT on the table and UPDATE on those columns, nothing else
+-- (postgres/provision/30-crm-grants.sql). crm-backend only reads it, and no
+-- trigger or code of the core emits an outbox event for it: no loop
+-- core -> annexe -> core.
+--
+--   subject_type       1 meter (subject_ref = EAN), 2 key (subject_ref = key id)
+--   regulatory_status  1 to_notify, 2 pending_grd, 3 pending_regulator,
+--                      4 authorized, 5 active, 6 leaving, 7 ended, 8 refused
+--
+-- ex_regulatory_link_one_operation is the invariant "an EAN is pending,
+-- authorised or active in a single operation on a given date", enforced for
+-- every writer. NULL bounds are open (daterange). Deleting an operation drops
+-- its episodes, so its meters are free to join another one; the dossier
+-- history stays in the annexe.
+-- See database_script/2026-10-29_regulatory_link_status.sql.
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+CREATE TABLE IF NOT EXISTS regulatory_link_status (
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_community         INT NOT NULL REFERENCES community (id) ON DELETE CASCADE,
+    id_sharing_operation INT NOT NULL REFERENCES sharing_operation (id) ON DELETE CASCADE,
+    subject_type         SMALLINT NOT NULL CHECK (subject_type IN (1, 2)),
+    subject_ref          VARCHAR(64) NOT NULL,
+    id_dossier_origin    BIGINT NOT NULL,
+    regulatory_status    SMALLINT NOT NULL CHECK (regulatory_status BETWEEN 1 AND 8),
+    valid_from           DATE,
+    valid_to             DATE,
+    regulatory_ref       VARCHAR(64),
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_regulatory_link_episode UNIQUE (id_dossier_origin, subject_type, subject_ref),
+    CONSTRAINT ck_regulatory_link_validity CHECK (valid_from IS NULL OR valid_to IS NULL OR valid_from <= valid_to),
+    CONSTRAINT ex_regulatory_link_one_operation EXCLUDE USING gist (
+        subject_ref WITH =,
+        daterange(valid_from, valid_to, '[]') WITH &&
+    ) WHERE (subject_type = 1 AND regulatory_status IN (2, 3, 4, 5))
+);
+CREATE INDEX IF NOT EXISTS ix_regulatory_link_operation ON regulatory_link_status (id_community, id_sharing_operation);
+DROP TRIGGER IF EXISTS update_regulatory_link_status_modtime ON regulatory_link_status;
+CREATE TRIGGER update_regulatory_link_status_modtime BEFORE UPDATE ON regulatory_link_status FOR EACH ROW EXECUTE PROCEDURE update_changetimestamp_column();
+
 -- --- MOCK DATA ---
 
 -- 1. Communities

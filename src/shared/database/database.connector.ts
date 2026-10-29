@@ -20,6 +20,7 @@ import { AuditLog } from "../../modules/audit_log/domain/audit-log.models.js";
 import { Notification, NotificationPreference, OutboundMessage } from "../../modules/notifications/domain/notification.models.js";
 import { UserOnboarding } from "../../modules/onboarding/domain/onboarding.models.js";
 import { OutboxEvent } from "../outbox/outbox-event.model.js";
+import { RegulatoryLinkStatus } from "../../modules/regulatory/domain/regulatory-link-status.models.js";
 
 const host: string = config.get("database.host");
 const port: number = config.get("database.port");
@@ -71,6 +72,7 @@ export const AppDataSource = new DataSource({
     NotificationPreference,
     UserOnboarding,
     OutboxEvent,
+    RegulatoryLinkStatus,
   ],
   logging: logging,
 });
