@@ -160,4 +160,19 @@ module.exports = {
       .map((feature) => feature.trim())
       .filter(Boolean),
   },
+  // ---- Outbox relay ---------------------------------------------------
+  // Read only by the crm-outbox-relay entrypoint (src/outbox-relay.ts), not by
+  // the API. The relay owns the CORE_EVENTS stream: `stream_max_age_days`
+  // bounds how long an annexe can be down and still catch up from the stream
+  // (beyond it, the administrative annexe reconciles at reactivation), and
+  // `duplicate_window_ms` how late a republished event is still dropped.
+  outbox_relay: {
+    nats_url: process.env.NATS_URL || "nats://nats:4222",
+    poll_interval_ms: process.env.OUTBOX_RELAY_POLL_INTERVAL_MS ? parseInt(process.env.OUTBOX_RELAY_POLL_INTERVAL_MS) : 500,
+    batch_size: process.env.OUTBOX_RELAY_BATCH_SIZE ? parseInt(process.env.OUTBOX_RELAY_BATCH_SIZE) : 100,
+    stream_max_age_days: process.env.OUTBOX_STREAM_MAX_AGE_DAYS ? parseInt(process.env.OUTBOX_STREAM_MAX_AGE_DAYS) : 30,
+    duplicate_window_ms: process.env.OUTBOX_DUPLICATE_WINDOW_MS ? parseInt(process.env.OUTBOX_DUPLICATE_WINDOW_MS) : 600000,
+    retention_days: process.env.OUTBOX_RETENTION_DAYS ? parseInt(process.env.OUTBOX_RETENTION_DAYS) : 30,
+    heartbeat_file: process.env.OUTBOX_RELAY_HEARTBEAT_FILE || "/tmp/outbox-relay.alive",
+  },
 };

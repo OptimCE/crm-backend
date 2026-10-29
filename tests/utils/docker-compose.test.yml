@@ -12,3 +12,15 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+  # JetStream for the outbox relay's tests (tests/functionals/outbox). 4223, not
+  # 4222, so a running dev stack's broker is never the one under test.
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4223:4222"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8222/healthz?js-enabled-only=true"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
