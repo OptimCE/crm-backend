@@ -73,7 +73,7 @@ describe("(Functional) regulatory_link_status", () => {
     await expect(insert({ op: 2, dossier: 11, status: RegulatoryStatus.ACTIVE, from: "2026-06-01", to: null })).resolves.toBeUndefined();
   });
 
-  it.each([RegulatoryStatus.TO_NOTIFY, RegulatoryStatus.LEAVING, RegulatoryStatus.ENDED, RegulatoryStatus.REFUSED])(
+  it.each([RegulatoryStatus.TO_NOTIFY, RegulatoryStatus.LEAVING, RegulatoryStatus.ENDED, RegulatoryStatus.REFUSED, RegulatoryStatus.WITHDRAWN])(
     "a status %s does not occupy the EAN",
     async (status) => {
       await insert({ op: 1, dossier: 10, status, from: null, to: null });
@@ -87,6 +87,12 @@ describe("(Functional) regulatory_link_status", () => {
     await insert({ op: 1, dossier: 10, status: RegulatoryStatus.ACTIVE, from: "2026-01-01", to: null, ...key });
 
     await expect(insert({ op: 2, dossier: 11, status: RegulatoryStatus.ACTIVE, from: "2026-01-01", to: null, ...key })).resolves.toBeUndefined();
+  });
+
+  it("refuses a status outside 1-9", async () => {
+    await expect(insert({ op: 1, dossier: 10, status: 10 as RegulatoryStatus, from: null, to: null })).rejects.toThrow(
+      /ck_regulatory_link_status_code/,
+    );
   });
 
   it("refuses a validity that ends before it starts", async () => {

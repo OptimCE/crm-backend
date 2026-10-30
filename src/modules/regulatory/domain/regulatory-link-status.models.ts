@@ -19,6 +19,8 @@ export enum RegulatoryStatus {
   LEAVING = 6,
   ENDED = 7,
   REFUSED = 8,
+  /** Filed, then cancelled, excluded or compensated before it was authorised: nothing to show. */
+  WITHDRAWN = 9,
 }
 
 /**
