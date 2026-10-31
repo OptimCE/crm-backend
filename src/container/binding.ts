@@ -104,6 +104,11 @@ import { OnboardingRepository } from "../modules/onboarding/infra/onboarding.rep
 import type { IOnboardingService } from "../modules/onboarding/domain/i-onboarding.service.js";
 import { OnboardingService } from "../modules/onboarding/infra/onboarding.service.js";
 import { OnboardingController } from "../modules/onboarding/api/onboarding.controller.js";
+import type { IRegulatoryRepository } from "../modules/regulatory/domain/i-regulatory.repository.js";
+import { RegulatoryRepository } from "../modules/regulatory/infra/regulatory.repository.js";
+import type { IRegulatoryService } from "../modules/regulatory/domain/i-regulatory.service.js";
+import { RegulatoryService } from "../modules/regulatory/infra/regulatory.service.js";
+import { RegulatoryController } from "../modules/regulatory/api/regulatory.controller.js";
 import type { IOutboxWriter } from "../shared/outbox/i-outbox.writer.js";
 import { OutboxWriter } from "../shared/outbox/outbox.writer.js";
 
@@ -177,6 +182,9 @@ if (!container.isBound("NotificationRepository")) {
 if (!container.isBound("OnboardingRepository")) {
   container.bind<IOnboardingRepository>("OnboardingRepository").to(OnboardingRepository);
 }
+if (!container.isBound("RegulatoryRepository")) {
+  container.bind<IRegulatoryRepository>("RegulatoryRepository").to(RegulatoryRepository);
+}
 if (!container.isBound("OutboxWriter")) {
   container.bind<IOutboxWriter>("OutboxWriter").to(OutboxWriter);
 }
@@ -208,6 +216,7 @@ container.bind<IOutboundService>("OutboundService").to(OutboundService);
 container.bind<IGeocodingService>("GeocodingService").to(GeocodingService);
 container.bind<IDsoService>("DsoService").to(DsoService);
 container.bind<IOnboardingService>("OnboardingService").to(OnboardingService);
+container.bind<IRegulatoryService>("RegulatoryService").to(RegulatoryService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -226,6 +235,7 @@ container.bind<NotificationController>(NotificationController).toSelf();
 container.bind<GeocodingController>(GeocodingController).toSelf();
 container.bind<DsoController>(DsoController).toSelf();
 container.bind<OnboardingController>(OnboardingController).toSelf();
+container.bind<RegulatoryController>(RegulatoryController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);
