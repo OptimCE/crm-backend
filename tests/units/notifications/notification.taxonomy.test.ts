@@ -29,6 +29,7 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       ADMIN_EFFECT_APPLIED: "admin_effect.applied",
       ADMIN_METER_ACTIVE: "admin_meter.active",
       ADMIN_CORRESPONDENCE_RECORDED: "admin_correspondence.recorded",
+      ADMIN_CORRESPONDENCE_RECEIVED: "admin_correspondence.received",
     });
   });
 
