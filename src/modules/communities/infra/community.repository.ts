@@ -453,6 +453,11 @@ export class CommunityRepository implements ICommunityRepository {
     if (community_details.legal_name !== undefined) community.legal_name = community_details.legal_name;
     if (community_details.iban !== undefined) community.iban = community_details.iban;
     if (community_details.account_holder_name !== undefined) community.account_holder_name = community_details.account_holder_name;
+    if (community_details.representative_first_name !== undefined) community.representative_first_name = community_details.representative_first_name;
+    if (community_details.representative_last_name !== undefined) community.representative_last_name = community_details.representative_last_name;
+    if (community_details.representative_email !== undefined) community.representative_email = community_details.representative_email;
+    if (community_details.statutes_date !== undefined) community.statutes_date = community_details.statutes_date;
+    if (community_details.internal_rules_date !== undefined) community.internal_rules_date = community_details.internal_rules_date;
     if (community_details.logo_url !== undefined) community.logo_url = community_details.logo_url;
     if (community_details.headquarters_address_id !== undefined) community.headquarters_address_id = community_details.headquarters_address_id;
 

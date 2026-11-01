@@ -25,6 +25,13 @@ CREATE TABLE IF NOT EXISTS community (
     legal_name VARCHAR(255) NULL,
     iban VARCHAR(34) NULL,
     account_holder_name VARCHAR(255) NULL,
+    -- The representative towards the GRD and the CWaPE, and the dates of the
+    -- statutes and internal rules in force (espace administratif, phase 4).
+    representative_first_name VARCHAR(255) NULL,
+    representative_last_name VARCHAR(255) NULL,
+    representative_email VARCHAR(255) NULL,
+    statutes_date DATE NULL,
+    internal_rules_date DATE NULL,
     headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT current_timestamp,

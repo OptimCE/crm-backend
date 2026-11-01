@@ -9,8 +9,11 @@
  *
  * Reserved, no emitter yet (the CRM has no such concept today): `operation.closed`,
  * `operation.installation_added` / `_removed` (an injection meter is a meter, its
- * `injection_status` travels in the meter events), `community.representative_changed`,
- * `community.statutes_changed`, `community.roi_changed`.
+ * `injection_status` travels in the meter events).
+ *
+ * The community's representative, statutes and internal rules (2026-11-01): emitted by
+ * `CommunityService.updateCommunity` when a RECORDED value changes. Recording one for the
+ * first time is the CRM catching up, not a change the regulator must hear about.
  */
 export const CORE_EVENTS = {
   OPERATION_CREATED: "operation.created",
@@ -21,6 +24,9 @@ export const CORE_EVENTS = {
   COMMUNITY_CREATED: "community.created",
   COMMUNITY_MEMBER_JOINED: "community.member_joined",
   COMMUNITY_MEMBER_LEFT: "community.member_left",
+  COMMUNITY_REPRESENTATIVE_CHANGED: "community.representative_changed",
+  COMMUNITY_STATUTES_CHANGED: "community.statutes_changed",
+  COMMUNITY_ROI_CHANGED: "community.roi_changed",
 } as const;
 
 export type CoreEventType = (typeof CORE_EVENTS)[keyof typeof CORE_EVENTS];

@@ -43,6 +43,7 @@ import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.servic
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import type { IOutboxWriter } from "../../../shared/outbox/i-outbox.writer.js";
 import { CORE_EVENTS } from "../../../shared/outbox/core-events.js";
+import { REGULATORY_IDENTITY_FIELDS, regulatoryIdentityEvents } from "../shared/regulatory-identity.js";
 /**
  * Implementation of the Community Service.
  * Manages community creation, updates, membership, and IAM synchronization.
@@ -255,13 +256,16 @@ export class CommunityService implements ICommunityService {
       }
     }
 
-    // Capture the current regulator before the update so the audit trail can
-    // record old → new for this sensitive, regulatory field.
-    let previous_regulator: string | undefined;
-    if (updated_community.regulator !== undefined) {
+    // Capture the current values before the update: the audit trail records the
+    // regulator old → new, and a changed representative, statutes or internal rules
+    // date is an event for the regulator's procedures.
+    const touches_regulatory_identity = REGULATORY_IDENTITY_FIELDS.some((field) => updated_community[field] !== undefined);
+    let previous: Community | undefined;
+    if (updated_community.regulator !== undefined || touches_regulatory_identity) {
       const existing = await this.community_repository.getCommunityById(internal_community_id, query_runner);
-      previous_regulator = existing?.community.regulator;
+      previous = existing?.community;
     }
+    const previous_regulator = updated_community.regulator !== undefined ? previous?.regulator : undefined;
 
     let community_updated: Community;
     try {
@@ -276,6 +280,21 @@ export class CommunityService implements ICommunityService {
       }
       logger.error({ operation: "updateCommunity", error: err }, "An exception occurred while updating the community in the database");
       throw new AppError(COMMUNITY_ERRORS.UPDATE_COMMUNITY.DATABASE_UPDATE_EXCEPTION, 400);
+    }
+
+    if (previous && touches_regulatory_identity) {
+      for (const event of regulatoryIdentityEvents(previous, community_updated)) {
+        await this.outbox.append(
+          {
+            id_community: internal_community_id,
+            aggregate_type: "community",
+            aggregate_id: internal_community_id,
+            event_type: event.event_type,
+            payload: { id_community: internal_community_id, ...event.payload },
+          },
+          query_runner,
+        );
+      }
     }
 
     await this.auditLogService.log(
@@ -295,6 +314,8 @@ export class CommunityService implements ICommunityService {
             ...(updated_community.legal_name !== undefined ? ["legal_name"] : []),
             ...(updated_community.iban !== undefined ? ["iban"] : []),
             ...(updated_community.account_holder_name !== undefined ? ["account_holder_name"] : []),
+            // The representative's identity: field names only, like the bank fields.
+            ...REGULATORY_IDENTITY_FIELDS.filter((field) => updated_community[field] !== undefined),
           ],
           ...(updated_community.name !== undefined ? { name: updated_community.name } : {}),
           ...(updated_community.regulator !== undefined ? { old_regulator: previous_regulator, new_regulator: updated_community.regulator } : {}),
