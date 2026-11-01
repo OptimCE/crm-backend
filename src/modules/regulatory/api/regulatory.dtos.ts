@@ -1,31 +1,43 @@
-import { Expose, Type } from "class-transformer";
-import { IsIn, IsInt, IsOptional, IsString, Matches, MaxLength, Min } from "class-validator";
+import { Expose, Transform, Type } from "class-transformer";
+import { ArrayMaxSize, IsIn, IsInt, IsOptional, IsString, Matches, MaxLength, Min } from "class-validator";
 import { GLOBAL_ERRORS } from "../../../shared/errors/errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import { RegulatorySubjectType } from "../domain/regulatory-link-status.models.js";
 
 /**
- * Which subjects' regulatory status to read. An operation is required: a badge
- * is always about a meter or a key IN an operation. Community scope comes from
- * the request context, never from this DTO.
+ * Which subjects' regulatory status to read. A badge is always about a meter or
+ * a key IN an operation: one episode per (operation, subject) comes back, for
+ * one operation or, without `id_sharing_operation`, for every operation of the
+ * community (the global meters list, which then picks each meter's current
+ * operation). Community scope comes from the request context, never from this
+ * DTO.
  */
 export class RegulatoryStatusQueryDTO {
   @Type(() => Number)
   @IsInt(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
   @Min(1, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
-  id_sharing_operation!: number;
+  @IsOptional()
+  id_sharing_operation?: number;
 
   @Type(() => Number)
   @IsIn([RegulatorySubjectType.METER, RegulatorySubjectType.KEY], withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.INTEGER))
   @IsOptional()
   subject_type?: RegulatorySubjectType;
 
-  /** One EAN (or key id); every subject of the operation when omitted. */
-  @Type(() => String)
-  @IsString(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
-  @MaxLength(64, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  /**
+   * EANs (or key ids): repeated (`subject_ref=a&subject_ref=b`) or
+   * comma-separated, at most 200; every subject when omitted.
+   */
+  @Transform(({ value }: { value: unknown }) =>
+    value === undefined || value === null
+      ? undefined
+      : (Array.isArray(value) ? value : [value]).flatMap((v) => String(v).split(",")).filter((v) => v !== ""),
+  )
+  @IsString(withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING, { each: true }))
+  @MaxLength(64, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING, { each: true }))
+  @ArrayMaxSize(200, withError(GLOBAL_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsOptional()
-  subject_ref?: string;
+  subject_ref?: string[];
 
   /**
    * `YYYY-MM-DD`: of a subject's episodes, the one whose authorised period

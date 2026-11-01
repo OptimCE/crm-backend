@@ -54,6 +54,7 @@ import type { IAuditLogService } from "../../audit_log/domain/i-audit-log.servic
 import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import type { IOutboxWriter } from "../../../shared/outbox/i-outbox.writer.js";
 import { CORE_EVENTS } from "../../../shared/outbox/core-events.js";
+import type { IRegulatoryRepository } from "../../regulatory/domain/i-regulatory.repository.js";
 
 @injectable()
 export class SharingOperationService implements ISharingOperationService {
@@ -65,6 +66,7 @@ export class SharingOperationService implements ISharingOperationService {
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private auditLogService: IAuditLogService,
     @inject("OutboxWriter") private readonly outbox: IOutboxWriter,
+    @inject("RegulatoryRepository") private readonly regulatoryRepository: IRegulatoryRepository,
   ) {}
 
   /**
@@ -959,7 +961,14 @@ export class SharingOperationService implements ISharingOperationService {
       throw new AppError(SHARING_OPERATION_ERRORS.PATCH_METER_STATUS.METER_NOT_PART_OF_SHARING, 400);
     }
 
-    // 4. Delegate to MeterRepository to handle history/update
+    // 4. With the administrative module active, a meter its procedure tracks takes its status from
+    // that procedure (the core aligns meter_data when the episode goes active), never by hand.
+    if (await this.regulatoryRepository.drivesMeter(id_sharing, id_meter, query_runner)) {
+      logger.warn({ operation: "patchMeterStatus", id_meter, id_sharing }, "The meter's status follows its administrative procedure");
+      throw new AppError(SHARING_OPERATION_ERRORS.PATCH_METER_STATUS.STATUS_FOLLOWS_PROCEDURE, 409);
+    }
+
+    // 5. Delegate to MeterRepository to handle history/update
     // id_meter corresponds to the EAN (string) of the meter directly
     try {
       await this.meterRepository.addMeterData(
@@ -1035,6 +1044,12 @@ export class SharingOperationService implements ISharingOperationService {
    */
   @Transactional()
   async deleteSharingOperation(id_sharing: number, query_runner?: QueryRunner): Promise<void> {
+    // The regulatory episodes cascade with the operation: while a procedure still tracks its
+    // meters or key, deleting it would erase what was filed with the GRD and the regulator.
+    if ((await this.regulatoryRepository.countLiveInOperation(id_sharing, query_runner)) > 0) {
+      logger.warn({ operation: "deleteSharingOperation", id_sharing }, "The operation's meters or key are tracked by a procedure");
+      throw new AppError(SHARING_OPERATION_ERRORS.DELETE_SHARING_OPERATION.REGULATORY_LINKS_LIVE, 409);
+    }
     // Read before the delete: the event needs the community, and the meters' link is nulled by it.
     const sharingOp = await this.sharing_operationRepository.getSharingOperationById(id_sharing, query_runner);
     const delete_result = await this.sharing_operationRepository.deleteSharingOperation(id_sharing, query_runner);

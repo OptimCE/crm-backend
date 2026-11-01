@@ -769,3 +769,74 @@ CREATE TABLE IF NOT EXISTS regulatory_link_status (
 CREATE INDEX IF NOT EXISTS ix_regulatory_link_operation ON regulatory_link_status (id_community, id_sharing_operation);
 DROP TRIGGER IF EXISTS update_regulatory_link_status_modtime ON regulatory_link_status;
 CREATE TRIGGER update_regulatory_link_status_modtime BEFORE UPDATE ON regulatory_link_status FOR EACH ROW EXECUTE PROCEDURE update_changetimestamp_column();
+
+-- One status for a meter in an operation: an episode written ACTIVE turns the
+-- meter's waiting rows of that operation ACTIVE from valid_from. See
+-- database_script/2026-11-01_regulatory_meter_alignment.sql.
+CREATE OR REPLACE FUNCTION meter_data_split(p_id INT, p_at DATE) RETURNS INT
+LANGUAGE plpgsql
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_columns TEXT;
+    v_new_id  INT;
+BEGIN
+    SELECT string_agg(quote_ident(attname), ', ' ORDER BY attnum)
+      INTO v_columns
+      FROM pg_attribute
+     WHERE attrelid = 'meter_data'::regclass
+       AND attnum > 0
+       AND NOT attisdropped
+       AND attidentity = ''
+       AND attgenerated = ''
+       AND attname NOT IN ('id', 'start_date', 'created_at', 'updated_at');
+    EXECUTE format(
+        'INSERT INTO meter_data (start_date, %1$s) SELECT $2, %1$s FROM meter_data WHERE id = $1 RETURNING id',
+        v_columns
+    ) INTO v_new_id USING p_id, p_at;
+    UPDATE meter_data SET end_date = p_at - 1 WHERE id = p_id;
+    RETURN v_new_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION meter_data_split(INT, DATE) FROM PUBLIC;
+
+CREATE OR REPLACE FUNCTION align_meter_data_with_regulatory() RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    r        RECORD;
+    v_target INT;
+BEGIN
+    FOR r IN
+        SELECT id, start_date, end_date
+          FROM meter_data
+         WHERE id_community = NEW.id_community
+           AND id_sharing_operation = NEW.id_sharing_operation
+           AND ean = NEW.subject_ref
+           AND status IN (3, 4)
+           AND (end_date IS NULL OR end_date >= NEW.valid_from)
+           AND (NEW.valid_to IS NULL OR start_date <= NEW.valid_to)
+         ORDER BY start_date
+         FOR UPDATE
+    LOOP
+        v_target := r.id;
+        IF r.start_date < NEW.valid_from THEN
+            v_target := meter_data_split(r.id, NEW.valid_from);
+        END IF;
+        IF NEW.valid_to IS NOT NULL AND (r.end_date IS NULL OR r.end_date > NEW.valid_to) THEN
+            PERFORM meter_data_split(v_target, NEW.valid_to + 1);
+        END IF;
+        UPDATE meter_data SET status = 1 WHERE id = v_target;
+    END LOOP;
+    RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS align_meter_data_on_activation ON regulatory_link_status;
+CREATE TRIGGER align_meter_data_on_activation
+    AFTER INSERT OR UPDATE OF regulatory_status, valid_from, valid_to ON regulatory_link_status
+    FOR EACH ROW
+    WHEN (NEW.subject_type = 1 AND NEW.regulatory_status = 5 AND NEW.valid_from IS NOT NULL)
+    EXECUTE FUNCTION align_meter_data_with_regulatory();

@@ -34,6 +34,7 @@ import { AUDIT_ACTIONS } from "../../audit_log/domain/audit-log.actions.js";
 import { METER_MAP_MAX_POINTS, MeterDataStatus } from "../shared/meter.types.js";
 import type { IGeocodingService } from "../../geocoding/domain/i-geocoding.service.js";
 import { toGeocodeRequest } from "../../geocoding/infra/geocoding.service.js";
+import type { IRegulatoryRepository } from "../../regulatory/domain/i-regulatory.repository.js";
 
 /**
  * Service implementation for managing meters.
@@ -46,6 +47,7 @@ export class MeterService implements IMeterService {
     @inject("AppDataSource") private readonly dataSource: typeof AppDataSource,
     @inject("AuditLogService") private readonly auditLogService: IAuditLogService,
     @inject("GeocodingService") private readonly geocodingService: IGeocodingService,
+    @inject("RegulatoryRepository") private readonly regulatoryRepository: IRegulatoryRepository,
   ) {}
 
   /**
@@ -260,10 +262,13 @@ export class MeterService implements IMeterService {
       throw new AppError(METER_ERRORS.PATCH_METER_DATA.METER_NOT_FOUND, 400);
     }
 
+    // The configuration being replaced: it supplies the sharing operation to keep, the holder the
+    // audit entry records the change from, and the status a procedure may be driving.
+    const previous = await this.meterRepository.getLastMeterData(patched_meter_data.EAN, query_runner);
+    const sharing_operation = this.resolvePatchedSharingOperation(patched_meter_data, previous);
+    await this.assertStatusNotDriven(patched_meter_data, previous, sharing_operation, query_runner);
+
     try {
-      // The configuration being replaced: it supplies the sharing operation to keep and the holder
-      // the audit entry records the change from.
-      const previous = await this.meterRepository.getLastMeterData(patched_meter_data.EAN, query_runner);
       const member_id = patched_meter_data.member_id || null;
       const result = await this.meterRepository.addMeterData(
         patched_meter_data.EAN,
@@ -283,7 +288,7 @@ export class MeterService implements IMeterService {
           production_chain: patched_meter_data.production_chain,
           total_generating_capacity: patched_meter_data.total_generating_capacity,
           member: member_id ? ({ id: member_id } as Member) : null,
-          sharing_operation: this.resolvePatchedSharingOperation(patched_meter_data, previous),
+          sharing_operation,
         },
         query_runner,
       );
@@ -314,6 +319,37 @@ export class MeterService implements IMeterService {
       }
       logger.error({ operation: "patchMeterData", error: err }, "Failed to patch meter data");
       throw new AppError(METER_ERRORS.PATCH_METER_DATA.DATABASE_UPDATE, 400);
+    }
+  }
+
+  /**
+   * With the administrative module active, a meter its procedure tracks takes its status in that
+   * operation from the procedure, never by hand. Only a status CHANGE in the SAME operation is
+   * refused: the update dialog sends the current status with every edit (holder, rate…), and a
+   * move to another operation is a membership change the procedures are filed from.
+   */
+  private async assertStatusNotDriven(
+    patched_meter_data: PatchMeterDataDTO,
+    previous: MeterData | null,
+    sharing_operation: SharingOperation | null,
+    query_runner?: QueryRunner,
+  ): Promise<void> {
+    const id_sharing = sharing_operation?.id;
+    if (
+      id_sharing === undefined ||
+      previous === null ||
+      previous.sharing_operation?.id !== id_sharing ||
+      patched_meter_data.status === undefined ||
+      patched_meter_data.status === previous.status
+    ) {
+      return;
+    }
+    if (await this.regulatoryRepository.drivesMeter(id_sharing, patched_meter_data.EAN, query_runner)) {
+      logger.warn(
+        { operation: "patchMeterData", ean: patched_meter_data.EAN, id_sharing },
+        "The meter's status follows its administrative procedure",
+      );
+      throw new AppError(METER_ERRORS.PATCH_METER_DATA.STATUS_FOLLOWS_PROCEDURE, 409);
     }
   }
 

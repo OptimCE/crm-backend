@@ -34,6 +34,8 @@ import type { Response } from "supertest";
 import { InMemoryCacheService } from "../../src/shared/cache/implementations/in-memory.cache.service.js";
 import type { ICacheService } from "../../src/shared/cache/i-cache.service.js";
 import type { IOutboxWriter } from "../../src/shared/outbox/i-outbox.writer.js";
+import { createMockRegulatoryRepository } from "../repository_mocked/regulatory.repository.mock.js";
+import type { IRegulatoryRepository } from "../../src/modules/regulatory/domain/i-regulatory.repository.js";
 
 export const expectWithLog = async (response: Response, assertionCallback: () => void | Promise<void>): Promise<void> => {
   try {
@@ -99,6 +101,16 @@ export async function initiliazeDbMock(): Promise<void> {
   }
   // The mocked query runner has no real transaction, which the real writer refuses on purpose.
   await mockOutboxWriterModule({});
+  // No database behind the mocked data source: the module off, nothing tracked by a procedure.
+  await mockRegulatoryRepositoryModule({});
+}
+
+export async function mockRegulatoryRepositoryModule(overrides: { [K in keyof IRegulatoryRepository]?: jest.Mock }): Promise<
+  jest.Mocked<IRegulatoryRepository>
+> {
+  const mock = createMockRegulatoryRepository();
+  Object.assign(mock, overrides);
+  return await mockModule<IRegulatoryRepository>(mock, "RegulatoryRepository");
 }
 
 export async function mockOutboxWriterModule(overrides: { [K in keyof IOutboxWriter]?: jest.Mock }): Promise<jest.Mocked<IOutboxWriter>> {

@@ -9,7 +9,7 @@ import { RegulatoryController } from "./regulatory.controller.js";
 export const regulatory_routes = express.Router();
 const regulatory_controller = lazyController<RegulatoryController>(RegulatoryController);
 
-// Get (/status) : The regulatory status of an operation's meters and keys, for the badges.
+// Get (/status) : The regulatory status of an operation's (or the community's) meters and keys, for the badges.
 //
 // Managers only, like the procedures it links to. No response cache, on purpose:
 // the administrative annexe writes regulatory_link_status straight into the

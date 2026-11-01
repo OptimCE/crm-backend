@@ -34,10 +34,12 @@
     "meter_not_in_community": "Een of meer meters behoren niet tot de gemeenschap",
     "latest_meter_data_not_found": "Geen geldige meterinformatie gevonden",
     "meter_not_part_of_sharing": "De meter maakt momenteel geen deel uit van de deeloperatie",
-    "database_add": "Er is een fout opgetreden bij het bijwerken van de meterinformatie in de database"
+    "database_add": "Er is een fout opgetreden bij het bijwerken van de meterinformatie in de database",
+    "status_follows_procedure": "De status van deze meter volgt zijn administratieve procedure: hij verandert wanneer de procedure vordert (inwerkingtreding, weigering), niet met de hand"
   },
   "delete_sharing_operation": {
-    "database_delete": "Er is een fout opgetreden bij het verwijderen van de deeloperatie uit de database"
+    "database_delete": "Er is een fout opgetreden bij het verwijderen van de deeloperatie uit de database",
+    "regulatory_links_live": "Meters of een sleutel van deze operatie worden gevolgd door een administratieve procedure: meld eerst het einde van de deling en verwijder daarna de operatie"
   },
   "delete_meter_from_sharing": {
     "date_required": "Een verwijderingsdatum is vereist",

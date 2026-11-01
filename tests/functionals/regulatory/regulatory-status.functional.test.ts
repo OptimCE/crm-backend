@@ -145,10 +145,10 @@ describe("(Functional) GET /regulatory/status", () => {
     expect(response.status).toBe(403);
   });
 
-  it("needs an operation", async () => {
+  it("refuses an operation that is not an id", async () => {
     await subscribe(true);
 
-    const response = await status("subject_ref=1");
+    const response = await status("id_sharing_operation=abc");
 
     expect(response.status).toBe(422);
   });
