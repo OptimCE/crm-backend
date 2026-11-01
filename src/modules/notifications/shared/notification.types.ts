@@ -59,14 +59,19 @@ export enum OutboundStatus {
 /**
  * What a recipient wants done with a given (type prefix, channel) pair.
  *
- * `2 DAILY_DIGEST` is deliberately NOT declared: there is no digest runner, and
- * a value the enum accepts while the code silently treats it as IMMEDIATE is a
- * value somebody eventually writes by hand. The number stays reserved in the
- * encoding and the DB `CHECK` rejects it; both are relaxed when digests ship.
+ * `2 DAILY_DIGEST` is deliberately NOT declared: nothing batches immediate
+ * emails into a digest, and a value the enum accepts while the code silently
+ * treats it as IMMEDIATE is a value somebody eventually writes by hand. The
+ * number stays reserved in the encoding and the DB `CHECK` rejects it.
+ *
+ * `4 WEEKLY` (2026-11-01) is for a summary type only (`NOTIFICATION_DIGEST_PREFIXES`,
+ * email channel): the producer builds the summary itself, daily by default, and
+ * sends a weekly one on Mondays. Refused on any other prefix.
  */
 export enum PreferenceMode {
   IMMEDIATE = 1,
   OFF = 3,
+  WEEKLY = 4,
 }
 
 /** Why an address was added to `email_suppression`. Written by the dispatcher. */

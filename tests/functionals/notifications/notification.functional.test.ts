@@ -647,7 +647,7 @@ describe("(Functional) Notification Module", () => {
       // 422, not 400: `PreferenceMode` deliberately does not declare `2`, so the
       // DTO's @IsEnum rejects it before the service is reached. (The unknown
       // type_prefix case above is a service-level check and returns 400.) The DB
-      // CHECK (mode IN (1,3)) is the third line of the same defence.
+      // CHECK (mode IN (1,3,4)) is the third line of the same defence.
       const app = await getApp();
       const response = await request(app)
         .put("/notifications/preferences")
@@ -655,6 +655,41 @@ describe("(Functional) Notification Module", () => {
         .send({ preferences: [{ type_prefix: "", channel: NotificationChannel.EMAIL, mode: 2 }] });
 
       expect(response.status).toBe(422);
+      expect(await preferenceCountFor(ADMIN_USER_ID)).toBe(0);
+    });
+
+    it("serves the summary prefixes, and takes WEEKLY on a summary's email", async () => {
+      const app = await getApp();
+      const read = await request(app).get("/notifications/preferences").set(ADMIN_NO_COMMUNITY);
+      expect(read.body.data.digest_prefixes).toEqual(["admin_digest"]);
+      expect(read.body.data.type_prefixes).toContain("admin_digest");
+
+      const response = await request(app)
+        .put("/notifications/preferences")
+        .set(ADMIN_NO_COMMUNITY)
+        .send({ preferences: [{ type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.WEEKLY }] });
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(200);
+        expect(response.body.data.preferences).toEqual([
+          { type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.WEEKLY },
+        ]);
+      });
+    });
+
+    it.each([
+      { type_prefix: "invoice", channel: NotificationChannel.EMAIL },
+      { type_prefix: "", channel: NotificationChannel.EMAIL },
+      { type_prefix: "admin_digest", channel: NotificationChannel.INAPP },
+    ])("refuses WEEKLY anywhere but a summary's email ($type_prefix, channel $channel)", async ({ type_prefix, channel }) => {
+      const app = await getApp();
+      const response = await request(app)
+        .put("/notifications/preferences")
+        .set(ADMIN_NO_COMMUNITY)
+        .send({ preferences: [{ type_prefix, channel, mode: PreferenceMode.WEEKLY }] });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error_code).toBe(NOTIFICATION_ERRORS.PREFERENCE_INVALID.errorCode);
       expect(await preferenceCountFor(ADMIN_USER_ID)).toBe(0);
     });
 

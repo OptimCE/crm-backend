@@ -37,7 +37,19 @@ export const NOTIFICATION_TYPES = {
   ADMIN_DEADLINE_DUE_SOON: "admin_deadline.due_soon",
   ADMIN_DEADLINE_MISSED: "admin_deadline.missed",
   ADMIN_DOSSIER_ACKNOWLEDGED: "admin_dossier.acknowledged",
+  ADMIN_DIGEST_SUMMARY: "admin_digest.summary",
+  ADMIN_EFFECT_APPLIED: "admin_effect.applied",
+  ADMIN_METER_ACTIVE: "admin_meter.active",
+  ADMIN_CORRESPONDENCE_RECORDED: "admin_correspondence.recorded",
 } as const;
+
+/**
+ * The prefixes of summary types: an email the producer builds from a period's
+ * events (`admin_digest.summary`, the administrative annexe's daily summary).
+ * Email only, and the one place `PreferenceMode.WEEKLY` means something: no row
+ * is daily, WEEKLY is Mondays, OFF is none.
+ */
+export const NOTIFICATION_DIGEST_PREFIXES: readonly string[] = Object.freeze(["admin_digest"]);
 
 /**
  * The `type_prefix` values `notification_preference` recognises: the first

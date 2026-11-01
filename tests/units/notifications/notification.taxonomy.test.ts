@@ -25,6 +25,10 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       ADMIN_DEADLINE_DUE_SOON: "admin_deadline.due_soon",
       ADMIN_DEADLINE_MISSED: "admin_deadline.missed",
       ADMIN_DOSSIER_ACKNOWLEDGED: "admin_dossier.acknowledged",
+      ADMIN_DIGEST_SUMMARY: "admin_digest.summary",
+      ADMIN_EFFECT_APPLIED: "admin_effect.applied",
+      ADMIN_METER_ACTIVE: "admin_meter.active",
+      ADMIN_CORRESPONDENCE_RECORDED: "admin_correspondence.recorded",
     });
   });
 
@@ -33,8 +37,12 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
     // `''` is the catch-all default row, not a prefix, and is surfaced
     // separately by the preferences endpoint.
     expect(NOTIFICATION_TYPE_PREFIXES).toEqual([
+      "admin_correspondence",
       "admin_deadline",
+      "admin_digest",
       "admin_dossier",
+      "admin_effect",
+      "admin_meter",
       "billing_run",
       "credit_note",
       "document",
