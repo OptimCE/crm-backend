@@ -64,14 +64,14 @@ export enum OutboundStatus {
  * treats it as IMMEDIATE is a value somebody eventually writes by hand. The
  * number stays reserved in the encoding and the DB `CHECK` rejects it.
  *
- * `4 WEEKLY` (2026-11-01) is for a summary type only (`NOTIFICATION_DIGEST_PREFIXES`,
- * email channel): the producer builds the summary itself, daily by default, and
- * sends a weekly one on Mondays. Refused on any other prefix.
+ * A summary's rhythm (`NOTIFICATION_DIGEST_PREFIXES`) is not a preference: the
+ * producer's own setting decides it (the administrative annexe's
+ * `digest_setting`, set by a community admin). A recipient only turns its
+ * email OFF.
  */
 export enum PreferenceMode {
   IMMEDIATE = 1,
   OFF = 3,
-  WEEKLY = 4,
 }
 
 /** Why an address was added to `email_suppression`. Written by the dispatcher. */

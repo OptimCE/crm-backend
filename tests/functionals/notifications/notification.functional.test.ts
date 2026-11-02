@@ -658,7 +658,7 @@ describe("(Functional) Notification Module", () => {
       expect(await preferenceCountFor(ADMIN_USER_ID)).toBe(0);
     });
 
-    it("serves the summary prefixes, and takes WEEKLY on a summary's email", async () => {
+    it("serves the summary prefixes, whose email a recipient turns off", async () => {
       const app = await getApp();
       const read = await request(app).get("/notifications/preferences").set(ADMIN_NO_COMMUNITY);
       expect(read.body.data.digest_prefixes).toEqual(["admin_digest"]);
@@ -667,29 +667,24 @@ describe("(Functional) Notification Module", () => {
       const response = await request(app)
         .put("/notifications/preferences")
         .set(ADMIN_NO_COMMUNITY)
-        .send({ preferences: [{ type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.WEEKLY }] });
+        .send({ preferences: [{ type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.OFF }] });
 
       await expectWithLog(response, () => {
         expect(response.status).toBe(200);
         expect(response.body.data.preferences).toEqual([
-          { type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.WEEKLY },
+          { type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.OFF },
         ]);
       });
     });
 
-    it.each([
-      { type_prefix: "invoice", channel: NotificationChannel.EMAIL },
-      { type_prefix: "", channel: NotificationChannel.EMAIL },
-      { type_prefix: "admin_digest", channel: NotificationChannel.INAPP },
-    ])("refuses WEEKLY anywhere but a summary's email ($type_prefix, channel $channel)", async ({ type_prefix, channel }) => {
+    it("refuses the weekly mode (4): a summary's rhythm is its producer's setting", async () => {
       const app = await getApp();
       const response = await request(app)
         .put("/notifications/preferences")
         .set(ADMIN_NO_COMMUNITY)
-        .send({ preferences: [{ type_prefix, channel, mode: PreferenceMode.WEEKLY }] });
+        .send({ preferences: [{ type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: 4 }] });
 
-      expect(response.status).toBe(400);
-      expect(response.body.error_code).toBe(NOTIFICATION_ERRORS.PREFERENCE_INVALID.errorCode);
+      expect(response.status).toBe(422);
       expect(await preferenceCountFor(ADMIN_USER_ID)).toBe(0);
     });
 

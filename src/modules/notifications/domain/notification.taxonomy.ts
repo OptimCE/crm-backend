@@ -46,9 +46,9 @@ export const NOTIFICATION_TYPES = {
 
 /**
  * The prefixes of summary types: an email the producer builds from a period's
- * events (`admin_digest.summary`, the administrative annexe's daily summary).
- * Email only, and the one place `PreferenceMode.WEEKLY` means something: no row
- * is daily, WEEKLY is Mondays, OFF is none.
+ * events (`admin_digest.summary`, the administrative annexe's summary). Email
+ * only. Who receives it and how often is the producer's setting (a community
+ * admin's choice); a recipient's OFF stops it for them.
  */
 export const NOTIFICATION_DIGEST_PREFIXES: readonly string[] = Object.freeze(["admin_digest"]);
 

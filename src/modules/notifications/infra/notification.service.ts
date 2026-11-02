@@ -211,14 +211,6 @@ export class NotificationService implements INotificationService {
       if (preference.type_prefix !== "" && !allowed.has(preference.type_prefix)) {
         throw new AppError(NOTIFICATION_ERRORS.PREFERENCE_INVALID, 400);
       }
-      // WEEKLY only means something for a summary's email: anywhere else it
-      // would be stored and then behave as IMMEDIATE.
-      if (
-        preference.mode === PreferenceMode.WEEKLY &&
-        (preference.channel !== NotificationChannel.EMAIL || !NOTIFICATION_DIGEST_PREFIXES.includes(preference.type_prefix))
-      ) {
-        throw new AppError(NOTIFICATION_ERRORS.PREFERENCE_INVALID, 400);
-      }
     }
     // De-duplicate on the primary key so a body repeating a pair cannot trip the
     // unique constraint and 500. Last one wins, which is the intuitive reading.

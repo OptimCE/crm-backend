@@ -165,8 +165,8 @@ export class NotificationPreferenceDTO {
   channel!: NotificationChannel;
 
   /**
-   * `PreferenceMode` — IMMEDIATE (1), OFF (3) or WEEKLY (4, a summary prefix's
-   * email only). `2 DAILY_DIGEST` is rejected: the encoding reserves it but
+   * `PreferenceMode` — IMMEDIATE (1) or OFF (3). `2 DAILY_DIGEST` is
+   * rejected: the encoding reserves it but
    * nothing batches immediate emails, and accepting a value that silently
    * behaves as IMMEDIATE is worse than refusing it.
    */
@@ -199,7 +199,7 @@ export class NotificationPreferencesDTO {
   @Expose()
   type_prefixes!: string[];
 
-  /** Which of `type_prefixes` are summaries: email only, daily, weekly or none. */
+  /** Which of `type_prefixes` are summaries: email only, on (no row) or OFF. */
   @Expose()
   digest_prefixes!: string[];
 
