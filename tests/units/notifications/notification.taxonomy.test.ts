@@ -30,6 +30,11 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       ADMIN_METER_ACTIVE: "admin_meter.active",
       ADMIN_CORRESPONDENCE_RECORDED: "admin_correspondence.recorded",
       ADMIN_CORRESPONDENCE_RECEIVED: "admin_correspondence.received",
+      SIGNATURE_REQUESTED: "signature.requested",
+      SIGNATURE_REMINDER: "signature.reminder",
+      SIGNATURE_SIGNED: "signature.signed",
+      SIGNATURE_DECLINED: "signature.declined",
+      SIGNATURE_COMPLETED: "signature.completed",
     });
   });
 
@@ -54,6 +59,7 @@ describe("(Unit) NOTIFICATION_TYPES registry", () => {
       "news_poll",
       "news_post",
       "producer_statement",
+      "signature",
     ]);
     expect(NOTIFICATION_TYPE_PREFIXES).not.toContain("");
   });

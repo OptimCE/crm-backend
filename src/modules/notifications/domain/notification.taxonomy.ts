@@ -42,6 +42,14 @@ export const NOTIFICATION_TYPES = {
   ADMIN_METER_ACTIVE: "admin_meter.active",
   ADMIN_CORRESPONDENCE_RECORDED: "admin_correspondence.recorded",
   ADMIN_CORRESPONDENCE_RECEIVED: "admin_correspondence.received",
+  // signature (2026-11-03): requested and reminder go to a signer whose turn it
+  // is, signed / declined / completed to the requester (completed to the
+  // signers too). requested, reminder and declined are TRANSACTIONAL.
+  SIGNATURE_REQUESTED: "signature.requested",
+  SIGNATURE_REMINDER: "signature.reminder",
+  SIGNATURE_SIGNED: "signature.signed",
+  SIGNATURE_DECLINED: "signature.declined",
+  SIGNATURE_COMPLETED: "signature.completed",
 } as const;
 
 /**

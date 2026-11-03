@@ -77,11 +77,12 @@ module.exports = {
   // a developer's shell must not reshape it. Unit tests exercise the overrides
   // through resolveAnnexCatalog() directly.
   //
-  // live-data ships `"defaultEnabled": false`, and the functional Catalog test
-  // asserts it is served, so the suite opts it in the way the dev stack does
-  // (ANNEX_CATALOG_ENABLE=live-data in the monorepo .env.dev).
+  // live-data and signature ship `"defaultEnabled": false`, and the functional
+  // Catalog test asserts they are served, so the suite opts them in the way the
+  // dev stack does (ANNEX_CATALOG_ENABLE=live-data,signature in the monorepo
+  // .env.dev).
   annex_catalog: {
-    enable: ["live-data"],
+    enable: ["live-data", "signature"],
     disable: [],
   },
   // ---- Outbox relay ---------------------------------------------------
