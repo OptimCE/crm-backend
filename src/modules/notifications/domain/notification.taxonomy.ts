@@ -37,7 +37,28 @@ export const NOTIFICATION_TYPES = {
   ADMIN_DEADLINE_DUE_SOON: "admin_deadline.due_soon",
   ADMIN_DEADLINE_MISSED: "admin_deadline.missed",
   ADMIN_DOSSIER_ACKNOWLEDGED: "admin_dossier.acknowledged",
+  ADMIN_DIGEST_SUMMARY: "admin_digest.summary",
+  ADMIN_EFFECT_APPLIED: "admin_effect.applied",
+  ADMIN_METER_ACTIVE: "admin_meter.active",
+  ADMIN_CORRESPONDENCE_RECORDED: "admin_correspondence.recorded",
+  ADMIN_CORRESPONDENCE_RECEIVED: "admin_correspondence.received",
+  // signature (2026-11-03): requested and reminder go to a signer whose turn it
+  // is, signed / declined / completed to the requester (completed to the
+  // signers too). requested, reminder and declined are TRANSACTIONAL.
+  SIGNATURE_REQUESTED: "signature.requested",
+  SIGNATURE_REMINDER: "signature.reminder",
+  SIGNATURE_SIGNED: "signature.signed",
+  SIGNATURE_DECLINED: "signature.declined",
+  SIGNATURE_COMPLETED: "signature.completed",
 } as const;
+
+/**
+ * The prefixes of summary types: an email the producer builds from a period's
+ * events (`admin_digest.summary`, the administrative annexe's summary). Email
+ * only. Who receives it and how often is the producer's setting (a community
+ * admin's choice); a recipient's OFF stops it for them.
+ */
+export const NOTIFICATION_DIGEST_PREFIXES: readonly string[] = Object.freeze(["admin_digest"]);
 
 /**
  * The `type_prefix` values `notification_preference` recognises: the first

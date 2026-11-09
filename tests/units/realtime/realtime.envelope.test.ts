@@ -64,3 +64,18 @@ describe("(Unit) parseEnvelope", () => {
     expect(parseEnvelope(oversize)).toBeNull();
   });
 });
+
+describe("(Unit) the espace administratif's topics", () => {
+  // Published by administrative-document; a topic the hub does not know is
+  // dropped here, silently, on its way to every manager's open page.
+  it.each([
+    REALTIME_TOPICS.ADMIN_CHANGE_DETECTED,
+    REALTIME_TOPICS.ADMIN_DOSSIER_UPDATED,
+    REALTIME_TOPICS.ADMIN_DOCUMENT_READY,
+    REALTIME_TOPICS.ADMIN_DEADLINE_DUE,
+  ])("carries %s", (topic) => {
+    const envelope = buildEnvelope({ ...valid, topic, ref: { kind: "dossier", id: "7" } });
+    expect(envelope).not.toBeNull();
+    expect(parseEnvelope(JSON.stringify(envelope))?.topic).toBe(topic);
+  });
+});

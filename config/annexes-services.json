@@ -61,6 +61,17 @@
       "unsubscribePath": "/annexes-services/live-data/unsubscribe",
       "unsubscribeWarningKey": "ANNEXES_SERVICES.LIVE_DATA.UNSUBSCRIBE_WARNING",
       "defaultEnabled": false
+    },
+    {
+      "feature": "signature",
+      "displayKey": "ANNEXES_SERVICES.SIGNATURE.NAME",
+      "descriptionKey": "ANNEXES_SERVICES.SIGNATURE.DESCRIPTION",
+      "icon": "pi pi-pen-to-square",
+      "minRole": "MEMBER",
+      "frontendRoute": "/signatures",
+      "subscribePath": "/annexes-services/signature/subscribe",
+      "unsubscribePath": "/annexes-services/signature/unsubscribe",
+      "defaultEnabled": false
     }
   ]
 }

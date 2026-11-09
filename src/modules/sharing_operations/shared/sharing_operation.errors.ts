@@ -56,9 +56,11 @@ export const SHARING_OPERATION_ERRORS = {
     LATEST_METER_DATA_NOT_FOUND: new LocalError(70014, "sharing_operation:patch_meter_status.latest_meter_data_not_found"),
     METER_NOT_PART_OF_SHARING: new LocalError(70015, "sharing_operation:patch_meter_status.meter_not_part_of_sharing"),
     DATABASE_ADD: new LocalError(70016, "sharing_operation:patch_meter_status.database_add"),
+    STATUS_FOLLOWS_PROCEDURE: new LocalError(70041, "sharing_operation:patch_meter_status.status_follows_procedure"),
   },
   DELETE_SHARING_OPERATION: {
     DATABASE_DELETE: new LocalError(70017, "sharing_operation:delete_sharing_operation.database_delete"),
+    REGULATORY_LINKS_LIVE: new LocalError(70042, "sharing_operation:delete_sharing_operation.regulatory_links_live"),
   },
   DELETE_METER_FROM_SHARING: {
     SHARING_OPERATION_NOT_FOUND: new LocalError(70018, "sharing_operation:delete_meter_from_sharing.sharing_operation_not_found"),

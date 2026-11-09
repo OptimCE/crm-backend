@@ -647,12 +647,42 @@ describe("(Functional) Notification Module", () => {
       // 422, not 400: `PreferenceMode` deliberately does not declare `2`, so the
       // DTO's @IsEnum rejects it before the service is reached. (The unknown
       // type_prefix case above is a service-level check and returns 400.) The DB
-      // CHECK (mode IN (1,3)) is the third line of the same defence.
+      // CHECK (mode IN (1,3,4)) is the third line of the same defence.
       const app = await getApp();
       const response = await request(app)
         .put("/notifications/preferences")
         .set(ADMIN_NO_COMMUNITY)
         .send({ preferences: [{ type_prefix: "", channel: NotificationChannel.EMAIL, mode: 2 }] });
+
+      expect(response.status).toBe(422);
+      expect(await preferenceCountFor(ADMIN_USER_ID)).toBe(0);
+    });
+
+    it("serves the summary prefixes, whose email a recipient turns off", async () => {
+      const app = await getApp();
+      const read = await request(app).get("/notifications/preferences").set(ADMIN_NO_COMMUNITY);
+      expect(read.body.data.digest_prefixes).toEqual(["admin_digest"]);
+      expect(read.body.data.type_prefixes).toContain("admin_digest");
+
+      const response = await request(app)
+        .put("/notifications/preferences")
+        .set(ADMIN_NO_COMMUNITY)
+        .send({ preferences: [{ type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.OFF }] });
+
+      await expectWithLog(response, () => {
+        expect(response.status).toBe(200);
+        expect(response.body.data.preferences).toEqual([
+          { type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: PreferenceMode.OFF },
+        ]);
+      });
+    });
+
+    it("refuses the weekly mode (4): a summary's rhythm is its producer's setting", async () => {
+      const app = await getApp();
+      const response = await request(app)
+        .put("/notifications/preferences")
+        .set(ADMIN_NO_COMMUNITY)
+        .send({ preferences: [{ type_prefix: "admin_digest", channel: NotificationChannel.EMAIL, mode: 4 }] });
 
       expect(response.status).toBe(422);
       expect(await preferenceCountFor(ADMIN_USER_ID)).toBe(0);

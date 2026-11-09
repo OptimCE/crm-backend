@@ -77,11 +77,27 @@ module.exports = {
   // a developer's shell must not reshape it. Unit tests exercise the overrides
   // through resolveAnnexCatalog() directly.
   //
-  // live-data ships `"defaultEnabled": false`, and the functional Catalog test
-  // asserts it is served, so the suite opts it in the way the dev stack does
-  // (ANNEX_CATALOG_ENABLE=live-data in the monorepo .env.dev).
+  // live-data and signature ship `"defaultEnabled": false`, and the functional
+  // Catalog test asserts they are served, so the suite opts them in the way the
+  // dev stack does (ANNEX_CATALOG_ENABLE=live-data,signature in the monorepo
+  // .env.dev).
   annex_catalog: {
-    enable: ["live-data"],
+    enable: ["live-data", "signature"],
     disable: [],
+  },
+  // ---- Outbox relay ---------------------------------------------------
+  // Read only by the crm-outbox-relay entrypoint (src/outbox-relay.ts), not by
+  // the API. The relay owns the CORE_EVENTS stream: `stream_max_age_days`
+  // bounds how long an annexe can be down and still catch up from the stream
+  // (beyond it, the administrative annexe reconciles at reactivation), and
+  // `duplicate_window_ms` how late a republished event is still dropped.
+  outbox_relay: {
+    nats_url: process.env.NATS_URL || "nats://localhost:4223",
+    poll_interval_ms: process.env.OUTBOX_RELAY_POLL_INTERVAL_MS ? parseInt(process.env.OUTBOX_RELAY_POLL_INTERVAL_MS) : 500,
+    batch_size: process.env.OUTBOX_RELAY_BATCH_SIZE ? parseInt(process.env.OUTBOX_RELAY_BATCH_SIZE) : 100,
+    stream_max_age_days: process.env.OUTBOX_STREAM_MAX_AGE_DAYS ? parseInt(process.env.OUTBOX_STREAM_MAX_AGE_DAYS) : 30,
+    duplicate_window_ms: process.env.OUTBOX_DUPLICATE_WINDOW_MS ? parseInt(process.env.OUTBOX_DUPLICATE_WINDOW_MS) : 600000,
+    retention_days: process.env.OUTBOX_RETENTION_DAYS ? parseInt(process.env.OUTBOX_RETENTION_DAYS) : 30,
+    heartbeat_file: process.env.OUTBOX_RELAY_HEARTBEAT_FILE || "/tmp/outbox-relay.alive",
   },
 };

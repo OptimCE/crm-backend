@@ -68,6 +68,11 @@ export function toCommunityDetailDTO(community: Community, member_count: number,
     legal_name: community.legal_name,
     iban: community.iban,
     account_holder_name: community.account_holder_name,
+    representative_first_name: community.representative_first_name,
+    representative_last_name: community.representative_last_name,
+    representative_email: community.representative_email,
+    statutes_date: community.statutes_date,
+    internal_rules_date: community.internal_rules_date,
   };
 }
 

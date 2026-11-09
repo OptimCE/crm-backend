@@ -1,5 +1,5 @@
 import { Expose, Type } from "class-transformer";
-import { IsEmail, IsIBAN, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
+import { IsEmail, IsIBAN, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, ValidateNested } from "class-validator";
 import { Role } from "../../../shared/dtos/role.js";
 import { PaginationQuery } from "../../../shared/dtos/query.dtos.js";
 import type { Sort } from "../../../shared/dtos/query.dtos.js";
@@ -259,6 +259,24 @@ export class CommunityDetailDTO {
   /** Name the bank account is held under — only set when it differs from `legal_name`. */
   @Expose()
   account_holder_name?: string | null;
+
+  /** Who represents the community towards the GRD and the regulator. */
+  @Expose()
+  representative_first_name?: string | null;
+
+  @Expose()
+  representative_last_name?: string | null;
+
+  @Expose()
+  representative_email?: string | null;
+
+  /** Date of the statutes in force (`YYYY-MM-DD`). */
+  @Expose()
+  statutes_date?: string | null;
+
+  /** Date of the internal rules (ROI) in force (`YYYY-MM-DD`). */
+  @Expose()
+  internal_rules_date?: string | null;
 }
 
 /**
@@ -344,6 +362,43 @@ export class UpdateCommunityDTO {
   @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
   @IsOptional()
   account_holder_name?: string | null;
+
+  /**
+   * The community's representative towards the GRD and the regulator. Changing a
+   * recorded representative emits `community.representative_changed`, which the
+   * administrative annexe turns into the regulator's update procedures.
+   */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(255, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  representative_first_name?: string | null;
+
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @MaxLength(255, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.STRING))
+  @IsOptional()
+  representative_last_name?: string | null;
+
+  @Type(() => String)
+  @IsEmail({}, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL))
+  @MaxLength(255, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL))
+  @IsOptional()
+  representative_email?: string | null;
+
+  /** Date of the statutes in force, `YYYY-MM-DD`. A new date emits `community.statutes_changed`. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  statutes_date?: string | null;
+
+  /** Date of the internal rules (ROI) in force, `YYYY-MM-DD`. A new date emits `community.roi_changed`. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
+  @IsOptional()
+  internal_rules_date?: string | null;
 }
 
 /**

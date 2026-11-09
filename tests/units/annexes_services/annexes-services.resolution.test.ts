@@ -167,6 +167,13 @@ describe("(Unit) annexes-services catalog resolution", () => {
       expect(liveData?.defaultEnabled).toBe(false);
     });
 
+    // Likewise signature (2026-11-03): production has no seal certificate yet.
+    it("ships signature off by default", () => {
+      const signature = parseAnnexCatalog(raw).find((m) => m.feature === "signature");
+      expect(signature?.defaultEnabled).toBe(false);
+      expect(signature?.minRole).toBe("MEMBER");
+    });
+
     it("getAnnexCatalog() resolves it once and logs the exposed set once", () => {
       const info = jest.spyOn(logger, "info").mockImplementation((() => logger) as never);
 
@@ -175,13 +182,14 @@ describe("(Unit) annexes-services catalog resolution", () => {
 
       expect(second).toBe(first);
       const modules = parseAnnexCatalog(raw);
-      const optedIn = (m: AnnexCatalogEntry): boolean => m.defaultEnabled !== false || m.feature === "live-data";
+      const optedIn = (m: AnnexCatalogEntry): boolean =>
+        m.defaultEnabled !== false || m.feature === "live-data" || m.feature === "signature";
       expect(logged(info, "annexes_services:catalog_loaded")).toEqual([
         expect.objectContaining({
           enabled: featuresOf(modules.filter(optedIn)),
           disabled: featuresOf(modules.filter((m) => !optedIn(m))),
-          // config/test.cjs hardcodes these: live-data opted in, nothing hidden.
-          overrides: { enable: ["live-data"], disable: [] },
+          // config/test.cjs hardcodes these: live-data and signature opted in, nothing hidden.
+          overrides: { enable: ["live-data", "signature"], disable: [] },
         }),
       ]);
     });

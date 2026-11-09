@@ -73,6 +73,24 @@ export class Community {
   @Column({ name: "account_holder_name", type: "varchar", length: 255, nullable: true })
   account_holder_name!: string | null;
 
+  /** Who represents the community towards the GRD and the regulator. Optional. */
+  @Column({ name: "representative_first_name", type: "varchar", length: 255, nullable: true })
+  representative_first_name!: string | null;
+
+  @Column({ name: "representative_last_name", type: "varchar", length: 255, nullable: true })
+  representative_last_name!: string | null;
+
+  @Column({ name: "representative_email", type: "varchar", length: 255, nullable: true })
+  representative_email!: string | null;
+
+  /** Date of the statutes in force (`YYYY-MM-DD`). Optional. */
+  @Column({ name: "statutes_date", type: "date", nullable: true })
+  statutes_date!: string | null;
+
+  /** Date of the internal rules (ROI) in force (`YYYY-MM-DD`). Optional. */
+  @Column({ name: "internal_rules_date", type: "date", nullable: true })
+  internal_rules_date!: string | null;
+
   @Column({ name: "headquarters_address_id", type: "int", nullable: true })
   headquarters_address_id!: number | null;
 

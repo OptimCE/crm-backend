@@ -15,6 +15,7 @@ import { audit_log_routes } from "./modules/audit_log/api/audit-log.routes.js";
 import { notification_routes } from "./modules/notifications/api/notification.routes.js";
 import { geocoding_routes } from "./modules/geocoding/api/geocoding.routes.js";
 import { dso_routes } from "./modules/dso/api/dso.routes.js";
+import { regulatory_routes } from "./modules/regulatory/api/regulatory.routes.js";
 
 export const router = express.Router();
 router.use("/communities", community_routes);
@@ -27,6 +28,7 @@ router.use("/me", me_routes);
 router.use("/members", member_routes);
 router.use("/meters", meter_router);
 router.use("/municipalities", municipality_routes);
+router.use("/regulatory", regulatory_routes);
 router.use("/sharing_operations", sharing_operation_routes);
 router.use("/users", user_router);
 router.use("/health", health_routes);

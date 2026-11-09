@@ -17,7 +17,8 @@
   },
   "patch_meter_data": {
     "meter_not_found": "Meter not found",
-    "database_update": "An error occurred while updating the meter data in the database"
+    "database_update": "An error occurred while updating the meter data in the database",
+    "status_follows_procedure": "This meter's status follows its administrative procedure: it changes as the procedure moves on (taking effect, refusal), not by hand"
   },
   "add_meter_data": {
     "conflict_config_already_existing": "Meter data already exists for this period",

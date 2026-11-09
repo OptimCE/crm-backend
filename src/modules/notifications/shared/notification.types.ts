@@ -59,10 +59,15 @@ export enum OutboundStatus {
 /**
  * What a recipient wants done with a given (type prefix, channel) pair.
  *
- * `2 DAILY_DIGEST` is deliberately NOT declared: there is no digest runner, and
- * a value the enum accepts while the code silently treats it as IMMEDIATE is a
- * value somebody eventually writes by hand. The number stays reserved in the
- * encoding and the DB `CHECK` rejects it; both are relaxed when digests ship.
+ * `2 DAILY_DIGEST` is deliberately NOT declared: nothing batches immediate
+ * emails into a digest, and a value the enum accepts while the code silently
+ * treats it as IMMEDIATE is a value somebody eventually writes by hand. The
+ * number stays reserved in the encoding and the DB `CHECK` rejects it.
+ *
+ * A summary's rhythm (`NOTIFICATION_DIGEST_PREFIXES`) is not a preference: the
+ * producer's own setting decides it (the administrative annexe's
+ * `digest_setting`, set by a community admin). A recipient only turns its
+ * email OFF.
  */
 export enum PreferenceMode {
   IMMEDIATE = 1,

@@ -11,7 +11,7 @@ import { container } from "../../../container/di-container.js";
 import type { IRealtimeHub } from "../../../shared/realtime/i-realtime.hub.js";
 import { REALTIME_TOPICS } from "../../../shared/realtime/realtime.topics.js";
 import { Notification } from "../domain/notification.models.js";
-import { NOTIFICATION_TYPE_PREFIXES } from "../domain/notification.taxonomy.js";
+import { NOTIFICATION_DIGEST_PREFIXES, NOTIFICATION_TYPE_PREFIXES } from "../domain/notification.taxonomy.js";
 // Value import, not `import type`: these are runtime enums, compared below.
 // Folding them into a type-only import silently yields `undefined`.
 import { NotificationCategory, NotificationChannel, PreferenceMode } from "../shared/notification.types.js";
@@ -197,7 +197,7 @@ export class NotificationService implements INotificationService {
     const rows = await this.notification_repository.listPreferences();
     return plainToInstance(
       NotificationPreferencesDTO,
-      { type_prefixes: [...NOTIFICATION_TYPE_PREFIXES], preferences: rows },
+      { type_prefixes: [...NOTIFICATION_TYPE_PREFIXES], digest_prefixes: [...NOTIFICATION_DIGEST_PREFIXES], preferences: rows },
       { excludeExtraneousValues: true },
     );
   }

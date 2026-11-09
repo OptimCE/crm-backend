@@ -34,10 +34,12 @@
     "meter_not_in_community": "One or more meters do not belong to the community",
     "latest_meter_data_not_found": "No valid meter information was found",
     "meter_not_part_of_sharing": "The meter is not currently part of the sharing operation",
-    "database_add": "An error occurred while updating the meter information in the database"
+    "database_add": "An error occurred while updating the meter information in the database",
+    "status_follows_procedure": "This meter's status follows its administrative procedure: it changes as the procedure moves on (taking effect, refusal), not by hand"
   },
   "delete_sharing_operation": {
-    "database_delete": "An error occurred while deleting the sharing operation from the database"
+    "database_delete": "An error occurred while deleting the sharing operation from the database",
+    "regulatory_links_live": "Meters or a key of this operation are tracked by an administrative procedure: notify the end of the sharing first, then delete the operation"
   },
   "delete_meter_from_sharing": {
     "date_required": "A removal date is required",

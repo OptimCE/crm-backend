@@ -16,6 +16,7 @@ export const METER_ERRORS = {
   PATCH_METER_DATA: {
     METER_NOT_FOUND: new LocalError(60004, "meter:patch_meter_data.meter_not_found"),
     DATABASE_UPDATE: new LocalError(60005, "meter:patch_meter_data.database_update"),
+    STATUS_FOLLOWS_PROCEDURE: new LocalError(60015, "meter:patch_meter_data.status_follows_procedure"),
   },
   ADD_METER_DATA: {
     CONFLICT_CONFIG_ALREADY_EXISTING: new LocalError(60006, "meter:add_meter_data.conflict_config_already_existing"),

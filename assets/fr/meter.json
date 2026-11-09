@@ -17,7 +17,8 @@
   },
   "patch_meter_data": {
     "meter_not_found": "Compteur introuvable",
-    "database_update": "Une erreur est survenue lors de la mise à jour des données compteurs dans la base de données"
+    "database_update": "Une erreur est survenue lors de la mise à jour des données compteurs dans la base de données",
+    "status_follows_procedure": "Le statut de ce compteur suit sa démarche administrative : il change quand la démarche avance (prise d'effet, refus), pas à la main"
   },
   "add_meter_data": {
     "conflict_config_already_existing": "Des données compteurs existe déjà pour cette période",

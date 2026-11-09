@@ -34,10 +34,12 @@
     "meter_not_in_community": "Ein oder mehrere Zähler gehören nicht zur Gemeinschaft",
     "latest_meter_data_not_found": "Keine gültigen Zählerinformationen gefunden",
     "meter_not_part_of_sharing": "Der Zähler ist derzeit nicht Teil der Teilungsoperation",
-    "database_add": "Beim Aktualisieren der Zählerinformationen in der Datenbank ist ein Fehler aufgetreten"
+    "database_add": "Beim Aktualisieren der Zählerinformationen in der Datenbank ist ein Fehler aufgetreten",
+    "status_follows_procedure": "Der Status dieses Zählers folgt seinem Verwaltungsverfahren: Er ändert sich mit dem Fortgang des Verfahrens (Inkrafttreten, Ablehnung), nicht von Hand"
   },
   "delete_sharing_operation": {
-    "database_delete": "Beim Löschen der Teilungsoperation aus der Datenbank ist ein Fehler aufgetreten"
+    "database_delete": "Beim Löschen der Teilungsoperation aus der Datenbank ist ein Fehler aufgetreten",
+    "regulatory_links_live": "Zähler oder ein Schlüssel dieser Operation werden von einem Verwaltungsverfahren verfolgt: Melden Sie zuerst das Ende der Teilung und löschen Sie dann die Operation"
   },
   "delete_meter_from_sharing": {
     "date_required": "Ein Entfernungsdatum ist erforderlich",

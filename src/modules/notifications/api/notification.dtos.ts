@@ -165,9 +165,10 @@ export class NotificationPreferenceDTO {
   channel!: NotificationChannel;
 
   /**
-   * `PreferenceMode` — IMMEDIATE (1) or OFF (3). `2 DAILY_DIGEST` is rejected:
-   * the encoding reserves it but no digest runner exists, and accepting a value
-   * that silently behaves as IMMEDIATE is worse than refusing it.
+   * `PreferenceMode` — IMMEDIATE (1) or OFF (3). `2 DAILY_DIGEST` is
+   * rejected: the encoding reserves it but
+   * nothing batches immediate emails, and accepting a value that silently
+   * behaves as IMMEDIATE is worse than refusing it.
    */
   @Expose()
   @Type(() => Number)
@@ -197,6 +198,10 @@ export class NotificationPreferenceUpdateDTO {
 export class NotificationPreferencesDTO {
   @Expose()
   type_prefixes!: string[];
+
+  /** Which of `type_prefixes` are summaries: email only, on (no row) or OFF. */
+  @Expose()
+  digest_prefixes!: string[];
 
   @Expose()
   @Type(() => NotificationPreferenceDTO)

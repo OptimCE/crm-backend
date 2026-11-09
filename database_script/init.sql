@@ -25,6 +25,13 @@ CREATE TABLE IF NOT EXISTS community (
     legal_name VARCHAR(255) NULL,
     iban VARCHAR(34) NULL,
     account_holder_name VARCHAR(255) NULL,
+    -- The representative towards the GRD and the CWaPE, and the dates of the
+    -- statutes and internal rules in force (espace administratif, phase 4).
+    representative_first_name VARCHAR(255) NULL,
+    representative_last_name VARCHAR(255) NULL,
+    representative_email VARCHAR(255) NULL,
+    statutes_date DATE NULL,
+    internal_rules_date DATE NULL,
     headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT current_timestamp,
@@ -694,3 +701,149 @@ CREATE TABLE IF NOT EXISTS user_onboarding (
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id_user, tour_key)
 );
+
+-- Transactional outbox of the core's domain events (shared/outbox/core-events.ts).
+-- A row is written IN THE SAME TRANSACTION as the CRM change it describes;
+-- crm-outbox-relay publishes it on core.evt.<event_type> with event_id as
+-- Nats-Msg-Id (JetStream drops a republished duplicate), then stamps
+-- published_at. No FK on id_community: the event outlives what it describes.
+-- See database_script/2026-10-29_outbox_event.sql.
+CREATE TABLE IF NOT EXISTS outbox_event (
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    event_id       UUID NOT NULL UNIQUE,
+    id_community   INT NOT NULL,
+    aggregate_type VARCHAR(32) NOT NULL,
+    aggregate_id   VARCHAR(64) NOT NULL,
+    event_type     VARCHAR(64) NOT NULL,
+    payload        JSONB NOT NULL DEFAULT '{}'::jsonb,
+    occurred_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    published_at   TIMESTAMPTZ,
+    attempts       SMALLINT NOT NULL DEFAULT 0,
+    last_error     TEXT
+);
+-- The relay's claim query. Partial so the index stays the size of the backlog.
+CREATE INDEX IF NOT EXISTS ix_outbox_event_unpublished ON outbox_event (id) WHERE published_at IS NULL;
+
+-- The regulatory status of an operation's meters and keys: what the GRD and the
+-- regulator have authorised, as opposed to meter_data / sharing_operation_key,
+-- which say what the CRM wants. One row = one episode of a subject (a meter's
+-- EAN, or a key id) in an operation, opened by one dossier of the
+-- administrative annexe. No row = not tracked (module inactive).
+--
+-- WRITTEN BY THE ANNEXE ONLY, through the four effect columns
+-- (regulatory_status, valid_from, valid_to, regulatory_ref): its DB role has
+-- INSERT on the table and UPDATE on those columns, nothing else
+-- (postgres/provision/30-crm-grants.sql). crm-backend only reads it, and no
+-- trigger or code of the core emits an outbox event for it: no loop
+-- core -> annexe -> core.
+--
+--   subject_type       1 meter (subject_ref = EAN), 2 key (subject_ref = key id)
+--   regulatory_status  1 to_notify, 2 pending_grd, 3 pending_regulator,
+--                      4 authorized, 5 active, 6 leaving, 7 ended, 8 refused,
+--                      9 withdrawn (filed, then cancelled or excluded before
+--                      it was authorised: tracked, but nothing to show)
+--
+-- ex_regulatory_link_one_operation is the invariant "an EAN is pending,
+-- authorised or active in a single operation on a given date", enforced for
+-- every writer. NULL bounds are open (daterange). Deleting an operation drops
+-- its episodes, so its meters are free to join another one; the dossier
+-- history stays in the annexe.
+-- See database_script/2026-10-29_regulatory_link_status.sql and
+-- 2026-10-30_regulatory_status_withdrawn.sql.
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+CREATE TABLE IF NOT EXISTS regulatory_link_status (
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_community         INT NOT NULL REFERENCES community (id) ON DELETE CASCADE,
+    id_sharing_operation INT NOT NULL REFERENCES sharing_operation (id) ON DELETE CASCADE,
+    subject_type         SMALLINT NOT NULL CHECK (subject_type IN (1, 2)),
+    subject_ref          VARCHAR(64) NOT NULL,
+    id_dossier_origin    BIGINT NOT NULL,
+    regulatory_status    SMALLINT NOT NULL,
+    valid_from           DATE,
+    valid_to             DATE,
+    regulatory_ref       VARCHAR(64),
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT ck_regulatory_link_status_code CHECK (regulatory_status BETWEEN 1 AND 9),
+    CONSTRAINT uq_regulatory_link_episode UNIQUE (id_dossier_origin, subject_type, subject_ref),
+    CONSTRAINT ck_regulatory_link_validity CHECK (valid_from IS NULL OR valid_to IS NULL OR valid_from <= valid_to),
+    CONSTRAINT ex_regulatory_link_one_operation EXCLUDE USING gist (
+        subject_ref WITH =,
+        daterange(valid_from, valid_to, '[]') WITH &&
+    ) WHERE (subject_type = 1 AND regulatory_status IN (2, 3, 4, 5))
+);
+CREATE INDEX IF NOT EXISTS ix_regulatory_link_operation ON regulatory_link_status (id_community, id_sharing_operation);
+DROP TRIGGER IF EXISTS update_regulatory_link_status_modtime ON regulatory_link_status;
+CREATE TRIGGER update_regulatory_link_status_modtime BEFORE UPDATE ON regulatory_link_status FOR EACH ROW EXECUTE PROCEDURE update_changetimestamp_column();
+
+-- One status for a meter in an operation: an episode written ACTIVE turns the
+-- meter's waiting rows of that operation ACTIVE from valid_from. See
+-- database_script/2026-11-01_regulatory_meter_alignment.sql.
+CREATE OR REPLACE FUNCTION meter_data_split(p_id INT, p_at DATE) RETURNS INT
+LANGUAGE plpgsql
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_columns TEXT;
+    v_new_id  INT;
+BEGIN
+    SELECT string_agg(quote_ident(attname), ', ' ORDER BY attnum)
+      INTO v_columns
+      FROM pg_attribute
+     WHERE attrelid = 'meter_data'::regclass
+       AND attnum > 0
+       AND NOT attisdropped
+       AND attidentity = ''
+       AND attgenerated = ''
+       AND attname NOT IN ('id', 'start_date', 'created_at', 'updated_at');
+    EXECUTE format(
+        'INSERT INTO meter_data (start_date, %1$s) SELECT $2, %1$s FROM meter_data WHERE id = $1 RETURNING id',
+        v_columns
+    ) INTO v_new_id USING p_id, p_at;
+    UPDATE meter_data SET end_date = p_at - 1 WHERE id = p_id;
+    RETURN v_new_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION meter_data_split(INT, DATE) FROM PUBLIC;
+
+CREATE OR REPLACE FUNCTION align_meter_data_with_regulatory() RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    r        RECORD;
+    v_target INT;
+BEGIN
+    FOR r IN
+        SELECT id, start_date, end_date
+          FROM meter_data
+         WHERE id_community = NEW.id_community
+           AND id_sharing_operation = NEW.id_sharing_operation
+           AND ean = NEW.subject_ref
+           AND status IN (3, 4)
+           AND (end_date IS NULL OR end_date >= NEW.valid_from)
+           AND (NEW.valid_to IS NULL OR start_date <= NEW.valid_to)
+         ORDER BY start_date
+         FOR UPDATE
+    LOOP
+        v_target := r.id;
+        IF r.start_date < NEW.valid_from THEN
+            v_target := meter_data_split(r.id, NEW.valid_from);
+        END IF;
+        IF NEW.valid_to IS NOT NULL AND (r.end_date IS NULL OR r.end_date > NEW.valid_to) THEN
+            PERFORM meter_data_split(v_target, NEW.valid_to + 1);
+        END IF;
+        UPDATE meter_data SET status = 1 WHERE id = v_target;
+    END LOOP;
+    RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS align_meter_data_on_activation ON regulatory_link_status;
+CREATE TRIGGER align_meter_data_on_activation
+    AFTER INSERT OR UPDATE OF regulatory_status, valid_from, valid_to ON regulatory_link_status
+    FOR EACH ROW
+    WHEN (NEW.subject_type = 1 AND NEW.regulatory_status = 5 AND NEW.valid_from IS NOT NULL)
+    EXECUTE FUNCTION align_meter_data_with_regulatory();

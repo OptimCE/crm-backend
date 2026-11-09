@@ -110,4 +110,8 @@ export const Tags = [
     name: "Users",
     description: "Operation related to managing users of the application",
   },
+  {
+    name: "Regulatory",
+    description: "What the regulator and the DSO have authorised for an operation's meters and keys (written by the administrative annexe)",
+  },
 ];
