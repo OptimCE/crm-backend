@@ -1143,6 +1143,27 @@ INSERT INTO consumer (
 INSERT INTO consumer (
     name, energy_allocated_percentage, id_iteration, id_community
 ) VALUES ('Consumer 2', 0.5, 1, 1);
+-- Key 2 (op 2, Public Wind Sharing): two iterations, 60 % then 40 % of the
+-- shared energy, so its page and its key description are not empty. Labels,
+-- not EANs, like key 1: nothing matches them to a meter.
+INSERT INTO iteration (
+    number, energy_allocated_percentage, id_key, id_community
+) VALUES (1, 0.6, 2, 1);
+INSERT INTO iteration (
+    number, energy_allocated_percentage, id_key, id_community
+) VALUES (2, 0.4, 2, 1);
+INSERT INTO consumer (
+    name, energy_allocated_percentage, id_iteration, id_community
+) VALUES ('Consumer 3', 0.5, 2, 1);
+INSERT INTO consumer (
+    name, energy_allocated_percentage, id_iteration, id_community
+) VALUES ('Consumer 4', 0.5, 2, 1);
+INSERT INTO consumer (
+    name, energy_allocated_percentage, id_iteration, id_community
+) VALUES ('Consumer 3', 0.5, 3, 1);
+INSERT INTO consumer (
+    name, energy_allocated_percentage, id_iteration, id_community
+) VALUES ('Consumer 4', 0.5, 3, 1);
 
 -- 10. Meters
 INSERT INTO meter (
