@@ -22,6 +22,9 @@ import logger from "./shared/monitor/logger.js";
 import { getRegulators } from "./modules/communities/shared/regulator.js";
 import { getAnnexCatalog } from "./modules/annexes_services/shared/annexes-catalog.js";
 import { I18N_NAMESPACES } from "./shared/utils/i18n-namespaces.js";
+import type { ExportNats } from "./shared/export/export-nats.js";
+import { CrmExportConsumer } from "./modules/exports/crm/crm-export.consumer.js";
+import { createCrmExportHandler } from "./modules/exports/crm/crm-export.handler.js";
 
 // 1. Recreate __filename and __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -82,6 +85,13 @@ const startServer = async (): Promise<void> => {
     // 4. Start Server only after translations are ready
     if (process.env.NODE_ENV !== "test") {
       await AppDataSource.initialize();
+      // In the background: the API serves while NATS is away (an export made then stays
+      // pending until the worker's sweep finds it).
+      const exportNats = container.isBound("ExportNats") ? container.get<ExportNats>("ExportNats") : null;
+      exportNats?.start();
+      // The `crm` part of every export is written here, one at a time, once NATS is up.
+      const crmExport = exportNats ? new CrmExportConsumer(exportNats, createCrmExportHandler(container)) : null;
+      crmExport?.start();
       const server = app.listen(port, host, () => {
         logger.info({ operation: "startServer" }, `Express is listening at http://${host}:${port}`);
       });
@@ -102,7 +112,12 @@ const startServer = async (): Promise<void> => {
       const shutdown = (signal: string): void => {
         logger.info({ operation: "shutdown", signal }, "Shutting down");
         const hub = container.isBound("RealtimeHub") ? container.get<IRealtimeHub>("RealtimeHub") : null;
-        void Promise.resolve(hub?.dispose()).finally(() => server.close(() => process.exit(0)));
+        // The export part first: it hands a part in progress back (nak) before NATS closes.
+        const stopExport = async (): Promise<void> => {
+          await crmExport?.stop();
+          await exportNats?.close();
+        };
+        void Promise.allSettled([hub?.dispose(), stopExport()]).finally(() => server.close(() => process.exit(0)));
       };
       process.once("SIGTERM", () => shutdown("SIGTERM"));
       process.once("SIGINT", () => shutdown("SIGINT"));

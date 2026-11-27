@@ -7,6 +7,7 @@ import { COMMUNITY_ERRORS } from "../shared/community.errors.js";
 import { withError } from "../../../shared/errors/dtos.errors.validation.js";
 import { AddressDTO, CreateAddressDTO } from "../../../shared/address/address.dtos.js";
 import { IsActiveRegulator, IsKnownRegulator } from "../shared/is-active-regulator.validator.js";
+import { PUBLIC_PHONE_PATTERN } from "../shared/public-contact.js";
 /**
  * DTO for querying communities with pagination and filtering.
  */
@@ -127,6 +128,47 @@ export class PublicCommunityDTO {
   /** Short-lived presigned URL (~15 min). Null when the community has no logo or URL generation failed. */
   @Expose()
   logo_presigned_url!: string | null;
+}
+
+/**
+ * What any signed-in user may read about a PUBLIC community (one with at least
+ * one public sharing operation): its presentation and its public contact.
+ *
+ * An explicit allow-list, not a trimmed `CommunityDetailDTO`: bank and legal
+ * data, the representative, the Keycloak id and the member count stay behind
+ * the members-only `GET /communities/:id`.
+ */
+export class PublicCommunityDetailDTO {
+  @Expose()
+  id!: number;
+
+  @Expose()
+  name!: string;
+
+  /** Coded regulator the community is notified to (see reference/regulators.json). */
+  @Expose()
+  regulator!: string;
+
+  /** Short-lived presigned URL (~15 min). Null when the community has no logo or URL generation failed. */
+  @Expose()
+  logo_presigned_url!: string | null;
+
+  @Expose()
+  description!: string | null;
+
+  @Expose()
+  website_url!: string | null;
+
+  @Expose()
+  headquarters_address!: AddressDTO | null;
+
+  /** Public contact e-mail, as set by an ADMIN. */
+  @Expose()
+  contact_email!: string | null;
+
+  /** Public contact phone number, as typed by an ADMIN. */
+  @Expose()
+  contact_phone!: string | null;
 }
 
 /**
@@ -277,6 +319,14 @@ export class CommunityDetailDTO {
   /** Date of the internal rules (ROI) in force (`YYYY-MM-DD`). */
   @Expose()
   internal_rules_date?: string | null;
+
+  /** Public contact e-mail, shown in the public communities directory. */
+  @Expose()
+  contact_email?: string | null;
+
+  /** Public contact phone number, shown in the public communities directory. */
+  @Expose()
+  contact_phone?: string | null;
 }
 
 /**
@@ -399,6 +449,21 @@ export class UpdateCommunityDTO {
   @Matches(/^\d{4}-\d{2}-\d{2}$/, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.DATE))
   @IsOptional()
   internal_rules_date?: string | null;
+
+  /** Public contact e-mail, published in the communities directory. `null` clears it. */
+  @Type(() => String)
+  @IsEmail({}, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL))
+  @MaxLength(255, withError(COMMUNITY_ERRORS.GENERIC_VALIDATION.WRONG_TYPE.EMAIL))
+  @IsOptional()
+  contact_email?: string | null;
+
+  /** Public contact phone number, published in the communities directory. `null` clears it. */
+  @Type(() => String)
+  @IsString(withError(COMMUNITY_ERRORS.VALIDATION.INVALID_PHONE))
+  @Matches(PUBLIC_PHONE_PATTERN, withError(COMMUNITY_ERRORS.VALIDATION.INVALID_PHONE))
+  @MaxLength(32, withError(COMMUNITY_ERRORS.VALIDATION.INVALID_PHONE))
+  @IsOptional()
+  contact_phone?: string | null;
 }
 
 /**

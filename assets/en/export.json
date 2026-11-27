@@ -1,0 +1,18 @@
+{
+  "reauth_required": "For security reasons, log in again before requesting an export",
+  "forbidden": "Only an administrator of the community can export its data",
+  "already_active": "An export is already being prepared for this scope",
+  "rate_limited": "Too many export requests for this scope today, try again later",
+  "not_found": "This export could not be found",
+  "download_forbidden": "Only the person who requested this export can download it",
+  "not_ready": "This export is not ready yet",
+  "expired": "This export has expired and its file was deleted",
+  "download_unavailable": "The download link could not be created, try again later",
+  "user_not_found": "Your account could not be found",
+  "validation": {
+    "scope": "The export scope must be \"user\" or \"community\"",
+    "community_id": "The community to export is missing or invalid",
+    "view": "The list must be \"mine\" or \"community\"",
+    "id": "The export id is invalid"
+  }
+}

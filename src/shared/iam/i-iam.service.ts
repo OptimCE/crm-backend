@@ -55,4 +55,26 @@ export interface IIamService {
    * @returns The user's email address.
    */
   getUserEmail(user_id: string): Promise<string>;
+
+  /**
+   * What the identity provider holds about a user, for the data export (`crm/identity.json`):
+   * profile, attributes, linked identity providers, roles, groups and creation date. Never a
+   * password hash, a credential, an OTP setting or a secret. Null when the user does not exist.
+   */
+  getUserExport(user_id: string): Promise<IamUserExport | null>;
+}
+
+export interface IamUserExport {
+  id: string;
+  username: string | null;
+  email: string | null;
+  email_verified: boolean | null;
+  first_name: string | null;
+  last_name: string | null;
+  enabled: boolean | null;
+  created_at: string | null;
+  attributes: Record<string, string[]>;
+  identity_providers: { provider: string; user_id: string | null; user_name: string | null }[];
+  realm_roles: string[];
+  groups: { name: string | null; path: string | null }[];
 }

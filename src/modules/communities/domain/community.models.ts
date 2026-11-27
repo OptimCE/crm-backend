@@ -91,6 +91,17 @@ export class Community {
   @Column({ name: "internal_rules_date", type: "date", nullable: true })
   internal_rules_date!: string | null;
 
+  /**
+   * Public contact e-mail, shown in the public communities directory. Optional.
+   * Unlike `representative_email`, it is meant to be published.
+   */
+  @Column({ name: "contact_email", type: "varchar", length: 255, nullable: true })
+  contact_email!: string | null;
+
+  /** Public contact phone number, shown in the public communities directory. Optional. */
+  @Column({ name: "contact_phone", type: "varchar", length: 32, nullable: true })
+  contact_phone!: string | null;
+
   @Column({ name: "headquarters_address_id", type: "int", nullable: true })
   headquarters_address_id!: number | null;
 

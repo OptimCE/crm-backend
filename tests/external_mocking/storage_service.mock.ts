@@ -7,5 +7,7 @@ export function createMockStorageService(): jest.Mocked<IStorageService> {
     getDocumentUrl: jest.fn(),
     uploadDocument: jest.fn(),
     ping: jest.fn(),
+    stat: jest.fn(),
+    bucket: "crm-files",
   };
 }

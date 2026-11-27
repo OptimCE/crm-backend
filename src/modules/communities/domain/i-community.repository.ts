@@ -71,6 +71,8 @@ export interface ICommunityRepository {
    * operations cover. Unpaginated (capped) — the map draws the whole set.
    */
   getPublicCommunitiesMap(query: CommunityMapQuery, limit: number, query_runner?: QueryRunner): Promise<PublicCommunityMapRow[]>;
+  /** A community with its headquarters, or null when it does not exist or has no public sharing operation. */
+  getPublicCommunityById(id: number, query_runner?: QueryRunner): Promise<Community | null>;
   getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null>;
   getAdmins(query: CommunityUsersQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;
   getMyCommunities(query: CommunityQueryDTO, query_runner?: QueryRunner): Promise<[CommunityUser[], number]>;

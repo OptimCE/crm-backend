@@ -171,4 +171,53 @@ module.exports = {
     retention_days: process.env.OUTBOX_RETENTION_DAYS ? parseInt(process.env.OUTBOX_RETENTION_DAYS) : 30,
     heartbeat_file: process.env.OUTBOX_RELAY_HEARTBEAT_FILE || "/tmp/outbox-relay.alive",
   },
+  // The data export (contracts/export/README.md at the monorepo root): POST /exports and its
+  // three companions, and the NATS connection that announces a new export to the worker.
+  export: {
+    nats_url: process.env.NATS_URL || "nats://nats:4222",
+    // The services asked for a part of every export (EXPORT_SERVICES, comma-separated).
+    services: (process.env.EXPORT_SERVICES || "crm,signature,administrative-document,billing,news-board,simulation-key,allocation-key-generation,live-data")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== ""),
+    // POST /exports wants an interactive login at most this old (the token's auth_time).
+    step_up_max_age_seconds: process.env.EXPORT_STEP_UP_MAX_AGE_SECONDS ? parseInt(process.env.EXPORT_STEP_UP_MAX_AGE_SECONDS) : 300,
+    // Requests per scope (one user, or one community) over the last 24 hours.
+    max_requests_per_day: process.env.EXPORT_MAX_REQUESTS_PER_DAY ? parseInt(process.env.EXPORT_MAX_REQUESTS_PER_DAY) : 3,
+    // How long a ready archive can be downloaded.
+    retention_days: process.env.EXPORT_RETENTION_DAYS ? parseInt(process.env.EXPORT_RETENTION_DAYS) : 7,
+    download_url_ttl_seconds: process.env.EXPORT_DOWNLOAD_URL_TTL_SECONDS ? parseInt(process.env.EXPORT_DOWNLOAD_URL_TTL_SECONDS) : 300,
+    bucket: process.env.EXPORT_BUCKET || "exports",
+    // Signs the download URLs with the export-download account, which can only read archives/.
+    // The endpoint is MinIO as the BROWSER reaches it: signing makes no network call.
+    download: {
+      public_endpoint: process.env.EXPORT_DOWNLOAD_PUBLIC_ENDPOINT || process.env.STORAGE_PUBLIC_ENDPOINT || "",
+      region: process.env.EXPORT_STORAGE_REGION || "us-east-1",
+      access_key: process.env.EXPORT_DOWNLOAD_ACCESS_KEY || "",
+      secret_key: process.env.EXPORT_DOWNLOAD_SECRET_KEY || "",
+    },
+    // The export worker (src/export-worker.ts), its own process. Its storage account is
+    // export-worker (EXPORT_STORAGE_*), which reads everything in `exports` and both document
+    // buckets, and writes archives/ only.
+    worker: {
+      tick_seconds: process.env.EXPORT_WORKER_TICK_SECONDS ? parseInt(process.env.EXPORT_WORKER_TICK_SECONDS) : 60,
+      // A job whose export.job.requested got lost is started by the sweep after this.
+      pending_grace_seconds: process.env.EXPORT_PENDING_GRACE_SECONDS ? parseInt(process.env.EXPORT_PENDING_GRACE_SECONDS) : 30,
+      // No answer this long after a request: published again, at most max_part_attempts times.
+      part_timeout_minutes: process.env.EXPORT_PART_TIMEOUT_MINUTES ? parseInt(process.env.EXPORT_PART_TIMEOUT_MINUTES) : 30,
+      max_part_attempts: process.env.EXPORT_MAX_PART_ATTEMPTS ? parseInt(process.env.EXPORT_MAX_PART_ATTEMPTS) : 3,
+      // An export still active this long after its request fails.
+      job_max_age_hours: process.env.EXPORT_JOB_MAX_AGE_HOURS ? parseInt(process.env.EXPORT_JOB_MAX_AGE_HOURS) : 24,
+      max_assembly_attempts: process.env.EXPORT_MAX_ASSEMBLY_ATTEMPTS ? parseInt(process.env.EXPORT_MAX_ASSEMBLY_ATTEMPTS) : 3,
+      // An assembly not heard of for this long belongs to a dead worker and is taken over.
+      assembly_lease_seconds: process.env.EXPORT_ASSEMBLY_LEASE_SECONDS ? parseInt(process.env.EXPORT_ASSEMBLY_LEASE_SECONDS) : 120,
+      // Pause before assembly attempt n+1: n times this.
+      assembly_retry_seconds: process.env.EXPORT_ASSEMBLY_RETRY_SECONDS ? parseInt(process.env.EXPORT_ASSEMBLY_RETRY_SECONDS) : 30,
+      // The buckets a part may reference documents in.
+      document_buckets: (process.env.EXPORT_DOCUMENT_BUCKETS || "crm-files optimce-documents").split(/[\s,]+/).filter((b) => b !== ""),
+      heartbeat_file: process.env.EXPORT_WORKER_HEARTBEAT_FILE || "/tmp/export-worker.alive",
+      // manifest.json's platform.version.
+      platform_version: process.env.OPTIMCE_VERSION || "unknown",
+    },
+  },
 };

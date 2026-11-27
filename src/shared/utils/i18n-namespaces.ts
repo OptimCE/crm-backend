@@ -15,6 +15,7 @@ export const I18N_NAMESPACES = [
   "audit_log",
   "community",
   "document",
+  "export",
   "geocoding",
   "invitation",
   "key",

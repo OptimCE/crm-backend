@@ -5,6 +5,7 @@ import type {
   CommunityLegalField,
   MyCommunityDTO,
   PublicCommunityDTO,
+  PublicCommunityDetailDTO,
   UsersCommunityDTO,
 } from "../api/community.dtos.js";
 import type { CommunityDashboardCountsRow } from "../domain/i-community.repository.js";
@@ -73,6 +74,27 @@ export function toCommunityDetailDTO(community: Community, member_count: number,
     representative_email: community.representative_email,
     statutes_date: community.statutes_date,
     internal_rules_date: community.internal_rules_date,
+    contact_email: community.contact_email,
+    contact_phone: community.contact_phone,
+  };
+}
+
+/**
+ * The public face of a community. Every field is listed by hand — never spread
+ * the entity here: anything added to `Community` (bank, legal, representative)
+ * must stay out of this DTO unless someone decides to publish it.
+ */
+export function toPublicCommunityDetailDTO(community: Community, logo_presigned_url: string | null): PublicCommunityDetailDTO {
+  return {
+    id: community.id,
+    name: community.name,
+    regulator: community.regulator,
+    logo_presigned_url,
+    description: community.description ?? null,
+    website_url: community.website_url ?? null,
+    headquarters_address: community.headquarters_address ? toAddressDTO(community.headquarters_address) : null,
+    contact_email: community.contact_email ?? null,
+    contact_phone: community.contact_phone ?? null,
   };
 }
 

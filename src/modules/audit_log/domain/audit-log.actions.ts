@@ -65,6 +65,14 @@ export const AUDIT_ACTIONS = {
   SHARING_OP_CONSUMPTION_UPLOADED: "crm.sharing_op_consumption.uploaded",
   /** One geocoding backfill batch. Logged per batch, never per address. */
   ADDRESS_GEOCODE_BACKFILL: "crm.address.geocode_backfill",
+  // The data export (contracts/export). A user's own export is logged outside any community; a
+  // community export in that community's log. requested and download_url_issued come from the
+  // API, expired and failed from the export worker.
+  EXPORT_JOB_REQUESTED: "crm.export_job.requested",
+  /** One per signed URL, with the caller's IP. */
+  EXPORT_JOB_DOWNLOAD_URL_ISSUED: "crm.export_job.download_url_issued",
+  EXPORT_JOB_EXPIRED: "crm.export_job.expired",
+  EXPORT_JOB_FAILED: "crm.export_job.failed",
 } as const;
 
 /**

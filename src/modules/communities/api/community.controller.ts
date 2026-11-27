@@ -18,6 +18,7 @@ import {
   MyCommunityDTO,
   PatchRoleUserDTO,
   PublicCommunityDTO,
+  PublicCommunityDetailDTO,
   PublicCommunityMapDTO,
   CommunityMapQuery,
   UpdateCommunityDTO,
@@ -89,6 +90,19 @@ export class CommunityController {
     const result = await this.communityService.getCommunityById(+req.params.id);
     logger.info("Community detail successfully retrieved");
     res.status(200).json(new ApiResponse<CommunityDetailDTO>(result, SUCCESS));
+  }
+
+  /**
+   * The public face of a community (presentation + public contact) for the
+   * public communities directory. Visible to any authenticated user — the
+   * community having a public sharing operation is the access control.
+   */
+  @communityControllerTraceDecorator.traceSpan("getPublicCommunityDetail", { url: "/communities/:id/public", method: "get" })
+  @Cache(cacheKey("communities:public-detail", "none", (req) => req.params.id), 60)
+  async getPublicCommunityDetail(req: Request, res: Response, _next: NextFunction): Promise<void> {
+    const result = await this.communityService.getPublicCommunityDetail(+req.params.id);
+    logger.info("Public community detail successfully retrieved");
+    res.status(200).json(new ApiResponse<PublicCommunityDetailDTO>(result, SUCCESS));
   }
 
   /**
@@ -207,6 +221,7 @@ export class CommunityController {
     cachePattern("communities:user-list", "user"),
     cachePattern("communities:all-list", "none"),
     cachePattern("communities:detail", "none"),
+    cachePattern("communities:public-detail", "none"),
     cachePattern("communities:sharing-operations", "community"),
   ])
   async updateCommunity(req: Request, res: Response, _next: NextFunction): Promise<void> {
@@ -228,6 +243,7 @@ export class CommunityController {
     cachePattern("communities:user-list", "user"),
     cachePattern("communities:all-list", "none"),
     cachePattern("communities:detail", "none"),
+    cachePattern("communities:public-detail", "none"),
   ])
   async uploadLogo(req: Request, res: Response, _next: NextFunction): Promise<void> {
     if (!req.file) {
@@ -246,6 +262,7 @@ export class CommunityController {
     cachePattern("communities:user-list", "user"),
     cachePattern("communities:all-list", "none"),
     cachePattern("communities:detail", "none"),
+    cachePattern("communities:public-detail", "none"),
   ])
   async deleteLogo(_req: Request, res: Response, _next: NextFunction): Promise<void> {
     await this.communityService.deleteLogo();

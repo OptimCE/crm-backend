@@ -1,5 +1,5 @@
 import KcAdminClient from "@keycloak/keycloak-admin-client";
-import type { IIamService } from "../i-iam.service.js";
+import type { IamUserExport, IIamService } from "../i-iam.service.js";
 import { injectable } from "inversify";
 import { CreateCommunityDTO } from "../../../modules/communities/api/community.dtos.js";
 import { Role } from "../../dtos/role.js";
@@ -230,4 +230,46 @@ export class KeycloakIamService implements IIamService {
       return user.email || "";
     });
   }
+
+  async getUserExport(user_id: string): Promise<IamUserExport | null> {
+    return this.withReauth(async () => {
+      const where = { id: user_id, realm: this.realm };
+      const user = await this.kcAdminClient.users.findOne(where);
+      if (!user) return null;
+      const [identities, roles, groups] = await Promise.all([
+        this.kcAdminClient.users.listFederatedIdentities(where),
+        this.kcAdminClient.users.listCompositeRealmRoleMappings(where),
+        this.kcAdminClient.users.listGroups({ ...where, briefRepresentation: true }),
+      ]);
+      // Built field by field from an allowlist: nothing a later Keycloak adds to the
+      // representation (credentials, OTP state, required actions) can slip into the export.
+      return {
+        id: user.id ?? user_id,
+        username: user.username ?? null,
+        email: user.email ?? null,
+        email_verified: user.emailVerified ?? null,
+        first_name: user.firstName ?? null,
+        last_name: user.lastName ?? null,
+        enabled: user.enabled ?? null,
+        created_at: user.createdTimestamp ? new Date(user.createdTimestamp).toISOString() : null,
+        attributes: exportableAttributes(user.attributes),
+        identity_providers: identities.map((i) => ({ provider: i.identityProvider ?? "", user_id: i.userId ?? null, user_name: i.userName ?? null })),
+        realm_roles: roles.map((r) => r.name ?? "").filter((name) => name !== ""),
+        groups: groups.map((g) => ({ name: g.name ?? null, path: g.path ?? null })),
+      };
+    });
+  }
+}
+
+/** Attribute names that could hold a secret, whatever a deployment stores there. */
+const SECRET_ATTRIBUTE = /password|secret|token|otp|totp|credential|hash|salt|key/iu;
+
+export function exportableAttributes(attributes: Record<string, unknown> | undefined): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  for (const [name, value] of Object.entries(attributes ?? {})) {
+    if (SECRET_ATTRIBUTE.test(name)) continue;
+    const values = Array.isArray(value) ? value : [value];
+    out[name] = values.filter((v) => v !== null && v !== undefined).map((v) => String(v));
+  }
+  return out;
 }

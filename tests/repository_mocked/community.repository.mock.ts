@@ -11,6 +11,7 @@ export function createMockCommunityRepository(): jest.Mocked<ICommunityRepositor
     getAllPublicCommunities: jest.fn(),
     getPublicCommunitiesMap: jest.fn(),
     getCommunityById: jest.fn(),
+    getPublicCommunityById: jest.fn(),
     getCommunityUser: jest.fn(),
     getDashboardCounts: jest.fn(),
     getMyCommunities: jest.fn(),

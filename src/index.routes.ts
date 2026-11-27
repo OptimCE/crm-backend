@@ -16,11 +16,13 @@ import { notification_routes } from "./modules/notifications/api/notification.ro
 import { geocoding_routes } from "./modules/geocoding/api/geocoding.routes.js";
 import { dso_routes } from "./modules/dso/api/dso.routes.js";
 import { regulatory_routes } from "./modules/regulatory/api/regulatory.routes.js";
+import { export_routes } from "./modules/exports/api/export.routes.js";
 
 export const router = express.Router();
 router.use("/communities", community_routes);
 router.use("/documents", document_router);
 router.use("/dso", dso_routes);
+router.use("/exports", export_routes);
 router.use("/geocoding", geocoding_routes);
 router.use("/invitations", invitation_routes);
 router.use("/keys", key_router);

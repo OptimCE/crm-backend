@@ -26,6 +26,17 @@ export interface IStorageService {
   deleteDocument(key: string): Promise<void>;
 
   /**
+   * The size and type of a stored document, without reading it, or null when there is no such
+   * object. The data export lists a document only by reference, and a reference to a missing
+   * object would fail every export of its community.
+   * @param key - The storage key/path of the document.
+   */
+  stat(key: string): Promise<{ size: number; contentType: string | null } | null>;
+
+  /** The bucket documents are stored in (what an export reference names). */
+  readonly bucket: string;
+
+  /**
    * Checks that the provider answers and holds the configured bucket, without reading or
    * writing a document. Used by GET /health.
    * @param timeoutMs - How long to wait for an answer.

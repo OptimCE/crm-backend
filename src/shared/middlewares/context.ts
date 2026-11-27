@@ -2,7 +2,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { Request, Response, NextFunction } from "express";
 import { Role, ROLE_HIERARCHY } from "../dtos/role.js";
-interface Context {
+export interface Context {
   user_id?: string;
   community_id?: string;
   role?: Role;
@@ -17,6 +17,14 @@ interface Context {
    * empty otherwise.
    */
   orgs?: OrgToken[];
+  /**
+   * When the user last logged in interactively, in epoch seconds: the token's
+   * `auth_time`, forwarded by the gateway as `x-auth-time`. A refreshed token
+   * keeps it, so only a real login moves it. Undefined when the token has none
+   * (a password-grant token) or the value is not a number. nginx blanks any
+   * `x-auth-time` a client sends, so only the gateway can set it.
+   */
+  auth_time?: number;
 }
 
 export interface OrgToken {
@@ -89,12 +97,23 @@ export function contextMiddleware(): (req: Request, _res: Response, next: NextFu
       role: effectiveRole,
       source_ip: sourceIp,
       orgs: groups,
+      auth_time: parseAuthTime(extractHeader("x-auth-time")),
     };
     requestContext.run(store, () => {
       next();
     });
   };
 }
+/**
+ * KrakenD forwards a numeric claim as text, possibly in exponent form
+ * ("1.7316e+09"), so this takes any finite positive number and floors it.
+ */
+function parseAuthTime(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined;
+  const value = Number(raw.trim());
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : undefined;
+}
+
 function resolveHighestRole(roles: string[] = []): Role | undefined {
   if (!roles || roles.length === 0) return undefined;
 
@@ -133,6 +152,18 @@ export function preserveContext(
       }
     });
   };
+}
+
+/**
+ * Runs `fn` as if a request with this context were being served: the repositories' tenant
+ * scoping (`withUserScope`, `withCommunityScope`) and `getContext()` see it. For work that
+ * replays what a user may read outside any HTTP request, such as the data export's `crm` part:
+ * it reuses the API's own reads, so it never shows more than the app would.
+ *
+ * Builds the context from scratch: nothing leaks in from an outer request.
+ */
+export function runWithContext<T>(context: Context, fn: () => Promise<T>): Promise<T> {
+  return requestContext.run({ orgs: [], ...context }, fn);
 }
 
 // Utilitaire pour récupérer le contexte complet

@@ -159,6 +159,31 @@ export const CommunityResponses = {
       },
     },
   },
+  PublicCommunityDetailSuccess: {
+    description: "Public detail of a public community: presentation and public contact only",
+    content: {
+      "application/json": {
+        schema: {
+          error_code: 0,
+          data: { $ref: "#/components/schemas/PublicCommunityDetailDTO" },
+        },
+        example: {
+          error_code: 0,
+          data: {
+            id: 1,
+            name: "Test Community",
+            regulator: "BE-WAL-CWAPE",
+            logo_presigned_url: null,
+            description: "A test community description",
+            website_url: "https://test-community.example.com",
+            headquarters_address: null,
+            contact_email: "contact@test-community.example.com",
+            contact_phone: "+32 470 12 34 56",
+          },
+        },
+      },
+    },
+  },
   CommunityDetailSuccess: {
     description: "Successful community detail response",
     content: {

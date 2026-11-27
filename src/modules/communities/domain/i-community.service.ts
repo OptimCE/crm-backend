@@ -7,6 +7,7 @@ import type {
   MyCommunityDTO,
   PatchRoleUserDTO,
   PublicCommunityDTO,
+  PublicCommunityDetailDTO,
   PublicCommunityMapDTO,
   CommunityMapQuery,
   UpdateCommunityDTO,
@@ -37,6 +38,12 @@ export interface ICommunityService {
    * @returns A CommunityDetailDTO with member count and optional user role.
    */
   getCommunityById(id: number): Promise<CommunityDetailDTO>;
+  /**
+   * What any signed-in user may read about a public community: presentation and
+   * public contact, nothing else. 404 when the community does not exist or has no
+   * public sharing operation.
+   */
+  getPublicCommunityDetail(id: number): Promise<PublicCommunityDetailDTO>;
   /**
    * Readiness aggregate for the ACTIVE community, taken from the request context
    * and never from a parameter. Read-only: no transaction, no audit row.

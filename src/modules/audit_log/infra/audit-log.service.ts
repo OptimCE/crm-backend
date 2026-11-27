@@ -35,7 +35,9 @@ export class AuditLogService implements IAuditLogService {
       let user_id: number | null = null;
       let user_email: string | null = null;
 
-      if (ctx.community_id) {
+      if (entry.id_community !== undefined) {
+        id_community = entry.id_community;
+      } else if (ctx.community_id) {
         try {
           id_community = await this.auth_context_repository.getInternalCommunityId(query_runner);
         } catch {
