@@ -111,6 +111,13 @@ import { RegulatoryService } from "../modules/regulatory/infra/regulatory.servic
 import { RegulatoryController } from "../modules/regulatory/api/regulatory.controller.js";
 import type { IOutboxWriter } from "../shared/outbox/i-outbox.writer.js";
 import { OutboxWriter } from "../shared/outbox/outbox.writer.js";
+import type { IExportRepository } from "../modules/exports/domain/i-export.repository.js";
+import { ExportRepository } from "../modules/exports/infra/export.repository.js";
+import type { IExportService } from "../modules/exports/domain/i-export.service.js";
+import { ExportService } from "../modules/exports/infra/export.service.js";
+import { ExportController } from "../modules/exports/api/export.controller.js";
+import { type ExportSettings, loadExportSettings } from "../modules/exports/shared/export.settings.js";
+import { initializeExportAdapters } from "./factory/export.factory.js";
 
 if (process.env.NODE_ENV !== "test") {
   // Runtime-only adapters. Tests inject mocks and should not initialize external resources here.
@@ -128,6 +135,8 @@ if (process.env.NODE_ENV !== "test") {
   // is empty. Here and NOT inside initializeGeocodingService(), which returns early
   // under geocoding.mode=OFF - a switch that has nothing to do with this feature.
   initializeDsoLookup();
+
+  initializeExportAdapters();
 }
 
 // Repository and shared-context bindings are idempotent to avoid duplicate binding errors.
@@ -188,6 +197,12 @@ if (!container.isBound("RegulatoryRepository")) {
 if (!container.isBound("OutboxWriter")) {
   container.bind<IOutboxWriter>("OutboxWriter").to(OutboxWriter);
 }
+if (!container.isBound("ExportRepository")) {
+  container.bind<IExportRepository>("ExportRepository").to(ExportRepository);
+}
+if (!container.isBound("ExportSettings")) {
+  container.bind<ExportSettings>("ExportSettings").toConstantValue(loadExportSettings());
+}
 if (!container.isBound("OutboundRepository")) {
   container.bind<IOutboundRepository>("OutboundRepository").to(OutboundRepository);
 }
@@ -217,6 +232,7 @@ container.bind<IGeocodingService>("GeocodingService").to(GeocodingService);
 container.bind<IDsoService>("DsoService").to(DsoService);
 container.bind<IOnboardingService>("OnboardingService").to(OnboardingService);
 container.bind<IRegulatoryService>("RegulatoryService").to(RegulatoryService);
+container.bind<IExportService>("ExportService").to(ExportService);
 
 // API controller bindings.
 container.bind<CommunityController>(CommunityController).toSelf();
@@ -236,6 +252,7 @@ container.bind<GeocodingController>(GeocodingController).toSelf();
 container.bind<DsoController>(DsoController).toSelf();
 container.bind<OnboardingController>(OnboardingController).toSelf();
 container.bind<RegulatoryController>(RegulatoryController).toSelf();
+container.bind<ExportController>(ExportController).toSelf();
 
 // Health module bindings.
 container.bind<IHealthService>(HealthService).to(HealthService);

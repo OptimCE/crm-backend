@@ -32,6 +32,7 @@
   },
   "validation": {
     "invalid_regulator": "De regulator is ongeldig of momenteel niet beschikbaar",
-    "invalid_iban": "Het IBAN is ongeldig"
+    "invalid_iban": "Het IBAN is ongeldig",
+    "invalid_phone": "Het telefoonnummer is ongeldig (8 tot 15 cijfers, bijvoorbeeld +32 470 12 34 56)"
   }
 }

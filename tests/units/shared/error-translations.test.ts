@@ -19,6 +19,7 @@ import { ONBOARDING_ERRORS } from "../../../src/modules/onboarding/shared/onboar
 import { REALTIME_ERRORS } from "../../../src/modules/realtime/shared/realtime.errors.js";
 import { SHARING_OPERATION_ERRORS } from "../../../src/modules/sharing_operations/shared/sharing_operation.errors.js";
 import { USER_ERRORS } from "../../../src/modules/users/shared/user.errors.js";
+import { EXPORT_ERRORS } from "../../../src/modules/exports/shared/export.errors.js";
 
 /**
  * Every error the API can answer with is translated in every language.
@@ -43,6 +44,7 @@ const REGISTRIES: Record<string, object> = {
   "modules/audit_log/shared/audit-log.errors.ts": AUDIT_LOG_ERRORS,
   "modules/communities/shared/community.errors.ts": COMMUNITY_ERRORS,
   "modules/documents/shared/document.errors.ts": DOCUMENT_ERRORS,
+  "modules/exports/shared/export.errors.ts": EXPORT_ERRORS,
   "modules/geocoding/shared/geocoding.errors.ts": GEOCODING_ERRORS,
   "modules/invitations/shared/invitation.errors.ts": INVITATION_ERRORS,
   "modules/keys/shared/key.errors.ts": KEY_ERRORS,

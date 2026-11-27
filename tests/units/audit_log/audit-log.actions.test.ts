@@ -46,6 +46,10 @@ describe("(Unit) AUDIT_ACTIONS registry", () => {
       SHARING_OPERATION_KEY_REJECTED: "crm.sharing_operation_key.rejected",
       SHARING_OP_CONSUMPTION_UPLOADED: "crm.sharing_op_consumption.uploaded",
       ADDRESS_GEOCODE_BACKFILL: "crm.address.geocode_backfill",
+      EXPORT_JOB_REQUESTED: "crm.export_job.requested",
+      EXPORT_JOB_DOWNLOAD_URL_ISSUED: "crm.export_job.download_url_issued",
+      EXPORT_JOB_EXPIRED: "crm.export_job.expired",
+      EXPORT_JOB_FAILED: "crm.export_job.failed",
     });
     for (const code of Object.values(AUDIT_ACTIONS)) {
       expect(code).toMatch(/^[a-z]+(?:_[a-z]+)*\.[a-z]+(?:_[a-z]+)*\.[a-z]+(?:_[a-z]+)*$/);

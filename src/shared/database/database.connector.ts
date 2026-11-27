@@ -21,6 +21,7 @@ import { Notification, NotificationPreference, OutboundMessage } from "../../mod
 import { UserOnboarding } from "../../modules/onboarding/domain/onboarding.models.js";
 import { OutboxEvent } from "../outbox/outbox-event.model.js";
 import { RegulatoryLinkStatus } from "../../modules/regulatory/domain/regulatory-link-status.models.js";
+import { ExportJob, ExportPart } from "../../modules/exports/domain/export.models.js";
 
 const host: string = config.get("database.host");
 const port: number = config.get("database.port");
@@ -73,6 +74,8 @@ export const AppDataSource = new DataSource({
     UserOnboarding,
     OutboxEvent,
     RegulatoryLinkStatus,
+    ExportJob,
+    ExportPart,
   ],
   logging: logging,
 });

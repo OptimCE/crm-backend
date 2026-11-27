@@ -8,6 +8,7 @@ export function createMockIamService(): jest.Mocked<IIamService> {
     deleteCommunity: jest.fn(),
     deleteUserFromCommunity: jest.fn(),
     getUserEmail: jest.fn(),
+    getUserExport: jest.fn(),
     updateCommunity: jest.fn(),
     updateUserRole: jest.fn(),
   };

@@ -36,5 +36,6 @@ export const COMMUNITY_ERRORS = {
   VALIDATION: {
     INVALID_REGULATOR: new LocalError(10017, "community:validation.invalid_regulator"),
     INVALID_IBAN: new LocalError(10018, "community:validation.invalid_iban"),
+    INVALID_PHONE: new LocalError(10019, "community:validation.invalid_phone"),
   },
 };

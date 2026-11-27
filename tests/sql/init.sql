@@ -38,6 +38,10 @@ CREATE TABLE IF NOT EXISTS community (
     representative_email VARCHAR(255) NULL,
     statutes_date DATE NULL,
     internal_rules_date DATE NULL,
+    -- Public contact shown in the communities directory (both optional, set by an
+    -- ADMIN). Unlike representative_email, these are meant to be published.
+    contact_email VARCHAR(255) NULL,
+    contact_phone VARCHAR(32) NULL,
     headquarters_address_id INTEGER NULL,
     auth_community_id VARCHAR(255) UNIQUE, -- External Auth provider link
     created_at TIMESTAMP DEFAULT current_timestamp,
@@ -830,6 +834,60 @@ CREATE TRIGGER align_meter_data_on_activation
     FOR EACH ROW
     WHEN (NEW.subject_type = 1 AND NEW.regulatory_status = 5 AND NEW.valid_from IS NOT NULL)
     EXECUTE FUNCTION align_meter_data_with_regulatory();
+
+-- Data export (RGPD art. 15 and 20), 2026-11-15: export_job and its parts.
+-- See database_script/2026-11-15_data_export.sql for what each column means.
+CREATE TABLE IF NOT EXISTS export_job (
+    id                UUID PRIMARY KEY,
+    scope_type        VARCHAR(16) NOT NULL CHECK (scope_type IN ('user', 'community')),
+    scope_id          VARCHAR(255) NOT NULL,
+    id_community      INT NULL REFERENCES community (id) ON DELETE CASCADE,
+    requester_user_id VARCHAR(255) NOT NULL,
+    id_requester      INT NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
+    status            VARCHAR(16) NOT NULL DEFAULT 'pending'
+                      CHECK (status IN ('pending', 'collecting', 'assembling', 'ready', 'failed', 'expired')),
+    schema_version    VARCHAR(16) NOT NULL,
+    locale            VARCHAR(8) NOT NULL CHECK (locale IN ('fr', 'en', 'nl', 'de')),
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    started_at        TIMESTAMPTZ NULL,
+    completed_at      TIMESTAMPTZ NULL,
+    expires_at        TIMESTAMPTZ NULL,
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    object_key        TEXT NULL,
+    size_bytes        BIGINT NULL,
+    sha256            CHAR(64) NULL,
+    assembly_attempts SMALLINT NOT NULL DEFAULT 0,
+    error_code        VARCHAR(64) NULL,
+    error_detail      TEXT NULL,
+    CONSTRAINT ck_export_job_scope CHECK ((scope_type = 'community') = (id_community IS NOT NULL)),
+    CONSTRAINT ck_export_job_ready CHECK (status <> 'ready' OR (object_key IS NOT NULL AND expires_at IS NOT NULL))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_export_job_active
+    ON export_job (requester_user_id, scope_type, scope_id)
+    WHERE status IN ('pending', 'collecting', 'assembling');
+CREATE INDEX IF NOT EXISTS ix_export_job_scope_created
+    ON export_job (scope_type, scope_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS ix_export_job_requester
+    ON export_job (id_requester, created_at DESC);
+CREATE INDEX IF NOT EXISTS ix_export_job_community
+    ON export_job (id_community, created_at DESC) WHERE id_community IS NOT NULL;
+CREATE INDEX IF NOT EXISTS ix_export_job_open
+    ON export_job (created_at) WHERE status IN ('pending', 'collecting', 'assembling');
+CREATE INDEX IF NOT EXISTS ix_export_job_expiry
+    ON export_job (expires_at) WHERE status = 'ready';
+
+CREATE TABLE IF NOT EXISTS export_part (
+    id            UUID PRIMARY KEY,
+    export_job_id UUID NOT NULL REFERENCES export_job (id) ON DELETE CASCADE,
+    service       VARCHAR(64) NOT NULL CHECK (service ~ '^[a-z][a-z0-9-]{1,62}$'),
+    status        VARCHAR(16) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'done', 'failed')),
+    attempts      SMALLINT NOT NULL DEFAULT 0,
+    requested_at  TIMESTAMPTZ NULL,
+    result        JSONB NULL,
+    last_error    TEXT NULL,
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_export_part_service UNIQUE (export_job_id, service)
+);
 
 -- --- MOCK DATA ---
 

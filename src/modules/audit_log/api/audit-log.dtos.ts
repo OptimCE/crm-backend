@@ -59,6 +59,13 @@ export interface AuditLogInputDTO {
   payload?: Record<string, unknown>;
   /** Override the default `crm-backend` source — e.g. for background jobs. */
   source?: string;
+  /**
+   * Override the community resolved from the request context (X-Community-ID), as an internal
+   * id. `null` records the entry outside any community, so it appears in no community's audit
+   * log: a user's personal data export, requested while some community is active, is not that
+   * community's business.
+   */
+  id_community?: number | null;
 }
 
 /**

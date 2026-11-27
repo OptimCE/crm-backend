@@ -1,0 +1,18 @@
+{
+  "reauth_required": "Pour des raisons de sécurité, reconnectez-vous avant de demander un export",
+  "forbidden": "Seul un administrateur de la communauté peut exporter ses données",
+  "already_active": "Un export est déjà en préparation pour ce périmètre",
+  "rate_limited": "Trop de demandes d'export pour ce périmètre aujourd'hui, réessayez plus tard",
+  "not_found": "Cet export est introuvable",
+  "download_forbidden": "Seule la personne qui a demandé cet export peut le télécharger",
+  "not_ready": "Cet export n'est pas encore prêt",
+  "expired": "Cet export a expiré et son fichier a été supprimé",
+  "download_unavailable": "Le lien de téléchargement n'a pas pu être créé, réessayez plus tard",
+  "user_not_found": "Votre compte est introuvable",
+  "validation": {
+    "scope": "Le périmètre de l'export doit être « user » ou « community »",
+    "community_id": "La communauté à exporter est manquante ou invalide",
+    "view": "La liste demandée doit être « mine » ou « community »",
+    "id": "L'identifiant de l'export est invalide"
+  }
+}

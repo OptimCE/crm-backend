@@ -334,6 +334,25 @@ export class CommunityRepository implements ICommunityRepository {
     return qb.getRawMany<PublicCommunityMapRow>();
   }
 
+  /**
+   * A community readable by anyone, or null when it does not exist OR is not
+   * public. "Public" is the definition getAllPublicCommunities uses: at least one
+   * sharing operation with `is_public = true`. Not tenant-scoped on purpose — the
+   * public flag is the access control, as for the public sharing operations.
+   */
+  async getPublicCommunityById(id: number, query_runner?: QueryRunner): Promise<Community | null> {
+    const manager = query_runner ? query_runner.manager : this.dataSource.manager;
+
+    return manager
+      .createQueryBuilder(Community, "community")
+      .leftJoinAndSelect("community.headquarters_address", "headquarters_address")
+      .where("community.id = :id", { id })
+      .andWhere("EXISTS (SELECT 1 FROM sharing_operation so WHERE so.id_community = community.id AND so.is_public = :isPublic)", {
+        isPublic: true,
+      })
+      .getOne();
+  }
+
   async getCommunityById(id: number, query_runner?: QueryRunner): Promise<{ community: Community; member_count: number } | null> {
     const manager = query_runner ? query_runner.manager : this.dataSource.manager;
 
@@ -458,6 +477,8 @@ export class CommunityRepository implements ICommunityRepository {
     if (community_details.representative_email !== undefined) community.representative_email = community_details.representative_email;
     if (community_details.statutes_date !== undefined) community.statutes_date = community_details.statutes_date;
     if (community_details.internal_rules_date !== undefined) community.internal_rules_date = community_details.internal_rules_date;
+    if (community_details.contact_email !== undefined) community.contact_email = community_details.contact_email;
+    if (community_details.contact_phone !== undefined) community.contact_phone = community_details.contact_phone;
     if (community_details.logo_url !== undefined) community.logo_url = community_details.logo_url;
     if (community_details.headquarters_address_id !== undefined) community.headquarters_address_id = community_details.headquarters_address_id;
 

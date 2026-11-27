@@ -1,0 +1,18 @@
+{
+  "reauth_required": "Meld u om veiligheidsredenen opnieuw aan voordat u een export aanvraagt",
+  "forbidden": "Alleen een beheerder van de gemeenschap kan haar gegevens exporteren",
+  "already_active": "Er wordt al een export voorbereid voor dit bereik",
+  "rate_limited": "Te veel exportaanvragen voor dit bereik vandaag, probeer het later opnieuw",
+  "not_found": "Deze export is niet gevonden",
+  "download_forbidden": "Alleen wie deze export heeft aangevraagd, kan hem downloaden",
+  "not_ready": "Deze export is nog niet klaar",
+  "expired": "Deze export is verlopen en het bestand is verwijderd",
+  "download_unavailable": "De downloadlink kon niet worden aangemaakt, probeer het later opnieuw",
+  "user_not_found": "Uw account is niet gevonden",
+  "validation": {
+    "scope": "Het bereik van de export moet \"user\" of \"community\" zijn",
+    "community_id": "De te exporteren gemeenschap ontbreekt of is ongeldig",
+    "view": "De lijst moet \"mine\" of \"community\" zijn",
+    "id": "De id van de export is ongeldig"
+  }
+}

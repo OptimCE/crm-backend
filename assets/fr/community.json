@@ -32,6 +32,7 @@
   },
   "validation": {
     "invalid_regulator": "Le régulateur est invalide ou n'est pas disponible actuellement",
-    "invalid_iban": "L'IBAN est invalide"
+    "invalid_iban": "L'IBAN est invalide",
+    "invalid_phone": "Le numéro de téléphone est invalide (8 à 15 chiffres, par exemple +32 470 12 34 56)"
   }
 }

@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadBucketCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 import config from "config";
@@ -9,11 +9,14 @@ import logger from "../../monitor/logger.js";
 import { AppError } from "../../middlewares/error.middleware.js";
 import { GLOBAL_ERRORS } from "../../errors/errors.js";
 
+/** A value that is a URL (scheme://…), not an object key. */
+const EXTERNAL_URL = /^[a-z][a-z0-9+.-]*:\/\//iu;
+
 @injectable()
 export class S3StorageService implements IStorageService {
   private client: S3Client;
   private publicClient: S3Client;
-  private bucket: string;
+  readonly bucket: string;
 
   constructor() {
     const endpoint: string = config.get("storage_service.settings.endpoint");
@@ -64,6 +67,22 @@ export class S3StorageService implements IStorageService {
     } catch (err) {
       logger.error({ operation: "uploadDocument", error: err }, "Failed to upload document to S3");
       throw new AppError(GLOBAL_ERRORS.EXCEPTION, 400);
+    }
+  }
+
+  async stat(key: string): Promise<{ size: number; contentType: string | null } | null> {
+    // Some rows hold a URL instead of a key of ours (an external logo, old seed data): there is
+    // no stored object to read, and MinIO answers such a "key" with a bodiless 400.
+    if (!key || EXTERNAL_URL.test(key)) return null;
+    try {
+      const head = await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
+      return { size: head.ContentLength ?? 0, contentType: head.ContentType ?? null };
+    } catch (err) {
+      const status = (err as { $metadata?: { httpStatusCode?: number }; name?: string }).$metadata?.httpStatusCode;
+      // 404: no such object; 400: a key the store refuses as such. A 403 is a misconfigured
+      // account and stays an error.
+      if (status === 404 || status === 400 || (err as { name?: string }).name === "NotFound") return null;
+      throw err;
     }
   }
 

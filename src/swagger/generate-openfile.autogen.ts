@@ -20,6 +20,7 @@ import { GeocodingParameters, GeocodingResponses } from "../modules/geocoding/ap
 import { DsoParameters, DsoResponses } from "../modules/dso/api/dso.swagger.js";
 import { OnboardingParameters, OnboardingResponses } from "../modules/onboarding/api/onboarding.swagger.js";
 import { RegulatoryParameters, RegulatoryResponses } from "../modules/regulatory/api/regulatory.swagger.js";
+import { ExportParameters, ExportResponses } from "../modules/exports/api/export.swagger.js";
 interface TsSchemas {
   definitions: Record<string, unknown>;
 }
@@ -103,6 +104,7 @@ const doc = {
       ...DsoParameters,
       ...OnboardingParameters,
       ...RegulatoryParameters,
+      ...ExportParameters,
     },
 
     // 3. MERGE RESPONSES
@@ -124,6 +126,7 @@ const doc = {
       ...DsoResponses,
       ...OnboardingResponses,
       ...RegulatoryResponses,
+      ...ExportResponses,
       // ...GenericGlobalResponses
     },
 

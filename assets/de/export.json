@@ -1,0 +1,18 @@
+{
+  "reauth_required": "Melden Sie sich aus Sicherheitsgründen erneut an, bevor Sie einen Export anfordern",
+  "forbidden": "Nur ein Administrator der Gemeinschaft kann ihre Daten exportieren",
+  "already_active": "Für diesen Bereich wird bereits ein Export vorbereitet",
+  "rate_limited": "Zu viele Exportanfragen für diesen Bereich heute, versuchen Sie es später erneut",
+  "not_found": "Dieser Export wurde nicht gefunden",
+  "download_forbidden": "Nur die Person, die diesen Export angefordert hat, kann ihn herunterladen",
+  "not_ready": "Dieser Export ist noch nicht fertig",
+  "expired": "Dieser Export ist abgelaufen und seine Datei wurde gelöscht",
+  "download_unavailable": "Der Download-Link konnte nicht erstellt werden, versuchen Sie es später erneut",
+  "user_not_found": "Ihr Konto wurde nicht gefunden",
+  "validation": {
+    "scope": "Der Bereich des Exports muss \"user\" oder \"community\" sein",
+    "community_id": "Die zu exportierende Gemeinschaft fehlt oder ist ungültig",
+    "view": "Die Liste muss \"mine\" oder \"community\" sein",
+    "id": "Die Export-ID ist ungültig"
+  }
+}

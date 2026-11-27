@@ -24,6 +24,11 @@ export const NOTIFICATION_TYPES = {
   MEMBER_INVITATION_RECEIVED: "member_invitation.received",
   MEMBER_UPDATED: "member.updated",
   DOCUMENT_UPLOADED: "document.uploaded",
+  // The data export (2026-11-15). requested goes to the community's other ADMINs when one of them
+  // exports the community (API); ready and failed to the requester (export worker).
+  DATA_EXPORT_REQUESTED: "data_export.requested",
+  DATA_EXPORT_READY: "data_export.ready",
+  DATA_EXPORT_FAILED: "data_export.failed",
   // news-board
   NEWS_POST_PUBLISHED: "news_post.published",
   NEWS_POLL_PUBLISHED: "news_poll.published",

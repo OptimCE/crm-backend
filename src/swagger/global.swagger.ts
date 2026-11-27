@@ -111,6 +111,10 @@ export const Tags = [
     description: "Operation related to managing users of the application",
   },
   {
+    name: "Exports",
+    description: "The data export: an archive of all the data about the caller, or about a community (RGPD art. 15 and 20)",
+  },
+  {
     name: "Regulatory",
     description: "What the regulator and the DSO have authorised for an operation's meters and keys (written by the administrative annexe)",
   },

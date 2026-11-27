@@ -353,6 +353,23 @@ community_routes.get(
   idChecker(),
   community_controller.getCommunityById.bind(community_controller),
 );
+// Get (/:id/public) : What any signed-in user may read about a public community
+// (presentation + public contact). 404 for a community with no public operation.
+community_routes.get(
+  "/:id/public",
+  /* #swagger.summary = "Public detail of a public community (description, website, headquarters, public contact)"
+       #swagger.tags = ['Communities']
+       #swagger.parameters['id'] = { $ref: '#/components/parameters/CommunityId' }
+       #swagger.responses[200] = { $ref: '#/components/responses/PublicCommunityDetailSuccess' }
+       #swagger.responses[401] = { $ref: '#/components/responses/Unauthorized' }
+       #swagger.responses[404] = { $ref: '#/components/responses/NotFound' }
+       #swagger.security = [{
+            "UserIdChecker": []
+       }]
+    */
+  idChecker(),
+  community_controller.getPublicCommunityDetail.bind(community_controller),
+);
 // Get (/:id/sharing_operations/public) : Public list of a community's sharing operations
 // (declared before /:id/sharing_operations so the more specific path matches first)
 community_routes.get(

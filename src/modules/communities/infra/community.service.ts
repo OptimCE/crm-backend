@@ -11,6 +11,7 @@ import {
   MyCommunityDTO,
   PatchRoleUserDTO,
   PublicCommunityDTO,
+  PublicCommunityDetailDTO,
   PublicCommunityMapDTO,
   CommunityMapQuery,
   UpdateCommunityDTO,
@@ -23,7 +24,14 @@ import logger from "../../../shared/monitor/logger.js";
 import { AppError } from "../../../shared/middlewares/error.middleware.js";
 import { Community, CommunityUser } from "../domain/community.models.js";
 import { Role } from "../../../shared/dtos/role.js";
-import { toCommunityDashboardDTO, toCommunityDetailDTO, toMyCommunityDTO, toPublicCommunityDTO, toUsersCommunityDTO } from "../shared/to_dto.js";
+import {
+  toCommunityDashboardDTO,
+  toCommunityDetailDTO,
+  toMyCommunityDTO,
+  toPublicCommunityDetailDTO,
+  toPublicCommunityDTO,
+  toUsersCommunityDTO,
+} from "../shared/to_dto.js";
 import { appTodayISO } from "../../../shared/utils/date.utils.js";
 
 /**
@@ -138,6 +146,35 @@ export class CommunityService implements ICommunityService {
     }
 
     return toCommunityDetailDTO(result.community, result.member_count, logo_presigned_url);
+  }
+
+  /**
+   * The public face of a community, for the public communities directory.
+   *
+   * Readable by any signed-in user, member or not, which is why it is a separate
+   * read rather than a relaxed getCommunityById: the DTO is an allow-list, and a
+   * community with no public sharing operation answers the same 404 as one that
+   * does not exist, so the route cannot enumerate private communities.
+   */
+  async getPublicCommunityDetail(id: number): Promise<PublicCommunityDetailDTO> {
+    const community = await this.community_repository.getPublicCommunityById(id);
+    if (!community) {
+      throw new AppError(COMMUNITY_ERRORS.GET_COMMUNITY.COMMUNITY_NOT_FOUND, 404);
+    }
+
+    let logo_presigned_url: string | null = null;
+    if (community.logo_url) {
+      try {
+        logo_presigned_url = await this.storage_service.getDocumentUrl(community.logo_url);
+      } catch (err) {
+        logger.error(
+          { operation: "getPublicCommunityDetail", error: err, communityId: community.id },
+          "Failed to generate presigned URL for community logo",
+        );
+      }
+    }
+
+    return toPublicCommunityDetailDTO(community, logo_presigned_url);
   }
 
   /**
@@ -316,6 +353,9 @@ export class CommunityService implements ICommunityService {
             ...(updated_community.account_holder_name !== undefined ? ["account_holder_name"] : []),
             // The representative's identity: field names only, like the bank fields.
             ...REGULATORY_IDENTITY_FIELDS.filter((field) => updated_community[field] !== undefined),
+            // The public contact: field names only, like the rest.
+            ...(updated_community.contact_email !== undefined ? ["contact_email"] : []),
+            ...(updated_community.contact_phone !== undefined ? ["contact_phone"] : []),
           ],
           ...(updated_community.name !== undefined ? { name: updated_community.name } : {}),
           ...(updated_community.regulator !== undefined ? { old_regulator: previous_regulator, new_regulator: updated_community.regulator } : {}),
