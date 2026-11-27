@@ -187,6 +187,79 @@ applicatie ook starten met tracing/logging ingeschakeld:
 npm run trace
 ```
 
+## Annexcatalogus
+
+`config/annexes-services.json` somt de annexmodules op (algorithm, simulation, news,
+billing, …) waarop gemeenschappen zich kunnen abonneren. `GET /annexes-services`
+levert ze aan, en alleen daar verneemt de frontend welke annexen bestaan. Het bestand
+zit in de image, dus elke deployment levert hetzelfde. Elke vermelding heeft `feature`,
+`displayKey`, `descriptionKey`, `icon`, `minRole`, `frontendRoute`, `subscribePath` en
+`unsubscribePath`, plus twee optionele velden:
+
+- `unsubscribeWarningKey`: een extra i18n-zin voor het bevestigingsvenster bij het
+  opzeggen.
+- `defaultEnabled` (boolean, afwezig = `true`): of een deployment de module aanbiedt
+  wanneer geen van de variabelen hieronder ze noemt. Lever een nieuwe annex waarvan de
+  service nog niet overal is uitgerold met `"defaultEnabled": false`. `live-data` wordt
+  zo geleverd: de ontwikkelstack van de monorepo schakelt het in met
+  `ANNEX_CATALOG_ENABLE=live-data` in `.env.dev`, en `config/test.cjs` doet hetzelfde
+  voor de testsuites.
+
+Elke deployment kiest dan zijn eigen set met twee variabelen:
+
+| Variabele               | Effect                                                                                                      |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `ANNEX_CATALOG_ENABLE`  | Door komma's gescheiden functies die worden aangeboden ook al zegt hun vermelding `"defaultEnabled": false` |
+| `ANNEX_CATALOG_DISABLE` | Door komma's gescheiden functies die worden verborgen. Heeft voorrang op `ANNEX_CATALOG_ENABLE`             |
+
+Een vermelding wordt aangeboden wanneer ze niet in `ANNEX_CATALOG_DISABLE` staat en
+haar `defaultEnabled` niet `false` is of ze in `ANNEX_CATALOG_ENABLE` staat. Namen zijn
+exacte `feature`-waarden (hoofdlettergevoelig), spaties eromheen worden genegeerd, en
+een lege variabele betekent geen. Als geen van beide variabelen is ingesteld, wordt
+elke vermelding aangeboden waarvan `defaultEnabled` niet `false` is.
+
+- **Noem alleen functies die in de image zitten die je draait.** Een naam die geen
+  `feature` van het bestand is, weigert het opstarten: een tikfout in
+  `ANNEX_CATALOG_DISABLE` zou de annex anders aan laten staan. De logregel heeft de
+  `operation` `annexes_services:catalog_overrides` en somt de onbekende namen op. In
+  productie is dat een herstartlus van de container; in de ontwikkelstack (`tsx watch`)
+  blijft de container draaien en toont alleen het log het. Stel een variabele dus in
+  dezelfde deployment in als de image die de vermelding toevoegt, haal ze weg in de
+  deployment die de vermelding verwijdert, en onthoud dat terugkeren naar een oudere
+  image een al ingestelde naam ongeldig kan maken. Gebruik `"defaultEnabled": false` in
+  het bestand om een nog niet uitgerolde annex uit te houden. Stel
+  `ANNEX_CATALOG_DISABLE` niet vooraf in.
+- **Opstartlog.** Bij het opstarten logt de service één keer, met de `operation`
+  `annexes_services:catalog_loaded`, de functies onder `enabled` en `disabled`. Dat log,
+  niet het bestand, vertelt je wat een deployment aanbiedt.
+- **Doorgeven.** Een variabele bereikt het proces alleen als het composebestand van de
+  deployment ze vermeldt onder `environment:` van crm-backend
+  (`- ANNEX_CATALOG_ENABLE=${ANNEX_CATALOG_ENABLE:-}`, idem voor `_DISABLE`). Een
+  `.env`-waarde zonder zo'n regel wordt stilzwijgend genegeerd: het opstartlog toont dan
+  `overrides: { enable: [], disable: [] }`. De `docker-compose.dev.yml` van de monorepo
+  geeft beide door; controleer het composebestand van elke andere deployment voordat je
+  erop vertrouwt.
+- **Een wijziging toepassen.** Beide variabelen worden één keer bij het opstarten
+  gelezen. Maak de container opnieuw aan (`docker compose up -d crm-backend`, of
+  `./docker-stack.sh restart -s crm-backend` in de monorepo): `docker compose restart`
+  behoudt de oude omgeving.
+
+**Wat uitschakelen doet.** De annex verdwijnt uit `GET /annexes-services`, dus toont de
+frontend er geen kaart, navigatielink of dashboardtegel voor, ook niet aan
+gemeenschappen die al geabonneerd zijn. Voor news, billing, live-data en
+administrative-document stuurt de route guard die gebruikers ook terug naar de
+startpagina. De pagina's van algorithm en simulation openen nog steeds via een directe
+URL. Een nieuw abonnement krijgt `404 FEATURE_NOT_FOUND`, en het log zegt
+`reason: "hidden"`. Opzeggen aanvaardt nog steeds elke functie van het bestand.
+
+**Wat uitschakelen niet doet.** Het trekt niets in bij gemeenschappen die al
+geabonneerd zijn. De annexservices controleren de rij in `community_subscription`, nooit
+deze catalogus, dus blijven ze die gemeenschappen antwoorden en blijft live-data hun
+telemetrie opnemen. Om die toegang te beëindigen, haal je de annexservice weg uit de
+deployment, of laat je de ADMIN van elke geabonneerde gemeenschap
+`POST /annexes-services/<feature>/unsubscribe` aanroepen. De interface heeft daar geen
+kaart voor zolang de annex verborgen is.
+
 ## Projectstructuur (selectie)
 
 - `src/` — TypeScript-broncode (domeinmodules onder `src/modules/`, gedeelde

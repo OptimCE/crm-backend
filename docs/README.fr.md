@@ -189,6 +189,83 @@ lancer l'application avec le traçage/journalisation activé :
 npm run trace
 ```
 
+## Catalogue des annexes
+
+`config/annexes-services.json` liste les modules annexes (algorithm, simulation,
+news, billing, …) auxquels les communautés peuvent s'abonner.
+`GET /annexes-services` le sert, et c'est le seul endroit où le frontend apprend
+quelles annexes existent. Le fichier est intégré à l'image : chaque déploiement
+livre donc le même. Chaque entrée a `feature`, `displayKey`, `descriptionKey`,
+`icon`, `minRole`, `frontendRoute`, `subscribePath` et `unsubscribePath`, plus
+deux champs facultatifs :
+
+- `unsubscribeWarningKey` : une phrase i18n supplémentaire pour la fenêtre de
+  confirmation du désabonnement.
+- `defaultEnabled` (booléen, absent = `true`) : si un déploiement sert le module
+  quand aucune variable ci-dessous ne le nomme. Livrez avec
+  `"defaultEnabled": false` une nouvelle annexe dont le service n'est pas encore
+  déployé partout. `live-data` est livré ainsi : la stack de développement du
+  monorepo l'active avec `ANNEX_CATALOG_ENABLE=live-data` dans `.env.dev`, et
+  `config/test.cjs` fait de même pour les suites de tests.
+
+Chaque déploiement choisit ensuite son propre ensemble avec deux variables :
+
+| Variable                | Effet                                                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `ANNEX_CATALOG_ENABLE`  | Fonctionnalités, séparées par des virgules, à servir même si leur entrée indique `"defaultEnabled": false` |
+| `ANNEX_CATALOG_DISABLE` | Fonctionnalités, séparées par des virgules, à masquer. Prime sur `ANNEX_CATALOG_ENABLE`                    |
+
+Une entrée est servie quand elle n'est pas dans `ANNEX_CATALOG_DISABLE` et que son
+`defaultEnabled` n'est pas `false`, ou qu'elle est dans `ANNEX_CATALOG_ENABLE`.
+Les noms sont les valeurs exactes de `feature` (sensibles à la casse), les espaces
+autour sont ignorés, et une variable vide signifie aucun. Sans aucune des deux
+variables, chaque entrée dont `defaultEnabled` n'est pas `false` est servie.
+
+- **Ne nommez que des fonctionnalités présentes dans l'image que vous exécutez.**
+  Un nom qui n'est pas un `feature` du fichier refuse le démarrage : une faute de
+  frappe dans `ANNEX_CATALOG_DISABLE` laisserait sinon l'annexe active. La ligne de
+  journal porte l'`operation` `annexes_services:catalog_overrides` et liste les
+  noms inconnus. En production, c'est une boucle de redémarrage du conteneur ; dans
+  la stack de développement (`tsx watch`), le conteneur reste en marche et seul le
+  journal le montre. Définissez donc une variable dans le même déploiement que
+  l'image qui ajoute l'entrée, retirez-la dans le déploiement qui supprime l'entrée,
+  et rappelez-vous que revenir à une image plus ancienne peut invalider un nom déjà
+  défini. Pour garder désactivée une annexe pas encore déployée, utilisez
+  `"defaultEnabled": false` dans le fichier. Ne définissez pas
+  `ANNEX_CATALOG_DISABLE` à l'avance.
+- **Journal de démarrage.** Au démarrage, le service journalise une fois, avec
+  l'`operation` `annexes_services:catalog_loaded`, les fonctionnalités `enabled` et
+  `disabled`. C'est ce journal, et non le fichier, qui dit ce qu'un déploiement
+  expose.
+- **Transmission.** Une variable n'atteint le processus que si le fichier compose du
+  déploiement la liste sous l'`environment:` de crm-backend
+  (`- ANNEX_CATALOG_ENABLE=${ANNEX_CATALOG_ENABLE:-}`, de même pour `_DISABLE`). Une
+  valeur de `.env` sans cette ligne est ignorée en silence : le journal de démarrage
+  montre alors `overrides: { enable: [], disable: [] }`. Le
+  `docker-compose.dev.yml` du monorepo transmet les deux ; vérifiez le fichier
+  compose de tout autre déploiement avant de compter dessus.
+- **Appliquer un changement.** Les deux variables sont lues une fois au démarrage.
+  Recréez le conteneur (`docker compose up -d crm-backend`, ou
+  `./docker-stack.sh restart -s crm-backend` dans le monorepo) :
+  `docker compose restart` garde l'ancien environnement.
+
+**Ce que fait la désactivation.** L'annexe disparaît de `GET /annexes-services` : le
+frontend n'affiche plus ni carte, ni lien de navigation, ni tuile de tableau de bord
+pour elle, même aux communautés déjà abonnées. Pour news, billing, live-data et
+administrative-document, la garde de route renvoie aussi ces utilisateurs à
+l'accueil. Les pages d'algorithm et de simulation s'ouvrent toujours par une URL
+directe. Un nouvel abonnement reçoit `404 FEATURE_NOT_FOUND`, et le journal indique
+`reason: "hidden"`. Le désabonnement accepte toujours chaque fonctionnalité du
+fichier.
+
+**Ce que la désactivation ne fait pas.** Elle ne révoque pas les communautés déjà
+abonnées. Les services annexes vérifient la ligne `community_subscription`, jamais ce
+catalogue : ils continuent donc de répondre à ces communautés, et live-data continue
+d'ingérer leur télémétrie. Pour mettre fin à cet accès, retirez le service annexe du
+déploiement, ou faites appeler `POST /annexes-services/<feature>/unsubscribe` par
+l'ADMIN de chaque communauté abonnée. L'interface n'a pas de carte pour le faire tant
+que l'annexe est masquée.
+
 ## Structure du projet (sélection)
 
 - `src/` — code source TypeScript (modules métier dans `src/modules/`,
